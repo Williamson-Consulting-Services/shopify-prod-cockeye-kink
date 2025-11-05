@@ -1,16 +1,23 @@
-{%- assign form_id = 'product-form-' | append: section.id -%}
+{%- comment %}
+  This part builds the dynamic form ID. This is correct.
+{%- endcomment %}
+{%- assign form_id = "product-form-" | append: section.id -%}
 
 <div style="margin-bottom:15px;">
   <label for="custom-engraving">Engraving (5 chars max, A-Z, 0-9):</label>
-
-  <input
-    type="text"
-    id="custom-engraving"
+  
+  <input 
+    type="text" 
+    id="custom-engraving" 
     name="properties[Engraving]"
     maxlength="5"
     pattern="[a-zA-Z0-9]*"
     title="Only letters (A-Z) and numbers (0-9) are allowed."
     style="width: 100%; border: 1px solid #ccc; padding: 8px; border-radius: 4px; box-sizing: border-box;"
+    
+    {%- comment %}
+      This 'form' attribute is correct.
+    {%- endcomment %}
     form="{{ form_id }}"
   >
 
@@ -20,50 +27,68 @@
 </div>
 
 <script>
-  (function () {
-    // Find the elements for this specific instance
-    const currentScript = document.currentScript;
-    const section = currentScript.closest('.shopify-section');
+(function() {
+  // --- THIS IS THE UPDATED SCRIPT ---
+  
+  const currentScript = document.currentScript;
+  
+  // 1. Get the <div> that is the direct sibling *before* this <script> tag.
+  const snippetWrapper = currentScript.previousElementSibling;
 
-    if (!section) return;
+  if (!snippetWrapper) {
+    console.warn('Custom validation: Could not find snippet wrapper.');
+    return;
+  }
 
-    // --- THIS IS THE JAVASCRIPT FIX ---
-    // Get the form ID we just created in Liquid
-    const formId = '{{ form_id }}';
+  // 2. Find the input and error message *inside* that specific div.
+  const customInput = snippetWrapper.querySelector('#custom-engraving');
+  const errorMsg = snippetWrapper.querySelector('#engraving-error');
+  
+  if (!customInput || !errorMsg) {
+    console.warn('Custom validation: Could not find input or error message.');
+    return;
+  }
 
-    // Find the form by its *exact* ID. This is much more reliable.
-    const productForm = document.getElementById(formId);
-    const customInput = section.querySelector('#custom-engraving');
-    const errorMsg = section.querySelector('#engraving-error');
+  // 3. Get the form ID *from the input's "form" attribute*.
+  const formId = customInput.getAttribute('form');
+  
+  if (!formId) {
+    console.warn('Custom validation: Input is missing "form" attribute.');
+    return;
+  }
+  
+  // 4. Find the product form using that ID.
+  const productForm = document.getElementById(formId);
 
-    if (!productForm || !customInput || !errorMsg) {
-      console.warn('Custom validation script could not find all required elements.');
-      return;
+  if (!productForm) {
+    console.warn('Custom validation: Could not find form with ID:', formId);
+    return;
+  }
+
+  // --- Real-time validation function (no change) ---
+  function validateInput() {
+    if (!customInput.checkValidity()) {
+      errorMsg.style.display = 'block';
+      customInput.style.borderColor = '#d9534f';
+      customInput.style.boxShadow = '0 0 0 1px #d9534f';
+      return false;
+    } else {
+      errorMsg.style.display = 'none';
+      customInput.style.borderColor = '#ccc';
+      customInput.style.boxShadow = 'none';
+      return true;
     }
+  }
 
-    // --- Real-time validation function (no change) ---
-    function validateInput() {
-      if (!customInput.checkValidity()) {
-        errorMsg.style.display = 'block';
-        customInput.style.borderColor = '#d9534f';
-        customInput.style.boxShadow = '0 0 0 1px #d9534f';
-        return false;
-      } else {
-        errorMsg.style.display = 'none';
-        customInput.style.borderColor = '#ccc';
-        customInput.style.boxShadow = 'none';
-        return true;
-      }
+  // --- Run validation on every keystroke (no change) ---
+  customInput.addEventListener('input', validateInput);
+
+  // --- Keep the 'submit' check as a final safeguard (no change) ---
+  productForm.addEventListener('submit', function(event) {
+    if (!validateInput()) {
+      event.preventDefault(); // Stop the 'Add to Cart'
     }
+  });
 
-    // --- Run validation on every keystroke (no change) ---
-    customInput.addEventListener('input', validateInput);
-
-    // --- Keep the 'submit' check as a final safeguard (no change) ---
-    productForm.addEventListener('submit', function (event) {
-      if (!validateInput()) {
-        event.preventDefault(); // Stop the 'Add to Cart'
-      }
-    });
-  })();
+})();
 </script>
