@@ -223,7 +223,7 @@
 </div>
 
 {%- comment -%} Unit of Measure - First property to indicate measurement unit used {%- endcomment -%}
-<input type="hidden" id="unitOfMeasure" name="properties[Unit of Measure]" form="product-form-{{ section.id }}" />
+<input type="hidden" id="unitOfMeasure" name="properties[Unit of Measure]" value="Measured in Inches" form="product-form-{{ section.id }}" />
 
 <input type="hidden" id="selectedOption" name="properties[Selected Option]" form="product-form-{{ section.id }}" />
 
@@ -663,6 +663,13 @@
       unitToggleButtons.forEach(btn => {
         btn.classList.toggle('active', btn.dataset.unit === 'in');
       });
+
+      // Reset unit of measure property
+      const unitOfMeasureInput = document.getElementById('unitOfMeasure');
+      if (unitOfMeasureInput) {
+        unitOfMeasureInput.value = 'Measured in Inches'; // Default to inches
+      }
+
       updateMeasurementVisibility();
 
       // Clear measurement values
@@ -1073,6 +1080,15 @@
         unitToggleButtons.forEach(btn => {
           btn.classList.toggle('active', btn.dataset.unit === currentUnit);
         });
+
+        // Update unit of measure property when unit changes
+        const unitOfMeasureInput = document.getElementById('unitOfMeasure');
+        if (unitOfMeasureInput) {
+          const unitValue = currentUnit === 'in' ? 'Measured in Inches' : 'Measured in Centimeters';
+          unitOfMeasureInput.value = unitValue;
+          unitOfMeasureInput.setAttribute('value', unitValue);
+        }
+
         updateMeasurementOnUnitChange();
         updateAddToCartButton();
       });
@@ -1120,10 +1136,14 @@
           return false;
         }
 
-        // Set unit of measure property (first property in order)
+        // Ensure unit of measure property is set (first property in order)
+        // This should already be set when unit changes, but ensure it's set here too
         const unitOfMeasureInput = document.getElementById('unitOfMeasure');
         if (unitOfMeasureInput) {
-          unitOfMeasureInput.value = currentUnit === 'in' ? 'Measured in Inches' : 'Measured in Centimeters';
+          const unitValue = currentUnit === 'in' ? 'Measured in Inches' : 'Measured in Centimeters';
+          unitOfMeasureInput.value = unitValue;
+          // Also ensure it's in the form by setting the attribute
+          unitOfMeasureInput.setAttribute('value', unitValue);
         }
 
         // Ensure both (in) and (cm) values are set for all active measurements
