@@ -34,10 +34,10 @@
           "type": "price",
           "settings": {}
         },
-        "variant_picker": {
-          "type": "variant_picker",
+        "custom_liquid_MbVxag": {
+          "type": "custom_liquid",
           "settings": {
-            "picker_type": "button"
+            "custom_liquid": "{% render 'validated-text-input' %}"
           }
         },
         "quantity_selector": {
@@ -85,7 +85,7 @@
         "title",
         "caption",
         "price",
-        "variant_picker",
+        "custom_liquid_MbVxag",
         "quantity_selector",
         "buy_buttons",
         "description",
@@ -125,44 +125,10 @@
         "padding_top": 36,
         "padding_bottom": 28
       }
-    },
-    "multicolumn": {
-      "type": "multicolumn",
-      "blocks": {
-        "column-1": {
-          "type": "column",
-          "settings": {
-            "title": "Hassle-Free Exchanges",
-            "text": "<p>Email info@cockeyekink.com for returns/modifications or refunds</p>",
-            "link_label": "",
-            "link": ""
-          }
-        }
-      },
-      "block_order": [
-        "column-1"
-      ],
-      "settings": {
-        "title": "",
-        "heading_size": "h1",
-        "image_width": "full",
-        "image_ratio": "adapt",
-        "columns_desktop": 2,
-        "column_alignment": "left",
-        "background_style": "none",
-        "button_label": "",
-        "button_link": "",
-        "color_scheme": "background-1",
-        "columns_mobile": "1",
-        "swipe_on_mobile": false,
-        "padding_top": 36,
-        "padding_bottom": 36
-      }
     }
   },
   "order": [
     "main",
-    "related-products",
-    "multicolumn"
+    "related-products"
   ]
 }
