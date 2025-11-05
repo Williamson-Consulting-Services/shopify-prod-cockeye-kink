@@ -42,7 +42,27 @@
   assign order_tag_name = "_custom"
   assign order_tag_value = "custom"
   assign banner_text = "Order has not been submitted yet"
+
+  comment
+    Show banner as long as order is in cart and not submitted:
+    - On product page: always show (order hasn't been added yet)
+    - On cart page: show if cart has items (order is in cart)
+    - On checkout/thank you pages: hide (order has been submitted)
+  endcomment
   assign banner_enabled = true
+  if template.name == 'cart'
+    if cart.item_count > 0
+      assign banner_enabled = true
+    else
+      assign banner_enabled = false
+    endif
+  endif
+  if template.name == 'checkout'
+    assign banner_enabled = false
+  endif
+  if request.page_type == 'checkout'
+    assign banner_enabled = false
+  endif
 -%}
 
 <style>
@@ -203,9 +223,9 @@
   }
 </style>
 
-{%- comment -%} Order Status Banner {%- endcomment -%}
+{%- comment -%} Order Status Banner - Displayed as long as order is in cart and not submitted {%- endcomment -%}
 {%- if banner_enabled -%}
-  <div class="order-status-banner">
+  <div class="order-status-banner" id="order-status-banner">
     {{ banner_text }}
   </div>
 {%- endif -%}
@@ -1189,11 +1209,51 @@
       });
     }
 
+    // Update banner visibility based on page/cart state
+    function updateBannerVisibility() {
+      const banner = document.getElementById('order-status-banner');
+      if (!banner) return;
+
+      // Hide banner on checkout/thank you pages
+      if (window.location.pathname.includes('/checkouts/') ||
+          window.location.pathname.includes('/thank-you') ||
+          window.location.pathname.includes('/checkout')) {
+        banner.style.display = 'none';
+        return;
+      }
+
+      // Show banner on product page (default)
+      if (window.location.pathname.includes('/products/')) {
+        banner.style.display = 'block';
+        return;
+      }
+
+      // On cart page, check if cart has items
+      if (window.location.pathname.includes('/cart')) {
+        // Check cart state via cart drawer or cart API
+        fetch('/cart.js')
+          .then(response => response.json())
+          .then(cart => {
+            if (cart.item_count > 0) {
+              banner.style.display = 'block';
+            } else {
+              banner.style.display = 'none';
+            }
+          })
+          .catch(() => {
+            // If fetch fails, show banner by default
+            banner.style.display = 'block';
+          });
+      }
+    }
+
     // Initialize on load (following validated-text-input.liquid pattern)
     function delayedInitialize() {
       initialize();
       // Run validation immediately on load (like validated-text-input does)
       updateAddToCartButton();
+      // Update banner visibility
+      updateBannerVisibility();
     }
 
     // Handle pageshow event for back/forward cache - clear all values
@@ -1201,6 +1261,13 @@
       // Clear all values when navigating back/forward
       initialize();
       updateAddToCartButton();
+      // Update banner visibility
+      updateBannerVisibility();
+    });
+
+    // Listen for cart updates to show/hide banner
+    document.addEventListener('cart:updated', function() {
+      updateBannerVisibility();
     });
 
     // Wait for DOM to be ready
