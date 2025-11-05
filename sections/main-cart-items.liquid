@@ -17,6 +17,24 @@
       padding-bottom: {{ section.settings.padding_bottom }}px;
     }
   }
+
+  /*
+   Styles for the custom line item properties in the cart
+  */
+  .cart-item-properties {
+    margin-top: 8px;
+    font-size: 0.85rem; /* Makes it slightly smaller than the main text */
+    color: #555; /* A slightly faded color */
+  }
+
+  .cart-item-properties div {
+    margin-bottom: 3px;
+  }
+
+  .cart-item-properties strong {
+    color: #000; /* Makes the label (e.g., "Engraving:") stand out */
+    font-weight: 500;
+  }
 {%- endstyle -%}
 
 {%- unless settings.cart_type == 'drawer' -%}
