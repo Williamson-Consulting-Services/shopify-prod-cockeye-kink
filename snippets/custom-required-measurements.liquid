@@ -158,6 +158,30 @@
     display: block;
   }
 
+  .conditional-section label {
+    display: block;
+    margin-top: 12px;
+    margin-bottom: 4px;
+    font-weight: bold;
+  }
+
+  .conditional-section label:first-child {
+    margin-top: 0;
+  }
+
+  .conditional-section select {
+    display: block;
+    width: 100%;
+    margin-bottom: 8px;
+  }
+
+  .conditional-section .custom-text {
+    display: block;
+    width: 100%;
+    margin-top: 8px;
+    margin-bottom: 8px;
+  }
+
   .custom-text {
     margin-top: 8px;
     display: none;
@@ -837,6 +861,34 @@
         }
       });
 
+      // Also validate harness customization fields if harness section is visible
+      if (harnessSection && harnessSection.classList.contains('active')) {
+        const harnessFields = [
+          'properties[Leather Color]',
+          'properties[Left Front Plate]',
+          'properties[Right Front Plate]',
+          'properties[Back Plate]',
+          'properties[Long Sliders]'
+        ];
+
+        harnessFields.forEach(fieldName => {
+          const select = document.querySelector(`select[name="${fieldName}"]`);
+          if (select) {
+            const hasValue = select.value && select.value !== '' && select.value !== 'Select one';
+            // Check if custom text field is filled as alternative
+            const customTextName = fieldName.replace(']', ' - Text]');
+            const customText = document.querySelector(`input[name="${customTextName}"]`);
+            const hasCustomText = customText && customText.value && customText.value.trim() !== '';
+
+            if (!hasValue && !hasCustomText) {
+              // Extract field name for display
+              const fieldDisplayName = fieldName.replace('properties[', '').replace(']', '');
+              requiredMeasurements.push(fieldDisplayName);
+            }
+          }
+        });
+      }
+
       return requiredMeasurements.length === 0;
     }
 
@@ -962,6 +1014,22 @@
           syncMeasurementValues(measName, this.value, unit);
         }
 
+        updateAddToCartButton();
+      });
+    });
+
+    // Harness customization field change handlers
+    const harnessSelects = document.querySelectorAll('#harness-details select');
+    harnessSelects.forEach(select => {
+      select.addEventListener('change', function() {
+        updateAddToCartButton();
+      });
+    });
+
+    // Harness customization custom text field change handlers
+    const harnessCustomTexts = document.querySelectorAll('#harness-details .custom-text');
+    harnessCustomTexts.forEach(input => {
+      input.addEventListener('input', function() {
         updateAddToCartButton();
       });
     });
