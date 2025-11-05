@@ -222,6 +222,9 @@
   {%- endfor -%}
 </div>
 
+{%- comment -%} Unit of Measure - First property to indicate measurement unit used {%- endcomment -%}
+<input type="hidden" id="unitOfMeasure" name="properties[Unit of Measure]" form="product-form-{{ section.id }}" />
+
 <input type="hidden" id="selectedOption" name="properties[Selected Option]" form="product-form-{{ section.id }}" />
 
 {%- comment -%} Custom Order Tagging {%- endcomment -%}
@@ -620,6 +623,12 @@
 
     // Initialize - reset all fields
     function initialize() {
+      // Reset unit of measure
+      const unitOfMeasureInput = document.getElementById('unitOfMeasure');
+      if (unitOfMeasureInput) {
+        unitOfMeasureInput.value = '';
+      }
+
       // Reset category selection
       optionButtons.forEach(btn => btn.classList.remove('selected'));
       if (selectedInput) selectedInput.value = '';
@@ -1109,6 +1118,12 @@
           event.preventDefault();
           alert('Please select a category and fill all required measurements.');
           return false;
+        }
+
+        // Set unit of measure property (first property in order)
+        const unitOfMeasureInput = document.getElementById('unitOfMeasure');
+        if (unitOfMeasureInput) {
+          unitOfMeasureInput.value = currentUnit === 'in' ? 'Measured in Inches' : 'Measured in Centimeters';
         }
 
         // Ensure both (in) and (cm) values are set for all active measurements
