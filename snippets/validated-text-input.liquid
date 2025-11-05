@@ -1,3 +1,5 @@
+{%- assign form_id = 'product-form-' | append: section.id -%}
+
 <div style="margin-bottom:15px;">
   <label for="custom-engraving">Engraving (5 chars max, A-Z, 0-9):</label>
 
@@ -9,6 +11,7 @@
     pattern="[a-zA-Z0-9]*"
     title="Only letters (A-Z) and numbers (0-9) are allowed."
     style="width: 100%; border: 1px solid #ccc; padding: 8px; border-radius: 4px; box-sizing: border-box;"
+
     form="{{ form_id }}"
   >
 
@@ -19,42 +22,45 @@
 
 <script>
   (function () {
-    // Find the elements for this specific instance of the snippet
+    // Find the elements for this specific instance
     const currentScript = document.currentScript;
     const section = currentScript.closest('.shopify-section');
 
     if (!section) return;
 
-    const productForm = section.querySelector('form[action$="/cart/add"]');
+    // --- THIS IS THE JAVASCRIPT FIX ---
+    // Get the form ID we just created in Liquid
+    const formId = '{{ form_id }}';
+
+    // Find the form by its *exact* ID. This is much more reliable.
+    const productForm = document.getElementById(formId);
     const customInput = section.querySelector('#custom-engraving');
     const errorMsg = section.querySelector('#engraving-error');
 
-    if (!productForm || !customInput || !errorMsg) return;
+    if (!productForm || !customInput || !errorMsg) {
+      console.warn('Custom validation script could not find all required elements.');
+      return;
+    }
 
-    // --- NEW: Real-time validation function ---
+    // --- Real-time validation function (no change) ---
     function validateInput() {
-      // checkValidity() uses the "pattern" and "maxlength" attributes
       if (!customInput.checkValidity()) {
-        // Show error
         errorMsg.style.display = 'block';
-        // Highlight the field with a red border
-        customInput.style.borderColor = '#d9534f'; // A common red for errors
-        customInput.style.boxShadow = '0 0 0 1px #d9534f'; // Adds a subtle "glow"
+        customInput.style.borderColor = '#d9534f';
+        customInput.style.boxShadow = '0 0 0 1px #d9534f';
         return false;
       } else {
-        // Hide error
         errorMsg.style.display = 'none';
-        // Reset the field's style
         customInput.style.borderColor = '#ccc';
         customInput.style.boxShadow = 'none';
         return true;
       }
     }
 
-    // --- NEW: Run validation on every keystroke ---
+    // --- Run validation on every keystroke (no change) ---
     customInput.addEventListener('input', validateInput);
 
-    // --- Keep the 'submit' check as a final safeguard ---
+    // --- Keep the 'submit' check as a final safeguard (no change) ---
     productForm.addEventListener('submit', function (event) {
       if (!validateInput()) {
         event.preventDefault(); // Stop the 'Add to Cart'
