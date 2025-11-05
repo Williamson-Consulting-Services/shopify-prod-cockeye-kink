@@ -1,15 +1,35 @@
 {% comment %}
   Custom Required Measurements Snippet
-  Configuration: Edit the JSON object in the script tag below to customize measurements, categories, and options
+  Configuration: Edit the JSON below to customize measurements
+  Structure: Categories define which measurements are included (true/false for each measurement)
+  This inverted structure makes it easy to see all measurements for a category at once
 {% endcomment %}
 
 {%- liquid
   comment
-    Configuration Variables - Easy to edit by store owner
-    Modify these arrays and values to customize the system
+    SINGLE SOURCE OF TRUTH - Categories list
+    These category names are used as keys in the categories section of the JSON config
+  endcomment
+  assign categories_list = "Deluxe Harness,Standard Harness,Suspender Harness,Dogtag/Pigtag,Chaps,Shirt,Pants,Suspenders,Other" | split: ","
+
+  comment
+    Measurement Configuration - JSON Dictionary Format (Inverted Structure)
+    Structure: categories at top level, each category lists only included measurements
+    - If measurement exists and value is true: included and required
+    - If measurement exists and value is false: included but optional
+    - If measurement doesn't exist: not shown for this category
+    Measurement properties: min_in, max_in are required (in inches)
+    - min_cm, max_cm can be specified to override auto-conversion (2.54x)
+    - step_in, step_cm can be overridden per measurement, otherwise defaults are used
+    Note: JSON is defined in script tag below for better formatting
   endcomment
 
-  assign categories_list = "Deluxe Harness,Standard Harness,Suspender Harness,Dogtag/Pigtag,Chaps,Shirt,Pants,Suspenders,Other" | split: ","
+  comment
+    Measurement names list for Liquid iteration (for HTML generation)
+    Must match the keys in measurements_json
+  endcomment
+  assign measurement_names = "Neck,Chest,Shoulders,Torso,Stomach,Waist,Butt,Butt Rise,Upper Thigh,Lower Thigh,Knee,Calf,Ankle,Inseam,Crotch,Bicep,Hips" | split: ","
+
   assign harness_categories = "Deluxe Harness,Standard Harness,Suspender Harness" | split: ","
   assign notes_categories = "Dogtag/Pigtag,Chaps,Shirt,Pants,Suspenders,Other" | split: ","
 
@@ -23,35 +43,6 @@
   assign order_tag_value = "custom"
   assign banner_text = "Order has not been submitted yet"
   assign banner_enabled = true
-
-  comment
-    Measurement definitions - each measurement has:
-    - name: measurement name
-    - min: minimum value (inches)
-    - max: maximum value (inches)
-    - step_in: step size for inches
-    - step_cm: step size for centimeters
-    - categories: comma-separated list of categories this applies to
-    - required: true/false
-  endcomment
-
-  assign measurement_neck_categories = "Deluxe Harness,Standard Harness,Suspender Harness,Dogtag/Pigtag,Other" | split: ","
-  assign measurement_chest_categories = "Deluxe Harness,Standard Harness,Suspender Harness,Shirt,Suspenders,Other" | split: ","
-  assign measurement_shoulders_categories = "Deluxe Harness,Standard Harness,Suspender Harness,Shirt,Suspenders,Other" | split: ","
-  assign measurement_torso_categories = "Deluxe Harness,Standard Harness,Suspender Harness,Shirt,Other" | split: ","
-  assign measurement_stomach_categories = "Shirt,Other" | split: ","
-  assign measurement_waist_categories = "Deluxe Harness,Standard Harness,Suspender Harness,Pants,Chaps,Suspenders,Other" | split: ","
-  assign measurement_butt_categories = "Pants,Other" | split: ","
-  assign measurement_butt_rise_categories = "Pants,Other" | split: ","
-  assign measurement_upper_thigh_categories = "Pants,Chaps,Other" | split: ","
-  assign measurement_lower_thigh_categories = "Pants,Chaps,Other" | split: ","
-  assign measurement_knee_categories = "Pants,Chaps,Other" | split: ","
-  assign measurement_calf_categories = "Pants,Chaps,Other" | split: ","
-  assign measurement_ankle_categories = "Pants,Chaps,Other" | split: ","
-  assign measurement_inseam_categories = "Pants,Other" | split: ","
-  assign measurement_crotch_categories = "Pants,Other" | split: ","
-  assign measurement_bicep_categories = "Shirt,Other" | split: ","
-  assign measurement_hips_categories = "Pants,Chaps,Other" | split: ","
 -%}
 
 <style>
@@ -222,98 +213,239 @@
 </div>
 
 {%- comment -%} Measurement Configuration for JavaScript {%- endcomment -%}
-<script type="application/json" id="measurement-config">
+{%- comment -%} Edit the JSON below to configure measurements and categories {%- endcomment -%}
+<script type="application/json" id="measurement-config-raw">
 {
+  "default_step_in": 0.5,
+  "default_step_cm": 0.5,
   "measurements": {
-    "Neck": { "min": 0.5, "max": 300, "step_in": 0.5, "step_cm": 0.5, "categories": {{ measurement_neck_categories | json }}, "required": true },
-    "Chest": { "min": 0.5, "max": 300, "step_in": 0.5, "step_cm": 0.5, "categories": {{ measurement_chest_categories | json }}, "required": true },
-    "Shoulders": { "min": 0.5, "max": 300, "step_in": 0.5, "step_cm": 0.5, "categories": {{ measurement_shoulders_categories | json }}, "required": true },
-    "Torso": { "min": 0.5, "max": 300, "step_in": 0.5, "step_cm": 0.5, "categories": {{ measurement_torso_categories | json }}, "required": true },
-    "Stomach": { "min": 0.5, "max": 300, "step_in": 0.5, "step_cm": 0.5, "categories": {{ measurement_stomach_categories | json }}, "required": true },
-    "Waist": { "min": 0.5, "max": 300, "step_in": 0.5, "step_cm": 0.5, "categories": {{ measurement_waist_categories | json }}, "required": true },
-    "Butt": { "min": 0.5, "max": 300, "step_in": 0.5, "step_cm": 0.5, "categories": {{ measurement_butt_categories | json }}, "required": true },
-    "Butt Rise": { "min": 0.5, "max": 300, "step_in": 0.5, "step_cm": 0.5, "categories": {{ measurement_butt_rise_categories | json }}, "required": true },
-    "Upper Thigh": { "min": 0.5, "max": 300, "step_in": 0.5, "step_cm": 0.5, "categories": {{ measurement_upper_thigh_categories | json }}, "required": true },
-    "Lower Thigh": { "min": 0.5, "max": 300, "step_in": 0.5, "step_cm": 0.5, "categories": {{ measurement_lower_thigh_categories | json }}, "required": true },
-    "Knee": { "min": 0.5, "max": 300, "step_in": 0.5, "step_cm": 0.5, "categories": {{ measurement_knee_categories | json }}, "required": true },
-    "Calf": { "min": 0.5, "max": 300, "step_in": 0.5, "step_cm": 0.5, "categories": {{ measurement_calf_categories | json }}, "required": true },
-    "Ankle": { "min": 0.5, "max": 300, "step_in": 0.5, "step_cm": 0.5, "categories": {{ measurement_ankle_categories | json }}, "required": true },
-    "Inseam": { "min": 0.5, "max": 300, "step_in": 0.5, "step_cm": 0.5, "categories": {{ measurement_inseam_categories | json }}, "required": true },
-    "Crotch": { "min": 0.5, "max": 300, "step_in": 0.5, "step_cm": 0.5, "categories": {{ measurement_crotch_categories | json }}, "required": true },
-    "Bicep": { "min": 0.5, "max": 300, "step_in": 0.5, "step_cm": 0.5, "categories": {{ measurement_bicep_categories | json }}, "required": true },
-    "Hips": { "min": 0.5, "max": 300, "step_in": 0.5, "step_cm": 0.5, "categories": {{ measurement_hips_categories | json }}, "required": false }
+    "Neck": {
+      "min_in": 0.5,
+      "max_in": 300
+    },
+    "Chest": {
+      "min_in": 0.5,
+      "max_in": 300
+    },
+    "Shoulders": {
+      "min_in": 0.5,
+      "max_in": 300
+    },
+    "Torso": {
+      "min_in": 0.5,
+      "max_in": 300
+    },
+    "Stomach": {
+      "min_in": 0.5,
+      "max_in": 300
+    },
+    "Waist": {
+      "min_in": 0.5,
+      "max_in": 300
+    },
+    "Butt": {
+      "min_in": 0.5,
+      "max_in": 300
+    },
+    "Butt Rise": {
+      "min_in": 0.5,
+      "max_in": 300
+    },
+    "Upper Thigh": {
+      "min_in": 0.5,
+      "max_in": 300
+    },
+    "Lower Thigh": {
+      "min_in": 0.5,
+      "max_in": 300
+    },
+    "Knee": {
+      "min_in": 0.5,
+      "max_in": 300
+    },
+    "Calf": {
+      "min_in": 0.5,
+      "max_in": 300
+    },
+    "Ankle": {
+      "min_in": 0.5,
+      "max_in": 300
+    },
+    "Inseam": {
+      "min_in": 0.5,
+      "max_in": 300
+    },
+    "Crotch": {
+      "min_in": 0.5,
+      "max_in": 300
+    },
+    "Bicep": {
+      "min_in": 0.5,
+      "max_in": 300
+    },
+    "Hips": {
+      "min_in": 0.5,
+      "max_in": 300
+    }
   },
   "categories": {
-    "harness_details": {{ harness_categories | json }},
-    "notes_section": {{ notes_categories | json }}
+    "Deluxe Harness": {
+      "Neck": true,
+      "Chest": true,
+      "Shoulders": true,
+      "Torso": true,
+      "Waist": true
+    },
+    "Standard Harness": {
+      "Neck": true,
+      "Chest": true,
+      "Shoulders": true,
+      "Torso": true,
+      "Waist": true
+    },
+    "Suspender Harness": {
+      "Neck": true,
+      "Chest": true,
+      "Shoulders": true,
+      "Torso": true,
+      "Waist": true
+    },
+    "Dogtag/Pigtag": {
+      "Neck": false
+    },
+    "Chaps": {
+      "Waist": true,
+      "Upper Thigh": true,
+      "Lower Thigh": true,
+      "Knee": true,
+      "Calf": true,
+      "Ankle": true,
+      "Hips": false
+    },
+    "Shirt": {
+      "Chest": true,
+      "Shoulders": true,
+      "Torso": true,
+      "Stomach": true,
+      "Bicep": true
+    },
+    "Pants": {
+      "Waist": true,
+      "Butt": true,
+      "Butt Rise": true,
+      "Upper Thigh": true,
+      "Lower Thigh": true,
+      "Knee": true,
+      "Calf": true,
+      "Ankle": true,
+      "Inseam": true,
+      "Crotch": true,
+      "Hips": false
+    },
+    "Suspenders": {
+      "Chest": true,
+      "Shoulders": true,
+      "Waist": true
+    },
+    "Other": {
+      "Neck": false,
+      "Chest": false,
+      "Shoulders": false,
+      "Torso": false,
+      "Stomach": false,
+      "Waist": false,
+      "Butt": false,
+      "Butt Rise": false,
+      "Upper Thigh": false,
+      "Lower Thigh": false,
+      "Knee": false,
+      "Calf": false,
+      "Ankle": false,
+      "Inseam": false,
+      "Crotch": false,
+      "Bicep": false,
+      "Hips": false
+    }
   }
+}
+</script>
+<script type="application/json" id="measurement-config">
+{
+  "harness_details": {{ harness_categories | json }},
+  "notes_section": {{ notes_categories | json }}
 }
 </script>
 
 {%- comment -%} Measurement Fields {%- endcomment -%}
 <div class="measurements-group" id="measurementsGroup">
-  {%- assign measurements_data = "Neck,Chest,Shoulders,Torso,Stomach,Waist,Butt,Butt Rise,Upper Thigh,Lower Thigh,Knee,Calf,Ankle,Inseam,Crotch,Bicep,Hips" | split: "," -%}
-  {%- for meas_name in measurements_data -%}
+  {%- for meas_name in measurement_names -%}
     {%- assign handle = meas_name | handleize -%}
+    {%- comment -%} Default values - actual config comes from JSON in JavaScript {%- endcomment -%}
     {%- assign min_in = 0.5 -%}
     {%- assign max_in = 300.0 -%}
     {%- assign step_in = 0.5 -%}
     {%- assign step_cm = 0.5 -%}
-    {%- assign min_cm = min_in | times: 2.54 -%}
-    {%- assign max_cm = max_in | times: 2.54 -%}
 
-    <div class="measurement-field"
-         id="measurement-{{ handle }}"
-         data-measurement="{{ meas_name }}"
-         data-min-in="{{ min_in }}"
-         data-max-in="{{ max_in }}"
-         data-step-in="{{ step_in }}"
-         data-step-cm="{{ step_cm }}">
-      <label for="{{ handle }}-in">{{ meas_name }}</label>
-      <select
-        id="{{ handle }}-in"
-        name="properties[{{ meas_name }} (in)]"
-        form="product-form-{{ section.id }}"
-        class="measurement-select measurement-in"
-        data-measurement="{{ meas_name }}"
-      >
-        <option value="" disabled selected>—</option>
-        {%- assign steps = max_in | divided_by: step_in | floor -%}
-        {%- for i in (0..steps) -%}
-          {%- assign val = i | times: step_in | plus: min_in -%}
-          {%- if val <= max_in -%}
-            {%- if step_in == 0.5 -%}
-              {%- assign display_val = val | round: 1 -%}
-            {%- else -%}
-              {%- assign display_val = val | round: 2 -%}
+      {%- comment -%} Calculate CM min/max from inches, rounded to nearest whole cm {%- endcomment -%}
+      {%- assign min_cm_raw = min_in | times: 2.54 -%}
+      {%- assign min_cm = min_cm_raw | floor -%}
+      {%- assign max_cm_raw = max_in | times: 2.54 -%}
+      {%- assign max_cm = max_cm_raw | floor -%}
+
+      <div class="measurement-field"
+           id="measurement-{{ handle }}"
+           data-measurement="{{ meas_name }}"
+           data-min-in="{{ min_in }}"
+           data-max-in="{{ max_in }}"
+           data-step-in="{{ step_in }}"
+           data-step-cm="{{ step_cm }}"
+           data-min-cm="{{ min_cm }}"
+           data-max-cm="{{ max_cm }}">
+        <label for="{{ handle }}-in">{{ meas_name }}</label>
+        <select
+          id="{{ handle }}-in"
+          name="properties[{{ meas_name }} (in)]"
+          form="product-form-{{ section.id }}"
+          class="measurement-select measurement-in"
+          data-measurement="{{ meas_name }}">
+          <option value="" disabled selected>—</option>
+          {%- assign steps = max_in | divided_by: step_in | floor -%}
+          {%- for i in (0..steps) -%}
+            {%- assign val = i | times: step_in | plus: min_in -%}
+            {%- if val <= max_in -%}
+              {%- if step_in == 0.5 -%}
+                {%- assign display_val = val | round: 1 -%}
+              {%- else -%}
+                {%- assign display_val = val | round: 2 -%}
+              {%- endif -%}
+              <option value="{{ val }}">{{ display_val }}</option>
             {%- endif -%}
-            <option value="{{ val }}">{{ display_val }}</option>
-          {%- endif -%}
-        {%- endfor -%}
-      </select>
-      <select
-        id="{{ handle }}-cm"
-        name="properties[{{ meas_name }} (cm)]"
-        form="product-form-{{ section.id }}"
-        class="measurement-select measurement-cm"
-        data-measurement="{{ meas_name }}"
-        style="display: none;"
-      >
-        <option value="" disabled selected>—</option>
-        {%- assign steps_cm = max_cm | divided_by: step_cm | floor -%}
-        {%- for i in (0..steps_cm) -%}
-          {%- assign val_cm = i | times: step_cm | plus: min_cm -%}
-          {%- if val_cm <= max_cm -%}
-            {%- if step_cm == 0.5 -%}
-              {%- assign display_val_cm = val_cm | round: 1 -%}
-            {%- else -%}
-              {%- assign display_val_cm = val_cm | round: 2 -%}
+          {%- endfor -%}
+        </select>
+        <select
+          id="{{ handle }}-cm"
+          name="properties[{{ meas_name }} (cm)]"
+          form="product-form-{{ section.id }}"
+          class="measurement-select measurement-cm"
+          data-measurement="{{ meas_name }}"
+          style="display: none;">
+          <option value="" disabled selected>—</option>
+          {%- assign steps_cm = max_cm | divided_by: step_cm | floor -%}
+          {%- for i in (0..steps_cm) -%}
+            {%- assign val_cm = i | times: step_cm | plus: min_cm -%}
+            {%- if val_cm <= max_cm -%}
+              {%- if step_cm == 0.5 -%}
+                {%- assign display_val_cm = val_cm | round: 1 -%}
+              {%- elsif step_cm >= 1 -%}
+                {%- assign display_val_cm = val_cm | round: 0 -%}
+              {%- else -%}
+                {%- assign display_val_cm = val_cm | round: 2 -%}
+              {%- endif -%}
+              <option value="{{ val_cm }}">{{ display_val_cm }}</option>
             {%- endif -%}
-            <option value="{{ val_cm }}">{{ display_val_cm }}</option>
-          {%- endif -%}
-        {%- endfor -%}
-      </select>
-    </div>
+          {%- endfor -%}
+        </select>
+      </div>
   {%- endfor -%}
 </div>
 
@@ -381,9 +513,58 @@
   (function() {
     'use strict';
 
-    // Load configuration from JSON script tag
+    // Load configuration from JSON script tags
     const configElement = document.getElementById('measurement-config');
-    const config = configElement ? JSON.parse(configElement.textContent) : {};
+    const configRaw = configElement ? JSON.parse(configElement.textContent) : {};
+
+    const configDataElement = document.getElementById('measurement-config-raw');
+    const configData = configDataElement ? JSON.parse(configDataElement.textContent) : {};
+
+    // Convert inverted structure: categories -> measurements to measurements -> categories
+    const measurements = {};
+    const measurementsData = configData.measurements || {};
+    const categoriesData = configData.categories || {};
+    const defaultStepIn = configData.default_step_in || 0.5;
+    const defaultStepCm = configData.default_step_cm || 0.5;
+
+    // Build measurements with their category lists and required flags
+    for (const [measName, measConfig] of Object.entries(measurementsData)) {
+      const categoryInfo = {};
+      // Find which categories include this measurement and if it's required
+      for (const [categoryName, categoryMeasurements] of Object.entries(categoriesData)) {
+        if (categoryMeasurements.hasOwnProperty(measName)) {
+          // Measurement exists in category - value determines if required
+          categoryInfo[categoryName] = {
+            included: true,
+            required: categoryMeasurements[measName] === true
+          };
+        }
+      }
+
+      // Convert min/max from inches to cm if not explicitly provided
+      const minIn = measConfig.min_in;
+      const maxIn = measConfig.max_in;
+      const minCm = measConfig.min_cm !== undefined ? measConfig.min_cm : Math.floor(minIn * 2.54);
+      const maxCm = measConfig.max_cm !== undefined ? measConfig.max_cm : Math.floor(maxIn * 2.54);
+
+      measurements[measName] = {
+        min_in: minIn,
+        max_in: maxIn,
+        min_cm: minCm,
+        max_cm: maxCm,
+        step_in: measConfig.step_in !== undefined ? measConfig.step_in : defaultStepIn,
+        step_cm: measConfig.step_cm !== undefined ? measConfig.step_cm : defaultStepCm,
+        categories: categoryInfo
+      };
+    }
+
+    const config = {
+      measurements: measurements,
+      categories: {
+        harness_details: configRaw.harness_details || [],
+        notes_section: configRaw.notes_section || []
+      }
+    };
     const INCH_TO_CM = 2.54;
     const CM_TO_INCH = 1 / 2.54;
 
@@ -491,6 +672,8 @@
         const cmSelect = field.querySelector('.measurement-cm');
         const stepIn = parseFloat(field.dataset.stepIn);
         const stepCm = parseFloat(field.dataset.stepCm);
+        const minCm = parseFloat(field.dataset.minCm);
+        const maxCm = parseFloat(field.dataset.maxCm);
 
         if (currentUnit === 'in') {
           // Switching to inches - convert from CM if we have a value
@@ -509,9 +692,11 @@
             const inValue = parseFloat(inSelect.value);
             const cmValue = convertValue(inValue, 'in', 'cm');
             const closestCm = getClosestStepValue(cmValue, stepCm);
+            // Ensure value is within CM range
+            const clampedCm = Math.max(minCm, Math.min(maxCm, closestCm));
             if (cmSelect) {
-              cmSelect.value = closestCm.toFixed(stepCm < 1 ? 2 : 0);
-              measurementValues.set(measName, { in: inValue, cm: closestCm });
+              cmSelect.value = clampedCm.toFixed(stepCm < 1 ? 2 : 0);
+              measurementValues.set(measName, { in: inValue, cm: clampedCm });
             }
           }
         }
@@ -527,12 +712,15 @@
         const measName = field.dataset.measurement;
         const measConfig = config.measurements[measName];
 
-        if (measConfig && measConfig.categories && measConfig.categories.includes(category)) {
+        // Check if measurement is included in this category
+        const categoryInfo = measConfig && measConfig.categories ? measConfig.categories[category] : null;
+
+        if (categoryInfo && categoryInfo.included) {
           field.classList.add('active');
-          // Set required attribute based on config
+          // Set required attribute based on category config
           const inSelect = field.querySelector('.measurement-in');
           const cmSelect = field.querySelector('.measurement-cm');
-          if (measConfig.required) {
+          if (categoryInfo.required) {
             if (inSelect) inSelect.setAttribute('required', 'required');
             if (cmSelect) cmSelect.setAttribute('required', 'required');
           } else {
@@ -565,7 +753,10 @@
       document.querySelectorAll('.measurement-field.active').forEach(field => {
         const measName = field.dataset.measurement;
         const measConfig = config.measurements[measName];
-        const isRequired = measConfig && measConfig.required === true;
+
+        // Check if this measurement is required for the selected category
+        const categoryInfo = measConfig && measConfig.categories ? measConfig.categories[selectedCategory] : null;
+        const isRequired = categoryInfo && categoryInfo.required === true;
 
         if (isRequired) {
           const activeSelect = currentUnit === 'in'
@@ -605,10 +796,18 @@
           const step = sourceUnit === 'in'
             ? parseFloat(field.dataset.stepCm)
             : parseFloat(field.dataset.stepIn);
+          const minCm = parseFloat(field.dataset.minCm);
+          const maxCm = parseFloat(field.dataset.maxCm);
           const closestValue = getClosestStepValue(convertedValue, step);
           const targetSelect = field.querySelector(`.measurement-${targetUnit}`);
 
           if (targetSelect) {
+            // Clamp value to valid range for CM
+            let finalValue = closestValue;
+            if (targetUnit === 'cm') {
+              finalValue = Math.max(minCm, Math.min(maxCm, closestValue));
+            }
+
             // Find the closest matching option
             const options = Array.from(targetSelect.options);
             let bestMatch = null;
@@ -617,7 +816,7 @@
             options.forEach(opt => {
               if (opt.value && opt.value !== '') {
                 const optValue = parseFloat(opt.value);
-                const diff = Math.abs(optValue - closestValue);
+                const diff = Math.abs(optValue - finalValue);
                 if (diff < bestDiff) {
                   bestDiff = diff;
                   bestMatch = opt;
@@ -630,7 +829,7 @@
               targetSelect.value = bestMatch.value;
             } else {
               // Fallback: set to closest value if no good match found
-              targetSelect.value = closestValue.toFixed(step < 1 ? 2 : 0);
+              targetSelect.value = finalValue.toFixed(step < 1 ? 2 : 0);
             }
 
             measurementValues.set(measName, {
@@ -734,10 +933,13 @@
                 const measName = match[1] || match[2];
                 const measConfig = config.measurements[measName];
 
+                // Check if measurement is included in the selected category
+                const categoryInfo = measConfig && measConfig.categories ? measConfig.categories[selectedCategory] : null;
+                const isIncluded = categoryInfo && categoryInfo.included === true;
+
                 // Remove if not in category or empty
                 const shouldRemove = !measConfig ||
-                                     !measConfig.categories ||
-                                     !measConfig.categories.includes(selectedCategory) ||
+                                     !isIncluded ||
                                      !input.value ||
                                      input.value === '';
 
