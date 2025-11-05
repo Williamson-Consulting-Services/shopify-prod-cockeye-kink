@@ -658,7 +658,7 @@
     "custom-order-required-measurements": {
       "name": "Custom Order Required Measurements",
       "settings": {
-        "custom_liquid": {
+        "custom_order_required_measurements": {
           "label": "Custom Order Required Measurements",
           "info": "Custom Order Required Measurements."
         }
