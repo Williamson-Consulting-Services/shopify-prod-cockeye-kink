@@ -1,10 +1,14 @@
 {%- comment %}
-  1. Create unique IDs for our form, input, and error elements
-     based on the section ID.
+  1. Create unique IDs for all elements, including the button.
 {%- endcomment %}
 {%- assign form_id = 'product-form-' | append: section.id -%}
 {%- assign input_id = 'custom-engraving-' | append: section.id -%}
 {%- assign error_id = 'engraving-error-' | append: section.id -%}
+
+{%- comment %}
+  NEW: Get the dynamic button ID.
+{%- endcomment %}
+{%- assign button_id = 'ProductSubmitButton-' | append: section.id -%}
 
 <div style="margin-bottom:15px;">
   <label for="{{ input_id }}">Engraving (5 chars max, A-Z, 0-9):</label>
@@ -26,41 +30,56 @@
 </div>
 
 <script>
-  // --- THIS IS THE FIX ---
   // Wait for the entire HTML document to be loaded and parsed
-  // before we try to find any elements.
-  document.addEventListener('DOMContentLoaded', function () {
-    // Get the unique IDs we created in Liquid
-    const formId = '{{ form_id }}';
-    const inputId = '{{ input_id }}';
-    const errorId = '{{ error_id }}';
+  document.addEventListener('DOMContentLoaded', function() {
 
-    // Now, find the elements by their unique IDs
+    // Get the unique IDs we created in Liquid
+    const formId = "{{ form_id }}";
+    const inputId = "{{ input_id }}";
+    const errorId = "{{ error_id }}";
+
+    {%- comment %}
+      NEW: Get the button ID from Liquid.
+    {%- endcomment %}
+    const buttonId = "{{ button_id }}";
+
+    // Now, find all the elements by their unique IDs
     const productForm = document.getElementById(formId);
     const customInput = document.getElementById(inputId);
     const errorMsg = document.getElementById(errorId);
 
+    {%- comment %}
+      NEW: Find the submit button.
+    {%- endcomment %}
+    const submitButton = document.getElementById(buttonId);
+
     // Check if all elements were found
-    if (!productForm) {
-      console.warn('Custom validation: Could not find form with ID:', formId);
-      return;
-    }
-    if (!customInput || !errorMsg) {
-      console.warn('Custom validation: Could not find input or error message.');
+    if (!productForm || !customInput || !errorMsg || !submitButton) {
+      console.warn('Custom validation: Could not find all required elements (form, input, error, or button).');
       return;
     }
 
-    // --- Real-time validation function (no change) ---
+    // --- NEW: Updated validation function ---
     function validateInput() {
       if (!customInput.checkValidity()) {
         errorMsg.style.display = 'block';
         customInput.style.borderColor = '#d9534f';
         customInput.style.boxShadow = '0 0 0 1px #d9534f';
+
+        // NEW: Disable the button
+        submitButton.disabled = true;
+        submitButton.style.opacity = '0.5'; // Visually show it's disabled
+
         return false;
       } else {
         errorMsg.style.display = 'none';
         customInput.style.borderColor = '#ccc';
         customInput.style.boxShadow = 'none';
+
+        // NEW: Enable the button
+        submitButton.disabled = false;
+        submitButton.style.opacity = '1';
+
         return true;
       }
     }
@@ -68,10 +87,13 @@
     // --- Add event listeners (no change) ---
     customInput.addEventListener('input', validateInput);
 
-    productForm.addEventListener('submit', function (event) {
+    productForm.addEventListener('submit', function(event) {
+      // This is still a good safeguard in case the user submits
+      // by pressing Enter in the text field.
       if (!validateInput()) {
         event.preventDefault(); // Stop the 'Add to Cart'
       }
     });
+
   });
 </script>
