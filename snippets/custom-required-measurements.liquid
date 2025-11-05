@@ -605,7 +605,18 @@
     const measurementsGroup = document.getElementById('measurementsGroup');
     const unitToggleButtons = document.querySelectorAll('.unit-toggle-button');
     const productForm = document.querySelector('#product-form-{{ section.id }}');
-    const addToCartButton = productForm ? productForm.querySelector('button[type="submit"], button[name="add"]') : null;
+    // Find the add to cart button by ID (matching buy-buttons.liquid pattern)
+    const buttonId = 'ProductSubmitButton-{{ section.id }}';
+    let addToCartButton = document.getElementById(buttonId);
+
+    // Fallback: try finding by name attribute if ID doesn't work
+    if (!addToCartButton && productForm) {
+      addToCartButton = productForm.querySelector('button[name="add"]');
+    }
+
+    if (!addToCartButton) {
+      console.warn('Could not find add to cart button with ID:', buttonId);
+    }
 
     // Initialize - reset all fields
     function initialize() {
@@ -667,7 +678,12 @@
         updateMeasurementsForCategory(selectedCategory);
       }
 
-      // Update add to cart button state
+      // Update add to cart button state - disable on load (following validated-text-input pattern)
+      if (addToCartButton) {
+        addToCartButton.disabled = true;
+        addToCartButton.style.opacity = '0.5';
+      }
+      // Then run validation to set proper state
       updateAddToCartButton();
     }
 
@@ -836,28 +852,52 @@
       }
 
       const requiredMeasurements = [];
-      document.querySelectorAll('.measurement-field.active').forEach(field => {
-        const measName = field.dataset.measurement;
-        const measConfig = config.measurements[measName];
+      const activeFields = document.querySelectorAll('.measurement-field.active');
 
+      activeFields.forEach(field => {
+        const measName = field.dataset.measurement;
+        if (!measName) return;
+
+        const measConfig = config.measurements[measName];
         if (!measConfig) return;
 
         // Check if this measurement is required for the selected category
         const categoryInfo = measConfig.categories ? measConfig.categories[selectedCategory] : null;
-        const isRequired = categoryInfo && categoryInfo.included && categoryInfo.required === true;
+        if (!categoryInfo) return;
 
-        if (isRequired) {
-          const inSelect = field.querySelector('.measurement-in');
-          const cmSelect = field.querySelector('.measurement-cm');
+        const isRequired = categoryInfo.included === true && categoryInfo.required === true;
+        if (!isRequired) return;
 
-          // Check if either select has a valid value (both should be synced, but check both to be safe)
-          const inHasValue = inSelect && inSelect.value && inSelect.value !== '' && inSelect.value !== '—';
-          const cmHasValue = cmSelect && cmSelect.value && cmSelect.value !== '' && cmSelect.value !== '—';
+        // This measurement is required - check if it has a value
+        const inSelect = field.querySelector('.measurement-in');
+        const cmSelect = field.querySelector('.measurement-cm');
 
-          // If neither has a value, it's missing
-          if (!inHasValue && !cmHasValue) {
-            requiredMeasurements.push(measName);
-          }
+        // Check if either select has a valid value (not placeholder)
+        // The placeholder option has value="" and is disabled, so we check for non-empty value
+        let inHasValue = false;
+        let cmHasValue = false;
+
+        if (inSelect) {
+          // Check if selected option is not the placeholder (first option with empty value)
+          const selectedOption = inSelect.options[inSelect.selectedIndex];
+          inHasValue = selectedOption &&
+                       selectedOption.value !== '' &&
+                       selectedOption.value !== null &&
+                       !selectedOption.disabled;
+        }
+
+        if (cmSelect) {
+          // Check if selected option is not the placeholder (first option with empty value)
+          const selectedOption = cmSelect.options[cmSelect.selectedIndex];
+          cmHasValue = selectedOption &&
+                       selectedOption.value !== '' &&
+                       selectedOption.value !== null &&
+                       !selectedOption.disabled;
+        }
+
+        // If neither has a value, it's missing
+        if (!inHasValue && !cmHasValue) {
+          requiredMeasurements.push(measName);
         }
       });
 
@@ -873,18 +913,29 @@
 
         harnessFields.forEach(fieldName => {
           const select = document.querySelector(`select[name="${fieldName}"]`);
-          if (select) {
-            const hasValue = select.value && select.value !== '' && select.value !== 'Select one';
-            // Check if custom text field is filled as alternative
-            const customTextName = fieldName.replace(']', ' - Text]');
-            const customText = document.querySelector(`input[name="${customTextName}"]`);
-            const hasCustomText = customText && customText.value && customText.value.trim() !== '';
+          if (!select) return;
 
-            if (!hasValue && !hasCustomText) {
-              // Extract field name for display
-              const fieldDisplayName = fieldName.replace('properties[', '').replace(']', '');
-              requiredMeasurements.push(fieldDisplayName);
-            }
+          // Check if selected option is not the placeholder
+          const selectedOption = select.options[select.selectedIndex];
+          const hasValue = selectedOption &&
+                           selectedOption.value !== '' &&
+                           selectedOption.value !== null &&
+                           selectedOption.value !== 'Select one';
+
+          // Check if custom text field is filled as alternative
+          const customTextName = fieldName.replace(']', ' - Text]');
+          const customText = document.querySelector(`input[name="${customTextName}"]`);
+          let hasCustomText = false;
+
+          if (customText) {
+            const customVal = customText.value;
+            hasCustomText = customVal !== null && customVal !== undefined && String(customVal).trim() !== '';
+          }
+
+          if (!hasValue && !hasCustomText) {
+            // Extract field name for display
+            const fieldDisplayName = fieldName.replace('properties[', '').replace(']', '');
+            requiredMeasurements.push(fieldDisplayName);
           }
         });
       }
@@ -892,17 +943,34 @@
       return requiredMeasurements.length === 0;
     }
 
-    // Update add to cart button state
+    // Update add to cart button state (following validated-text-input.liquid pattern)
     function updateAddToCartButton() {
-      if (!addToCartButton) return;
+      // Re-find button in case DOM changed
+      if (!addToCartButton) {
+        addToCartButton = document.getElementById(buttonId);
+      }
+      if (!addToCartButton && productForm) {
+        addToCartButton = productForm.querySelector('button[name="add"]');
+      }
+
+      if (!addToCartButton) {
+        return;
+      }
 
       const isValid = validateRequiredFields();
-      addToCartButton.disabled = !isValid;
-      addToCartButton.setAttribute('aria-disabled', !isValid);
 
+      // Follow validated-text-input pattern: set disabled and opacity
       if (!isValid) {
+        addToCartButton.disabled = true;
+        addToCartButton.style.opacity = '0.5';
+        addToCartButton.setAttribute('disabled', 'disabled');
+        addToCartButton.setAttribute('aria-disabled', 'true');
         addToCartButton.title = 'Please select a category and fill all required measurements';
       } else {
+        addToCartButton.disabled = false;
+        addToCartButton.style.opacity = '1';
+        addToCartButton.removeAttribute('disabled');
+        addToCartButton.removeAttribute('aria-disabled');
         addToCartButton.removeAttribute('title');
       }
     }
@@ -1092,11 +1160,25 @@
       });
     }
 
-    // Initialize on load
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initialize);
-    } else {
+    // Initialize on load (following validated-text-input.liquid pattern)
+    function delayedInitialize() {
       initialize();
+      // Run validation immediately on load (like validated-text-input does)
+      updateAddToCartButton();
+    }
+
+    // Handle pageshow event for back/forward cache - clear all values
+    window.addEventListener('pageshow', function() {
+      // Clear all values when navigating back/forward
+      initialize();
+      updateAddToCartButton();
+    });
+
+    // Wait for DOM to be ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', delayedInitialize);
+    } else {
+      delayedInitialize();
     }
   })();
 
