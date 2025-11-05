@@ -162,12 +162,6 @@
     }
   }
 </script>
-<script type="application/json" id="measurement-config">
-  {
-    "harness_details": {{ harness_categories | json }},
-    "notes_section": {{ notes_categories | json }}
-  }
-</script>
 
 {%- liquid
   comment
@@ -228,6 +222,13 @@
     assign banner_enabled = false
   endif
 -%}
+
+<script type="application/json" id="measurement-config">
+  {
+    "harness_details": {{ harness_categories | json }},
+    "notes_section": {{ notes_categories | json }}
+  }
+</script>
 
 <style>
   .order-status-banner {
