@@ -1,42 +1,42 @@
 {%- comment %}
-  https://trello.com/c/xoRQnitG/15-12-dog-tag-bug-fix
+ https://trello.com/c/xoRQnitG/15-12-dog-tag-bug-fix
   This block sets up unique IDs for all elements. This is crucial for
   AC5, AC8, AC9, and AC10, as it allows the JavaScript to
   connect all the components (input, form, button, error) reliably.
 {%- endcomment %}
-{%- assign form_id = "product-form-" | append: section.id -%}
-{%- assign input_id = "custom-engraving-" | append: section.id -%}
-{%- assign error_id = "engraving-error-" | append:section.id -%}
-{%- assign button_id = "ProductSubmitButton-" | append: section.id -%}
+{%- assign form_id = 'product-form-' | append: section.id -%}
+{%- assign input_id = 'custom-engraving-' | append: section.id -%}
+{%- assign error_id = 'engraving-error-' | append: section.id -%}
+{%- assign button_id = 'ProductSubmitButton-' | append: section.id -%}
 
 {%- comment %} MEETS: AC1 (Display) - This is the UI for the input field. {%- endcomment %}
 <div style="margin-bottom:15px;">
   <!-- Label updated to reflect 1-5 char rule -->
   <label for="{{ input_id }}">Engraving (1-5 chars, A-Z, 0-9):</label>
-  
-  <input 
-    type="text" 
-    id="{{ input_id }}" 
-    
+
+  <input
+    type="text"
+    id="{{ input_id }}"
+
     {%- comment %} MEETS: AC2 (Data Submission) - This 'name' attribute is what Shopify looks for. {%- endcomment %}
     name="properties[Engraving]"
-    
+
     {%- comment %} MEETS: AC6 (Max Length) - HTML attribute enforces the 5-char limit. {%- endcomment %}
     maxlength="5"
-    
+
     {%- comment %} MEETS: AC7 (Pattern) - HTML attribute (regex) enforces alphanumeric. {%- endcomment %}
     pattern="[a-zA-Z0-9]*"
-    
+
     {%- comment %}
       MEETS: AC5 (Required) - Part 1
       The 'required' attribute makes the field invalid when empty,
       which is the trigger for disabling the button on load.
     {%- endcomment %}
-    required 
-    
+    required
+
     title="Only letters (A-Z) and numbers (0-9) are allowed."
     style="width: 100%; border: 1px solid #ccc; padding: 8px; border-radius: 4px; box-sizing: border-box;"
-    
+
     {%- comment %}
       MEETS: AC2 (Data Submission) - Part 2
       This 'form' attribute links this input (which is in a Custom Liquid block)
@@ -52,75 +52,94 @@
 </div>
 
 <script>
-// Wait for the page to load to prevent "Could not find element" errors
-document.addEventListener('DOMContentLoaded', function() {
-  
-  // Get all unique element IDs from Liquid
-  const formId = "{{ form_id }}";
-  const inputId = "{{ input_id }}";
-  const errorId = "{{ error_id }}";
-  const buttonId = "{{ button_id }}";
-  
-  // Find all the elements
-  const productForm = document.getElementById(formId);
-  const customInput = document.getElementById(inputId);
-  const errorMsg = document.getElementById(errorId);
-  const submitButton = document.getElementById(buttonId);
-  
-  if (!productForm || !customInput || !errorMsg || !submitButton) {
-    console.warn('Custom validation: Could not find all required elements.');
-    return;
-  }
+  // Wait for the page to load to prevent "Could not find element" errors
+  document.addEventListener('DOMContentLoaded', function() {
 
-  {% comment %} // --- This function handles AC8, AC9, and AC10 --- {% endcomment %}
-  function validateInput() {
-    // checkValidity() uses the 'required', 'pattern', and 'maxlength' attributes
-    if (!customInput.checkValidity()) {
-      
-      {%- comment %} MEETS: AC8 (Error Feedback) - Part 2: Show the error message. {%- endcomment %}
-      errorMsg.style.display = 'block';
-      customInput.style.borderColor = '#d9534f';
-      customInput.style.boxShadow = '0 0 0 1px #d9534f';
-      
-      {%- comment %} MEETS: AC9 (Disable Button) - Disables and fades the button. {%- endcomment %}
-      submitButton.disabled = true;
-      submitButton.style.opacity = '0.5';
-      
-      return false;
-    } else {
-      {%- comment %} MEETS: AC10 (Enable Button) - Part 1: Hide the error. {%- endcomment %}
-      errorMsg.style.display = 'none';
-      customInput.style.borderColor = '#ccc';
-      customInput.style.boxShadow = 'none';
-      
-      {%- comment %} MEETS: AC10 (Enable Button) - Part 2: Enable and un-fade the button. {%- endcomment %}
-      submitButton.disabled = false;
-      submitButton.style.opacity = '1';
-      
-      return true;
-    }
-  }
+    // Get all unique element IDs from Liquid
+    const formId = "{{ form_id }}";
+    const inputId = "{{ input_id }}";
+    const errorId = "{{ error_id }}";
+    const buttonId = "{{ button_id }}";
 
-  {%- comment %}
-    MEETS: AC8, AC9, AC10 (Real-time)
-    This 'input' listener runs the validation on every keystroke.
-  {%- endcomment %}
-  customInput.addEventListener('input', validateInput);
-  
-  productForm.addEventListener('submit', function(event) {
-    // Final safeguard on submit
-    if (!validateInput()) {
-      event.preventDefault();
+    // Find all the elements
+    const productForm = document.getElementById(formId);
+    const customInput = document.getElementById(inputId);
+    const errorMsg = document.getElementById(errorId);
+    const submitButton = document.getElementById(buttonId);
+
+    if (!productForm || !customInput || !errorMsg || !submitButton) {
+      console.warn('Custom validation: Could not find all required elements.');
+      return;
     }
+
+    {% comment %} // --- This function handles AC8, AC9, and AC10 --- {% endcomment %}
+    function validateInput() {
+      // checkValidity() uses the 'required', 'pattern', and 'maxlength' attributes
+      if (!customInput.checkValidity()) {
+
+        {%- comment %} MEETS: AC8 (Error Feedback) - Part 2: Show the error message. {%- endcomment %}
+        errorMsg.style.display = 'block';
+        customInput.style.borderColor = '#d9534f';
+        customInput.style.boxShadow = '0 0 0 1px #d9534f';
+
+        {%- comment %} MEETS: AC9 (Disable Button) - Disables and fades the button. {%- endcomment %}
+        submitButton.disabled = true;
+        submitButton.style.opacity = '0.5';
+
+        return false;
+      } else {
+        {%- comment %} MEETS: AC10 (Enable Button) - Part 1: Hide the error. {%- endcomment %}
+        errorMsg.style.display = 'none';
+        customInput.style.borderColor = '#ccc';
+        customInput.style.boxShadow = 'none';
+
+        {%- comment %} MEETS: AC10 (Enable Button) - Part 2: Enable and un-fade the button. {%- endcomment %}
+        submitButton.disabled = false;
+        submitButton.style.opacity = '1';
+
+        return true;
+      }
+    }
+
+    {%- comment %}
+      MEETS: AC8, AC9, AC10 (Real-time)
+      This 'input' listener runs the validation on every keystroke.
+    {%- endcomment %}
+    customInput.addEventListener('input', validateInput);
+
+    productForm.addEventListener('submit', function(event) {
+      // Final safeguard on submit
+      if (!validateInput()) {
+        event.preventDefault();
+      }
+    });
+
+    {%- comment %}
+      MEETS: AC5 (Required) - Part 2
+      This disables the button on page load, because the
+      empty 'required' field is invalid.
+    {%- endcomment %}
+    submitButton.disabled = true;
+    submitButton.style.opacity = '0.5';
+
+    {%- comment %}
+      NEW FIX (Part 1):
+      Run validation once on load. This handles cases where
+      the browser autofills the field (but not bfcache).
+    {%- endcomment %}
+    validateInput();
+
+    {%- comment %}
+      NEW FIX (Part 2):
+      Add a 'pageshow' listener. This event fires every time
+      the page is displayed, including from the back/forward cache.
+      This fixes the "back button" issue.
+    {%- endcomment %}
+    window.addEventListener('pageshow', function() {
+      // Re-run the validation to set the button state
+      // based on the cached form value.
+      validateInput();
+    });
+
   });
-
-  {%- comment %}
-    MEETS: AC5 (Required) - Part 2
-    This disables the button on page load, because the
-    empty 'required' field is invalid.
-  {%- endcomment %}
-  submitButton.disabled = true;
-  submitButton.style.opacity = '0.5';
-
-});
 </script>
