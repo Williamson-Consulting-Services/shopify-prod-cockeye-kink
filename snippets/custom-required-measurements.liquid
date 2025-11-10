@@ -1,151 +1,54 @@
 {% comment %}
   Custom Required Measurements Snippet
-  Configuration: Edit the values inside the JSON config block below
-  Structure: Categories define which measurements are required or optional
-  This inverted structure makes it easy to see all measurements for a category at once
+  Configuration: Define measurement and category groupings using reusable strings.
+  Group strings are composed once and reused across categories to keep the data DRY.
 {% endcomment %}
 
-{%- capture measurement_config_json -%}
-{
-  "measurements": [
-    "Neck",
-    "Chest",
-    "Shoulders",
-    "Torso",
-    "Stomach",
-    "Waist",
-    "Butt",
-    "Butt Rise",
-    "Upper Thigh",
-    "Lower Thigh",
-    "Knee",
-    "Calf",
-    "Ankle",
-    "Inseam",
-    "Crotch",
-    "Bicep",
-    "Hips"
-  ],
-  "categories": {
-    "Deluxe Harness": {
-      "required": ["Neck", "Chest", "Shoulders", "Torso", "Waist"],
-      "optional": []
-    },
-    "Standard Harness": {
-      "required": ["Neck", "Chest", "Shoulders", "Torso", "Waist"],
-      "optional": []
-    },
-    "Suspender Harness": {
-      "required": ["Neck", "Chest", "Shoulders", "Torso", "Waist"],
-      "optional": []
-    },
-    "Dogtag/Pigtag": {
-      "required": [],
-      "optional": ["Neck"]
-    },
-    "Chaps": {
-      "required": ["Waist", "Upper Thigh", "Lower Thigh", "Knee", "Calf", "Ankle"],
-      "optional": ["Hips"]
-    },
-    "Shirt": {
-      "required": ["Chest", "Shoulders", "Torso", "Stomach", "Bicep"],
-      "optional": []
-    },
-    "Pants": {
-      "required": [
-        "Waist",
-        "Butt",
-        "Butt Rise",
-        "Upper Thigh",
-        "Lower Thigh",
-        "Knee",
-        "Calf",
-        "Ankle",
-        "Inseam",
-        "Crotch"
-      ],
-      "optional": ["Hips"]
-    },
-    "Suspenders": {
-      "required": ["Chest", "Shoulders", "Waist"],
-      "optional": []
-    },
-    "Other": {
-      "required": [],
-      "optional": [
-        "Neck",
-        "Chest",
-        "Shoulders",
-        "Torso",
-        "Stomach",
-        "Waist",
-        "Butt",
-        "Butt Rise",
-        "Upper Thigh",
-        "Lower Thigh",
-        "Knee",
-        "Calf",
-        "Ankle",
-        "Inseam",
-        "Crotch",
-        "Bicep",
-        "Hips"
-      ]
-    }
-  },
-  "category_order": [
-    "Deluxe Harness",
-    "Standard Harness",
-    "Suspender Harness",
-    "Dogtag/Pigtag",
-    "Chaps",
-    "Shirt",
-    "Pants",
-    "Suspenders",
-    "Other"
-  ],
-  "harness_details": ["Deluxe Harness", "Standard Harness", "Suspender Harness"],
-  "notes_section": ["Dogtag/Pigtag", "Chaps", "Shirt", "Pants", "Suspenders", "Other"],
-  "harness_options": {
-    "leather_colors": ["Black", "White", "Red", "Blue", "Green", "Yellow", "Orange", "Purple"],
-    "plates": {
-      "left_front": [
-        "Bear Paw",
-        "Puppy Paw",
-        "Fist Image",
-        "Pig Image",
-        "Boot Image",
-        "Biohazard Symbol",
-        "Cigar Man"
-      ],
-      "right_front": [
-        "Bear Paw",
-        "Puppy Paw",
-        "Fist Image",
-        "Pig Image",
-        "Boot Image",
-        "Biohazard Symbol",
-        "Cigar Man"
-      ],
-      "back": ["Bear Paw", "Puppy Paw", "Fist Image", "Pig Image", "Wesco Boot", "Watersports", "Happy Puppy"]
-    },
-    "long_sliders": ["None", "Brass", "Steel"]
-  }
-}
-{%- endcapture -%}
+{%- assign upper_torso = 'Chest|Shoulders|Torso' | split: '|' -%}
+{%- assign stomach_array = 'Stomach' | split: '|' -%}
+{%- assign bicep_array = 'Bicep' | split: '|' -%}
+{%- assign neck_array = 'Neck' | split: '|' -%}
+{%- assign waist_array = 'Waist' | split: '|' -%}
+{%- assign lower_leg_chain = 'Upper Thigh|Lower Thigh|Knee|Calf|Ankle' | split: '|' -%}
+{%- assign butt_array = 'Butt|Butt Rise' | split: '|' -%}
+{%- assign inseam_crotch_array = 'Inseam|Crotch' | split: '|' -%}
+{%- assign hips_array = 'Hips' | split: '|' -%}
 
-<script type="application/json" id="measurement-config-raw">
-  {{ measurement_config_json | strip }}
-</script>
+{%- assign measurement_names = neck_array
+  | concat: upper_torso
+  | concat: stomach_array
+  | concat: waist_array
+  | concat: butt_array
+  | concat: lower_leg_chain
+  | concat: inseam_crotch_array
+  | concat: bicep_array
+  | concat: hips_array
+  | uniq
+-%}
+{%- assign categories_order = 'Deluxe Harness|Standard Harness|Suspender Harness|Dogtag/Pigtag|Chaps|Shirt|Pants|Suspenders|Other' | split: '|' -%}
 
-{%- assign measurement_config = measurement_config_json | strip | json -%}
-{%- assign measurement_names = measurement_config.measurements -%}
-{%- assign categories_order = measurement_config.category_order -%}
-{%- assign leather_colors = measurement_config.harness_options.leather_colors -%}
-{%- assign left_front_plates = measurement_config.harness_options.plates.left_front -%}
-{%- assign right_front_plates = measurement_config.harness_options.plates.right_front -%}
-{%- assign back_plates = measurement_config.harness_options.plates.back -%}
-{%- assign long_sliders = measurement_config.harness_options.long_sliders -%}
+{%- assign harness_categories = 'Deluxe Harness|Standard Harness|Suspender Harness' | split: '|' -%}
+{%- assign notes_categories = 'Dogtag/Pigtag|Chaps|Shirt|Pants|Suspenders|Other' | split: '|' -%}
+
+{%- assign harness_required = neck_array | concat: upper_torso | concat: waist_array -%}
+{%- assign suspenders_required = 'Chest|Shoulders|Waist' | split: '|' -%}
+{%- assign shirt_required = upper_torso | concat: stomach_array | concat: bicep_array -%}
+{%- assign chaps_required = waist_array | concat: lower_leg_chain -%}
+{%- assign pants_required = waist_array | concat: butt_array | concat: lower_leg_chain | concat: inseam_crotch_array -%}
+
+{%- assign empty_measurement_list = measurement_names | slice: 0, 0 -%}
+{%- assign dogtag_optional = neck_array -%}
+{%- assign hips_optional = hips_array -%}
+{%- assign other_optional = measurement_names -%}
+
+{%- assign leather_colors = 'Black|White|Red|Blue|Green|Yellow|Orange|Purple' | split: '|' -%}
+{%- assign front_plate_options = 'Bear Paw|Puppy Paw|Fist Image|Pig Image|Boot Image|Biohazard Symbol|Cigar Man' | split: '|' -%}
+{%- assign back_plate_extra = 'Wesco Boot|Watersports|Happy Puppy' | split: '|' -%}
+{%- assign back_plate_options = front_plate_options | concat: back_plate_extra -%}
+{%- assign left_front_plates = front_plate_options -%}
+{%- assign right_front_plates = front_plate_options -%}
+{%- assign back_plates = back_plate_options -%}
+{%- assign long_sliders = 'None|Brass|Steel' | split: '|' -%}
 
 {%- liquid
   comment
@@ -347,11 +250,40 @@
 {%- comment -%} Category Selection Buttons {%- endcomment -%}
 <div class="options-group" id="optionButtons">
   {%- for category in categories_order -%}
+    {%- assign required_list = empty_measurement_list -%}
+    {%- assign optional_list = empty_measurement_list -%}
+    {%- if category == 'Deluxe Harness' or category == 'Standard Harness' -%}
+      {%- assign required_list = harness_required -%}
+    {%- elsif category == 'Suspender Harness' -%}
+      {%- assign required_list = harness_required -%}
+    {%- elsif category == 'Dogtag/Pigtag' -%}
+      {%- assign optional_list = dogtag_optional -%}
+    {%- elsif category == 'Chaps' -%}
+      {%- assign required_list = chaps_required -%}
+      {%- assign optional_list = hips_optional -%}
+    {%- elsif category == 'Shirt' -%}
+      {%- assign required_list = shirt_required -%}
+    {%- elsif category == 'Pants' -%}
+      {%- assign required_list = pants_required -%}
+      {%- assign optional_list = hips_optional -%}
+    {%- elsif category == 'Suspenders' -%}
+      {%- assign required_list = suspenders_required -%}
+    {%- elsif category == 'Other' -%}
+      {%- assign optional_list = other_optional -%}
+    {%- endif -%}
+
+    {%- assign required_string = required_list | join: '|' -%}
+    {%- assign optional_string = optional_list | join: '|' -%}
+
     <button
       type="button"
       class="option-button"
       data-index="{{ forloop.index0 }}"
       data-label="{{ category }}"
+      data-required="{{ required_string }}"
+      data-optional="{{ optional_string }}"
+      data-show-harness="{% if harness_categories contains category %}true{% else %}false{% endif %}"
+      data-show-notes="{% if notes_categories contains category %}true{% else %}false{% endif %}"
     >
       {{ category }}
     </button>
