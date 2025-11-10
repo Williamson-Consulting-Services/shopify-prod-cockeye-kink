@@ -138,7 +138,7 @@
   {{ measurement_config_json | strip }}
 </script>
 
-{%- assign measurement_config = measurement_config_json | strip | parse_json -%}
+{%- assign measurement_config = measurement_config_json | strip | json -%}
 {%- assign measurement_names = measurement_config.measurements -%}
 {%- assign categories_order = measurement_config.category_order -%}
 {%- assign leather_colors = measurement_config.harness_options.leather_colors -%}
@@ -397,7 +397,7 @@
     >
       <label for="{{ handle }}-in">{{ meas_name }}</label>
       <input
-        type="text"
+        type="number"
         inputmode="decimal"
         autocomplete="off"
         id="{{ handle }}-in"
@@ -408,7 +408,7 @@
         placeholder="0.000"
       >
       <input
-        type="text"
+        type="number"
         inputmode="decimal"
         autocomplete="off"
         id="{{ handle }}-cm"
