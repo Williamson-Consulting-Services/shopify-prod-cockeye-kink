@@ -1,0 +1,132 @@
+<div
+  id="custom-order-banner"
+  class="custom-order-banner"
+  role="status"
+  aria-live="polite"
+  hidden
+>
+  <div class="custom-order-banner__inner">
+    <span class="custom-order-banner__text" data-banner-text>
+      Order has not been submitted yet
+    </span>
+  </div>
+</div>
+
+<style>
+  .custom-order-banner {
+    position: sticky;
+    top: 0;
+    z-index: 120;
+    width: 100%;
+    background-color: #111;
+    color: #fff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  }
+
+  .custom-order-banner[hidden] {
+    display: none !important;
+  }
+
+  .custom-order-banner__inner {
+    max-width: var(--page-width, 1200px);
+    margin: 0 auto;
+    padding: 0.75rem 1.5rem;
+    text-align: center;
+    font-size: 1.4rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .custom-order-banner {
+      transition: transform 200ms ease, opacity 200ms ease;
+    }
+
+    .custom-order-banner[hidden] {
+      opacity: 0;
+      transform: translateY(-100%);
+    }
+  }
+</style>
+
+<script>
+  window.CustomOrderBanner = (function () {
+    const banner = document.getElementById('custom-order-banner');
+    if (!banner) {
+      return {
+        setForceShow() {},
+        refreshCart() {},
+        setBannerText() {},
+      };
+    }
+
+    const textElement = banner.querySelector('[data-banner-text]');
+    const defaultText = textElement ? textElement.textContent.trim() : '';
+    const suppressed =
+      window.location.pathname.includes('/checkouts/') ||
+      window.location.pathname.includes('/checkout') ||
+      window.location.pathname.includes('/thank-you');
+
+    const state = {
+      forceShow: false,
+      cartHasCustom: false,
+    };
+
+    function render() {
+      if (suppressed) {
+        banner.hidden = true;
+        return;
+      }
+      const shouldShow = state.forceShow || state.cartHasCustom;
+      banner.hidden = !shouldShow;
+    }
+
+    function setForceShow(value) {
+      state.forceShow = Boolean(value);
+      render();
+    }
+
+    function setBannerText(value) {
+      if (textElement) {
+        textElement.textContent = value && value.trim() !== '' ? value : defaultText;
+      }
+    }
+
+    async function refreshCart() {
+      if (suppressed) return;
+      try {
+        const response = await fetch('/cart.js', { credentials: 'same-origin' });
+        if (!response.ok) throw new Error(response.statusText);
+        const cart = await response.json();
+        const hasCustom = (cart.items || []).some((item) => {
+          if (!item.properties) return false;
+          const customFlag = item.properties['_custom'] || item.properties['Order Type'];
+          return typeof customFlag === 'string' && customFlag.toLowerCase() === 'custom';
+        });
+        state.cartHasCustom = hasCustom;
+        render();
+      } catch (error) {
+        console.warn('CustomOrderBanner cart check failed:', error);
+      }
+    }
+
+    function init() {
+      render();
+      refreshCart();
+      window.addEventListener('cart:updated', refreshCart);
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+
+    return {
+      setForceShow,
+      refreshCart,
+      setBannerText,
+    };
+  })();
+</script>
+

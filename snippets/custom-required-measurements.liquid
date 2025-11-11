@@ -59,41 +59,9 @@
   assign order_tag_name = '_custom'
   assign order_tag_value = 'custom'
   assign banner_text = 'Order has not been submitted yet'
-
-  comment
-    Show banner as long as order is in cart and not submitted:
-    - On product page: always show (order hasn't been added yet)
-    - On cart page: show if cart has items (order is in cart)
-    - On checkout/thank you pages: hide (order has been submitted)
-  endcomment
-  assign banner_enabled = true
-  if template.name == 'cart'
-    if cart.item_count > 0
-      assign banner_enabled = true
-    else
-      assign banner_enabled = false
-    endif
-  endif
-  if template.name == 'checkout'
-    assign banner_enabled = false
-  endif
-  if request.page_type == 'checkout'
-    assign banner_enabled = false
-  endif
 -%}
 
 <style>
-  .order-status-banner {
-    background-color: #fff3cd;
-    border: 2px solid #ffc107;
-    border-radius: 8px;
-    padding: 12px 16px;
-    margin-bottom: 20px;
-    font-weight: bold;
-    color: #856404;
-    text-align: center;
-  }
-
   .unit-toggle-container {
     display: flex;
     align-items: center;
@@ -239,13 +207,6 @@
     background-color: #aaa;
   }
 </style>
-
-{%- comment -%} Order Status Banner - Displayed as long as order is in cart and not submitted {%- endcomment -%}
-{%- if banner_enabled -%}
-  <div class="order-status-banner" id="order-status-banner">
-    {{ banner_text }}
-  </div>
-{%- endif -%}
 
 {%- comment -%} Category Selection Buttons {%- endcomment -%}
 <div class="options-group" id="optionButtons">
@@ -503,6 +464,14 @@
         notes_section: notesSectionCategories,
       },
     };
+
+    if (document && document.body) {
+      document.body.dataset.customOrderPage = 'true';
+    }
+    if (window.CustomOrderBanner) {
+      window.CustomOrderBanner.setBannerText('{{ banner_text | escape }}');
+      window.CustomOrderBanner.setForceShow(true);
+    }
 
     const INCH_TO_CM = 2.54;
     const CM_TO_INCH = 1 / 2.54;
@@ -823,36 +792,6 @@
       updateAddToCartButton();
     }
 
-    function updateBannerVisibility() {
-      const banner = document.getElementById('order-status-banner');
-      if (!banner) return;
-
-      if (
-        window.location.pathname.includes('/checkouts/') ||
-        window.location.pathname.includes('/thank-you') ||
-        window.location.pathname.includes('/checkout')
-      ) {
-        banner.style.display = 'none';
-        return;
-      }
-
-      if (window.location.pathname.includes('/products/')) {
-        banner.style.display = 'block';
-        return;
-      }
-
-      if (window.location.pathname.includes('/cart')) {
-        fetch('/cart.js')
-          .then((response) => response.json())
-          .then((cart) => {
-            banner.style.display = cart.item_count > 0 ? 'block' : 'none';
-          })
-          .catch(() => {
-            banner.style.display = 'block';
-          });
-      }
-    }
-
     optionButtons.forEach((button) => {
       button.addEventListener('click', function () {
         optionButtons.forEach((btn) => btn.classList.remove('selected'));
@@ -976,16 +915,20 @@
     function delayedInitialize() {
       initialize();
       updateAddToCartButton();
-      updateBannerVisibility();
+      if (window.CustomOrderBanner) {
+        window.CustomOrderBanner.setBannerText('{{ banner_text | escape }}');
+        window.CustomOrderBanner.setForceShow(true);
+      }
     }
 
     window.addEventListener('pageshow', function () {
       initialize();
       updateAddToCartButton();
-      updateBannerVisibility();
+      if (window.CustomOrderBanner) {
+        window.CustomOrderBanner.setBannerText('{{ banner_text | escape }}');
+        window.CustomOrderBanner.setForceShow(true);
+      }
     });
-
-    document.addEventListener('cart:updated', updateBannerVisibility);
 
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', delayedInitialize);
