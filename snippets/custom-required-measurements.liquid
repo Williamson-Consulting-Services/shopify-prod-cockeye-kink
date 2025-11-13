@@ -208,8 +208,7 @@
     <input
       type="radio"
       id="{{ option_id }}"
-      class="category-option-input"
-      name="custom_category_selection"
+      name="properties[Selected Option]"
       value="{{ category_name }}"
       data-index="{{ forloop.index0 }}"
       data-label="{{ category_name }}"
@@ -219,7 +218,7 @@
       data-show-notes="true"
       {% if forloop.first %}checked{% endif %}
     >
-    <label class="category-option-label button button--secondary" for="{{ option_id }}">
+    <label class="category-option-label" for="{{ option_id }}">
       {{ category_name }}
     </label>
   {%- endfor -%}
@@ -234,8 +233,6 @@
   form="product-form-{{ section.id }}"
 >
 
-<input type="hidden" id="selectedOption" name="properties[Selected Option]" form="product-form-{{ section.id }}">
-
 {%- comment -%} Custom Order Tagging {%- endcomment -%}
 <input
   type="hidden"
@@ -245,13 +242,17 @@
 >
 
 {%- comment -%} Unit Toggle {%- endcomment -%}
-<div class="unit-toggle-container">
-  <span class="unit-toggle-label">Unit:</span>
-  <div class="unit-toggle-buttons">
-    <button type="button" class="unit-toggle-button button button--secondary active" data-unit="in">Inches</button>
-    <button type="button" class="unit-toggle-button button button--secondary" data-unit="cm">Centimeters</button>
-  </div>
-</div>
+<fieldset class="product-form__input product-form__input--pill unit-toggle" id="unitToggle">
+  <legend class="form__label">Unit</legend>
+  <label>
+    <input type="radio" name="unit_toggle" value="in" data-unit="in" checked>
+    Inches
+  </label>
+  <label>
+    <input type="radio" name="unit_toggle" value="cm" data-unit="cm">
+    Centimeters
+  </label>
+</fieldset>
 
 {%- comment -%} Measurement Fields {%- endcomment -%}
 <p class="measurement-hint">Measurements marked with * are optional for the selected category.</p>
@@ -380,16 +381,16 @@
 
 {%- comment -%} Notes Section {%- endcomment -%}
 <div class="conditional-section" id="notes-section">
-  <label>Notes</label>
+  <label>Item Notes *</label>
   <textarea
-    name="properties[Notes]"
-    placeholder="Enter your notes here"
+    name="properties[Item Notes]"
+    placeholder="Enter your item notes here"
     form="product-form-{{ section.id }}"
   ></textarea>
-  <label>Event (Optional)</label>
+  <label>Event Notes *</label>
   <textarea
-    name="properties[Event (Optional)]"
-    placeholder="Event name or details"
+    name="properties[Event Notes]"
+    placeholder="Event name or notes here"
     form="product-form-{{ section.id }}"
   ></textarea>
 </div>
@@ -450,10 +451,9 @@
     let hasInteractedWithForm = false;
 
     const measurementInputs = document.querySelectorAll('.measurement-input');
-    const selectedInput = document.getElementById('selectedOption');
     const harnessSection = document.getElementById('harness-details');
     const notesSection = document.getElementById('notes-section');
-    const unitToggleButtons = document.querySelectorAll('.unit-toggle-button');
+    const unitToggleInputs = document.querySelectorAll('#unitToggle input[type="radio"]');
 
     const productFormSelectors = [
       '#product-form-{{ section.id }}',
@@ -757,7 +757,6 @@
         unitOfMeasureInput.value = 'Measured in Inches';
       }
 
-      if (selectedInput) selectedInput.value = '';
       selectedCategory = null;
 
       if (harnessSection) harnessSection.classList.remove('active');
@@ -773,8 +772,8 @@
       });
 
       currentUnit = 'in';
-      unitToggleButtons.forEach((btn) => {
-        btn.classList.toggle('active', btn.dataset.unit === 'in');
+      unitToggleInputs.forEach((input) => {
+        input.checked = input.dataset.unit === 'in';
       });
       updateMeasurementVisibility();
 
@@ -784,7 +783,6 @@
         const firstInput = categoryInputs[0];
         firstInput.checked = true;
         selectedCategory = firstInput.dataset.label;
-        if (selectedInput) selectedInput.value = selectedCategory;
         updateSectionVisibility(selectedCategory);
         updateMeasurementsForCategory(selectedCategory);
       }
@@ -802,7 +800,6 @@
         if (!this.checked) return;
         flagFormInteraction();
         selectedCategory = this.dataset.label;
-        if (selectedInput) selectedInput.value = selectedCategory;
 
         updateSectionVisibility(selectedCategory);
         updateMeasurementsForCategory(selectedCategory);
@@ -811,13 +808,11 @@
       });
     });
 
-    unitToggleButtons.forEach((button) => {
-      button.addEventListener('click', function () {
+    unitToggleInputs.forEach((input) => {
+      input.addEventListener('change', function () {
+        if (!this.checked) return;
         flagFormInteraction();
         currentUnit = this.dataset.unit;
-        unitToggleButtons.forEach((btn) => {
-          btn.classList.toggle('active', btn.dataset.unit === currentUnit);
-        });
 
         if (unitOfMeasureInput) {
           const unitValue = currentUnit === 'in' ? 'Measured in Inches' : 'Measured in Centimeters';
