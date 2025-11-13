@@ -4,15 +4,15 @@
   Group strings are composed once and reused across categories to keep the data DRY.
 {% endcomment %}
 
-{%- assign upper_torso = 'Chest|Shoulders|Torso' | split: '|' -%}
-{%- assign stomach_array = 'Stomach' | split: '|' -%}
-{%- assign bicep_array = 'Bicep' | split: '|' -%}
-{%- assign neck_array = 'Neck' | split: '|' -%}
-{%- assign waist_array = 'Waist' | split: '|' -%}
-{%- assign lower_leg_chain = 'Upper Thigh|Lower Thigh|Knee|Calf|Ankle' | split: '|' -%}
-{%- assign butt_array = 'Butt|Butt Rise' | split: '|' -%}
-{%- assign inseam_crotch_array = 'Inseam|Crotch' | split: '|' -%}
-{%- assign hips_array = 'Hips' | split: '|' -%}
+{%- assign upper_torso = settings.custom_measurements_upper_torso | default: 'Chest|Shoulders|Torso' | split: '|' -%}
+{%- assign stomach_array = settings.custom_measurements_stomach | default: 'Stomach' | split: '|' -%}
+{%- assign bicep_array = settings.custom_measurements_bicep | default: 'Bicep' | split: '|' -%}
+{%- assign neck_array = settings.custom_measurements_neck | default: 'Neck' | split: '|' -%}
+{%- assign waist_array = settings.custom_measurements_waist | default: 'Waist' | split: '|' -%}
+{%- assign lower_leg_chain = settings.custom_measurements_lower_leg_chain | default: 'Upper Thigh|Lower Thigh|Knee|Calf|Ankle' | split: '|' -%}
+{%- assign butt_array = settings.custom_measurements_butt | default: 'Butt|Butt Rise' | split: '|' -%}
+{%- assign inseam_crotch_array = settings.custom_measurements_inseam_crotch | default: 'Inseam|Crotch' | split: '|' -%}
+{%- assign hips_array = settings.custom_measurements_hips | default: 'Hips' | split: '|' -%}
 
 {%- assign measurement_names = neck_array
   | concat: upper_torso
@@ -25,10 +25,19 @@
   | concat: hips_array
   | uniq
 -%}
-{%- assign categories_order = 'Deluxe Harness|Standard Harness|Suspender Harness|Dogtag/Pigtag|Chaps|Shirt|Pants|Suspenders|Other' | split: '|' -%}
+{%- assign categories_order = settings.custom_measurements_categories_order
+  | default: 'Deluxe Harness|Standard Harness|Suspender Harness|Dogtag/Pigtag|Chaps|Shirt|Pants|Suspenders|Other'
+  | split: '|'
+-%}
 
-{%- assign harness_categories = 'Deluxe Harness|Standard Harness|Suspender Harness' | split: '|' -%}
-{%- assign notes_categories = 'Dogtag/Pigtag|Chaps|Shirt|Pants|Suspenders|Other' | split: '|' -%}
+{%- assign harness_categories = settings.custom_measurements_harness_categories
+  | default: 'Deluxe Harness|Standard Harness|Suspender Harness'
+  | split: '|'
+-%}
+{%- assign notes_categories = settings.custom_measurements_notes_categories
+  | default: 'Dogtag/Pigtag|Chaps|Shirt|Pants|Suspenders|Other'
+  | split: '|'
+-%}
 
 {%- assign harness_required = neck_array | concat: upper_torso | concat: waist_array -%}
 {%- assign suspenders_required = 'Chest|Shoulders|Waist' | split: '|' -%}
@@ -41,24 +50,27 @@
 {%- assign hips_optional = hips_array -%}
 {%- assign other_optional = measurement_names -%}
 
-{%- assign leather_colors = 'Black|White|Red|Blue|Green|Yellow|Orange|Purple' | split: '|' -%}
-{%- assign front_plate_options = 'Bear Paw|Puppy Paw|Fist Image|Pig Image|Boot Image|Biohazard Symbol|Cigar Man' | split: '|' -%}
-{%- assign back_plate_extra = 'Wesco Boot|Watersports|Happy Puppy' | split: '|' -%}
+{%- assign leather_colors = settings.custom_measurements_leather_colors
+  | default: 'Black|White|Red|Blue|Green|Yellow|Orange|Purple'
+  | split: '|'
+-%}
+{%- assign front_plate_options = settings.custom_measurements_front_plate_options
+  | default: 'Bear Paw|Puppy Paw|Fist Image|Pig Image|Boot Image|Biohazard Symbol|Cigar Man'
+  | split: '|'
+-%}
+{%- assign back_plate_extra = settings.custom_measurements_back_plate_extra
+  | default: 'Wesco Boot|Watersports|Happy Puppy'
+  | split: '|'
+-%}
 {%- assign back_plate_options = front_plate_options | concat: back_plate_extra -%}
 {%- assign left_front_plates = front_plate_options -%}
 {%- assign right_front_plates = front_plate_options -%}
 {%- assign back_plates = back_plate_options -%}
-{%- assign long_sliders = 'None|Brass|Steel' | split: '|' -%}
+{%- assign long_sliders = settings.custom_measurements_long_sliders | default: 'None|Brass|Steel' | split: '|' -%}
 
 {%- liquid
-  comment
-    Configuration source of truth lives in the JSON block above.
-    Liquid assigns only order metadata and banner defaults here.
-  endcomment
-
   assign order_tag_name = '_custom'
   assign order_tag_value = 'custom'
-  assign banner_text = 'Order has not been submitted yet'
 -%}
 
 <style>
@@ -465,14 +477,6 @@
       },
     };
 
-    if (document && document.body) {
-      document.body.dataset.customOrderPage = 'true';
-    }
-    if (window.CustomOrderBanner) {
-      window.CustomOrderBanner.setBannerText('{{ banner_text | escape }}');
-      window.CustomOrderBanner.setForceShow(true);
-    }
-
     const INCH_TO_CM = 2.54;
     const CM_TO_INCH = 1 / 2.54;
     const PRECISION = 3;
@@ -481,6 +485,7 @@
     let selectedCategory = null;
     const measurementValues = new Map();
     let isSyncingValues = false;
+    let hasInteractedWithForm = false;
 
     const measurementInputs = document.querySelectorAll('.measurement-input');
     const selectedInput = document.getElementById('selectedOption');
@@ -538,6 +543,24 @@
       }
 
       return null;
+    }
+
+    function updateBannerEditingState(isEditing) {
+      const eventName = isEditing ? 'custom-order:editing' : 'custom-order:editing-stop';
+      try {
+        window.dispatchEvent(new CustomEvent(eventName));
+      } catch (error) {
+        console.warn('Unable to dispatch banner editing event:', error);
+      }
+      if (window.CustomOrderBanner && typeof window.CustomOrderBanner.notifyEditing === 'function') {
+        window.CustomOrderBanner.notifyEditing(isEditing);
+      }
+    }
+
+    function flagFormInteraction() {
+      if (hasInteractedWithForm) return;
+      hasInteractedWithForm = true;
+      updateBannerEditingState(true);
     }
 
     function formatValue(value) {
@@ -747,6 +770,9 @@
     }
 
     function initialize() {
+      hasInteractedWithForm = false;
+      updateBannerEditingState(false);
+
       if (unitOfMeasureInput) {
         unitOfMeasureInput.value = 'Measured in Inches';
       }
@@ -794,6 +820,7 @@
 
     optionButtons.forEach((button) => {
       button.addEventListener('click', function () {
+        flagFormInteraction();
         optionButtons.forEach((btn) => btn.classList.remove('selected'));
         this.classList.add('selected');
         selectedCategory = this.dataset.label;
@@ -808,6 +835,7 @@
 
     unitToggleButtons.forEach((button) => {
       button.addEventListener('click', function () {
+        flagFormInteraction();
         currentUnit = this.dataset.unit;
         unitToggleButtons.forEach((btn) => {
           btn.classList.toggle('active', btn.dataset.unit === currentUnit);
@@ -825,6 +853,7 @@
 
     measurementInputs.forEach((input) => {
       input.addEventListener('input', function () {
+        flagFormInteraction();
         updateAddToCartButton();
       });
 
@@ -854,10 +883,14 @@
 
     harnessSelects.forEach((select) => {
       select.addEventListener('change', updateAddToCartButton);
+      select.addEventListener('change', flagFormInteraction);
     });
 
     harnessCustomTexts.forEach((input) => {
-      input.addEventListener('input', updateAddToCartButton);
+      input.addEventListener('input', function () {
+        flagFormInteraction();
+        updateAddToCartButton();
+      });
     });
 
     if (productForm) {
@@ -915,19 +948,11 @@
     function delayedInitialize() {
       initialize();
       updateAddToCartButton();
-      if (window.CustomOrderBanner) {
-        window.CustomOrderBanner.setBannerText('{{ banner_text | escape }}');
-        window.CustomOrderBanner.setForceShow(true);
-      }
     }
 
     window.addEventListener('pageshow', function () {
       initialize();
       updateAddToCartButton();
-      if (window.CustomOrderBanner) {
-        window.CustomOrderBanner.setBannerText('{{ banner_text | escape }}');
-        window.CustomOrderBanner.setForceShow(true);
-      }
     });
 
     if (document.readyState === 'loading') {

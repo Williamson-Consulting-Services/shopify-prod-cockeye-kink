@@ -352,6 +352,94 @@
         }
       }
     },
+    "custom_order_banner": {
+      "name": "Custom order banner",
+      "settings": {
+        "header_copy": {
+          "content": "Banner messaging"
+        },
+        "editing_text": {
+          "label": "Editing state message"
+        },
+        "cart_text": {
+          "label": "In-cart message"
+        },
+        "header_colors": {
+          "content": "Banner colors"
+        },
+        "background_color": {
+          "label": "Background color"
+        },
+        "text_color": {
+          "label": "Text color"
+        },
+        "shadow_color": {
+          "label": "Shadow color"
+        },
+        "shadow_opacity": {
+          "label": "Shadow opacity"
+        }
+      }
+    },
+    "custom_order_measurements_settings": {
+      "name": "Custom measurements",
+      "settings": {
+        "header_measurements": {
+          "content": "Measurement groups"
+        },
+        "upper_torso": {
+          "label": "Upper torso measurements"
+        },
+        "stomach": {
+          "label": "Stomach measurements"
+        },
+        "bicep": {
+          "label": "Bicep measurements"
+        },
+        "neck": {
+          "label": "Neck measurements"
+        },
+        "waist": {
+          "label": "Waist measurements"
+        },
+        "lower_leg_chain": {
+          "label": "Lower leg measurements"
+        },
+        "butt": {
+          "label": "Butt measurements"
+        },
+        "inseam_crotch": {
+          "label": "Inseam and crotch measurements"
+        },
+        "hips": {
+          "label": "Hip measurements"
+        },
+        "categories_order": {
+          "label": "Category order"
+        },
+        "harness_categories": {
+          "label": "Harness categories"
+        },
+        "notes_categories": {
+          "label": "Notes categories"
+        },
+        "header_options": {
+          "content": "Customization options"
+        },
+        "leather_colors": {
+          "label": "Leather colors"
+        },
+        "front_plate_options": {
+          "label": "Front plate options"
+        },
+        "back_plate_extra": {
+          "label": "Back plate extra options"
+        },
+        "long_sliders": {
+          "label": "Long slider options"
+        }
+      }
+    },
     "layout": {
       "name": "Layout",
       "settings": {

@@ -1,13 +1,28 @@
+{%- liquid
+  assign banner_editing_translation = 'custom_order.banner.editing' | t
+  assign banner_cart_translation = 'custom_order.banner.cart' | t
+  assign banner_editing_text = settings.custom_order_banner_editing_text | default: banner_editing_translation
+  assign banner_cart_text = settings.custom_order_banner_cart_text | default: banner_cart_translation
+
+  assign banner_background_color = settings.custom_order_banner_background_color | default: '#ffec99'
+  assign banner_text_color = settings.custom_order_banner_text_color | default: '#3f2f00'
+  assign banner_shadow_color = settings.custom_order_banner_shadow_color | default: '#000000'
+  assign banner_shadow_opacity = settings.custom_order_banner_shadow_opacity | default: 20
+  assign banner_shadow_alpha = banner_shadow_opacity | divided_by: 100.0
+  assign banner_shadow_rgba = banner_shadow_color | color_modify: 'alpha', banner_shadow_alpha
+-%}
+
 <div
   id="custom-order-banner"
   class="custom-order-banner"
   role="status"
   aria-live="polite"
   hidden
+  style="--custom-order-banner-bg: {{ banner_background_color }}; --custom-order-banner-color: {{ banner_text_color }}; --custom-order-banner-shadow: {{ banner_shadow_rgba }};"
 >
   <div class="custom-order-banner__inner">
     <span class="custom-order-banner__text" data-banner-text>
-      Custom order is in cart
+      {{ banner_cart_text | escape }}
     </span>
   </div>
 </div>
@@ -18,9 +33,9 @@
     top: 0;
     z-index: 120;
     width: 100%;
-    background-color: #ffec99;
-    color: #3f2f00;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    background-color: var(--custom-order-banner-bg);
+    color: var(--custom-order-banner-color);
+    box-shadow: 0 2px 6px var(--custom-order-banner-shadow);
   }
 
   .custom-order-banner[hidden] {
@@ -61,7 +76,8 @@
     }
 
     const textElement = banner.querySelector('[data-banner-text]');
-    const defaultText = textElement ? textElement.textContent.trim() : '';
+    const editingTextDefault = {{ banner_editing_text | json }};
+    const cartTextDefault = {{ banner_cart_text | json }};
     const suppressed =
       window.location.pathname.includes('/checkouts/') ||
       window.location.pathname.includes('/checkout') ||
@@ -70,6 +86,9 @@
     const state = {
       forceShow: false,
       cartHasCustom: false,
+      editing: false,
+      cartText: cartTextDefault,
+      editingText: editingTextDefault,
     };
 
     function render() {
@@ -77,7 +96,21 @@
         banner.hidden = true;
         return;
       }
-      const shouldShow = state.forceShow || state.cartHasCustom;
+      let shouldShow = false;
+      let nextText = state.cartText;
+
+      if (state.cartHasCustom) {
+        shouldShow = true;
+        nextText = state.cartText || cartTextDefault;
+      } else if (state.forceShow || state.editing) {
+        shouldShow = true;
+        nextText = state.editingText || editingTextDefault;
+      }
+
+      if (textElement && typeof nextText === 'string' && textElement.textContent !== nextText) {
+        textElement.textContent = nextText;
+      }
+
       banner.hidden = !shouldShow;
     }
 
@@ -86,10 +119,14 @@
       render();
     }
 
-    function setBannerText(value) {
-      if (textElement) {
-        textElement.textContent = value && value.trim() !== '' ? value : defaultText;
+    function setBannerText(value, mode = 'cart') {
+      const sanitized = value && value.trim() !== '' ? value.trim() : null;
+      if (mode === 'editing') {
+        state.editingText = sanitized || editingTextDefault;
+      } else {
+        state.cartText = sanitized || cartTextDefault;
       }
+      render();
     }
 
     async function refreshCart() {
@@ -110,10 +147,20 @@
       }
     }
 
+    function notifyEditing(isEditing = true) {
+      const nextFlag = Boolean(isEditing);
+      if (state.editing !== nextFlag) {
+        state.editing = nextFlag;
+        render();
+      }
+    }
+
     function init() {
       render();
       refreshCart();
       window.addEventListener('cart:updated', refreshCart);
+      window.addEventListener('custom-order:editing', () => notifyEditing(true));
+      window.addEventListener('custom-order:editing-stop', () => notifyEditing(false));
     }
 
     if (document.readyState === 'loading') {
@@ -126,6 +173,7 @@
       setForceShow,
       refreshCart,
       setBannerText,
+      notifyEditing,
     };
   })();
 </script>

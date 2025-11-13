@@ -1455,5 +1455,167 @@
         "info": "t:settings_schema.cart.settings.cart_drawer.collection.info"
       }
     ]
+  },
+  {
+    "name": "t:settings_schema.custom_order_banner.name",
+    "settings": [
+      {
+        "type": "header",
+        "content": "t:settings_schema.custom_order_banner.settings.header_copy.content"
+      },
+      {
+        "type": "text",
+        "id": "custom_order_banner_editing_text",
+        "label": "t:settings_schema.custom_order_banner.settings.editing_text.label",
+        "default": "Custom order not in cart yet — make sure you add it before leaving this page."
+      },
+      {
+        "type": "text",
+        "id": "custom_order_banner_cart_text",
+        "label": "t:settings_schema.custom_order_banner.settings.cart_text.label",
+        "default": "Custom order is in cart"
+      },
+      {
+        "type": "header",
+        "content": "t:settings_schema.custom_order_banner.settings.header_colors.content"
+      },
+      {
+        "type": "color",
+        "id": "custom_order_banner_background_color",
+        "label": "t:settings_schema.custom_order_banner.settings.background_color.label",
+        "default": "#ffec99"
+      },
+      {
+        "type": "color",
+        "id": "custom_order_banner_text_color",
+        "label": "t:settings_schema.custom_order_banner.settings.text_color.label",
+        "default": "#3f2f00"
+      },
+      {
+        "type": "color",
+        "id": "custom_order_banner_shadow_color",
+        "label": "t:settings_schema.custom_order_banner.settings.shadow_color.label",
+        "default": "#000000"
+      },
+      {
+        "type": "range",
+        "id": "custom_order_banner_shadow_opacity",
+        "min": 0,
+        "max": 100,
+        "step": 5,
+        "unit": "%",
+        "label": "t:settings_schema.custom_order_banner.settings.shadow_opacity.label",
+        "default": 20
+      }
+    ]
+  },
+  {
+    "name": "t:settings_schema.custom_order_measurements_settings.name",
+    "settings": [
+      {
+        "type": "header",
+        "content": "t:settings_schema.custom_order_measurements_settings.settings.header_measurements.content"
+      },
+      {
+        "type": "text",
+        "id": "custom_measurements_upper_torso",
+        "label": "t:settings_schema.custom_order_measurements_settings.settings.upper_torso.label",
+        "default": "Chest|Shoulders|Torso"
+      },
+      {
+        "type": "text",
+        "id": "custom_measurements_stomach",
+        "label": "t:settings_schema.custom_order_measurements_settings.settings.stomach.label",
+        "default": "Stomach"
+      },
+      {
+        "type": "text",
+        "id": "custom_measurements_bicep",
+        "label": "t:settings_schema.custom_order_measurements_settings.settings.bicep.label",
+        "default": "Bicep"
+      },
+      {
+        "type": "text",
+        "id": "custom_measurements_neck",
+        "label": "t:settings_schema.custom_order_measurements_settings.settings.neck.label",
+        "default": "Neck"
+      },
+      {
+        "type": "text",
+        "id": "custom_measurements_waist",
+        "label": "t:settings_schema.custom_order_measurements_settings.settings.waist.label",
+        "default": "Waist"
+      },
+      {
+        "type": "text",
+        "id": "custom_measurements_lower_leg_chain",
+        "label": "t:settings_schema.custom_order_measurements_settings.settings.lower_leg_chain.label",
+        "default": "Upper Thigh|Lower Thigh|Knee|Calf|Ankle"
+      },
+      {
+        "type": "text",
+        "id": "custom_measurements_butt",
+        "label": "t:settings_schema.custom_order_measurements_settings.settings.butt.label",
+        "default": "Butt|Butt Rise"
+      },
+      {
+        "type": "text",
+        "id": "custom_measurements_inseam_crotch",
+        "label": "t:settings_schema.custom_order_measurements_settings.settings.inseam_crotch.label",
+        "default": "Inseam|Crotch"
+      },
+      {
+        "type": "text",
+        "id": "custom_measurements_hips",
+        "label": "t:settings_schema.custom_order_measurements_settings.settings.hips.label",
+        "default": "Hips"
+      },
+      {
+        "type": "text",
+        "id": "custom_measurements_categories_order",
+        "label": "t:settings_schema.custom_order_measurements_settings.settings.categories_order.label",
+        "default": "Deluxe Harness|Standard Harness|Suspender Harness|Dogtag/Pigtag|Chaps|Shirt|Pants|Suspenders|Other"
+      },
+      {
+        "type": "text",
+        "id": "custom_measurements_harness_categories",
+        "label": "t:settings_schema.custom_order_measurements_settings.settings.harness_categories.label",
+        "default": "Deluxe Harness|Standard Harness|Suspender Harness"
+      },
+      {
+        "type": "text",
+        "id": "custom_measurements_notes_categories",
+        "label": "t:settings_schema.custom_order_measurements_settings.settings.notes_categories.label",
+        "default": "Dogtag/Pigtag|Chaps|Shirt|Pants|Suspenders|Other"
+      },
+      {
+        "type": "header",
+        "content": "t:settings_schema.custom_order_measurements_settings.settings.header_options.content"
+      },
+      {
+        "type": "text",
+        "id": "custom_measurements_leather_colors",
+        "label": "t:settings_schema.custom_order_measurements_settings.settings.leather_colors.label",
+        "default": "Black|White|Red|Blue|Green|Yellow|Orange|Purple"
+      },
+      {
+        "type": "text",
+        "id": "custom_measurements_front_plate_options",
+        "label": "t:settings_schema.custom_order_measurements_settings.settings.front_plate_options.label",
+        "default": "Bear Paw|Puppy Paw|Fist Image|Pig Image|Boot Image|Biohazard Symbol|Cigar Man"
+      },
+      {
+        "type": "text",
+        "id": "custom_measurements_back_plate_extra",
+        "label": "t:settings_schema.custom_order_measurements_settings.settings.back_plate_extra.label",
+        "default": "Wesco Boot|Watersports|Happy Puppy"
+      },
+      {
+        "type": "text",
+        "id": "custom_measurements_long_sliders",
+        "label": "t:settings_schema.custom_order_measurements_settings.settings.long_sliders.label",
+        "default": "None|Brass|Steel"
+      }
+    ]
   }
 ]
