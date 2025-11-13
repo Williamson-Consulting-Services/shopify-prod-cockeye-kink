@@ -63,60 +63,47 @@
   .unit-toggle-container {
     display: flex;
     align-items: center;
-    gap: 12px;
-    margin-bottom: 16px;
-    padding: 8px 12px;
-    background-color: #f9f9f9;
-    border-radius: 8px;
+    gap: var(--spacing-3, 0.75rem);
+    margin-bottom: var(--spacing-4, 1.5rem);
+    padding: var(--spacing-2, 0.5rem) var(--spacing-3, 0.75rem);
+    background-color: rgba(var(--color-foreground-rgb, 0, 0, 0), 0.04);
+    border-radius: var(--border-radius-base, 0.5rem);
   }
 
   .unit-toggle-label {
-    font-weight: bold;
-    margin-right: 8px;
+    font-weight: var(--font-heading-weight, 600);
+    margin-right: var(--spacing-2, 0.5rem);
   }
 
   .unit-toggle-buttons {
     display: flex;
-    gap: 8px;
+    gap: var(--spacing-2, 0.5rem);
   }
 
-  .unit-toggle-button {
-    padding: 6px 16px;
-    border: 2px solid #ccc;
-    border-radius: 6px;
-    background-color: white;
-    cursor: pointer;
-    font-weight: bold;
-    transition: all 0.3s ease;
-  }
-
-  .unit-toggle-button.active {
-    background-color: #444;
-    color: #fff;
-    border-color: #444;
+  .unit-toggle-button.button--secondary.active,
+  .option-button.button--secondary.selected {
+    background-color: var(--color-foreground);
+    color: var(--color-background);
+    border-color: var(--color-foreground);
   }
 
   .measurement-input {
-    font-weight: bold;
-    color: black;
+    font-weight: var(--font-body-weight-bold, 600);
+    color: var(--color-foreground);
     width: 6em;
-    padding: 4px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    background: white;
   }
 
   .measurements-group {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 12px;
-    margin-bottom: 16px;
+    gap: var(--spacing-3, 0.75rem);
+    margin-bottom: var(--spacing-4, 1.5rem);
   }
 
   .measurements-group label {
     display: block;
-    margin-bottom: 4px;
-    font-weight: bold;
+    margin-bottom: 0.25rem;
+    font-weight: var(--font-heading-weight, 600);
   }
 
   .measurement-field {
@@ -130,31 +117,16 @@
   .options-group {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
-    margin-bottom: 16px;
-  }
-
-  .option-button {
-    background-color: #eee;
-    border: 2px solid #ccc;
-    border-radius: 8px;
-    padding: 10px 18px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-
-  .option-button.selected {
-    background-color: #444;
-    color: #fff;
+    gap: var(--spacing-3, 0.75rem);
+    margin-bottom: var(--spacing-4, 1.5rem);
   }
 
   .conditional-section {
     display: none;
-    margin-top: 16px;
-    padding: 10px;
-    background-color: #f9f9f9;
-    border-radius: 8px;
+    margin-top: var(--spacing-4, 1.5rem);
+    padding: var(--spacing-3, 0.75rem);
+    background-color: rgba(var(--color-foreground-rgb, 0, 0, 0), 0.04);
+    border-radius: var(--border-radius-base, 0.5rem);
   }
 
   .conditional-section.active {
@@ -163,56 +135,38 @@
 
   .conditional-section label {
     display: block;
-    margin-top: 12px;
-    margin-bottom: 4px;
-    font-weight: bold;
+    margin-top: var(--spacing-3, 0.75rem);
+    margin-bottom: 0.25rem;
+    font-weight: var(--font-heading-weight, 600);
   }
 
   .conditional-section label:first-child {
     margin-top: 0;
   }
 
-  .conditional-section select {
-    display: block;
-    width: 100%;
-    margin-bottom: 8px;
-  }
-
+  .conditional-section select,
   .conditional-section .custom-text {
-    display: block;
     width: 100%;
-    margin-top: 8px;
-    margin-bottom: 8px;
+    margin-bottom: var(--spacing-2, 0.5rem);
   }
 
   .custom-text {
-    margin-top: 8px;
+    margin-top: var(--spacing-2, 0.5rem);
     display: none;
   }
 
   .custom-toggle-button {
-    display: inline-block;
-    margin-top: 12px;
-    background-color: #ccc;
-    padding: 8px 14px;
-    font-weight: bold;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-
-  .custom-toggle-button:hover {
-    background-color: #aaa;
+    margin-top: var(--spacing-3, 0.75rem);
   }
 
   .measurement-hint {
-    margin-bottom: 12px;
+    margin-bottom: var(--spacing-3, 0.75rem);
     font-size: 0.92em;
-    color: #4a4a4a;
+    color: rgba(var(--color-foreground-rgb, 0, 0, 0), 0.7);
   }
 
   .measurement-field--optional label {
-    font-weight: normal;
+    font-weight: var(--font-body-weight, 400);
   }
 </style>
 
@@ -273,7 +227,7 @@
 
     <button
       type="button"
-      class="option-button"
+      class="option-button button button--secondary"
       data-index="{{ forloop.index0 }}"
       data-label="{{ category_name }}"
       data-required="{{ required_string }}"
@@ -309,8 +263,8 @@
 <div class="unit-toggle-container">
   <span class="unit-toggle-label">Unit:</span>
   <div class="unit-toggle-buttons">
-    <button type="button" class="unit-toggle-button active" data-unit="in">Inches</button>
-    <button type="button" class="unit-toggle-button" data-unit="cm">Centimeters</button>
+    <button type="button" class="unit-toggle-button button button--secondary active" data-unit="in">Inches</button>
+    <button type="button" class="unit-toggle-button button button--secondary" data-unit="cm">Centimeters</button>
   </div>
 </div>
 
@@ -433,7 +387,7 @@
   >
 
   <div>
-    <button type="button" class="custom-toggle-button" onclick="toggleCustomFields()">
+    <button type="button" class="custom-toggle-button button button--secondary" onclick="toggleCustomFields()">
       Don't see a color listed? Click here
     </button>
   </div>
