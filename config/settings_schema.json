@@ -1562,6 +1562,14 @@
         "id": "custom_measurements_long_sliders",
         "label": "t:settings_schema.custom_order_measurements_settings.settings.long_sliders.label",
         "default": "None|Brass|Steel"
+      },
+      {
+        "type": "number",
+        "id": "custom_measurements_precision",
+        "label": "t:settings_schema.custom_order_measurements_settings.settings.precision.label",
+        "default": 3,
+        "min": 0,
+        "max": 6
       }
     ]
   }

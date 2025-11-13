@@ -411,6 +411,12 @@
         },
         "long_sliders": {
           "label": "Long slider options"
+        },
+        "precision": {
+          "label": "Decimal precision"
+        },
+        "inches_to_cm": {
+          "label": "Inches to centimeters conversion"
         }
       }
     },

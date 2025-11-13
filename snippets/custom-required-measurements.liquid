@@ -219,12 +219,12 @@
 {%- comment -%} Unit Toggle {%- endcomment -%}
 <fieldset class="product-form__input product-form__input--pill unit-toggle" id="unitToggle">
   <legend class="form__label">Unit</legend>
-  <label>
-    <input type="radio" name="unit_toggle" value="in" data-unit="in" form="product-form-{{ section.id }}" checked>
+    <input id="unit-in" type="radio" name="unit_toggle" value="in" data-unit="in" form="product-form-{{ section.id }}" checked>
+  <label for="unit-in">
     Inches
   </label>
-  <label>
-    <input type="radio" name="unit_toggle" value="cm" data-unit="cm" form="product-form-{{ section.id }}">
+  <input id="unit-cm" type="radio" name="unit_toggle" value="cm" data-unit="cm" form="product-form-{{ section.id }}">
+  <label for="unit-cm">
     Centimeters
   </label>
 </fieldset>
@@ -417,7 +417,7 @@
 
     const INCH_TO_CM = 2.54;
     const CM_TO_INCH = 1 / 2.54;
-    const PRECISION = 3;
+    const PRECISION = {{ settings.custom_measurements_precision | default: 3 }};
 
     let currentUnit = 'in';
     let selectedCategory = null;
