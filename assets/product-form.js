@@ -1,3 +1,9 @@
+const dispatchCartUpdatedEvent = (detail) => {
+  if (typeof window !== 'undefined' && typeof window.dispatchEvent === 'function') {
+    window.dispatchEvent(new CustomEvent('cart:updated', { detail }));
+  }
+};
+
 if (!customElements.get('product-form')) {
   customElements.define(
     'product-form',
@@ -74,6 +80,7 @@ if (!customElements.get('product-form')) {
                 () => {
                   setTimeout(() => {
                     this.cart.renderContents(response);
+                    dispatchCartUpdatedEvent(response);
                   });
                 },
                 { once: true }
@@ -81,6 +88,7 @@ if (!customElements.get('product-form')) {
               quickAddModal.hide(true);
             } else {
               this.cart.renderContents(response);
+              dispatchCartUpdatedEvent(response);
             }
           })
           .catch((e) => {
