@@ -245,7 +245,8 @@
 
     {%- assign harness_match = false -%}
     {%- for harness in harness_categories -%}
-      {%- if harness | strip == category_name -%}
+      {%- assign harness_clean = harness | strip -%}
+      {%- if harness_clean == category_name -%}
         {%- assign harness_match = true -%}
         {%- break -%}
       {%- endif -%}
@@ -253,7 +254,8 @@
 
     {%- assign notes_match = false -%}
     {%- for note_category in notes_categories -%}
-      {%- if note_category | strip == category_name -%}
+      {%- assign note_clean = note_category | strip -%}
+      {%- if note_clean == category_name -%}
         {%- assign notes_match = true -%}
         {%- break -%}
       {%- endif -%}
