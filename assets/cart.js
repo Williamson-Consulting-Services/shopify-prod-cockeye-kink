@@ -1,3 +1,9 @@
+const dispatchCartUpdatedEvent = (detail) => {
+  if (typeof window !== 'undefined' && typeof window.dispatchEvent === 'function') {
+    window.dispatchEvent(new CustomEvent('cart:updated', { detail }));
+  }
+};
+
 class CartRemoveButton extends HTMLElement {
   constructor() {
     super();
@@ -53,6 +59,7 @@ class CartItems extends HTMLElement {
         const html = new DOMParser().parseFromString(responseText, 'text/html');
         const sourceQty = html.querySelector('cart-items');
         this.innerHTML = sourceQty.innerHTML;
+        dispatchCartUpdatedEvent();
       })
       .catch((e) => {
         console.error(e);
@@ -148,6 +155,7 @@ class CartItems extends HTMLElement {
           trapFocus(cartDrawerWrapper, document.querySelector('.cart-item__name'));
         }
         publish(PUB_SUB_EVENTS.cartUpdate, { source: 'cart-items' });
+        dispatchCartUpdatedEvent(parsedState);
       })
       .catch(() => {
         this.querySelectorAll('.loading-overlay').forEach((overlay) => overlay.classList.add('hidden'));
