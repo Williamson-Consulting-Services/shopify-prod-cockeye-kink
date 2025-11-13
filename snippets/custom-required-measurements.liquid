@@ -942,6 +942,12 @@
             }
           });
         }
+
+        hasInteractedWithForm = false;
+        updateBannerEditingState(false);
+        if (window.CustomOrderBanner && typeof window.CustomOrderBanner.refreshCart === 'function') {
+          window.CustomOrderBanner.refreshCart();
+        }
       });
     }
 
@@ -960,6 +966,11 @@
     } else {
       delayedInitialize();
     }
+
+    document.addEventListener('cart:updated', function () {
+      hasInteractedWithForm = false;
+      updateBannerEditingState(false);
+    });
   })();
 
   function toggleCustomFields() {
