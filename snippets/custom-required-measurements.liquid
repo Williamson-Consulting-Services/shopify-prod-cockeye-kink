@@ -185,6 +185,7 @@
       class="category-option-input"
       name="properties[Selected Option]"
       value="{{ category_name }}"
+      form="product-form-{{ section.id }}"
       data-index="{{ forloop.index0 }}"
       data-label="{{ category_name }}"
       data-required="{{ required_string }}"
@@ -219,11 +220,11 @@
 <fieldset class="product-form__input product-form__input--pill unit-toggle" id="unitToggle">
   <legend class="form__label">Unit</legend>
   <label>
-    <input type="radio" name="unit_toggle" value="in" data-unit="in" checked>
+    <input type="radio" name="unit_toggle" value="in" data-unit="in" form="product-form-{{ section.id }}" checked>
     Inches
   </label>
   <label>
-    <input type="radio" name="unit_toggle" value="cm" data-unit="cm">
+    <input type="radio" name="unit_toggle" value="cm" data-unit="cm" form="product-form-{{ section.id }}">
     Centimeters
   </label>
 </fieldset>
