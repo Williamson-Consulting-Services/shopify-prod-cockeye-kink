@@ -116,10 +116,6 @@
     display: none;
   }
 
-  .custom-toggle-button {
-    margin-top: var(--spacing-3, 0.75rem);
-  }
-
   .measurement-hint {
     margin-bottom: var(--spacing-3, 0.75rem);
     font-size: 0.92em;
@@ -133,7 +129,7 @@
 
 {%- comment -%} Category Selection Buttons {%- endcomment -%}
 <fieldset class="product-form__input product-form__input--pill" id="optionButtons">
-  <legend class="form__label">Custom product category</legend>
+  <legend class="form__label">{{ 'custom_measurements.category_legend' | t }}</legend>
   {%- for category in categories_order -%}
     {%- assign category_name = category | strip -%}
     {%- if category_name == '' -%}{% continue %}{% endif %}
@@ -218,19 +214,19 @@
 
 {%- comment -%} Unit Toggle {%- endcomment -%}
 <fieldset class="product-form__input product-form__input--pill unit-toggle" id="unitToggle">
-  <legend class="form__label">Unit</legend>
-    <input id="unit-in" type="radio" name="unit_toggle" value="in" data-unit="in" form="product-form-{{ section.id }}" checked>
+  <legend class="form__label">{{ 'custom_measurements.unit_legend' | t }}</legend>
+  <input id="unit-in" type="radio" name="unit_toggle" value="in" data-unit="in" form="product-form-{{ section.id }}" checked>
   <label for="unit-in">
-    Inches
+    {{ 'custom_measurements.unit_inches' | t }}
   </label>
   <input id="unit-cm" type="radio" name="unit_toggle" value="cm" data-unit="cm" form="product-form-{{ section.id }}">
   <label for="unit-cm">
-    Centimeters
+    {{ 'custom_measurements.unit_centimeters' | t }}
   </label>
 </fieldset>
 
 {%- comment -%} Measurement Fields {%- endcomment -%}
-<p class="measurement-hint">Measurements marked with * are optional for the selected category.</p>
+<p class="measurement-hint">{{ 'custom_measurements.measurement_hint' | t }}</p>
 <div class="measurements-group" id="measurementsGroup">
   {%- for meas_name in measurement_names -%}
     {%- assign measurement_label = meas_name | strip -%}
@@ -348,24 +344,24 @@
   >
 
   <div>
-    <button type="button" class="custom-toggle-button button button--secondary" onclick="toggleCustomFields()">
-      Don't see a color listed? Click here
+    <button type="button" class="button button--secondary" onclick="toggleCustomFields()">
+      {{ 'custom_measurements.custom_color_button' | t }}
     </button>
   </div>
 </div>
 
 {%- comment -%} Notes Section {%- endcomment -%}
 <div class="conditional-section" id="notes-section">
-  <label>Item Notes *</label>
+  <label>{{ 'custom_measurements.item_notes_label' | t }}</label>
   <textarea
     name="properties[Item Notes]"
-    placeholder="Enter your item notes here"
+    placeholder="{{ 'custom_measurements.item_notes_placeholder' | t }}"
     form="product-form-{{ section.id }}"
   ></textarea>
-  <label>Event Notes *</label>
+  <label>{{ 'custom_measurements.event_notes_label' | t }}</label>
   <textarea
     name="properties[Event Notes]"
-    placeholder="Event name or notes here"
+    placeholder="{{ 'custom_measurements.event_notes_placeholder' | t }}"
     form="product-form-{{ section.id }}"
   ></textarea>
 </div>

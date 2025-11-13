@@ -367,64 +367,67 @@
       }
     },
     "custom_order_banner": {
-      "name": "TODO",
+      "name": "Custom order banner",
       "settings": {
         "header_copy": {
-          "content": "TODO"
+          "content": "Banner messaging"
         },
         "editing_text": {
-          "label": "TODO"
+          "label": "Editing state message"
         },
         "cart_text": {
-          "label": "TODO"
+          "label": "In-cart message"
         },
         "header_colors": {
-          "content": "TODO"
+          "content": "Banner colors"
         },
         "background_color": {
-          "label": "TODO"
+          "label": "Background color"
         },
         "text_color": {
-          "label": "TODO"
+          "label": "Text color"
         },
         "shadow_color": {
-          "label": "TODO"
+          "label": "Shadow color"
         },
         "shadow_opacity": {
-          "label": "TODO"
+          "label": "Shadow opacity"
         }
       }
     },
     "custom_order_measurements_settings": {
-      "name": "TODO",
+      "name": "Custom measurements",
       "settings": {
         "header_measurements": {
           "content": "Categories and measurements"
         },
         "categories_order": {
-          "label": "TODO"
-        },
-        "harness_categories": {
-          "label": "TODO"
-        },
-        "header_options": {
-          "content": "TODO"
-        },
-        "leather_colors": {
-          "label": "TODO"
-        },
-        "front_plate_options": {
-          "label": "TODO"
-        },
-        "back_plate_extra": {
-          "label": "TODO"
-        },
-        "long_sliders": {
-          "label": "TODO"
+          "label": "Category order"
         },
         "measurement_map": {
           "label": "Measurement assignments",
           "info": "Format: Measurement: Category, Category*, ... (use * to mark optional measurements for a category). One measurement per line."
+        },
+        "harness_categories": {
+          "label": "Harness categories"
+        },
+        "header_options": {
+          "content": "Customization options"
+        },
+        "leather_colors": {
+          "label": "Leather colors"
+        },
+        "front_plate_options": {
+          "label": "Front plate options"
+        },
+        "back_plate_extra": {
+          "label": "Back plate extra options"
+        },
+        "long_sliders": {
+          "label": "Long slider options"
+        },
+        "precision": {
+          "label": "Decimal precision"
         }
       }
     }
@@ -2712,7 +2715,7 @@
           "label": "Alignement du contenu sur mobile"
         },
         "color_scheme": {
-          "info": "TODO"
+          "info": "Visible when container displayed."
         }
       },
       "blocks": {
@@ -3351,16 +3354,34 @@
       }
     },
     "custom-order-measurements": {
-      "name": "TODO",
+      "name": "Custom Order Measurements",
       "settings": {
         "custom_order_measurements": {
-          "label": "TODO",
-          "info": "TODO"
+          "label": "Custom Order Measurements",
+          "info": "Custom Order Measurements."
         }
       },
       "presets": {
-        "name": "TODO"
+        "name": "Custom Order Measurements"
       }
     }
+  },
+  "custom_order": {
+    "banner": {
+      "editing": "Custom order not in cart yet — make sure you add it before leaving this page.",
+      "cart": "Custom order is in cart"
+    }
+  },
+  "custom_measurements": {
+    "category_legend": "Custom product category",
+    "unit_legend": "Unit",
+    "unit_inches": "Inches",
+    "unit_centimeters": "Centimeters",
+    "measurement_hint": "Measurements marked with * are optional for the selected category.",
+    "custom_color_button": "Don't see a color listed? Click here",
+    "item_notes_label": "Item Notes *",
+    "item_notes_placeholder": "Enter your item notes here",
+    "event_notes_label": "Event Notes *",
+    "event_notes_placeholder": "Event name or notes here"
   }
 }
