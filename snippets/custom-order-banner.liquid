@@ -166,6 +166,27 @@
       window.addEventListener('cart:updated', refreshCart);
       window.addEventListener('custom-order:editing', () => notifyEditing(true));
       window.addEventListener('custom-order:editing-stop', () => notifyEditing(false));
+
+      const removalSelectors = [
+        '[data-cart-remove]',
+        '[data-cart-remove-button]',
+        '.cart-remove-button',
+        'button[name="remove"]',
+        'a[href*="cart/change"]',
+      ];
+
+      function handlePotentialRemoval(event) {
+        if (!event) return;
+        const target = event.target;
+        if (!target) return;
+        const shouldRefresh = removalSelectors.some((selector) => target.closest(selector));
+        if (shouldRefresh) {
+          setTimeout(refreshCart, 150);
+        }
+      }
+
+      document.addEventListener('click', handlePotentialRemoval, true);
+      document.addEventListener('submit', handlePotentialRemoval, true);
     }
 
     if (document.readyState === 'loading') {
