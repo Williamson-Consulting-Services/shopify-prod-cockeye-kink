@@ -4,6 +4,12 @@ const dispatchCartUpdatedEvent = (detail) => {
   }
 };
 
+const dispatchCustomOrderItemAdded = (detail) => {
+  if (typeof window !== 'undefined' && typeof window.dispatchEvent === 'function') {
+    window.dispatchEvent(new CustomEvent('custom-order:item-added', { detail }));
+  }
+};
+
 if (!customElements.get('product-form')) {
   customElements.define(
     'product-form',
@@ -36,6 +42,11 @@ if (!customElements.get('product-form')) {
         delete config.headers['Content-Type'];
 
         const formData = new FormData(this.form);
+        const customFlag = formData.get('properties[_custom]');
+        const orderTypeFlag = formData.get('properties[Order Type]');
+        const isCustomOrder =
+          (typeof customFlag === 'string' && customFlag.toLowerCase() === 'custom') ||
+          (typeof orderTypeFlag === 'string' && orderTypeFlag.toLowerCase() === 'custom');
         if (this.cart) {
           formData.append(
             'sections',
@@ -73,6 +84,11 @@ if (!customElements.get('product-form')) {
             if (!this.error)
               publish(PUB_SUB_EVENTS.cartUpdate, { source: 'product-form', productVariantId: formData.get('id') });
             this.error = false;
+            if (isCustomOrder) {
+              dispatchCustomOrderItemAdded({ productVariantId: formData.get('id'), response });
+            }
+            dispatchCartUpdatedEvent(response);
+
             const quickAddModal = this.closest('quick-add-modal');
             if (quickAddModal) {
               document.body.addEventListener(
@@ -81,6 +97,9 @@ if (!customElements.get('product-form')) {
                   setTimeout(() => {
                     this.cart.renderContents(response);
                     dispatchCartUpdatedEvent(response);
+                    if (isCustomOrder) {
+                      dispatchCustomOrderItemAdded({ productVariantId: formData.get('id'), response });
+                    }
                   });
                 },
                 { once: true }
@@ -89,6 +108,9 @@ if (!customElements.get('product-form')) {
             } else {
               this.cart.renderContents(response);
               dispatchCartUpdatedEvent(response);
+              if (isCustomOrder) {
+                dispatchCustomOrderItemAdded({ productVariantId: formData.get('id'), response });
+              }
             }
           })
           .catch((e) => {

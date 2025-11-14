@@ -951,6 +951,12 @@
       updateAddToCartButton();
       resetAfterAddToCartPending = false;
     });
+
+    document.addEventListener('custom-order:item-added', function () {
+      resetAfterAddToCartPending = false;
+      initialize();
+      updateAddToCartButton();
+    });
   })();
 
   function toggleCustomFields() {
