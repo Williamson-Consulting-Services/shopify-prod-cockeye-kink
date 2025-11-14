@@ -1534,7 +1534,7 @@
         "type": "text",
         "id": "custom_measurements_harness_categories",
         "label": "t:settings_schema.custom_order_measurements_settings.settings.harness_categories.label",
-        "info": "t:settings_schema.custom_order_measurements_settings.settings.delimiter.info",
+        "info": "t:settings_schema.custom_order_measurements_settings.settings.harness_categories.info",
         "default": "Deluxe Harness, Standard Harness, Suspender Harness"
       },
       {
@@ -1566,7 +1566,7 @@
         "type": "text",
         "id": "custom_measurements_long_sliders",
         "label": "t:settings_schema.custom_order_measurements_settings.settings.long_sliders.label",
-        "info": "t:settings_schema.custom_order_measurements_settings.settings.delimiter.info",
+        "info": "t:settings_schema.custom_order_measurements_settings.settings.long_sliders.info",
         "default": "None, Brass, Steel"
       },
       {
