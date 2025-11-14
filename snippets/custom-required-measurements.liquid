@@ -5,10 +5,9 @@
   "Measurement: Category, Category*, ...".
 {% endcomment %}
 
-{%- assign default_categories_order = 'Deluxe Harness|Standard Harness|Suspender Harness|Dogtag/Pigtag|Chaps|Shirt|Pants|Suspenders|Other' -%}
-{%- assign categories_order = settings.custom_measurements_categories_order
-  | default: default_categories_order
-  | split: '|'
+{%- assign default_categories_order = 'Deluxe Harness, Standard Harness, Suspender Harness, Dogtag/Pigtag, Chaps, Shirt, Pants, Suspenders, Other' -%}
+{%- assign categories_order = (settings.custom_measurements_categories_order | default: default_categories_order)
+  | split: ','
 -%}
 
 {%- assign default_measurement_map = 'Neck: Deluxe Harness, Standard Harness, Suspender Harness, Dogtag/Pigtag*, Other*\nChest: Deluxe Harness, Standard Harness, Suspender Harness, Shirt, Suspenders, Other*\nShoulders: Deluxe Harness, Standard Harness, Suspender Harness, Shirt, Suspenders, Other*\nTorso: Deluxe Harness, Standard Harness, Suspender Harness, Shirt, Other*\nStomach: Shirt, Other*\nWaist: Deluxe Harness, Standard Harness, Suspender Harness, Chaps, Pants, Suspenders, Other*\nButt: Pants, Other*\nButt Rise: Pants, Other*\nUpper Thigh: Chaps, Pants, Other*\nLower Thigh: Chaps, Pants, Other*\nKnee: Chaps, Pants, Other*\nCalf: Chaps, Pants, Other*\nAnkle: Chaps, Pants, Other*\nInseam: Pants, Other*\nCrotch: Pants, Other*\nBicep: Shirt, Other*\nHips: Chaps*, Pants*, Other*' -%}
@@ -27,27 +26,41 @@
 {%- endfor -%}
 {%- assign measurement_names = measurement_names | uniq -%}
 
-{%- assign harness_categories = settings.custom_measurements_harness_categories
-  | default: 'Deluxe Harness|Standard Harness|Suspender Harness'
-  | split: '|'
+{%- assign default_harness_categories = 'Deluxe Harness, Standard Harness, Suspender Harness' -%}
+{%- assign harness_source_raw = settings.custom_measurements_harness_categories | default: default_harness_categories -%}
+{%- assign harness_source = harness_source_raw | replace: '|', ',' -%}
+{%- assign harness_categories = harness_source
+  | split: ','
 -%}
-{%- assign leather_colors = settings.custom_measurements_leather_colors
-  | default: 'Black|White|Red|Blue|Green|Yellow|Orange|Purple'
-  | split: '|'
+
+{%- assign default_leather_colors = 'Black, White, Red, Blue, Green, Yellow, Orange, Purple' -%}
+{%- assign leather_source_raw = settings.custom_measurements_leather_colors | default: default_leather_colors -%}
+{%- assign leather_source = leather_source_raw | replace: '|', ',' -%}
+{%- assign leather_colors = leather_source
+  | split: ','
 -%}
-{%- assign front_plate_options = settings.custom_measurements_front_plate_options
-  | default: 'Bear Paw|Puppy Paw|Fist Image|Pig Image|Boot Image|Biohazard Symbol|Cigar Man'
-  | split: '|'
+
+{%- assign default_front_plate_options = 'Bear Paw, Puppy Paw, Fist Image, Pig Image, Boot Image, Biohazard Symbol, Cigar Man' -%}
+{%- assign front_plate_source_raw = settings.custom_measurements_front_plate_options | default: default_front_plate_options -%}
+{%- assign front_plate_source = front_plate_source_raw | replace: '|', ',' -%}
+{%- assign front_plate_options = front_plate_source
+  | split: ','
 -%}
-{%- assign back_plate_extra = settings.custom_measurements_back_plate_extra
-  | default: 'Wesco Boot|Watersports|Happy Puppy'
-  | split: '|'
+
+{%- assign default_back_plate_extra = 'Wesco Boot, Watersports, Happy Puppy' -%}
+{%- assign back_plate_extra_source_raw = settings.custom_measurements_back_plate_extra | default: default_back_plate_extra -%}
+{%- assign back_plate_extra_source = back_plate_extra_source_raw | replace: '|', ',' -%}
+{%- assign back_plate_extra = back_plate_extra_source
+  | split: ','
 -%}
 {%- assign back_plate_options = front_plate_options | concat: back_plate_extra -%}
 {%- assign left_front_plates = front_plate_options -%}
 {%- assign right_front_plates = front_plate_options -%}
 {%- assign back_plates = back_plate_options -%}
-{%- assign long_sliders = settings.custom_measurements_long_sliders | default: 'None|Brass|Steel' | split: '|' -%}
+{%- assign default_long_sliders = 'None, Brass, Steel' -%}
+{%- assign long_sliders_source_raw = settings.custom_measurements_long_sliders | default: default_long_sliders -%}
+{%- assign long_sliders_source = long_sliders_source_raw | replace: '|', ',' -%}
+{%- assign long_sliders = long_sliders_source | split: ',' -%}
 
 {%- liquid
   assign order_tag_name = '_custom'
@@ -272,7 +285,9 @@
   <select name="properties[Leather Color]" form="product-form-{{ section.id }}">
     <option value="">Select one</option>
     {%- for color in leather_colors -%}
-      <option>{{ color }}</option>
+      {%- assign color_clean = color | strip -%}
+      {%- if color_clean == '' -%}{% continue %}{% endif %}
+      <option>{{ color_clean }}</option>
     {%- endfor -%}
   </select>
   <input
@@ -287,7 +302,9 @@
   <select name="properties[Left Front Plate]" form="product-form-{{ section.id }}">
     <option value="">Select one</option>
     {%- for plate in left_front_plates -%}
-      <option>{{ plate }}</option>
+      {%- assign plate_clean = plate | strip -%}
+      {%- if plate_clean == '' -%}{% continue %}{% endif %}
+      <option>{{ plate_clean }}</option>
     {%- endfor -%}
   </select>
   <input
@@ -302,7 +319,9 @@
   <select name="properties[Right Front Plate]" form="product-form-{{ section.id }}">
     <option value="">Select one</option>
     {%- for plate in right_front_plates -%}
-      <option>{{ plate }}</option>
+      {%- assign plate_clean = plate | strip -%}
+      {%- if plate_clean == '' -%}{% continue %}{% endif %}
+      <option>{{ plate_clean }}</option>
     {%- endfor -%}
   </select>
   <input
@@ -317,7 +336,9 @@
   <select name="properties[Back Plate]" form="product-form-{{ section.id }}">
     <option value="">Select one</option>
     {%- for plate in back_plates -%}
-      <option>{{ plate }}</option>
+      {%- assign plate_clean = plate | strip -%}
+      {%- if plate_clean == '' -%}{% continue %}{% endif %}
+      <option>{{ plate_clean }}</option>
     {%- endfor -%}
   </select>
   <input
@@ -332,7 +353,9 @@
   <select name="properties[Long Sliders]" form="product-form-{{ section.id }}">
     <option value="">Select one</option>
     {%- for slider in long_sliders -%}
-      <option>{{ slider }}</option>
+      {%- assign slider_clean = slider | strip -%}
+      {%- if slider_clean == '' -%}{% continue %}{% endif %}
+      <option>{{ slider_clean }}</option>
     {%- endfor -%}
   </select>
   <input

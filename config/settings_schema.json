@@ -1520,7 +1520,8 @@
         "type": "text",
         "id": "custom_measurements_categories_order",
         "label": "t:settings_schema.custom_order_measurements_settings.settings.categories_order.label",
-        "default": "Deluxe Harness|Standard Harness|Suspender Harness|Dogtag/Pigtag|Chaps|Shirt|Pants|Suspenders|Other"
+        "info": "t:settings_schema.custom_order_measurements_settings.settings.delimiter_info",
+        "default": "Deluxe Harness, Standard Harness, Suspender Harness, Dogtag/Pigtag, Chaps, Shirt, Pants, Suspenders, Other"
       },
       {
         "type": "textarea",
@@ -1533,7 +1534,8 @@
         "type": "text",
         "id": "custom_measurements_harness_categories",
         "label": "t:settings_schema.custom_order_measurements_settings.settings.harness_categories.label",
-        "default": "Deluxe Harness|Standard Harness|Suspender Harness"
+        "info": "t:settings_schema.custom_order_measurements_settings.settings.delimiter_info",
+        "default": "Deluxe Harness, Standard Harness, Suspender Harness"
       },
       {
         "type": "header",
@@ -1543,25 +1545,29 @@
         "type": "text",
         "id": "custom_measurements_leather_colors",
         "label": "t:settings_schema.custom_order_measurements_settings.settings.leather_colors.label",
-        "default": "Black|White|Red|Blue|Green|Yellow|Orange|Purple"
+        "info": "t:settings_schema.custom_order_measurements_settings.settings.delimiter_info",
+        "default": "Black, White, Red, Blue, Green, Yellow, Orange, Purple"
       },
       {
         "type": "text",
         "id": "custom_measurements_front_plate_options",
         "label": "t:settings_schema.custom_order_measurements_settings.settings.front_plate_options.label",
-        "default": "Bear Paw|Puppy Paw|Fist Image|Pig Image|Boot Image|Biohazard Symbol|Cigar Man"
+        "info": "t:settings_schema.custom_order_measurements_settings.settings.delimiter_info",
+        "default": "Bear Paw, Puppy Paw, Fist Image, Pig Image, Boot Image, Biohazard Symbol, Cigar Man"
       },
       {
         "type": "text",
         "id": "custom_measurements_back_plate_extra",
         "label": "t:settings_schema.custom_order_measurements_settings.settings.back_plate_extra.label",
-        "default": "Wesco Boot|Watersports|Happy Puppy"
+        "info": "t:settings_schema.custom_order_measurements_settings.settings.delimiter_info",
+        "default": "Wesco Boot, Watersports, Happy Puppy"
       },
       {
         "type": "text",
         "id": "custom_measurements_long_sliders",
         "label": "t:settings_schema.custom_order_measurements_settings.settings.long_sliders.label",
-        "default": "None|Brass|Steel"
+        "info": "t:settings_schema.custom_order_measurements_settings.settings.delimiter_info",
+        "default": "None, Brass, Steel"
       },
       {
         "type": "range",

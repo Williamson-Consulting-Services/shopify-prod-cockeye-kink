@@ -379,7 +379,7 @@
           "content": "Categories and measurements"
         },
         "categories_order": {
-          "label": "Category order"
+          "label": "Custom Item Categories"
         },
         "measurement_map": {
           "label": "Measurement assignments",
