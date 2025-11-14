@@ -417,7 +417,8 @@
 
     let currentUnit = 'in';
     let selectedCategory = null;
-    const measurementValues = new Map();
+    const measurementValuesByCategory = new Map();
+    let currentCategoryStore = null;
     let isSyncingValues = false;
     let hasInteractedWithForm = false;
 
@@ -529,12 +530,22 @@
       return Number.isFinite(parseValue(input.value));
     }
 
+    function getCategoryStore(category) {
+      if (!category) return null;
+      if (!measurementValuesByCategory.has(category)) {
+        measurementValuesByCategory.set(category, new Map());
+      }
+      return measurementValuesByCategory.get(category);
+    }
+
     function clearMeasurementField(field) {
       const inInput = field.querySelector('.measurement-in');
       const cmInput = field.querySelector('.measurement-cm');
       if (inInput) inInput.value = '';
       if (cmInput) cmInput.value = '';
-      measurementValues.delete(field.dataset.measurement);
+      if (currentCategoryStore) {
+        currentCategoryStore.delete(field.dataset.measurement);
+      }
     }
 
     function updateMeasurementVisibility() {
@@ -568,14 +579,18 @@
         }
         const converted = numericValue * INCH_TO_CM;
         cmInput.value = formatValue(converted);
-        measurementValues.set(measName, { in: numericValue, cm: converted });
+        if (currentCategoryStore) {
+          currentCategoryStore.set(measName, { in: numericValue, cm: converted });
+        }
       } else {
         if (cmInput.value !== formatValue(numericValue)) {
           cmInput.value = formatValue(numericValue);
         }
         const converted = numericValue * CM_TO_INCH;
         inInput.value = formatValue(converted);
-        measurementValues.set(measName, { in: converted, cm: numericValue });
+        if (currentCategoryStore) {
+          currentCategoryStore.set(measName, { in: converted, cm: numericValue });
+        }
       }
 
       isSyncingValues = false;
@@ -584,7 +599,9 @@
     function updateMeasurementsForCategory(category) {
       measurementFields.forEach((field) => {
         const measName = field.dataset.measurement;
-        const measConfig = config.measurements[measName];
+      const measConfig = config.measurements[measName];
+      const inInput = field.querySelector('.measurement-in');
+      const cmInput = field.querySelector('.measurement-cm');
         const categoryInfo = measConfig && measConfig.categories ? measConfig.categories[category] : null;
         const baseLabel = field.dataset.labelBase || measName;
         const labelElement = field.querySelector('label');
@@ -597,6 +614,8 @@
           if (labelElement) {
             labelElement.textContent = isOptional ? `${baseLabel} *` : baseLabel;
           }
+          if (inInput) inInput.value = '';
+          if (cmInput) cmInput.value = '';
         } else {
           field.classList.remove('active');
           field.classList.remove('measurement-field--optional');
@@ -605,6 +624,60 @@
             labelElement.textContent = baseLabel;
           }
           clearMeasurementField(field);
+          const store = currentCategoryStore;
+          if (store) {
+            store.delete(measName);
+          }
+        }
+      });
+    }
+
+    function saveCurrentCategoryMeasurements() {
+      if (!selectedCategory) return;
+      const store = getCategoryStore(selectedCategory);
+      store.clear();
+
+      measurementFields.forEach((field) => {
+        if (!field.classList.contains('active')) return;
+        const measName = field.dataset.measurement;
+        const inInput = field.querySelector('.measurement-in');
+        const cmInput = field.querySelector('.measurement-cm');
+        let inValue = parseValue(inInput ? inInput.value : '');
+        let cmValue = parseValue(cmInput ? cmInput.value : '');
+
+        if (!Number.isFinite(inValue) && Number.isFinite(cmValue)) {
+          inValue = cmValue * CM_TO_INCH;
+        } else if (!Number.isFinite(cmValue) && Number.isFinite(inValue)) {
+          cmValue = inValue * INCH_TO_CM;
+        }
+
+        if (Number.isFinite(inValue) || Number.isFinite(cmValue)) {
+          store.set(measName, {
+            in: Number.isFinite(inValue) ? inValue : null,
+            cm: Number.isFinite(cmValue) ? cmValue : null,
+          });
+        }
+      });
+    }
+
+    function restoreMeasurementsForCategory(category) {
+      const store = getCategoryStore(category);
+      measurementFields.forEach((field) => {
+        const measName = field.dataset.measurement;
+        const stored = store ? store.get(measName) : null;
+        const inInput = field.querySelector('.measurement-in');
+        const cmInput = field.querySelector('.measurement-cm');
+
+        if (stored && (Number.isFinite(stored.in) || Number.isFinite(stored.cm))) {
+          if (inInput) {
+            inInput.value = Number.isFinite(stored.in) ? formatValue(stored.in) : '';
+          }
+          if (cmInput) {
+            cmInput.value = Number.isFinite(stored.cm) ? formatValue(stored.cm) : '';
+          }
+        } else {
+          if (inInput) inInput.value = '';
+          if (cmInput) cmInput.value = '';
         }
       });
     }
@@ -738,6 +811,9 @@
       if (harnessSection) harnessSection.classList.remove('active');
       if (notesSection) notesSection.classList.remove('active');
 
+      measurementValuesByCategory.clear();
+      currentCategoryStore = null;
+
       measurementFields.forEach((field) => {
         clearMeasurementField(field);
         field.classList.remove('active');
@@ -749,7 +825,6 @@
             input.setAttribute('name', input.dataset.originalName);
           }
           input.removeAttribute('data-removed');
-          input.value = '';
         });
       });
 
@@ -763,8 +838,6 @@
         input.checked = input.dataset.unit === 'in';
       });
       updateMeasurementVisibility();
-
-      measurementValues.clear();
 
       if (harnessSection) {
         harnessSection.querySelectorAll('select').forEach((select) => {
@@ -785,8 +858,11 @@
         const firstInput = categoryInputs[0];
         firstInput.checked = true;
         selectedCategory = firstInput.dataset.label;
+        currentCategoryStore = getCategoryStore(selectedCategory);
         updateSectionVisibility(selectedCategory);
         updateMeasurementsForCategory(selectedCategory);
+        restoreMeasurementsForCategory(selectedCategory);
+        updateMeasurementOnUnitChange();
       }
 
       const button = resolveAddToCartButton();
@@ -801,10 +877,14 @@
       input.addEventListener('change', function () {
         if (!this.checked) return;
         flagFormInteraction();
+        if (selectedCategory) {
+          saveCurrentCategoryMeasurements();
+        }
         selectedCategory = this.dataset.label;
-
+        currentCategoryStore = getCategoryStore(selectedCategory);
         updateSectionVisibility(selectedCategory);
         updateMeasurementsForCategory(selectedCategory);
+        restoreMeasurementsForCategory(selectedCategory);
         updateMeasurementOnUnitChange();
         updateAddToCartButton();
       });
@@ -814,6 +894,9 @@
       input.addEventListener('change', function () {
         if (!this.checked) return;
         flagFormInteraction();
+        if (selectedCategory) {
+          saveCurrentCategoryMeasurements();
+        }
         currentUnit = this.dataset.unit;
 
         if (unitOfMeasureInput) {
@@ -847,7 +930,9 @@
           if (targetInput) {
             targetInput.value = '';
           }
-          measurementValues.delete(measName);
+          if (currentCategoryStore) {
+            currentCategoryStore.delete(measName);
+          }
         }
         updateAddToCartButton();
       }
