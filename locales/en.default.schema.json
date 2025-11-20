@@ -352,6 +352,82 @@
         }
       }
     },
+    "custom_order_banner": {
+      "name": "Custom order banner",
+      "settings": {
+        "header_copy": {
+          "content": "Banner messaging"
+        },
+        "editing_text": {
+          "label": "Editing state message"
+        },
+        "cart_text": {
+          "label": "In-cart message"
+        },
+        "header_colors": {
+          "content": "Banner colors"
+        },
+        "background_color": {
+          "label": "Background color"
+        },
+        "text_color": {
+          "label": "Text color"
+        },
+        "shadow_color": {
+          "label": "Shadow color"
+        },
+        "shadow_opacity": {
+          "label": "Shadow opacity"
+        }
+      }
+    },
+    "custom_order_measurements_settings": {
+      "name": "Custom measurements",
+      "settings": {
+        "header_measurements": {
+          "content": "Categories and measurements"
+        },
+        "categories_order": {
+          "label": "Custom Item Categories",
+          "info": "Enter categories separated by commas."
+        },
+        "measurement_map": {
+          "label": "Measurement assignments",
+          "info": "Format: Measurement: Category, Category*, ... (use * to mark optional measurements for a category). One measurement per line."
+        },
+        "harness_categories": {
+          "label": "Harness categories",
+          "info": "Enter categories separated by commas."
+        },
+        "header_options": {
+          "content": "Customization options"
+        },
+        "leather_colors": {
+          "label": "Leather colors",
+          "info": "Enter colors separated by commas."
+        },
+        "front_plate_options": {
+          "label": "Front plate options",
+          "info": "Enter options separated by commas."
+        },
+        "back_plate_extra": {
+          "label": "Back plate extra options",
+          "info": "Enter options separated by commas."
+        },
+        "long_sliders": {
+          "label": "Long slider options",
+          "info": "Enter options separated by commas."
+        },
+        "associates": {
+          "label": "Associate options",
+          "info": "Comma-separated list of associate options. Use 'Other' as the last option to allow custom text input."
+        },
+        "precision": {
+          "label": "Decimal precision",
+          "info": "Number of decimal places shown for measurement values."
+        }
+      }
+    },
     "layout": {
       "name": "Layout",
       "settings": {

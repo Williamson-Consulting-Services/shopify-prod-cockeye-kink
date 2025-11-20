@@ -1,0 +1,1569 @@
+{% comment %}
+  Custom Required Measurements Snippet
+  Configuration is driven by theme settings: categories are pipe-delimited and
+  measurements are mapped via a text area using the format
+  "Measurement: Category, Category*, ...".
+{% endcomment %}
+
+{%- assign default_categories_order = 'Deluxe Harness, Standard Harness, Suspender Harness, Dogtag/Pigtag, Chaps, Shirt, Pants, Suspenders, Other' -%}
+{%- assign categories_source = settings.custom_measurements_categories_order | default: default_categories_order -%}
+{%- assign categories_order = categories_source | split: ',' -%}
+
+{%- assign default_measurement_map = 'Neck: Deluxe Harness, Standard Harness, Suspender Harness, Dogtag/Pigtag*, Other*\nChest: Deluxe Harness, Standard Harness, Suspender Harness, Shirt, Suspenders, Other*\nShoulders: Deluxe Harness, Standard Harness, Suspender Harness, Shirt, Suspenders, Other*\nTorso: Deluxe Harness, Standard Harness, Suspender Harness, Shirt, Other*\nStomach: Shirt, Other*\nWaist: Deluxe Harness, Standard Harness, Suspender Harness, Chaps, Pants, Suspenders, Other*\nButt: Pants, Other*\nButt Rise: Pants, Other*\nUpper Thigh: Chaps, Pants, Other*\nLower Thigh: Chaps, Pants, Other*\nKnee: Chaps, Pants, Other*\nCalf: Chaps, Pants, Other*\nAnkle: Chaps, Pants, Other*\nInseam: Pants, Other*\nCrotch: Pants, Other*\nBicep: Shirt, Other*\nHips: Chaps*, Pants*, Other*' -%}
+{%- assign measurement_map_source = settings.custom_measurements_map | default: default_measurement_map -%}
+{%- assign measurement_map_lines = measurement_map_source | newline_to_br | split: '<br />' -%}
+
+{%- assign measurement_names = '' | split: '|' -%}
+{%- for measurement_line in measurement_map_lines -%}
+  {%- assign measurement_line = measurement_line | strip -%}
+  {%- if measurement_line == '' -%}{% continue %}{% endif %}
+  {%- assign parts = measurement_line | split: ':' -%}
+  {%- assign measurement_label = parts[0] | strip -%}
+  {%- if measurement_label == '' -%}{% continue %}{% endif %}
+  {%- assign measurement_entry = measurement_label | split: '__split__' -%}
+  {%- assign measurement_names = measurement_names | concat: measurement_entry -%}
+{%- endfor -%}
+{%- assign measurement_names = measurement_names | uniq -%}
+
+{%- assign default_harness_categories = 'Deluxe Harness, Standard Harness, Suspender Harness' -%}
+{%- assign harness_source_raw = settings.custom_measurements_harness_categories | default: default_harness_categories -%}
+{%- assign harness_source = harness_source_raw | replace: '|', ',' -%}
+{%- assign harness_categories = harness_source
+  | split: ','
+-%}
+
+{%- assign default_leather_colors = 'Black, White, Red, Blue, Green, Yellow, Orange, Purple' -%}
+{%- assign leather_source_raw = settings.custom_measurements_leather_colors | default: default_leather_colors -%}
+{%- assign leather_source = leather_source_raw | replace: '|', ',' -%}
+{%- assign leather_colors = leather_source
+  | split: ','
+-%}
+
+{%- assign default_front_plate_options = 'Bear Paw, Puppy Paw, Fist Image, Pig Image, Boot Image, Biohazard Symbol, Cigar Man' -%}
+{%- assign front_plate_source_raw = settings.custom_measurements_front_plate_options | default: default_front_plate_options -%}
+{%- assign front_plate_source = front_plate_source_raw | replace: '|', ',' -%}
+{%- assign front_plate_options = front_plate_source
+  | split: ','
+-%}
+
+{%- assign default_back_plate_extra = 'Wesco Boot, Watersports, Happy Puppy' -%}
+{%- assign back_plate_extra_source_raw = settings.custom_measurements_back_plate_extra | default: default_back_plate_extra -%}
+{%- assign back_plate_extra_source = back_plate_extra_source_raw | replace: '|', ',' -%}
+{%- assign back_plate_extra = back_plate_extra_source
+  | split: ','
+-%}
+{%- assign back_plate_options = front_plate_options | concat: back_plate_extra -%}
+{%- assign left_front_plates = front_plate_options -%}
+{%- assign right_front_plates = front_plate_options -%}
+{%- assign back_plates = back_plate_options -%}
+{%- assign default_long_sliders = 'None, Brass, Steel' -%}
+{%- assign long_sliders_source_raw = settings.custom_measurements_long_sliders | default: default_long_sliders -%}
+{%- assign long_sliders_source = long_sliders_source_raw | replace: '|', ',' -%}
+{%- assign long_sliders = long_sliders_source | split: ',' -%}
+{%- assign default_associates = 'Clair, Erik, Other' -%}
+{%- assign associates_source_raw = settings.custom_measurements_associates | default: default_associates -%}
+{%- assign associates_source = associates_source_raw | replace: '|', ',' -%}
+{%- assign associates = associates_source | split: ',' -%}
+
+{%- liquid
+  assign order_tag_name = '_custom'
+  assign order_tag_value = 'custom'
+-%}
+
+<style>
+  /* Measurement Field Container */
+  .measurement-field {
+    position: relative;
+    display: none;
+  }
+
+  .measurement-field.active {
+    display: block;
+  }
+
+  /* Measurement Input Wrapper */
+  .measurement-input-wrapper {
+    position: relative;
+    display: flex;
+    width: 100%;
+    max-width: 12rem;
+    transition: box-shadow var(--duration-short) ease;
+  }
+
+  .measurement-input-wrapper:before {
+    pointer-events: none;
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    border-radius: var(--inputs-radius-outset);
+    box-shadow: var(--inputs-shadow-horizontal-offset) var(--inputs-shadow-vertical-offset)
+      var(--inputs-shadow-blur-radius) rgba(var(--color-shadow), var(--inputs-shadow-opacity));
+    z-index: -1;
+  }
+
+  .measurement-input-wrapper:after {
+    pointer-events: none;
+    content: '';
+    position: absolute;
+    top: var(--inputs-border-width);
+    right: var(--inputs-border-width);
+    bottom: var(--inputs-border-width);
+    left: var(--inputs-border-width);
+    border: 0.1rem solid transparent;
+    border-radius: var(--inputs-radius);
+    box-shadow: 0 0 0 var(--inputs-border-width) rgba(var(--color-foreground), var(--inputs-border-opacity));
+    transition: box-shadow var(--duration-short) ease;
+    z-index: 1;
+  }
+
+  .measurement-input-wrapper:hover:after {
+    box-shadow: 0 0 0 calc(0.1rem + var(--inputs-border-width))
+      rgba(var(--color-foreground), var(--inputs-border-opacity));
+  }
+
+  /* Measurement Input Fields */
+  .measurement-input {
+    -webkit-appearance: none;
+    appearance: none;
+    background-color: rgb(var(--color-background));
+    color: rgb(var(--color-foreground));
+    font-family: var(--font-body-family);
+    font-style: var(--font-body-style);
+    font-weight: var(--font-body-weight-bold, 600);
+    font-size: 1.6rem;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 1.5rem;
+    margin: var(--inputs-border-width);
+    border: 0;
+    border-radius: var(--inputs-radius);
+    height: 4.5rem;
+    min-height: calc(var(--inputs-border-width) * 2);
+    transition: box-shadow var(--duration-short) ease;
+    position: relative;
+    z-index: 2;
+  }
+
+  .measurement-input:focus,
+  .measurement-input:focus-visible {
+    outline: 0;
+  }
+
+  /* Focus state on wrapper when input is focused */
+  .measurement-input-wrapper:has(.measurement-input:focus):after,
+  .measurement-input-wrapper:has(.measurement-input:focus-visible):after {
+    box-shadow: 0 0 0 calc(0.1rem + var(--inputs-border-width)) rgba(var(--color-foreground));
+  }
+
+  /* Fallback for browsers without :has() support */
+  @supports not selector(:has(*)) {
+    .measurement-input:focus {
+      box-shadow: 0 0 0 calc(0.1rem + var(--inputs-border-width)) rgba(var(--color-foreground));
+    }
+  }
+
+  .measurement-input::placeholder {
+    color: rgba(var(--color-foreground), 0.5);
+    opacity: 1;
+  }
+
+  /* Measurements Group */
+  .measurements-group {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: var(--spacing-4, 1.5rem);
+    margin-bottom: var(--spacing-4, 1.5rem);
+  }
+
+  .measurements-group label {
+    display: block;
+    margin-bottom: 0.6rem;
+    font-weight: var(--font-heading-weight, 600);
+    font-size: 1.4rem;
+    letter-spacing: 0.1rem;
+    line-height: 1.5;
+    color: rgb(var(--color-foreground));
+  }
+
+  .measurement-field--optional label {
+    font-weight: var(--font-body-weight, 400);
+  }
+
+  /* Conditional Sections */
+  .conditional-section {
+    display: none;
+    margin-top: var(--spacing-4, 1.5rem);
+    padding: var(--spacing-4, 1.5rem);
+    background-color: rgba(var(--color-foreground), 0.04);
+    border-radius: var(--inputs-radius);
+    position: relative;
+  }
+
+  .conditional-section.active {
+    display: block;
+  }
+
+  .conditional-section label {
+    display: block;
+    margin-top: var(--spacing-4, 1.5rem);
+    margin-bottom: 0.6rem;
+    font-weight: var(--font-heading-weight, 600);
+    font-size: 1.4rem;
+    letter-spacing: 0.1rem;
+    line-height: 1.5;
+    color: rgb(var(--color-foreground));
+  }
+
+  .conditional-section label:first-child {
+    margin-top: 0;
+  }
+
+  /* Select Elements */
+  .conditional-section .select-wrapper {
+    position: relative;
+    display: flex;
+    width: 100%;
+    margin-bottom: var(--spacing-3, 0.75rem);
+    transition: box-shadow var(--duration-short) ease;
+  }
+
+  .conditional-section .select-wrapper:before {
+    pointer-events: none;
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    border-radius: var(--inputs-radius-outset);
+    box-shadow: var(--inputs-shadow-horizontal-offset) var(--inputs-shadow-vertical-offset)
+      var(--inputs-shadow-blur-radius) rgba(var(--color-shadow), var(--inputs-shadow-opacity));
+    z-index: -1;
+  }
+
+  .conditional-section .select-wrapper:after {
+    pointer-events: none;
+    content: '';
+    position: absolute;
+    top: var(--inputs-border-width);
+    right: var(--inputs-border-width);
+    bottom: var(--inputs-border-width);
+    left: var(--inputs-border-width);
+    border: 0.1rem solid transparent;
+    border-radius: var(--inputs-radius);
+    box-shadow: 0 0 0 var(--inputs-border-width) rgba(var(--color-foreground), var(--inputs-border-opacity));
+    transition: box-shadow var(--duration-short) ease;
+    z-index: 1;
+  }
+
+  .conditional-section .select-wrapper:hover:after {
+    box-shadow: 0 0 0 calc(0.1rem + var(--inputs-border-width))
+      rgba(var(--color-foreground), var(--inputs-border-opacity));
+  }
+
+  .conditional-section select {
+    -webkit-appearance: none;
+    appearance: none;
+    background-color: rgb(var(--color-background));
+    color: rgba(var(--color-foreground), 0.75);
+    font-family: var(--font-body-family);
+    font-style: var(--font-body-style);
+    font-weight: var(--font-body-weight);
+    font-size: 1.2rem;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0 calc(var(--inputs-border-width) + 3rem) 0 2rem;
+    margin: var(--inputs-border-width);
+    border: 0;
+    border-radius: var(--inputs-radius);
+    height: 4.5rem;
+    min-height: calc(var(--inputs-border-width) * 2);
+    cursor: pointer;
+    line-height: calc(1 + 0.6 / var(--font-body-scale));
+    transition: box-shadow var(--duration-short) ease;
+    position: relative;
+    z-index: 2;
+  }
+
+  .conditional-section select:focus,
+  .conditional-section select:focus-visible {
+    outline: 0;
+    box-shadow: 0 0 0 calc(0.1rem + var(--inputs-border-width)) rgba(var(--color-foreground));
+  }
+
+  /* Select caret icon - using background image (standard approach for select elements) */
+  .conditional-section select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%23000' fill-opacity='0.75' d='M5 6L0 0h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right calc(var(--inputs-border-width) + 1.5rem) center;
+    background-size: 0.6rem;
+  }
+
+  /* Custom Text Inputs */
+  .custom-text-wrapper {
+    position: relative;
+    display: none;
+    flex: 1;
+    width: 100%;
+    margin-top: var(--spacing-2, 0.5rem);
+    margin-bottom: var(--spacing-3, 0.75rem);
+    transition: box-shadow var(--duration-short) ease;
+  }
+
+  /* Ensure wrapper uses flex when visible */
+  .custom-text-wrapper[style*="display: block"] {
+    display: flex !important;
+  }
+
+  .custom-text {
+    -webkit-appearance: none;
+    appearance: none;
+    background-color: rgb(var(--color-background));
+    color: rgb(var(--color-foreground));
+    font-family: var(--font-body-family);
+    font-style: var(--font-body-style);
+    font-weight: var(--font-body-weight);
+    font-size: 1.6rem;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 1.5rem;
+    margin: var(--inputs-border-width);
+    border: 0;
+    border-radius: var(--inputs-radius);
+    height: 4.5rem;
+    min-height: calc(var(--inputs-border-width) * 2);
+    transition: box-shadow var(--duration-short) ease;
+    position: relative;
+    z-index: 2;
+  }
+
+
+  .custom-text-wrapper:before {
+    pointer-events: none;
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    border-radius: var(--inputs-radius-outset);
+    box-shadow: var(--inputs-shadow-horizontal-offset) var(--inputs-shadow-vertical-offset)
+      var(--inputs-shadow-blur-radius) rgba(var(--color-shadow), var(--inputs-shadow-opacity));
+    z-index: -1;
+  }
+
+  .custom-text-wrapper:after {
+    pointer-events: none;
+    content: '';
+    position: absolute;
+    top: var(--inputs-border-width);
+    right: var(--inputs-border-width);
+    bottom: var(--inputs-border-width);
+    left: var(--inputs-border-width);
+    border: 0.1rem solid transparent;
+    border-radius: var(--inputs-radius);
+    box-shadow: 0 0 0 var(--inputs-border-width) rgba(var(--color-foreground), var(--inputs-border-opacity));
+    transition: box-shadow var(--duration-short) ease;
+    z-index: 1;
+  }
+
+  .custom-text-wrapper:hover:after {
+    box-shadow: 0 0 0 calc(0.1rem + var(--inputs-border-width))
+      rgba(var(--color-foreground), var(--inputs-border-opacity));
+  }
+
+  .custom-text:focus,
+  .custom-text:focus-visible {
+    outline: 0;
+  }
+
+  /* Focus state on wrapper when input is focused */
+  .custom-text-wrapper:has(.custom-text:focus):after,
+  .custom-text-wrapper:has(.custom-text:focus-visible):after {
+    box-shadow: 0 0 0 calc(0.1rem + var(--inputs-border-width)) rgba(var(--color-foreground));
+  }
+
+  /* Fallback for browsers without :has() support */
+  @supports not selector(:has(*)) {
+    .custom-text:focus {
+      box-shadow: 0 0 0 calc(0.1rem + var(--inputs-border-width)) rgba(var(--color-foreground));
+    }
+  }
+
+  .custom-text::placeholder {
+    color: rgba(var(--color-foreground), 0.5);
+    opacity: 1;
+  }
+
+  /* Textarea Elements */
+  .conditional-section textarea {
+    -webkit-appearance: none;
+    appearance: none;
+    background-color: rgb(var(--color-background));
+    color: rgb(var(--color-foreground));
+    font-family: var(--font-body-family);
+    font-style: var(--font-body-style);
+    font-weight: var(--font-body-weight);
+    font-size: 1.6rem;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 1.5rem;
+    margin: var(--inputs-border-width);
+    border: 0;
+    border-radius: var(--inputs-radius);
+    min-height: 10rem;
+    resize: none;
+    transition: box-shadow var(--duration-short) ease;
+    position: relative;
+  }
+
+  .conditional-section .textarea-wrapper {
+    position: relative;
+    display: flex;
+    width: 100%;
+    margin-bottom: var(--spacing-3, 0.75rem);
+    transition: box-shadow var(--duration-short) ease;
+  }
+
+  .conditional-section .textarea-wrapper:before {
+    pointer-events: none;
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    border-radius: var(--inputs-radius-outset);
+    box-shadow: var(--inputs-shadow-horizontal-offset) var(--inputs-shadow-vertical-offset)
+      var(--inputs-shadow-blur-radius) rgba(var(--color-shadow), var(--inputs-shadow-opacity));
+    z-index: -1;
+  }
+
+  .conditional-section .textarea-wrapper:after {
+    pointer-events: none;
+    content: '';
+    position: absolute;
+    top: var(--inputs-border-width);
+    right: var(--inputs-border-width);
+    bottom: var(--inputs-border-width);
+    left: var(--inputs-border-width);
+    border: 0.1rem solid transparent;
+    border-radius: var(--inputs-radius);
+    box-shadow: 0 0 0 var(--inputs-border-width) rgba(var(--color-foreground), var(--inputs-border-opacity));
+    transition: box-shadow var(--duration-short) ease;
+    z-index: 1;
+  }
+
+  .conditional-section .textarea-wrapper:hover:after {
+    box-shadow: 0 0 0 calc(0.1rem + var(--inputs-border-width))
+      rgba(var(--color-foreground), var(--inputs-border-opacity));
+  }
+
+  .conditional-section textarea {
+    position: relative;
+    z-index: 2;
+  }
+
+  .conditional-section textarea:focus,
+  .conditional-section textarea:focus-visible {
+    outline: 0;
+    box-shadow: 0 0 0 calc(0.1rem + var(--inputs-border-width)) rgba(var(--color-foreground));
+  }
+
+  .conditional-section textarea::placeholder {
+    color: rgba(var(--color-foreground), 0.5);
+    opacity: 1;
+  }
+
+  /* Measurement Hint */
+  .measurement-hint {
+    margin-bottom: var(--spacing-4, 1.5rem);
+    font-size: 1.4rem;
+    color: rgba(var(--color-foreground), 0.7);
+    line-height: 1.5;
+  }
+
+  /* Responsive adjustments */
+  @media screen and (max-width: 749px) {
+    .measurements-group {
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: var(--spacing-3, 0.75rem);
+    }
+
+    .measurement-input {
+      max-width: 100%;
+    }
+  }
+</style>
+
+{%- comment -%} Associate Section {%- endcomment -%}
+<div class="conditional-section" id="associate-section">
+  <label>{{ 'custom_measurements.associate_label' | t }}</label>
+  <div class="select-wrapper">
+    <select name="properties[Associate]" id="associate-select" form="product-form-{{ section.id }}">
+      <option value="">Select one</option>
+      {%- for associate in associates -%}
+        {%- assign associate_clean = associate | strip -%}
+        {%- if associate_clean == '' -%}{% continue %}{% endif %}
+        <option value="{{ associate_clean }}">{{ associate_clean }}</option>
+      {%- endfor -%}
+    </select>
+  </div>
+  <div class="custom-text-wrapper" id="associate-text-wrapper" style="display: none;">
+    <input
+      type="text"
+      name="properties[Associate - Text]"
+      id="associate-text"
+      class="custom-text"
+      placeholder="{{ 'custom_measurements.associate_placeholder' | t }}"
+      form="product-form-{{ section.id }}"
+    >
+  </div>
+</div>
+
+{%- comment -%} Category Selection Buttons {%- endcomment -%}
+<fieldset class="product-form__input product-form__input--pill" id="optionButtons">
+  <legend class="form__label">{{ 'custom_measurements.category_legend' | t }}</legend>
+  {%- for category in categories_order -%}
+    {%- assign category_name = category | strip -%}
+    {%- if category_name == '' -%}{% continue %}{% endif %}
+    {%- assign required_list = '' | split: '|' -%}
+    {%- assign optional_list = '' | split: '|' -%}
+
+    {%- for measurement_line in measurement_map_lines -%}
+      {%- assign measurement_line = measurement_line | strip -%}
+      {%- if measurement_line == '' -%}{% continue %}{% endif %}
+      {%- assign parts = measurement_line | split: ':' -%}
+      {%- assign measurement_label = parts[0] | strip -%}
+      {%- if measurement_label == '' -%}{% continue %}{% endif %}
+      {%- assign categories_part = '' -%}
+      {%- if parts.size > 1 -%}
+        {%- assign categories_part = parts[1] -%}
+      {%- endif -%}
+      {%- assign category_tokens = categories_part | split: ',' -%}
+      {%- for token in category_tokens -%}
+        {%- assign token_clean = token | strip -%}
+        {%- if token_clean == '' -%}{% continue %}{% endif %}
+        {%- assign base_category = token_clean | remove: '*' | strip -%}
+        {%- if base_category == category_name -%}
+          {%- assign measurement_entry = measurement_label | split: '__split__' -%}
+          {%- if base_category != token_clean -%}
+            {%- assign optional_list = optional_list | concat: measurement_entry -%}
+          {%- else -%}
+            {%- assign required_list = required_list | concat: measurement_entry -%}
+          {%- endif -%}
+        {%- endif -%}
+      {%- endfor -%}
+    {%- endfor -%}
+
+    {%- assign required_string = required_list | uniq | join: '|' -%}
+    {%- assign optional_string = optional_list | uniq | join: '|' -%}
+
+    {%- assign harness_match = false -%}
+    {%- for harness in harness_categories -%}
+      {%- assign harness_clean = harness | strip -%}
+      {%- if harness_clean == category_name -%}
+        {%- assign harness_match = true -%}
+        {%- break -%}
+      {%- endif -%}
+    {%- endfor -%}
+
+    {%- assign option_id = 'custom-category-' | append: section.id | append: '-' | append: forloop.index0 -%}
+    <input
+      type="radio"
+      id="{{ option_id }}"
+      class="category-option-input"
+      name="properties[Selected Option]"
+      value="{{ category_name }}"
+      form="product-form-{{ section.id }}"
+      data-index="{{ forloop.index0 }}"
+      data-label="{{ category_name }}"
+      data-required="{{ required_string }}"
+      data-optional="{{ optional_string }}"
+      data-show-harness="{% if harness_match %}true{% else %}false{% endif %}"
+      {% if forloop.first %}checked{% endif %}
+    >
+    <label for="{{ option_id }}">
+      {{ category_name }}
+    </label>
+  {%- endfor -%}
+</fieldset>
+
+{%- comment -%} Unit of Measure - First property to indicate measurement unit used {%- endcomment -%}
+<input
+  type="hidden"
+  id="unitOfMeasure"
+  name="properties[Unit of Measure]"
+  value="Measured in Inches"
+  form="product-form-{{ section.id }}"
+>
+
+{%- comment -%} Custom Order Tagging {%- endcomment -%}
+<input
+  type="hidden"
+  name="properties[{{ order_tag_name }}]"
+  value="{{ order_tag_value }}"
+  form="product-form-{{ section.id }}"
+>
+
+{%- comment -%} Unit Toggle {%- endcomment -%}
+<fieldset class="product-form__input product-form__input--pill unit-toggle" id="unitToggle">
+  <legend class="form__label">{{ 'custom_measurements.unit_legend' | t }}</legend>
+  <input id="unit-in" type="radio" name="unit_toggle" value="in" data-unit="in" form="product-form-{{ section.id }}" checked>
+  <label for="unit-in">
+    {{ 'custom_measurements.unit_inches' | t }}
+  </label>
+  <input id="unit-cm" type="radio" name="unit_toggle" value="cm" data-unit="cm" form="product-form-{{ section.id }}">
+  <label for="unit-cm">
+    {{ 'custom_measurements.unit_centimeters' | t }}
+  </label>
+</fieldset>
+
+{%- comment -%} Measurement Fields {%- endcomment -%}
+<p class="measurement-hint">{{ 'custom_measurements.measurement_hint' | t }}</p>
+<div class="measurements-group" id="measurementsGroup">
+  {%- for meas_name in measurement_names -%}
+    {%- assign measurement_label = meas_name | strip -%}
+    {%- if measurement_label == '' -%}{% continue %}{% endif %}
+    {%- assign handle = measurement_label | handleize -%}
+    <div
+      class="measurement-field"
+      id="measurement-{{ handle }}"
+      data-measurement="{{ measurement_label }}"
+      data-label-base="{{ measurement_label }}"
+    >
+      <label for="{{ handle }}-in">{{ measurement_label }}</label>
+      <div class="measurement-input-wrapper">
+        <input
+          type="number"
+          inputmode="decimal"
+          autocomplete="off"
+          id="{{ handle }}-in"
+          name="properties[{{ measurement_label }} (in)]"
+          form="product-form-{{ section.id }}"
+          class="measurement-input measurement-in"
+          data-measurement="{{ measurement_label }}"
+          placeholder="0.000"
+          min="0"
+        >
+        <input
+          type="number"
+          inputmode="decimal"
+          autocomplete="off"
+          id="{{ handle }}-cm"
+          name="properties[{{ measurement_label }} (cm)]"
+          form="product-form-{{ section.id }}"
+          class="measurement-input measurement-cm"
+          data-measurement="{{ measurement_label }}"
+          placeholder="0.000"
+          min="0"
+          style="display: none;"
+        >
+      </div>
+    </div>
+  {%- endfor -%}
+</div>
+
+{%- comment -%} Harness Details Section {%- endcomment -%}
+<div class="conditional-section" id="harness-details">
+  <label>Leather Color</label>
+  <div class="select-wrapper">
+    <select name="properties[Leather Color]" form="product-form-{{ section.id }}">
+      <option value="">Select one</option>
+      {%- for color in leather_colors -%}
+        {%- assign color_clean = color | strip -%}
+        {%- if color_clean == '' -%}{% continue %}{% endif %}
+        <option>{{ color_clean }}</option>
+      {%- endfor -%}
+    </select>
+  </div>
+  <div class="custom-text-wrapper">
+    <input
+      type="text"
+      name="properties[Leather Color - Text]"
+      class="custom-text"
+      placeholder="Enter custom color"
+      form="product-form-{{ section.id }}"
+    >
+  </div>
+
+  <label>Left Front Plate</label>
+  <div class="select-wrapper">
+    <select name="properties[Left Front Plate]" form="product-form-{{ section.id }}">
+      <option value="">Select one</option>
+      {%- for plate in left_front_plates -%}
+        {%- assign plate_clean = plate | strip -%}
+        {%- if plate_clean == '' -%}{% continue %}{% endif %}
+        <option>{{ plate_clean }}</option>
+      {%- endfor -%}
+    </select>
+  </div>
+  <div class="custom-text-wrapper">
+    <input
+      type="text"
+      name="properties[Left Front Plate - Text]"
+      class="custom-text"
+      placeholder="Enter custom plate"
+      form="product-form-{{ section.id }}"
+    >
+  </div>
+
+  <label>Right Front Plate</label>
+  <div class="select-wrapper">
+    <select name="properties[Right Front Plate]" form="product-form-{{ section.id }}">
+      <option value="">Select one</option>
+      {%- for plate in right_front_plates -%}
+        {%- assign plate_clean = plate | strip -%}
+        {%- if plate_clean == '' -%}{% continue %}{% endif %}
+        <option>{{ plate_clean }}</option>
+      {%- endfor -%}
+    </select>
+  </div>
+  <div class="custom-text-wrapper">
+    <input
+      type="text"
+      name="properties[Right Front Plate - Text]"
+      class="custom-text"
+      placeholder="Enter custom plate"
+      form="product-form-{{ section.id }}"
+    >
+  </div>
+
+  <label>Back Plate</label>
+  <div class="select-wrapper">
+    <select name="properties[Back Plate]" form="product-form-{{ section.id }}">
+      <option value="">Select one</option>
+      {%- for plate in back_plates -%}
+        {%- assign plate_clean = plate | strip -%}
+        {%- if plate_clean == '' -%}{% continue %}{% endif %}
+        <option>{{ plate_clean }}</option>
+      {%- endfor -%}
+    </select>
+  </div>
+  <div class="custom-text-wrapper">
+    <input
+      type="text"
+      name="properties[Back Plate - Text]"
+      class="custom-text"
+      placeholder="Enter custom plate"
+      form="product-form-{{ section.id }}"
+    >
+  </div>
+
+  <label>Long Sliders</label>
+  <div class="select-wrapper">
+    <select name="properties[Long Sliders]" form="product-form-{{ section.id }}">
+      <option value="">Select one</option>
+      {%- for slider in long_sliders -%}
+        {%- assign slider_clean = slider | strip -%}
+        {%- if slider_clean == '' -%}{% continue %}{% endif %}
+        <option>{{ slider_clean }}</option>
+      {%- endfor -%}
+    </select>
+  </div>
+  <div class="custom-text-wrapper">
+    <input
+      type="text"
+      name="properties[Long Sliders - Text]"
+      class="custom-text"
+      placeholder="Enter custom sliders"
+      form="product-form-{{ section.id }}"
+    >
+  </div>
+
+  <div>
+    <button type="button" class="button button--secondary" onclick="toggleCustomFields()">
+      {{ 'custom_measurements.custom_color_button' | t }}
+    </button>
+  </div>
+</div>
+
+{%- comment -%} Notes Section {%- endcomment -%}
+<div class="conditional-section" id="notes-section">
+  <label>{{ 'custom_measurements.item_notes_label' | t }}</label>
+  <div class="textarea-wrapper">
+    <textarea
+      name="properties[Item Notes]"
+      placeholder="{{ 'custom_measurements.item_notes_placeholder' | t }}"
+      form="product-form-{{ section.id }}"
+    ></textarea>
+  </div>
+  <label>{{ 'custom_measurements.event_notes_label' | t }}</label>
+  <div class="textarea-wrapper">
+    <textarea
+      name="properties[Event Notes]"
+      placeholder="{{ 'custom_measurements.event_notes_placeholder' | t }}"
+      form="product-form-{{ section.id }}"
+    ></textarea>
+  </div>
+</div>
+
+<script>
+  (function () {
+    'use strict';
+
+    const categoryInputs = Array.from(document.querySelectorAll('.category-option-input'));
+    const measurementFields = Array.from(document.querySelectorAll('.measurement-field'));
+    const measurementNames = measurementFields.map((field) => field.dataset.measurement);
+
+    const categoryConfigs = {};
+    const harnessDetailCategories = [];
+
+    categoryInputs.forEach((input) => {
+      const categoryName = input.dataset.label;
+      const requiredList = (input.dataset.required || '').split('|').filter(Boolean);
+      const optionalList = (input.dataset.optional || '').split('|').filter(Boolean);
+      categoryConfigs[categoryName] = {
+        required: requiredList,
+        optional: optionalList,
+      };
+      if (input.dataset.showHarness === 'true') {
+        harnessDetailCategories.push(categoryName);
+      }
+    });
+
+    const measurements = {};
+    measurementNames.forEach((measName) => {
+      const categoryInfo = {};
+      Object.entries(categoryConfigs).forEach(([categoryName, categoryConfig]) => {
+        if (categoryConfig.required.includes(measName)) {
+          categoryInfo[categoryName] = { included: true, required: true };
+        } else if (categoryConfig.optional.includes(measName)) {
+          categoryInfo[categoryName] = { included: true, required: false };
+        }
+      });
+      measurements[measName] = { categories: categoryInfo };
+    });
+
+    const config = {
+      measurements,
+      categories: {
+        harness_details: harnessDetailCategories,
+        notes_section: [],
+        associate_section: [],
+      },
+    };
+
+    const INCH_TO_CM = 2.54;
+    const CM_TO_INCH = 1 / 2.54;
+    const PRECISION = {{ settings.custom_measurements_precision | default: 3 }};
+
+    let currentUnit = 'in';
+    let selectedCategory = null;
+    const measurementValuesByCategory = new Map();
+    let currentCategoryStore = null;
+    let isSyncingValues = false;
+    let hasInteractedWithForm = false;
+
+    const measurementInputs = Array.from(document.querySelectorAll('.measurement-input')).map((input) => {
+      if (!input.dataset.originalName) {
+        input.dataset.originalName = input.getAttribute('name');
+      }
+      return input;
+    });
+    const harnessSection = document.getElementById('harness-details');
+    const notesSection = document.getElementById('notes-section');
+    const associateSection = document.getElementById('associate-section');
+    const associateSelect = document.getElementById('associate-select');
+    const associateText = document.getElementById('associate-text');
+    const associateTextWrapper = document.getElementById('associate-text-wrapper');
+    const unitToggleInputs = document.querySelectorAll('#unitToggle input[type="radio"]');
+
+    const productFormSelectors = [
+      '#product-form-{{ section.id }}',
+      'form[action*="/cart/add"]',
+      'form[id^="product-form"]',
+    ];
+    let productForm = null;
+    for (const selector of productFormSelectors) {
+      const formCandidate = document.querySelector(selector);
+      if (formCandidate) {
+        productForm = formCandidate;
+        break;
+      }
+    }
+
+    const unitOfMeasureInput = document.getElementById('unitOfMeasure');
+    const harnessSelects = document.querySelectorAll('#harness-details select');
+    const harnessCustomTexts = document.querySelectorAll('#harness-details .custom-text');
+
+    const buttonId = 'ProductSubmitButton-{{ section.id }}';
+    let addToCartButton = null;
+    let addToCartButtonWarningLogged = false;
+    let addToCartButtonListenerAttached = false;
+    let resetAfterAddToCartPending = false;
+
+    function resolveAddToCartButton() {
+      if (addToCartButton && document.body.contains(addToCartButton)) {
+        return addToCartButton;
+      }
+
+      const buttonSelectors = [
+        `#${buttonId}`,
+        `#product-form-{{ section.id }} button[type="submit"]`,
+        `#product-form-{{ section.id }} button[name="add"]`,
+        'form[action*="/cart/add"] button[type="submit"]',
+        'form[action*="/cart/add"] button[name="add"]',
+        'button[name="add"][type="submit"]',
+      ];
+
+      for (const selector of buttonSelectors) {
+        const candidate = document.querySelector(selector);
+        if (candidate) {
+          addToCartButton = candidate;
+          if (!addToCartButtonListenerAttached) {
+            addToCartButton.addEventListener('click', function () {
+              resetAfterAddToCartPending = true;
+            });
+            addToCartButtonListenerAttached = true;
+          }
+          return addToCartButton;
+        }
+      }
+
+      if (!addToCartButtonWarningLogged) {
+        console.warn('Could not find add to cart button with ID:', buttonId);
+        addToCartButtonWarningLogged = true;
+      }
+
+      return null;
+    }
+
+    function updateBannerEditingState(isEditing) {
+      const eventName = isEditing ? 'custom-order:editing' : 'custom-order:editing-stop';
+      try {
+        window.dispatchEvent(new CustomEvent(eventName));
+      } catch (error) {
+        console.warn('Unable to dispatch banner editing event:', error);
+      }
+      if (window.CustomOrderBanner && typeof window.CustomOrderBanner.notifyEditing === 'function') {
+        window.CustomOrderBanner.notifyEditing(isEditing);
+      }
+    }
+
+    function flagFormInteraction() {
+      if (hasInteractedWithForm) return;
+      hasInteractedWithForm = true;
+      updateBannerEditingState(true);
+    }
+
+    function formatValue(value) {
+      if (value === null || value === undefined || Number.isNaN(value)) {
+        return '';
+      }
+      return Number(value).toFixed(PRECISION);
+    }
+
+    function parseValue(raw) {
+      if (typeof raw !== 'string') return NaN;
+      const trimmed = raw.trim();
+      if (trimmed === '') return NaN;
+      const parsed = Number(trimmed);
+      return Number.isFinite(parsed) ? parsed : NaN;
+    }
+
+    function hasValidNumber(input) {
+      if (!input) return false;
+      return Number.isFinite(parseValue(input.value));
+    }
+
+    function getCategoryStore(category) {
+      if (!category) return null;
+      if (!measurementValuesByCategory.has(category)) {
+        measurementValuesByCategory.set(category, new Map());
+      }
+      return measurementValuesByCategory.get(category);
+    }
+
+    function clearMeasurementField(field) {
+      const inInput = field.querySelector('.measurement-in');
+      const cmInput = field.querySelector('.measurement-cm');
+      if (inInput) inInput.value = '';
+      if (cmInput) cmInput.value = '';
+      if (currentCategoryStore) {
+        currentCategoryStore.delete(field.dataset.measurement);
+      }
+    }
+
+    function updateMeasurementVisibility() {
+      measurementFields.forEach((field) => {
+        const wrapper = field.querySelector('.measurement-input-wrapper');
+        if (!wrapper) return;
+
+        const inInput = wrapper.querySelector('.measurement-in');
+        const cmInput = wrapper.querySelector('.measurement-cm');
+        if (!inInput || !cmInput) return;
+
+        if (currentUnit === 'in') {
+          inInput.style.display = 'block';
+          cmInput.style.display = 'none';
+        } else {
+          inInput.style.display = 'none';
+          cmInput.style.display = 'block';
+        }
+      });
+    }
+
+    function syncMeasurementValues(measName, sourceUnit, numericValue) {
+      const field = document.querySelector(`.measurement-field[data-measurement="${measName}"]`);
+      if (!field) return;
+      const inInput = field.querySelector('.measurement-in');
+      const cmInput = field.querySelector('.measurement-cm');
+      if (!inInput || !cmInput) return;
+
+      if (isSyncingValues) return;
+      isSyncingValues = true;
+
+      if (sourceUnit === 'in') {
+        if (inInput.value !== formatValue(numericValue)) {
+          inInput.value = formatValue(numericValue);
+        }
+        const converted = numericValue * INCH_TO_CM;
+        cmInput.value = formatValue(converted);
+        if (currentCategoryStore) {
+          currentCategoryStore.set(measName, { in: numericValue, cm: converted });
+        }
+      } else {
+        if (cmInput.value !== formatValue(numericValue)) {
+          cmInput.value = formatValue(numericValue);
+        }
+        const converted = numericValue * CM_TO_INCH;
+        inInput.value = formatValue(converted);
+        if (currentCategoryStore) {
+          currentCategoryStore.set(measName, { in: converted, cm: numericValue });
+        }
+      }
+
+      isSyncingValues = false;
+    }
+
+    function updateMeasurementsForCategory(category) {
+      measurementFields.forEach((field) => {
+        const measName = field.dataset.measurement;
+      const measConfig = config.measurements[measName];
+      const inInput = field.querySelector('.measurement-in');
+      const cmInput = field.querySelector('.measurement-cm');
+        const categoryInfo = measConfig && measConfig.categories ? measConfig.categories[category] : null;
+        const baseLabel = field.dataset.labelBase || measName;
+        const labelElement = field.querySelector('label');
+
+        if (categoryInfo && categoryInfo.included) {
+          field.classList.add('active');
+          const isOptional = categoryInfo.required === false;
+          field.classList.toggle('measurement-field--optional', isOptional);
+          field.dataset.optional = isOptional ? 'true' : 'false';
+          if (labelElement) {
+            labelElement.textContent = isOptional ? `${baseLabel} *` : baseLabel;
+          }
+          if (inInput) inInput.value = '';
+          if (cmInput) cmInput.value = '';
+        } else {
+          field.classList.remove('active');
+          field.classList.remove('measurement-field--optional');
+          field.removeAttribute('data-optional');
+          if (labelElement) {
+            labelElement.textContent = baseLabel;
+          }
+          clearMeasurementField(field);
+          const store = currentCategoryStore;
+          if (store) {
+            store.delete(measName);
+          }
+        }
+      });
+    }
+
+    function saveCurrentCategoryMeasurements() {
+      if (!selectedCategory) return;
+      const store = getCategoryStore(selectedCategory);
+      store.clear();
+
+      measurementFields.forEach((field) => {
+        if (!field.classList.contains('active')) return;
+        const measName = field.dataset.measurement;
+        const inInput = field.querySelector('.measurement-in');
+        const cmInput = field.querySelector('.measurement-cm');
+        let inValue = parseValue(inInput ? inInput.value : '');
+        let cmValue = parseValue(cmInput ? cmInput.value : '');
+
+        if (!Number.isFinite(inValue) && Number.isFinite(cmValue)) {
+          inValue = cmValue * CM_TO_INCH;
+        } else if (!Number.isFinite(cmValue) && Number.isFinite(inValue)) {
+          cmValue = inValue * INCH_TO_CM;
+        }
+
+        if (Number.isFinite(inValue) || Number.isFinite(cmValue)) {
+          store.set(measName, {
+            in: Number.isFinite(inValue) ? inValue : null,
+            cm: Number.isFinite(cmValue) ? cmValue : null,
+          });
+        }
+      });
+    }
+
+    function restoreMeasurementsForCategory(category) {
+      const store = getCategoryStore(category);
+      measurementFields.forEach((field) => {
+        const measName = field.dataset.measurement;
+        const stored = store ? store.get(measName) : null;
+        const inInput = field.querySelector('.measurement-in');
+        const cmInput = field.querySelector('.measurement-cm');
+
+        if (stored && (Number.isFinite(stored.in) || Number.isFinite(stored.cm))) {
+          if (inInput) {
+            inInput.value = Number.isFinite(stored.in) ? formatValue(stored.in) : '';
+          }
+          if (cmInput) {
+            cmInput.value = Number.isFinite(stored.cm) ? formatValue(stored.cm) : '';
+          }
+        } else {
+          if (inInput) inInput.value = '';
+          if (cmInput) cmInput.value = '';
+        }
+      });
+    }
+
+    function validateRequiredFields() {
+      if (!selectedCategory || !config.measurements) return false;
+
+      const activeFields = document.querySelectorAll('.measurement-field.active');
+      for (const field of activeFields) {
+        const measName = field.dataset.measurement;
+        const measConfig = config.measurements[measName];
+        if (!measConfig) continue;
+
+        const categoryInfo = measConfig.categories ? measConfig.categories[selectedCategory] : null;
+        if (!categoryInfo || !categoryInfo.required) continue;
+
+        const inInput = field.querySelector('.measurement-in');
+        const cmInput = field.querySelector('.measurement-cm');
+        const hasValue = hasValidNumber(inInput) || hasValidNumber(cmInput);
+        if (!hasValue) {
+          return false;
+        }
+      }
+
+      if (harnessSection && harnessSection.classList.contains('active')) {
+        const harnessFields = [
+          'properties[Leather Color]',
+          'properties[Left Front Plate]',
+          'properties[Right Front Plate]',
+          'properties[Back Plate]',
+          'properties[Long Sliders]',
+        ];
+
+        for (const fieldName of harnessFields) {
+          const select = document.querySelector(`select[name="${fieldName}"]`);
+          if (!select) continue;
+          const selectedOption = select.options[select.selectedIndex];
+          const hasSelectValue =
+            selectedOption &&
+            selectedOption.value !== '' &&
+            selectedOption.value !== null &&
+            selectedOption.value !== 'Select one';
+
+          const customTextName = fieldName.replace(']', ' - Text]');
+          const customText = document.querySelector(`input[name="${customTextName}"]`);
+          const hasCustomText = customText && customText.value && customText.value.trim() !== '';
+
+          if (!hasSelectValue && !hasCustomText) {
+            return false;
+          }
+        }
+      }
+
+      return true;
+    }
+
+    function updateAddToCartButton() {
+      const button = resolveAddToCartButton();
+      if (!button) return;
+
+      const isValid = validateRequiredFields();
+      if (!isValid) {
+        button.disabled = true;
+        button.style.opacity = '0.5';
+        button.setAttribute('disabled', 'disabled');
+        button.setAttribute('aria-disabled', 'true');
+        button.title = 'Please select a category and fill all required measurements';
+      } else {
+        button.disabled = false;
+        button.style.opacity = '1';
+        button.removeAttribute('disabled');
+        button.removeAttribute('aria-disabled');
+        button.removeAttribute('title');
+      }
+    }
+
+    function updateSectionVisibility(category) {
+      if (harnessSection) {
+        const showHarness =
+          config.categories && config.categories.harness_details
+            ? config.categories.harness_details.includes(category)
+            : false;
+        harnessSection.classList.toggle('active', showHarness);
+      }
+      if (notesSection) {
+        notesSection.classList.add('active');
+      }
+      if (associateSection) {
+        associateSection.classList.add('active');
+      }
+
+      document.querySelectorAll('.custom-text-wrapper').forEach((wrapper) => {
+        if (wrapper.id !== 'associate-text-wrapper') {
+          wrapper.style.display = 'none';
+        }
+      });
+
+      // Handle associate "Other" option
+      if (associateSelect && associateTextWrapper) {
+        const selectedValue = associateSelect.value;
+        if (selectedValue === 'Other') {
+          associateTextWrapper.style.display = 'flex';
+        } else {
+          associateTextWrapper.style.display = 'none';
+          if (associateText) associateText.value = '';
+        }
+      }
+    }
+
+    function updateMeasurementOnUnitChange() {
+      const activeFields = document.querySelectorAll('.measurement-field.active');
+      activeFields.forEach((field) => {
+        const measName = field.dataset.measurement;
+        const inInput = field.querySelector('.measurement-in');
+        const cmInput = field.querySelector('.measurement-cm');
+
+        if (!inInput || !cmInput) return;
+
+        if (currentUnit === 'in') {
+          const cmValue = parseValue(cmInput.value);
+          if (Number.isFinite(cmValue)) {
+            syncMeasurementValues(measName, 'cm', cmValue);
+          }
+        } else {
+          const inValue = parseValue(inInput.value);
+          if (Number.isFinite(inValue)) {
+            syncMeasurementValues(measName, 'in', inValue);
+          }
+        }
+      });
+
+      updateMeasurementVisibility();
+      updateAddToCartButton();
+    }
+
+    function initialize() {
+      hasInteractedWithForm = false;
+      updateBannerEditingState(false);
+      resetAfterAddToCartPending = false;
+
+      if (unitOfMeasureInput) {
+        unitOfMeasureInput.value = 'Measured in Inches';
+      }
+
+      selectedCategory = null;
+
+      if (harnessSection) harnessSection.classList.remove('active');
+      if (notesSection) notesSection.classList.remove('active');
+      if (associateSection) associateSection.classList.remove('active');
+
+      measurementValuesByCategory.clear();
+      currentCategoryStore = null;
+
+      measurementFields.forEach((field) => {
+        clearMeasurementField(field);
+        field.classList.remove('active');
+        field.classList.remove('measurement-field--optional');
+
+        const inputs = field.querySelectorAll('.measurement-input');
+        inputs.forEach((input) => {
+          if (input.dataset.originalName) {
+            input.setAttribute('name', input.dataset.originalName);
+          }
+          input.removeAttribute('data-removed');
+        });
+      });
+
+      document.querySelectorAll('.custom-text-wrapper').forEach((wrapper) => {
+        if (wrapper.id !== 'associate-text-wrapper') {
+          wrapper.style.display = 'none';
+        }
+        const input = wrapper.querySelector('.custom-text');
+        if (input) input.value = '';
+      });
+
+      if (associateSelect) {
+        associateSelect.selectedIndex = 0;
+      }
+      if (associateTextWrapper) {
+        associateTextWrapper.style.display = 'none';
+        if (associateText) associateText.value = '';
+      }
+
+      currentUnit = 'in';
+      unitToggleInputs.forEach((input) => {
+        input.checked = input.dataset.unit === 'in';
+      });
+      updateMeasurementVisibility();
+
+      if (harnessSection) {
+        harnessSection.querySelectorAll('select').forEach((select) => {
+          select.selectedIndex = 0;
+        });
+        harnessSection.querySelectorAll('.custom-text-wrapper').forEach((wrapper) => {
+          const input = wrapper.querySelector('.custom-text');
+          if (input) input.value = '';
+        });
+      }
+
+      if (notesSection) {
+        notesSection.querySelectorAll('textarea').forEach((textarea) => {
+          textarea.value = '';
+        });
+      }
+
+      // Always show associate section
+      if (associateSection) {
+        associateSection.classList.add('active');
+      }
+
+      if (categoryInputs.length > 0) {
+        const firstInput = categoryInputs[0];
+        firstInput.checked = true;
+        selectedCategory = firstInput.dataset.label;
+        currentCategoryStore = getCategoryStore(selectedCategory);
+        updateSectionVisibility(selectedCategory);
+        updateMeasurementsForCategory(selectedCategory);
+        restoreMeasurementsForCategory(selectedCategory);
+        updateMeasurementOnUnitChange();
+      }
+
+      const button = resolveAddToCartButton();
+      if (button) {
+        button.disabled = true;
+        button.style.opacity = '0.5';
+      }
+      updateAddToCartButton();
+    }
+
+    categoryInputs.forEach((input) => {
+      input.addEventListener('change', function () {
+        if (!this.checked) return;
+        flagFormInteraction();
+        if (selectedCategory) {
+          saveCurrentCategoryMeasurements();
+        }
+        selectedCategory = this.dataset.label;
+        currentCategoryStore = getCategoryStore(selectedCategory);
+        updateSectionVisibility(selectedCategory);
+        updateMeasurementsForCategory(selectedCategory);
+        restoreMeasurementsForCategory(selectedCategory);
+        updateMeasurementOnUnitChange();
+        updateAddToCartButton();
+      });
+    });
+
+    unitToggleInputs.forEach((input) => {
+      input.addEventListener('change', function () {
+        if (!this.checked) return;
+        flagFormInteraction();
+        if (selectedCategory) {
+          saveCurrentCategoryMeasurements();
+        }
+        currentUnit = this.dataset.unit;
+
+        if (unitOfMeasureInput) {
+          const unitValue = currentUnit === 'in' ? 'Measured in Inches' : 'Measured in Centimeters';
+          unitOfMeasureInput.value = unitValue;
+          unitOfMeasureInput.setAttribute('value', unitValue);
+        }
+
+        updateMeasurementOnUnitChange();
+      });
+    });
+
+    measurementInputs.forEach((input) => {
+      input.addEventListener('input', function () {
+        flagFormInteraction();
+        updateAddToCartButton();
+      });
+
+      function normalizeMeasurementValue() {
+        const field = input.closest('.measurement-field');
+        if (!field) return;
+        const measName = field.dataset.measurement;
+        const unit = input.classList.contains('measurement-in') ? 'in' : 'cm';
+        const numericValue = parseValue(input.value);
+
+        if (Number.isFinite(numericValue)) {
+          syncMeasurementValues(measName, unit, numericValue);
+        } else if (!isSyncingValues) {
+          const targetInput =
+            unit === 'in' ? field.querySelector('.measurement-cm') : field.querySelector('.measurement-in');
+          if (targetInput) {
+            targetInput.value = '';
+          }
+          if (currentCategoryStore) {
+            currentCategoryStore.delete(measName);
+          }
+        }
+        updateAddToCartButton();
+      }
+
+      input.addEventListener('blur', normalizeMeasurementValue);
+      input.addEventListener('change', normalizeMeasurementValue);
+    });
+
+    harnessSelects.forEach((select) => {
+      select.addEventListener('change', updateAddToCartButton);
+      select.addEventListener('change', flagFormInteraction);
+    });
+
+    harnessCustomTexts.forEach((input) => {
+      input.addEventListener('input', function () {
+        flagFormInteraction();
+        updateAddToCartButton();
+      });
+    });
+
+    if (associateSelect) {
+      associateSelect.addEventListener('change', function () {
+        flagFormInteraction();
+        const selectedValue = this.value;
+        if (associateTextWrapper) {
+          if (selectedValue === 'Other') {
+            associateTextWrapper.style.display = 'flex';
+          } else {
+            associateTextWrapper.style.display = 'none';
+            if (associateText) associateText.value = '';
+          }
+        }
+        updateAddToCartButton();
+      });
+    }
+
+    if (associateText) {
+      associateText.addEventListener('input', function () {
+        flagFormInteraction();
+        updateAddToCartButton();
+      });
+    }
+
+    if (productForm) {
+      productForm.addEventListener('submit', function (event) {
+        if (!validateRequiredFields()) {
+          event.preventDefault();
+          alert('Please select a category and fill all required measurements.');
+          resetAfterAddToCartPending = false;
+          return false;
+        }
+
+        if (unitOfMeasureInput) {
+          const unitValue = currentUnit === 'in' ? 'Measured in Inches' : 'Measured in Centimeters';
+          unitOfMeasureInput.value = unitValue;
+          unitOfMeasureInput.setAttribute('value', unitValue);
+        }
+
+        document.querySelectorAll('.measurement-field.active').forEach((field) => {
+          const measName = field.dataset.measurement;
+          const inInput = field.querySelector('.measurement-in');
+          const cmInput = field.querySelector('.measurement-cm');
+          const inValue = parseValue(inInput ? inInput.value : '');
+          const cmValue = parseValue(cmInput ? cmInput.value : '');
+
+          if (Number.isFinite(inValue) && !Number.isFinite(cmValue)) {
+            syncMeasurementValues(measName, 'in', inValue);
+          } else if (Number.isFinite(cmValue) && !Number.isFinite(inValue)) {
+            syncMeasurementValues(measName, 'cm', cmValue);
+          }
+        });
+
+        if (selectedCategory && config.measurements) {
+          const measurementInputsForSubmit = this.querySelectorAll('input[name^="properties["]');
+          measurementInputsForSubmit.forEach((input) => {
+            const name = input.getAttribute('name');
+            if (!name || (!name.includes('(in)') && !name.includes('(cm)'))) return;
+
+            const match = name.match(/properties\[(.+?)\s+\(in\)\]|properties\[(.+?)\s+\(cm\)\]/);
+            if (!match) return;
+
+            const measName = match[1] || match[2];
+            const measConfig = config.measurements[measName];
+            const categoryInfo = measConfig && measConfig.categories ? measConfig.categories[selectedCategory] : null;
+            const isIncluded = categoryInfo && categoryInfo.included === true;
+            const value = input.value && input.value.trim() !== '' ? input.value : '';
+
+            if (!isIncluded || value === '') {
+              input.removeAttribute('name');
+              input.setAttribute('data-removed', 'true');
+            }
+          });
+        }
+
+        resetAfterAddToCartPending = true;
+        hasInteractedWithForm = false;
+        updateBannerEditingState(false);
+      });
+    }
+
+    function delayedInitialize() {
+      initialize();
+      updateAddToCartButton();
+    }
+
+    window.addEventListener('pageshow', function () {
+      initialize();
+      updateAddToCartButton();
+    });
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', delayedInitialize);
+    } else {
+      delayedInitialize();
+    }
+
+    // Wait for subscribe and PUB_SUB_EVENTS to be available (deferred scripts)
+    function setupCartUpdateSubscription() {
+      if (typeof subscribe === 'function' && typeof PUB_SUB_EVENTS !== 'undefined' && PUB_SUB_EVENTS.cartUpdate) {
+        subscribe(PUB_SUB_EVENTS.cartUpdate, function (event) {
+          if (event.cartState || event.itemCount !== undefined) {
+            hasInteractedWithForm = false;
+            updateBannerEditingState(false);
+            if (!resetAfterAddToCartPending) {
+              return;
+            }
+            initialize();
+            updateAddToCartButton();
+            resetAfterAddToCartPending = false;
+          }
+          if (event.customOrderItemAdded) {
+            resetAfterAddToCartPending = false;
+            initialize();
+            updateAddToCartButton();
+          }
+        });
+      } else {
+        // Retry after a short delay if scripts aren't loaded yet
+        setTimeout(setupCartUpdateSubscription, 100);
+      }
+    }
+
+    // Try to set up subscription immediately, or wait for scripts to load
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', setupCartUpdateSubscription);
+    } else {
+      setupCartUpdateSubscription();
+    }
+  })();
+
+  function toggleCustomFields() {
+    document.querySelectorAll('.custom-text-wrapper').forEach((wrapper) => {
+      wrapper.style.display = 'flex';
+    });
+  }
+</script>

@@ -1,3 +1,12 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin language editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "settings_schema": {
     "colors": {
@@ -363,6 +372,71 @@
           },
           "label": "호버 효과",
           "info": "카드 및 버튼에 영향을 미칩니다."
+        }
+      }
+    },
+    "custom_order_banner": {
+      "name": "Custom order banner",
+      "settings": {
+        "header_copy": {
+          "content": "Banner messaging"
+        },
+        "editing_text": {
+          "label": "Editing state message"
+        },
+        "cart_text": {
+          "label": "In-cart message"
+        },
+        "header_colors": {
+          "content": "Banner colors"
+        },
+        "background_color": {
+          "label": "Background color"
+        },
+        "text_color": {
+          "label": "Text color"
+        },
+        "shadow_color": {
+          "label": "Shadow color"
+        },
+        "shadow_opacity": {
+          "label": "Shadow opacity"
+        }
+      }
+    },
+    "custom_order_measurements_settings": {
+      "name": "Custom measurements",
+      "settings": {
+        "header_measurements": {
+          "content": "Categories and measurements"
+        },
+        "categories_order": {
+          "label": "Category order"
+        },
+        "measurement_map": {
+          "label": "Measurement assignments",
+          "info": "Format: Measurement: Category, Category*, ... (use * to mark optional measurements for a category). One measurement per line."
+        },
+        "harness_categories": {
+          "label": "Harness categories"
+        },
+        "header_options": {
+          "content": "Customization options"
+        },
+        "leather_colors": {
+          "label": "Leather colors"
+        },
+        "front_plate_options": {
+          "label": "Front plate options"
+        },
+        "back_plate_extra": {
+          "label": "Back plate extra options"
+        },
+        "long_sliders": {
+          "label": "Long slider options"
+        },
+        "precision": {
+          "label": "Decimal precision"
         }
       }
     }
@@ -2648,6 +2722,9 @@
             "label": "오른쪽"
           },
           "label": "모바일 콘텐츠 정렬"
+        },
+        "color_scheme": {
+          "info": "Visible when container displayed."
         }
       },
       "blocks": {
@@ -3284,6 +3361,36 @@
       "presets": {
         "name": "여러 행"
       }
+    },
+    "custom-order-measurements": {
+      "name": "Custom Order Measurements",
+      "settings": {
+        "custom_order_measurements": {
+          "label": "Custom Order Measurements",
+          "info": "Custom Order Measurements."
+        }
+      },
+      "presets": {
+        "name": "Custom Order Measurements"
+      }
     }
+  },
+  "custom_order": {
+    "banner": {
+      "editing": "Custom order not in cart yet — make sure you add it before leaving this page.",
+      "cart": "Custom order is in cart"
+    }
+  },
+  "custom_measurements": {
+    "category_legend": "Custom product category",
+    "unit_legend": "Unit",
+    "unit_inches": "Inches",
+    "unit_centimeters": "Centimeters",
+    "measurement_hint": "Measurements marked with * are optional for the selected category.",
+    "custom_color_button": "Don't see a color listed? Click here",
+    "item_notes_label": "Item Notes *",
+    "item_notes_placeholder": "Enter your item notes here",
+    "event_notes_label": "Event Notes *",
+    "event_notes_placeholder": "Event name or notes here"
   }
 }
