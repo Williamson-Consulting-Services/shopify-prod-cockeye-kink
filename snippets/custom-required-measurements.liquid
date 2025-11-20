@@ -71,29 +71,7 @@
 -%}
 
 <style>
-  /* Measurement Input Fields */
-  .measurement-input {
-    -webkit-appearance: none;
-    appearance: none;
-    background-color: rgb(var(--color-background));
-    color: rgb(var(--color-foreground));
-    font-family: var(--font-body-family);
-    font-style: var(--font-body-style);
-    font-weight: var(--font-body-weight-bold, 600);
-    font-size: 1.6rem;
-    width: 100%;
-    max-width: 12rem;
-    box-sizing: border-box;
-    padding: 1.5rem;
-    margin: var(--inputs-border-width);
-    border: 0;
-    border-radius: var(--inputs-radius);
-    height: 4.5rem;
-    min-height: calc(var(--inputs-border-width) * 2);
-    transition: box-shadow var(--duration-short) ease;
-    position: relative;
-  }
-
+  /* Measurement Field Container */
   .measurement-field {
     position: relative;
     display: none;
@@ -103,7 +81,16 @@
     display: block;
   }
 
-  .measurement-field:before {
+  /* Measurement Input Wrapper */
+  .measurement-input-wrapper {
+    position: relative;
+    display: flex;
+    width: 100%;
+    max-width: 12rem;
+    transition: box-shadow var(--duration-short) ease;
+  }
+
+  .measurement-input-wrapper:before {
     pointer-events: none;
     content: '';
     position: absolute;
@@ -117,7 +104,7 @@
     z-index: -1;
   }
 
-  .measurement-field:after {
+  .measurement-input-wrapper:after {
     pointer-events: none;
     content: '';
     position: absolute;
@@ -132,15 +119,50 @@
     z-index: 1;
   }
 
-  .measurement-input:hover {
+  .measurement-input-wrapper:hover:after {
     box-shadow: 0 0 0 calc(0.1rem + var(--inputs-border-width))
       rgba(var(--color-foreground), var(--inputs-border-opacity));
+  }
+
+  /* Measurement Input Fields */
+  .measurement-input {
+    -webkit-appearance: none;
+    appearance: none;
+    background-color: rgb(var(--color-background));
+    color: rgb(var(--color-foreground));
+    font-family: var(--font-body-family);
+    font-style: var(--font-body-style);
+    font-weight: var(--font-body-weight-bold, 600);
+    font-size: 1.6rem;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 1.5rem;
+    margin: var(--inputs-border-width);
+    border: 0;
+    border-radius: var(--inputs-radius);
+    height: 4.5rem;
+    min-height: calc(var(--inputs-border-width) * 2);
+    transition: box-shadow var(--duration-short) ease;
+    position: relative;
+    z-index: 2;
   }
 
   .measurement-input:focus,
   .measurement-input:focus-visible {
     outline: 0;
+  }
+
+  /* Focus state on wrapper when input is focused */
+  .measurement-input-wrapper:has(.measurement-input:focus):after,
+  .measurement-input-wrapper:has(.measurement-input:focus-visible):after {
     box-shadow: 0 0 0 calc(0.1rem + var(--inputs-border-width)) rgba(var(--color-foreground));
+  }
+
+  /* Fallback for browsers without :has() support */
+  @supports not selector(:has(*)) {
+    .measurement-input:focus {
+      box-shadow: 0 0 0 calc(0.1rem + var(--inputs-border-width)) rgba(var(--color-foreground));
+    }
   }
 
   .measurement-input::placeholder {
@@ -284,10 +306,16 @@
   .custom-text-wrapper {
     position: relative;
     display: none;
+    flex: 1;
     width: 100%;
     margin-top: var(--spacing-2, 0.5rem);
     margin-bottom: var(--spacing-3, 0.75rem);
     transition: box-shadow var(--duration-short) ease;
+  }
+
+  /* Ensure wrapper uses flex when visible */
+  .custom-text-wrapper[style*="display: block"] {
+    display: flex !important;
   }
 
   .custom-text {
@@ -347,11 +375,22 @@
       rgba(var(--color-foreground), var(--inputs-border-opacity));
   }
 
-
   .custom-text:focus,
   .custom-text:focus-visible {
     outline: 0;
+  }
+
+  /* Focus state on wrapper when input is focused */
+  .custom-text-wrapper:has(.custom-text:focus):after,
+  .custom-text-wrapper:has(.custom-text:focus-visible):after {
     box-shadow: 0 0 0 calc(0.1rem + var(--inputs-border-width)) rgba(var(--color-foreground));
+  }
+
+  /* Fallback for browsers without :has() support */
+  @supports not selector(:has(*)) {
+    .custom-text:focus {
+      box-shadow: 0 0 0 calc(0.1rem + var(--inputs-border-width)) rgba(var(--color-foreground));
+    }
   }
 
   .custom-text::placeholder {
@@ -597,31 +636,33 @@
       data-label-base="{{ measurement_label }}"
     >
       <label for="{{ handle }}-in">{{ measurement_label }}</label>
-      <input
-        type="number"
-        inputmode="decimal"
-        autocomplete="off"
-        id="{{ handle }}-in"
-        name="properties[{{ measurement_label }} (in)]"
-        form="product-form-{{ section.id }}"
-        class="measurement-input measurement-in"
-        data-measurement="{{ measurement_label }}"
-        placeholder="0.000"
-        min="0"
-      >
-      <input
-        type="number"
-        inputmode="decimal"
-        autocomplete="off"
-        id="{{ handle }}-cm"
-        name="properties[{{ measurement_label }} (cm)]"
-        form="product-form-{{ section.id }}"
-        class="measurement-input measurement-cm"
-        data-measurement="{{ measurement_label }}"
-        placeholder="0.000"
-        min="0"
-        style="display: none;"
-      >
+      <div class="measurement-input-wrapper">
+        <input
+          type="number"
+          inputmode="decimal"
+          autocomplete="off"
+          id="{{ handle }}-in"
+          name="properties[{{ measurement_label }} (in)]"
+          form="product-form-{{ section.id }}"
+          class="measurement-input measurement-in"
+          data-measurement="{{ measurement_label }}"
+          placeholder="0.000"
+          min="0"
+        >
+        <input
+          type="number"
+          inputmode="decimal"
+          autocomplete="off"
+          id="{{ handle }}-cm"
+          name="properties[{{ measurement_label }} (cm)]"
+          form="product-form-{{ section.id }}"
+          class="measurement-input measurement-cm"
+          data-measurement="{{ measurement_label }}"
+          placeholder="0.000"
+          min="0"
+          style="display: none;"
+        >
+      </div>
     </div>
   {%- endfor -%}
 </div>
@@ -949,9 +990,13 @@
 
     function updateMeasurementVisibility() {
       measurementFields.forEach((field) => {
-        const inInput = field.querySelector('.measurement-in');
-        const cmInput = field.querySelector('.measurement-cm');
+        const wrapper = field.querySelector('.measurement-input-wrapper');
+        if (!wrapper) return;
+
+        const inInput = wrapper.querySelector('.measurement-in');
+        const cmInput = wrapper.querySelector('.measurement-cm');
         if (!inInput || !cmInput) return;
+
         if (currentUnit === 'in') {
           inInput.style.display = 'block';
           cmInput.style.display = 'none';
@@ -1178,7 +1223,7 @@
       if (associateSelect && associateTextWrapper) {
         const selectedValue = associateSelect.value;
         if (selectedValue === 'Other') {
-          associateTextWrapper.style.display = 'block';
+          associateTextWrapper.style.display = 'flex';
         } else {
           associateTextWrapper.style.display = 'none';
           if (associateText) associateText.value = '';
@@ -1392,7 +1437,7 @@
         const selectedValue = this.value;
         if (associateTextWrapper) {
           if (selectedValue === 'Other') {
-            associateTextWrapper.style.display = 'block';
+            associateTextWrapper.style.display = 'flex';
           } else {
             associateTextWrapper.style.display = 'none';
             if (associateText) associateText.value = '';
@@ -1503,7 +1548,7 @@
 
   function toggleCustomFields() {
     document.querySelectorAll('.custom-text-wrapper').forEach((wrapper) => {
-      wrapper.style.display = 'block';
+      wrapper.style.display = 'flex';
     });
   }
 </script>
