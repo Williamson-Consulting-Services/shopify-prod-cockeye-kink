@@ -418,6 +418,10 @@
           "label": "Long slider options",
           "info": "Enter options separated by commas."
         },
+        "associates": {
+          "label": "Associate options",
+          "info": "Comma-separated list of associate options. Use 'Other' as the last option to allow custom text input."
+        },
         "precision": {
           "label": "Decimal precision",
           "info": "Number of decimal places shown for measurement values."

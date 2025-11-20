@@ -60,6 +60,10 @@
 {%- assign long_sliders_source_raw = settings.custom_measurements_long_sliders | default: default_long_sliders -%}
 {%- assign long_sliders_source = long_sliders_source_raw | replace: '|', ',' -%}
 {%- assign long_sliders = long_sliders_source | split: ',' -%}
+{%- assign default_associates = 'Clair, Erik, Other' -%}
+{%- assign associates_source_raw = settings.custom_measurements_associates | default: default_associates -%}
+{%- assign associates_source = associates_source_raw | replace: '|', ',' -%}
+{%- assign associates = associates_source | split: ',' -%}
 
 {%- liquid
   assign order_tag_name = '_custom'
@@ -374,6 +378,28 @@
   </div>
 </div>
 
+{%- comment -%} Associate Section {%- endcomment -%}
+<div class="conditional-section" id="associate-section">
+  <label>{{ 'custom_measurements.associate_label' | t }}</label>
+  <select name="properties[Associate]" id="associate-select" form="product-form-{{ section.id }}">
+    <option value="">Select one</option>
+    {%- for associate in associates -%}
+      {%- assign associate_clean = associate | strip -%}
+      {%- if associate_clean == '' -%}{% continue %}{% endif %}
+      <option value="{{ associate_clean }}">{{ associate_clean }}</option>
+    {%- endfor -%}
+  </select>
+  <input
+    type="text"
+    name="properties[Associate - Text]"
+    id="associate-text"
+    class="custom-text"
+    placeholder="{{ 'custom_measurements.associate_placeholder' | t }}"
+    form="product-form-{{ section.id }}"
+    style="display: none;"
+  >
+</div>
+
 {%- comment -%} Notes Section {%- endcomment -%}
 <div class="conditional-section" id="notes-section">
   <label>{{ 'custom_measurements.item_notes_label' | t }}</label>
@@ -432,6 +458,7 @@
       categories: {
         harness_details: harnessDetailCategories,
         notes_section: [],
+        associate_section: [],
       },
     };
 
@@ -454,6 +481,9 @@
     });
     const harnessSection = document.getElementById('harness-details');
     const notesSection = document.getElementById('notes-section');
+    const associateSection = document.getElementById('associate-section');
+    const associateSelect = document.getElementById('associate-select');
+    const associateText = document.getElementById('associate-text');
     const unitToggleInputs = document.querySelectorAll('#unitToggle input[type="radio"]');
 
     const productFormSelectors = [
@@ -789,10 +819,26 @@
       if (notesSection) {
         notesSection.classList.add('active');
       }
+      if (associateSection) {
+        associateSection.classList.add('active');
+      }
 
       document.querySelectorAll('.custom-text').forEach((el) => {
-        el.style.display = 'none';
+        if (el.id !== 'associate-text') {
+          el.style.display = 'none';
+        }
       });
+
+      // Handle associate "Other" option
+      if (associateSelect && associateText) {
+        const selectedValue = associateSelect.value;
+        if (selectedValue === 'Other') {
+          associateText.style.display = 'block';
+        } else {
+          associateText.style.display = 'none';
+          associateText.value = '';
+        }
+      }
     }
 
     function updateMeasurementOnUnitChange() {
@@ -834,6 +880,7 @@
 
       if (harnessSection) harnessSection.classList.remove('active');
       if (notesSection) notesSection.classList.remove('active');
+      if (associateSection) associateSection.classList.remove('active');
 
       measurementValuesByCategory.clear();
       currentCategoryStore = null;
@@ -853,9 +900,19 @@
       });
 
       document.querySelectorAll('.custom-text').forEach((el) => {
-        el.style.display = 'none';
+        if (el.id !== 'associate-text') {
+          el.style.display = 'none';
+        }
         el.value = '';
       });
+
+      if (associateSelect) {
+        associateSelect.selectedIndex = 0;
+      }
+      if (associateText) {
+        associateText.style.display = 'none';
+        associateText.value = '';
+      }
 
       currentUnit = 'in';
       unitToggleInputs.forEach((input) => {
@@ -876,6 +933,11 @@
         notesSection.querySelectorAll('textarea').forEach((textarea) => {
           textarea.value = '';
         });
+      }
+
+      // Always show associate section
+      if (associateSection) {
+        associateSection.classList.add('active');
       }
 
       if (categoryInputs.length > 0) {
@@ -976,6 +1038,29 @@
         updateAddToCartButton();
       });
     });
+
+    if (associateSelect) {
+      associateSelect.addEventListener('change', function () {
+        flagFormInteraction();
+        const selectedValue = this.value;
+        if (associateText) {
+          if (selectedValue === 'Other') {
+            associateText.style.display = 'block';
+          } else {
+            associateText.style.display = 'none';
+            associateText.value = '';
+          }
+        }
+        updateAddToCartButton();
+      });
+    }
+
+    if (associateText) {
+      associateText.addEventListener('input', function () {
+        flagFormInteraction();
+        updateAddToCartButton();
+      });
+    }
 
     if (productForm) {
       productForm.addEventListener('submit', function (event) {

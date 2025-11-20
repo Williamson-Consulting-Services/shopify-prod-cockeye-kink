@@ -1570,6 +1570,13 @@
         "default": "None, Brass, Steel"
       },
       {
+        "type": "text",
+        "id": "custom_measurements_associates",
+        "label": "t:settings_schema.custom_order_measurements_settings.settings.associates.label",
+        "info": "t:settings_schema.custom_order_measurements_settings.settings.associates.info",
+        "default": "Clair, Erik, Other"
+      },
+      {
         "type": "range",
         "id": "custom_measurements_precision",
         "label": "t:settings_schema.custom_order_measurements_settings.settings.precision.label",

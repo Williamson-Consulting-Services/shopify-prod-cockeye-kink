@@ -79,6 +79,8 @@
     "unit_centimeters": "Centimeters",
     "measurement_hint": "Measurements marked with * are optional for the selected category.",
     "custom_color_button": "Don't see a color listed? Click here",
+    "associate_label": "Associate",
+    "associate_placeholder": "Enter associate name",
     "item_notes_label": "Item Notes *",
     "item_notes_placeholder": "Enter your item notes here",
     "event_notes_label": "Event Notes *",
