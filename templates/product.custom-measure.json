@@ -12,6 +12,10 @@
     "main": {
       "type": "main-product",
       "blocks": {
+        "title": {
+          "type": "title",
+          "settings": {}
+        },
         "vendor": {
           "type": "text",
           "settings": {
@@ -19,35 +23,10 @@
             "text_style": "uppercase"
           }
         },
-        "title": {
-          "type": "title",
-          "settings": {}
-        },
-        "caption": {
-          "type": "text",
-          "settings": {
-            "text": "{{ product.metafields.descriptors.subtitle.value }}",
-            "text_style": "subtitle"
-          }
-        },
-        "price": {
-          "type": "price",
-          "settings": {}
-        },
-        "variant_picker": {
-          "type": "variant_picker",
-          "settings": {
-            "picker_type": "button"
-          }
-        },
-        "quantity_selector": {
-          "type": "quantity_selector",
-          "settings": {}
-        },
         "text_J6M9gc": {
           "type": "text",
           "settings": {
-            "text": "<strong>Custom orders can require the following measurements: Neck, Chest, Shoulders, Stomach, Waist, Butt/Hips, Upper Thigh, Lower Thigh, Knee, Calf (widest), Ankle, Inseam. See measuring guide requirements below.</strong>",
+            "text": "<strong>This page is for staff and associates. Orders filled by customers may be cancelled. </br> To begin, select the product category, unit of measure, and then fill in the order details.</strong>",
             "text_style": "body"
           }
         },
@@ -56,6 +35,10 @@
           "settings": {
             "custom_liquid": "{% render 'custom-required-measurements' %}"
           }
+        },
+        "quantity_selector": {
+          "type": "quantity_selector",
+          "settings": {}
         },
         "text_Yj8XCR": {
           "type": "text",
@@ -74,13 +57,6 @@
         "description": {
           "type": "description",
           "settings": {}
-        },
-        "text_47yRVa": {
-          "type": "text",
-          "settings": {
-            "text": "<strong>We will attempt to contact you if any measurements are missing. Otherwise the order may be refunded and cancelled.</strong>",
-            "text_style": "body"
-          }
         },
         "collapsible-row-0": {
           "type": "collapsible_tab",
@@ -117,18 +93,14 @@
         }
       },
       "block_order": [
-        "vendor",
         "title",
-        "caption",
-        "price",
-        "variant_picker",
-        "quantity_selector",
+        "vendor",
         "text_J6M9gc",
         "custom_liquid_i43zwU",
+        "quantity_selector",
         "text_Yj8XCR",
         "buy_buttons",
         "description",
-        "text_47yRVa",
         "collapsible-row-0",
         "collapsible-row-1",
         "collapsible-row-3",
@@ -136,11 +108,11 @@
       ],
       "settings": {
         "enable_sticky_info": true,
-        "media_size": "large",
+        "media_size": "small",
         "constrain_to_viewport": true,
         "media_fit": "contain",
         "gallery_layout": "stacked",
-        "media_position": "left",
+        "media_position": "right",
         "image_zoom": "lightbox",
         "mobile_thumbnails": "hide",
         "hide_variants": true,
