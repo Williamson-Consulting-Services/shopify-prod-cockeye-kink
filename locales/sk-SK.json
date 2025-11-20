@@ -210,6 +210,10 @@
     }
   },
   "templates": {
+    "404": {
+      "title": "Stránka sa nenašla",
+      "subtext": "404"
+    },
     "search": {
       "no_results": "Pre výraz „{{ terms }}“ sa nenašli žiadne výsledky. Skontrolujte pravopis alebo použite iné slovo či slovné spojenie.",
       "title": "Výsledky vyhľadávania",
@@ -263,10 +267,6 @@
         "error_heading": "Upravte tieto údaje:",
         "title": "Kontaktný formulár"
       }
-    },
-    "404": {
-      "title": "Stránka sa nenašla",
-      "subtext": "404"
     }
   },
   "sections": {
@@ -496,5 +496,23 @@
       "send_on": "RRRR-MM-DD",
       "send_on_label": "Dátum odoslania (voliteľné)"
     }
+  },
+  "custom_order": {
+    "banner": {
+      "editing": "Custom order not in cart yet — make sure you add it before leaving this page.",
+      "cart": "Custom order is in cart"
+    }
+  },
+  "custom_measurements": {
+    "category_legend": "Custom product category",
+    "unit_legend": "Unit",
+    "unit_inches": "Inches",
+    "unit_centimeters": "Centimeters",
+    "measurement_hint": "Measurements marked with * are optional for the selected category.",
+    "custom_color_button": "Don't see a color listed? Click here",
+    "item_notes_label": "Item Notes *",
+    "item_notes_placeholder": "Enter your item notes here",
+    "event_notes_label": "Event Notes *",
+    "event_notes_placeholder": "Event name or notes here"
   }
 }

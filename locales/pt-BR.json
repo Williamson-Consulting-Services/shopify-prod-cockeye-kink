@@ -206,6 +206,10 @@
     }
   },
   "templates": {
+    "404": {
+      "title": "Página não encontrada",
+      "subtext": "404"
+    },
     "search": {
       "no_results": "Não foram encontrados resultados para “{{ terms }}”. Verifique a ortografia ou use uma palavra ou frase diferente.",
       "results_with_count": {
@@ -254,10 +258,6 @@
         "error_heading": "Ajuste o seguinte:",
         "title": "Formulário de contato"
       }
-    },
-    "404": {
-      "title": "Página não encontrada",
-      "subtext": "404"
     }
   },
   "sections": {
@@ -486,5 +486,23 @@
       "send_on": "AAAA-MM-DD",
       "send_on_label": "Enviar em (opcional)"
     }
+  },
+  "custom_order": {
+    "banner": {
+      "editing": "Custom order not in cart yet — make sure you add it before leaving this page.",
+      "cart": "Custom order is in cart"
+    }
+  },
+  "custom_measurements": {
+    "category_legend": "Custom product category",
+    "unit_legend": "Unit",
+    "unit_inches": "Inches",
+    "unit_centimeters": "Centimeters",
+    "measurement_hint": "Measurements marked with * are optional for the selected category.",
+    "custom_color_button": "Don't see a color listed? Click here",
+    "item_notes_label": "Item Notes *",
+    "item_notes_placeholder": "Enter your item notes here",
+    "event_notes_label": "Event Notes *",
+    "event_notes_placeholder": "Event name or notes here"
   }
 }

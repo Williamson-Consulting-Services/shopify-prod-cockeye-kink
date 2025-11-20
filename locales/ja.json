@@ -202,6 +202,10 @@
     }
   },
   "templates": {
+    "404": {
+      "title": "ページが見つかりません",
+      "subtext": "404"
+    },
     "search": {
       "no_results": "「{{ terms }}」に一致する結果は見つかりませんでした。スペルを確認するか、別の単語やフレーズを使用してください。",
       "results_with_count": {
@@ -245,10 +249,6 @@
         "error_heading": "以下を確認してください。",
         "title": "お問い合わせフォーム"
       }
-    },
-    "404": {
-      "title": "ページが見つかりません",
-      "subtext": "404"
     }
   },
   "sections": {
@@ -476,5 +476,23 @@
       "send_on": "YYYY-MM-DD",
       "send_on_label": "送信日 (任意)"
     }
+  },
+  "custom_order": {
+    "banner": {
+      "editing": "Custom order not in cart yet — make sure you add it before leaving this page.",
+      "cart": "Custom order is in cart"
+    }
+  },
+  "custom_measurements": {
+    "category_legend": "Custom product category",
+    "unit_legend": "Unit",
+    "unit_inches": "Inches",
+    "unit_centimeters": "Centimeters",
+    "measurement_hint": "Measurements marked with * are optional for the selected category.",
+    "custom_color_button": "Don't see a color listed? Click here",
+    "item_notes_label": "Item Notes *",
+    "item_notes_placeholder": "Enter your item notes here",
+    "event_notes_label": "Event Notes *",
+    "event_notes_placeholder": "Event name or notes here"
   }
 }

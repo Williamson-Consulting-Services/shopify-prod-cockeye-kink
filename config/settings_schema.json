@@ -1455,5 +1455,130 @@
         "info": "t:settings_schema.cart.settings.cart_drawer.collection.info"
       }
     ]
+  },
+  {
+    "name": "t:settings_schema.custom_order_banner.name",
+    "settings": [
+      {
+        "type": "header",
+        "content": "t:settings_schema.custom_order_banner.settings.header_copy.content"
+      },
+      {
+        "type": "text",
+        "id": "custom_order_banner_editing_text",
+        "label": "t:settings_schema.custom_order_banner.settings.editing_text.label",
+        "default": "Custom order not in cart yet — make sure you add it before leaving this page."
+      },
+      {
+        "type": "text",
+        "id": "custom_order_banner_cart_text",
+        "label": "t:settings_schema.custom_order_banner.settings.cart_text.label",
+        "default": "Custom order is in cart"
+      },
+      {
+        "type": "header",
+        "content": "t:settings_schema.custom_order_banner.settings.header_colors.content"
+      },
+      {
+        "type": "color",
+        "id": "custom_order_banner_background_color",
+        "label": "t:settings_schema.custom_order_banner.settings.background_color.label",
+        "default": "#ffec99"
+      },
+      {
+        "type": "color",
+        "id": "custom_order_banner_text_color",
+        "label": "t:settings_schema.custom_order_banner.settings.text_color.label",
+        "default": "#3f2f00"
+      },
+      {
+        "type": "color",
+        "id": "custom_order_banner_shadow_color",
+        "label": "t:settings_schema.custom_order_banner.settings.shadow_color.label",
+        "default": "#000000"
+      },
+      {
+        "type": "range",
+        "id": "custom_order_banner_shadow_opacity",
+        "min": 0,
+        "max": 100,
+        "step": 5,
+        "unit": "%",
+        "label": "t:settings_schema.custom_order_banner.settings.shadow_opacity.label",
+        "default": 20
+      }
+    ]
+  },
+  {
+    "name": "t:settings_schema.custom_order_measurements_settings.name",
+    "settings": [
+      {
+        "type": "header",
+        "content": "t:settings_schema.custom_order_measurements_settings.settings.header_measurements.content"
+      },
+      {
+        "type": "text",
+        "id": "custom_measurements_categories_order",
+        "label": "t:settings_schema.custom_order_measurements_settings.settings.categories_order.label",
+        "info": "t:settings_schema.custom_order_measurements_settings.settings.categories_order.info",
+        "default": "Deluxe Harness, Standard Harness, Suspender Harness, Dogtag/Pigtag, Hats, Chaps, Shirt, Pants, Belts, Gloves, Suspenders, Other"
+      },
+      {
+        "type": "textarea",
+        "id": "custom_measurements_map",
+        "label": "t:settings_schema.custom_order_measurements_settings.settings.measurement_map.label",
+        "info": "t:settings_schema.custom_order_measurements_settings.settings.measurement_map.info",
+        "default": "Head Circumference: Hats, Other*\nNeck: Deluxe Harness, Standard Harness, Suspender Harness, Dogtag/Pigtag, Shirt, Other*\nShoulders: Deluxe Harness, Standard Harness, Suspender Harness, Shirt, Suspenders, Other*\nChest: Deluxe Harness, Standard Harness, Suspender Harness, Shirt, Suspenders, Other*\nTorso: Deluxe Harness, Standard Harness, Suspender Harness, Shirt, Other*\nSleeve Length: Shirt, Other*\nBicep: Shirt, Other*\nWrist: Shirt, Gloves, Other*\nPalm Circumference: Gloves, Other*\nHand Length: Gloves, Other*\nStomach: Shirt, Other*\nWaist: Deluxe Harness, Standard Harness, Suspender Harness, Chaps, Pants, Belts, Suspenders, Other*\nHips: Chaps, Pants, Belts, Other*\nButt (Seat): Pants, Chaps, Other*\nButt Rise: Pants, Other*\nUpper Thigh: Chaps, Pants, Other*\nLower Thigh: Chaps, Pants, Other*\nKnee: Chaps, Pants, Other*\nCalf: Chaps, Pants, Other*\nAnkle: Chaps, Pants, Other*\nInseam: Pants, Chaps, Other*\nCrotch: Pants, Other*"
+      },
+      {
+        "type": "text",
+        "id": "custom_measurements_harness_categories",
+        "label": "t:settings_schema.custom_order_measurements_settings.settings.harness_categories.label",
+        "info": "t:settings_schema.custom_order_measurements_settings.settings.harness_categories.info",
+        "default": "Deluxe Harness, Standard Harness, Suspender Harness"
+      },
+      {
+        "type": "header",
+        "content": "t:settings_schema.custom_order_measurements_settings.settings.header_options.content"
+      },
+      {
+        "type": "text",
+        "id": "custom_measurements_leather_colors",
+        "label": "t:settings_schema.custom_order_measurements_settings.settings.leather_colors.label",
+        "info": "t:settings_schema.custom_order_measurements_settings.settings.leather_colors.info",
+        "default": "Black, White, Red, Blue, Green, Yellow, Orange, Purple"
+      },
+      {
+        "type": "text",
+        "id": "custom_measurements_front_plate_options",
+        "label": "t:settings_schema.custom_order_measurements_settings.settings.front_plate_options.label",
+        "info": "t:settings_schema.custom_order_measurements_settings.settings.front_plate_options.info",
+        "default": "Bear Paw, Puppy Paw, Fist Image, Pig Image, Boot Image, Biohazard Symbol, Cigar Man"
+      },
+      {
+        "type": "text",
+        "id": "custom_measurements_back_plate_extra",
+        "label": "t:settings_schema.custom_order_measurements_settings.settings.back_plate_extra.label",
+        "info": "t:settings_schema.custom_order_measurements_settings.settings.back_plate_extra.info",
+        "default": "Wesco Boot, Watersports, Happy Puppy"
+      },
+      {
+        "type": "text",
+        "id": "custom_measurements_long_sliders",
+        "label": "t:settings_schema.custom_order_measurements_settings.settings.long_sliders.label",
+        "info": "t:settings_schema.custom_order_measurements_settings.settings.long_sliders.info",
+        "default": "None, Brass, Steel"
+      },
+      {
+        "type": "range",
+        "id": "custom_measurements_precision",
+        "label": "t:settings_schema.custom_order_measurements_settings.settings.precision.label",
+        "info": "t:settings_schema.custom_order_measurements_settings.settings.precision.info",
+        "default": 3,
+        "min": 0,
+        "max": 6,
+        "step": 1
+      }
+    ]
   }
 ]

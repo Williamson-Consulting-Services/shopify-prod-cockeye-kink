@@ -1,0 +1,225 @@
+{%- liquid
+  assign banner_editing_translation = 'custom_order.banner.editing' | t
+  assign banner_cart_translation = 'custom_order.banner.cart' | t
+  assign banner_editing_text = settings.custom_order_banner_editing_text | default: banner_editing_translation
+  assign banner_cart_text = settings.custom_order_banner_cart_text | default: banner_cart_translation
+
+  assign banner_background_color = settings.custom_order_banner_background_color | default: '#ffec99'
+  assign banner_text_color = settings.custom_order_banner_text_color | default: '#3f2f00'
+  assign banner_shadow_color = settings.custom_order_banner_shadow_color | default: '#000000'
+  assign banner_shadow_opacity = settings.custom_order_banner_shadow_opacity | default: 20
+  assign banner_shadow_alpha = banner_shadow_opacity | divided_by: 100.0
+  assign banner_shadow_rgba = banner_shadow_color | color_modify: 'alpha', banner_shadow_alpha
+-%}
+
+<div
+  id="custom-order-banner"
+  class="custom-order-banner"
+  role="status"
+  aria-live="polite"
+  hidden
+  style="--custom-order-banner-bg: {{ banner_background_color }}; --custom-order-banner-color: {{ banner_text_color }}; --custom-order-banner-shadow: {{ banner_shadow_rgba }};"
+>
+  <div class="custom-order-banner__inner">
+    <span class="custom-order-banner__text custom-order-banner__text--editing" data-banner-editing hidden>
+      {{ banner_editing_text | escape }}
+    </span>
+    <span class="custom-order-banner__text custom-order-banner__text--cart" data-banner-cart hidden>
+      {{ banner_cart_text | escape }}
+    </span>
+  </div>
+</div>
+
+<style>
+  .custom-order-banner {
+    position: sticky;
+    top: 0;
+    z-index: 120;
+    width: 100%;
+    background-color: var(--custom-order-banner-bg);
+    color: var(--custom-order-banner-color);
+    box-shadow: 0 2px 6px var(--custom-order-banner-shadow);
+  }
+
+  .custom-order-banner[hidden] {
+    display: none !important;
+  }
+
+  .custom-order-banner__inner {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    max-width: var(--page-width, 1200px);
+    margin: 0 auto;
+    padding: 0.75rem 1.5rem;
+    text-align: center;
+    font-size: 1.4rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .custom-order-banner {
+      transition: transform 200ms ease, opacity 200ms ease;
+    }
+
+    .custom-order-banner[hidden] {
+      opacity: 0;
+      transform: translateY(-100%);
+    }
+  }
+</style>
+
+<script>
+  window.CustomOrderBanner = (function () {
+    const banner = document.getElementById('custom-order-banner');
+    if (!banner) {
+      return {
+        setForceShow() {},
+        refreshCart() {},
+        setBannerText() {},
+      };
+    }
+
+    const editingElement = banner.querySelector('[data-banner-editing]');
+    const cartElement = banner.querySelector('[data-banner-cart]');
+    const editingTextDefault = {{ banner_editing_text | json }};
+    const cartTextDefault = {{ banner_cart_text | json }};
+    const suppressed =
+      window.location.pathname.includes('/checkouts/') ||
+      window.location.pathname.includes('/checkout') ||
+      window.location.pathname.includes('/thank-you');
+
+    const state = {
+      forceShow: false,
+      cartHasCustom: false,
+      editing: false,
+      cartText: cartTextDefault,
+      editingText: editingTextDefault,
+    };
+
+    function render() {
+      if (suppressed) {
+        banner.hidden = true;
+        return;
+      }
+      const showEditing = state.forceShow || state.editing;
+      const showCart = state.cartHasCustom;
+
+      if (editingElement) {
+        const text = state.editingText || editingTextDefault;
+        if (typeof text === 'string') editingElement.textContent = text;
+        editingElement.hidden = !showEditing;
+      }
+
+      if (cartElement) {
+        const text = state.cartText || cartTextDefault;
+        if (typeof text === 'string') cartElement.textContent = text;
+        cartElement.hidden = !showCart;
+      }
+
+      banner.hidden = !(showEditing || showCart);
+      banner.classList.toggle('custom-order-banner--stacked', showEditing && showCart);
+    }
+
+    function setForceShow(value) {
+      state.forceShow = Boolean(value);
+      render();
+    }
+
+    function setBannerText(value, mode = 'cart') {
+      const sanitized = value && value.trim() !== '' ? value.trim() : null;
+      if (mode === 'editing') {
+        state.editingText = sanitized || editingTextDefault;
+      } else {
+        state.cartText = sanitized || cartTextDefault;
+      }
+      render();
+    }
+
+    async function refreshCart() {
+      if (suppressed) return;
+      try {
+        const cartUrl = `/cart.js?timestamp=${Date.now()}`;
+        const response = await fetch(cartUrl, {
+          credentials: 'same-origin',
+          cache: 'no-store',
+          headers: { 'Cache-Control': 'no-cache' },
+        });
+        if (!response.ok) throw new Error(response.statusText);
+        const cart = await response.json();
+        const hasCustom = (cart.items || []).some((item) => {
+          if (!item.properties) return false;
+          const customFlag = item.properties['_custom'] || item.properties['Order Type'];
+          return typeof customFlag === 'string' && customFlag.toLowerCase() === 'custom';
+        });
+        state.cartHasCustom = hasCustom;
+        render();
+      } catch (error) {
+        console.warn('CustomOrderBanner cart check failed:', error);
+      }
+    }
+
+    function notifyEditing(isEditing = true) {
+      const nextFlag = Boolean(isEditing);
+      if (state.editing !== nextFlag) {
+        state.editing = nextFlag;
+        render();
+      }
+    }
+
+    function init() {
+      render();
+      refreshCart();
+      subscribe(PUB_SUB_EVENTS.cartUpdate, (event) => {
+        if (event.cartState || event.itemCount !== undefined) {
+          refreshCart();
+        }
+        if (event.customOrderItemAdded) {
+          state.editing = false;
+          state.forceShow = false;
+          state.cartHasCustom = true;
+          render();
+          setTimeout(refreshCart, 200);
+        }
+      });
+      window.addEventListener('custom-order:editing', () => notifyEditing(true));
+      window.addEventListener('custom-order:editing-stop', () => notifyEditing(false));
+
+      const removalSelectors = [
+        '[data-cart-remove]',
+        '[data-cart-remove-button]',
+        '.cart-remove-button',
+        'button[name="remove"]',
+        'a[href*="cart/change"]',
+      ];
+
+      function handlePotentialRemoval(event) {
+        if (!event) return;
+        const target = event.target;
+        if (!target) return;
+        const shouldRefresh = removalSelectors.some((selector) => target.closest(selector));
+        if (shouldRefresh) {
+          setTimeout(refreshCart, 150);
+        }
+      }
+
+      document.addEventListener('click', handlePotentialRemoval, true);
+      document.addEventListener('submit', handlePotentialRemoval, true);
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+
+    return {
+      setForceShow,
+      refreshCart,
+      setBannerText,
+      notifyEditing,
+    };
+  })();
+</script>
+

@@ -202,6 +202,10 @@
     }
   },
   "templates": {
+    "404": {
+      "title": "Không tìm thấy trang",
+      "subtext": "404"
+    },
     "search": {
       "no_results": "Không tìm thấy kết quả cho \"{{ terms }}\". Kiểm tra chính tả hoặc sử dụng một từ hoặc cụm từ khác.",
       "results_with_count": {
@@ -245,10 +249,6 @@
         "error_heading": "Vui lòng điều chỉnh các mục sau:",
         "title": "Biểu mẫu liên hệ"
       }
-    },
-    "404": {
-      "title": "Không tìm thấy trang",
-      "subtext": "404"
     }
   },
   "sections": {
@@ -476,5 +476,23 @@
       "send_on": "DD-MM-YYYY",
       "send_on_label": "Ngày gửi (tùy chọn)"
     }
+  },
+  "custom_order": {
+    "banner": {
+      "editing": "Custom order not in cart yet — make sure you add it before leaving this page.",
+      "cart": "Custom order is in cart"
+    }
+  },
+  "custom_measurements": {
+    "category_legend": "Custom product category",
+    "unit_legend": "Unit",
+    "unit_inches": "Inches",
+    "unit_centimeters": "Centimeters",
+    "measurement_hint": "Measurements marked with * are optional for the selected category.",
+    "custom_color_button": "Don't see a color listed? Click here",
+    "item_notes_label": "Item Notes *",
+    "item_notes_placeholder": "Enter your item notes here",
+    "event_notes_label": "Event Notes *",
+    "event_notes_placeholder": "Event name or notes here"
   }
 }
