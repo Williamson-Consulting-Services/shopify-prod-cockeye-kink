@@ -26,9 +26,13 @@
         "text_J6M9gc": {
           "type": "text",
           "settings": {
-            "text": "<strong>This page is for staff and associates. Orders filled by customers may be cancelled. </br> To begin, select the product category, unit of measure, and then fill in the order details.</strong>",
+            "text": "<strong>This page is for staff and associates. Orders filled by customers may be cancelled.  To begin, select the product category, unit of measure, and then fill in the order details. This product page is for staff and associates only. Contact us at info@cockeyekink.com to schedule a video consultation, or provide additional concept pieces.Any orders without prior contact or consultation are subject to automatic refund/cancellation.Customers will be sent an updated invoice after project is evaluated. The price is shown as $0.00 does not reflect the final cost.</strong>",
             "text_style": "body"
           }
+        },
+        "description": {
+          "type": "description",
+          "settings": {}
         },
         "custom_liquid_i43zwU": {
           "type": "custom_liquid",
@@ -53,10 +57,6 @@
             "show_dynamic_checkout": false,
             "show_gift_card_recipient": false
           }
-        },
-        "description": {
-          "type": "description",
-          "settings": {}
         },
         "collapsible-row-0": {
           "type": "collapsible_tab",
@@ -96,11 +96,11 @@
         "title",
         "vendor",
         "text_J6M9gc",
+        "description",
         "custom_liquid_i43zwU",
         "quantity_selector",
         "text_Yj8XCR",
         "buy_buttons",
-        "description",
         "collapsible-row-0",
         "collapsible-row-1",
         "collapsible-row-3",
