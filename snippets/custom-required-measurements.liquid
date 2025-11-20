@@ -1527,23 +1527,38 @@
       delayedInitialize();
     }
 
-    subscribe(PUB_SUB_EVENTS.cartUpdate, function (event) {
-      if (event.cartState || event.itemCount !== undefined) {
-        hasInteractedWithForm = false;
-        updateBannerEditingState(false);
-        if (!resetAfterAddToCartPending) {
-          return;
-        }
-        initialize();
-        updateAddToCartButton();
-        resetAfterAddToCartPending = false;
+    // Wait for subscribe and PUB_SUB_EVENTS to be available (deferred scripts)
+    function setupCartUpdateSubscription() {
+      if (typeof subscribe === 'function' && typeof PUB_SUB_EVENTS !== 'undefined' && PUB_SUB_EVENTS.cartUpdate) {
+        subscribe(PUB_SUB_EVENTS.cartUpdate, function (event) {
+          if (event.cartState || event.itemCount !== undefined) {
+            hasInteractedWithForm = false;
+            updateBannerEditingState(false);
+            if (!resetAfterAddToCartPending) {
+              return;
+            }
+            initialize();
+            updateAddToCartButton();
+            resetAfterAddToCartPending = false;
+          }
+          if (event.customOrderItemAdded) {
+            resetAfterAddToCartPending = false;
+            initialize();
+            updateAddToCartButton();
+          }
+        });
+      } else {
+        // Retry after a short delay if scripts aren't loaded yet
+        setTimeout(setupCartUpdateSubscription, 100);
       }
-      if (event.customOrderItemAdded) {
-        resetAfterAddToCartPending = false;
-        initialize();
-        updateAddToCartButton();
-      }
-    });
+    }
+
+    // Try to set up subscription immediately, or wait for scripts to load
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', setupCartUpdateSubscription);
+    } else {
+      setupCartUpdateSubscription();
+    }
   })();
 
   function toggleCustomFields() {

@@ -30,7 +30,7 @@ class ProductFormExtension {
           formData = options.body;
         }
 
-        return originalFetch.apply(this, args).then((response) => {
+        return originalFetch.call(window, ...args).then((response) => {
           const clonedResponse = response.clone();
           clonedResponse
             .json()
@@ -62,7 +62,7 @@ class ProductFormExtension {
         });
       }
 
-      return originalFetch.apply(this, args);
+      return originalFetch.call(window, ...args);
     };
 
     if (window._fetchIntercepted) {
@@ -70,9 +70,9 @@ class ProductFormExtension {
       window.fetch = function (...args) {
         const url = args[0];
         if (typeof url === 'string' && url.includes('/cart/add')) {
-          return productFormExtensionFetch.apply(this, args);
+          return productFormExtensionFetch.call(window, ...args);
         }
-        return existingFetch.apply(this, args);
+        return existingFetch.call(window, ...args);
       };
     } else {
       window.fetch = productFormExtensionFetch;
