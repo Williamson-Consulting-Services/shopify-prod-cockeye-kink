@@ -71,26 +71,31 @@
 -%}
 
 <style>
+  /* Measurement Input Fields */
   .measurement-input {
+    -webkit-appearance: none;
+    appearance: none;
+    background-color: rgb(var(--color-background));
+    color: rgb(var(--color-foreground));
+    font-family: var(--font-body-family);
+    font-style: var(--font-body-style);
     font-weight: var(--font-body-weight-bold, 600);
-    color: var(--color-foreground);
-    width: 6em;
-  }
-
-  .measurements-group {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: var(--spacing-3, 0.75rem);
-    margin-bottom: var(--spacing-4, 1.5rem);
-  }
-
-  .measurements-group label {
-    display: block;
-    margin-bottom: 0.25rem;
-    font-weight: var(--font-heading-weight, 600);
+    font-size: 1.6rem;
+    width: 100%;
+    max-width: 12rem;
+    box-sizing: border-box;
+    padding: 1.5rem;
+    margin: var(--inputs-border-width);
+    border: 0;
+    border-radius: var(--inputs-radius);
+    height: 4.5rem;
+    min-height: calc(var(--inputs-border-width) * 2);
+    transition: box-shadow var(--duration-short) ease;
+    position: relative;
   }
 
   .measurement-field {
+    position: relative;
     display: none;
   }
 
@@ -98,12 +103,81 @@
     display: block;
   }
 
+  .measurement-field:before {
+    pointer-events: none;
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    border-radius: var(--inputs-radius-outset);
+    box-shadow: var(--inputs-shadow-horizontal-offset) var(--inputs-shadow-vertical-offset)
+      var(--inputs-shadow-blur-radius) rgba(var(--color-shadow), var(--inputs-shadow-opacity));
+    z-index: -1;
+  }
+
+  .measurement-field:after {
+    pointer-events: none;
+    content: '';
+    position: absolute;
+    top: var(--inputs-border-width);
+    right: var(--inputs-border-width);
+    bottom: var(--inputs-border-width);
+    left: var(--inputs-border-width);
+    border: 0.1rem solid transparent;
+    border-radius: var(--inputs-radius);
+    box-shadow: 0 0 0 var(--inputs-border-width) rgba(var(--color-foreground), var(--inputs-border-opacity));
+    transition: box-shadow var(--duration-short) ease;
+    z-index: 1;
+  }
+
+  .measurement-input:hover {
+    box-shadow: 0 0 0 calc(0.1rem + var(--inputs-border-width))
+      rgba(var(--color-foreground), var(--inputs-border-opacity));
+  }
+
+  .measurement-input:focus,
+  .measurement-input:focus-visible {
+    outline: 0;
+    box-shadow: 0 0 0 calc(0.1rem + var(--inputs-border-width)) rgba(var(--color-foreground));
+  }
+
+  .measurement-input::placeholder {
+    color: rgba(var(--color-foreground), 0.5);
+    opacity: 1;
+  }
+
+  /* Measurements Group */
+  .measurements-group {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: var(--spacing-4, 1.5rem);
+    margin-bottom: var(--spacing-4, 1.5rem);
+  }
+
+  .measurements-group label {
+    display: block;
+    margin-bottom: 0.6rem;
+    font-weight: var(--font-heading-weight, 600);
+    font-size: 1.4rem;
+    letter-spacing: 0.1rem;
+    line-height: 1.5;
+    color: rgb(var(--color-foreground));
+  }
+
+  .measurement-field--optional label {
+    font-weight: var(--font-body-weight, 400);
+  }
+
+  /* Conditional Sections */
   .conditional-section {
     display: none;
     margin-top: var(--spacing-4, 1.5rem);
-    padding: var(--spacing-3, 0.75rem);
-    background-color: rgba(var(--color-foreground-rgb, 0, 0, 0), 0.04);
-    border-radius: var(--border-radius-base, 0.5rem);
+    padding: var(--spacing-4, 1.5rem);
+    background-color: rgba(var(--color-foreground), 0.04);
+    border-radius: var(--inputs-radius);
+    position: relative;
   }
 
   .conditional-section.active {
@@ -112,36 +186,304 @@
 
   .conditional-section label {
     display: block;
-    margin-top: var(--spacing-3, 0.75rem);
-    margin-bottom: 0.25rem;
+    margin-top: var(--spacing-4, 1.5rem);
+    margin-bottom: 0.6rem;
     font-weight: var(--font-heading-weight, 600);
+    font-size: 1.4rem;
+    letter-spacing: 0.1rem;
+    line-height: 1.5;
+    color: rgb(var(--color-foreground));
   }
 
   .conditional-section label:first-child {
     margin-top: 0;
   }
 
-  .conditional-section select,
-  .conditional-section .custom-text {
+  /* Select Elements */
+  .conditional-section .select-wrapper {
+    position: relative;
+    display: flex;
     width: 100%;
-    margin-bottom: var(--spacing-2, 0.5rem);
+    margin-bottom: var(--spacing-3, 0.75rem);
+    transition: box-shadow var(--duration-short) ease;
+  }
+
+  .conditional-section .select-wrapper:before {
+    pointer-events: none;
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    border-radius: var(--inputs-radius-outset);
+    box-shadow: var(--inputs-shadow-horizontal-offset) var(--inputs-shadow-vertical-offset)
+      var(--inputs-shadow-blur-radius) rgba(var(--color-shadow), var(--inputs-shadow-opacity));
+    z-index: -1;
+  }
+
+  .conditional-section .select-wrapper:after {
+    pointer-events: none;
+    content: '';
+    position: absolute;
+    top: var(--inputs-border-width);
+    right: var(--inputs-border-width);
+    bottom: var(--inputs-border-width);
+    left: var(--inputs-border-width);
+    border: 0.1rem solid transparent;
+    border-radius: var(--inputs-radius);
+    box-shadow: 0 0 0 var(--inputs-border-width) rgba(var(--color-foreground), var(--inputs-border-opacity));
+    transition: box-shadow var(--duration-short) ease;
+    z-index: 1;
+  }
+
+  .conditional-section .select-wrapper:hover:after {
+    box-shadow: 0 0 0 calc(0.1rem + var(--inputs-border-width))
+      rgba(var(--color-foreground), var(--inputs-border-opacity));
+  }
+
+  .conditional-section select {
+    -webkit-appearance: none;
+    appearance: none;
+    background-color: rgb(var(--color-background));
+    color: rgba(var(--color-foreground), 0.75);
+    font-family: var(--font-body-family);
+    font-style: var(--font-body-style);
+    font-weight: var(--font-body-weight);
+    font-size: 1.2rem;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0 calc(var(--inputs-border-width) + 3rem) 0 2rem;
+    margin: var(--inputs-border-width);
+    border: 0;
+    border-radius: var(--inputs-radius);
+    height: 4.5rem;
+    min-height: calc(var(--inputs-border-width) * 2);
+    cursor: pointer;
+    line-height: calc(1 + 0.6 / var(--font-body-scale));
+    transition: box-shadow var(--duration-short) ease;
+    position: relative;
+    z-index: 2;
+  }
+
+  .conditional-section select:focus,
+  .conditional-section select:focus-visible {
+    outline: 0;
+    box-shadow: 0 0 0 calc(0.1rem + var(--inputs-border-width)) rgba(var(--color-foreground));
+  }
+
+  /* Select caret icon - using background image (standard approach for select elements) */
+  .conditional-section select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%23000' fill-opacity='0.75' d='M5 6L0 0h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right calc(var(--inputs-border-width) + 1.5rem) center;
+    background-size: 0.6rem;
+  }
+
+  /* Custom Text Inputs */
+  .custom-text-wrapper {
+    position: relative;
+    display: none;
+    width: 100%;
+    margin-top: var(--spacing-2, 0.5rem);
+    margin-bottom: var(--spacing-3, 0.75rem);
+    transition: box-shadow var(--duration-short) ease;
   }
 
   .custom-text {
-    margin-top: var(--spacing-2, 0.5rem);
-    display: none;
+    -webkit-appearance: none;
+    appearance: none;
+    background-color: rgb(var(--color-background));
+    color: rgb(var(--color-foreground));
+    font-family: var(--font-body-family);
+    font-style: var(--font-body-style);
+    font-weight: var(--font-body-weight);
+    font-size: 1.6rem;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 1.5rem;
+    margin: var(--inputs-border-width);
+    border: 0;
+    border-radius: var(--inputs-radius);
+    height: 4.5rem;
+    min-height: calc(var(--inputs-border-width) * 2);
+    transition: box-shadow var(--duration-short) ease;
+    position: relative;
+    z-index: 2;
   }
 
-  .measurement-hint {
+
+  .custom-text-wrapper:before {
+    pointer-events: none;
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    border-radius: var(--inputs-radius-outset);
+    box-shadow: var(--inputs-shadow-horizontal-offset) var(--inputs-shadow-vertical-offset)
+      var(--inputs-shadow-blur-radius) rgba(var(--color-shadow), var(--inputs-shadow-opacity));
+    z-index: -1;
+  }
+
+  .custom-text-wrapper:after {
+    pointer-events: none;
+    content: '';
+    position: absolute;
+    top: var(--inputs-border-width);
+    right: var(--inputs-border-width);
+    bottom: var(--inputs-border-width);
+    left: var(--inputs-border-width);
+    border: 0.1rem solid transparent;
+    border-radius: var(--inputs-radius);
+    box-shadow: 0 0 0 var(--inputs-border-width) rgba(var(--color-foreground), var(--inputs-border-opacity));
+    transition: box-shadow var(--duration-short) ease;
+    z-index: 1;
+  }
+
+  .custom-text-wrapper:hover:after {
+    box-shadow: 0 0 0 calc(0.1rem + var(--inputs-border-width))
+      rgba(var(--color-foreground), var(--inputs-border-opacity));
+  }
+
+
+  .custom-text:focus,
+  .custom-text:focus-visible {
+    outline: 0;
+    box-shadow: 0 0 0 calc(0.1rem + var(--inputs-border-width)) rgba(var(--color-foreground));
+  }
+
+  .custom-text::placeholder {
+    color: rgba(var(--color-foreground), 0.5);
+    opacity: 1;
+  }
+
+  /* Textarea Elements */
+  .conditional-section textarea {
+    -webkit-appearance: none;
+    appearance: none;
+    background-color: rgb(var(--color-background));
+    color: rgb(var(--color-foreground));
+    font-family: var(--font-body-family);
+    font-style: var(--font-body-style);
+    font-weight: var(--font-body-weight);
+    font-size: 1.6rem;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 1.5rem;
+    margin: var(--inputs-border-width);
+    border: 0;
+    border-radius: var(--inputs-radius);
+    min-height: 10rem;
+    resize: none;
+    transition: box-shadow var(--duration-short) ease;
+    position: relative;
+  }
+
+  .conditional-section .textarea-wrapper {
+    position: relative;
+    display: flex;
+    width: 100%;
     margin-bottom: var(--spacing-3, 0.75rem);
-    font-size: 0.92em;
-    color: rgba(var(--color-foreground-rgb, 0, 0, 0), 0.7);
+    transition: box-shadow var(--duration-short) ease;
   }
 
-  .measurement-field--optional label {
-    font-weight: var(--font-body-weight, 400);
+  .conditional-section .textarea-wrapper:before {
+    pointer-events: none;
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    border-radius: var(--inputs-radius-outset);
+    box-shadow: var(--inputs-shadow-horizontal-offset) var(--inputs-shadow-vertical-offset)
+      var(--inputs-shadow-blur-radius) rgba(var(--color-shadow), var(--inputs-shadow-opacity));
+    z-index: -1;
+  }
+
+  .conditional-section .textarea-wrapper:after {
+    pointer-events: none;
+    content: '';
+    position: absolute;
+    top: var(--inputs-border-width);
+    right: var(--inputs-border-width);
+    bottom: var(--inputs-border-width);
+    left: var(--inputs-border-width);
+    border: 0.1rem solid transparent;
+    border-radius: var(--inputs-radius);
+    box-shadow: 0 0 0 var(--inputs-border-width) rgba(var(--color-foreground), var(--inputs-border-opacity));
+    transition: box-shadow var(--duration-short) ease;
+    z-index: 1;
+  }
+
+  .conditional-section .textarea-wrapper:hover:after {
+    box-shadow: 0 0 0 calc(0.1rem + var(--inputs-border-width))
+      rgba(var(--color-foreground), var(--inputs-border-opacity));
+  }
+
+  .conditional-section textarea {
+    position: relative;
+    z-index: 2;
+  }
+
+  .conditional-section textarea:focus,
+  .conditional-section textarea:focus-visible {
+    outline: 0;
+    box-shadow: 0 0 0 calc(0.1rem + var(--inputs-border-width)) rgba(var(--color-foreground));
+  }
+
+  .conditional-section textarea::placeholder {
+    color: rgba(var(--color-foreground), 0.5);
+    opacity: 1;
+  }
+
+  /* Measurement Hint */
+  .measurement-hint {
+    margin-bottom: var(--spacing-4, 1.5rem);
+    font-size: 1.4rem;
+    color: rgba(var(--color-foreground), 0.7);
+    line-height: 1.5;
+  }
+
+  /* Responsive adjustments */
+  @media screen and (max-width: 749px) {
+    .measurements-group {
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: var(--spacing-3, 0.75rem);
+    }
+
+    .measurement-input {
+      max-width: 100%;
+    }
   }
 </style>
+
+{%- comment -%} Associate Section {%- endcomment -%}
+<div class="conditional-section" id="associate-section">
+  <label>{{ 'custom_measurements.associate_label' | t }}</label>
+  <div class="select-wrapper">
+    <select name="properties[Associate]" id="associate-select" form="product-form-{{ section.id }}">
+      <option value="">Select one</option>
+      {%- for associate in associates -%}
+        {%- assign associate_clean = associate | strip -%}
+        {%- if associate_clean == '' -%}{% continue %}{% endif %}
+        <option value="{{ associate_clean }}">{{ associate_clean }}</option>
+      {%- endfor -%}
+    </select>
+  </div>
+  <div class="custom-text-wrapper" id="associate-text-wrapper" style="display: none;">
+    <input
+      type="text"
+      name="properties[Associate - Text]"
+      id="associate-text"
+      class="custom-text"
+      placeholder="{{ 'custom_measurements.associate_placeholder' | t }}"
+      form="product-form-{{ section.id }}"
+    >
+  </div>
+</div>
 
 {%- comment -%} Category Selection Buttons {%- endcomment -%}
 <fieldset class="product-form__input product-form__input--pill" id="optionButtons">
@@ -287,89 +629,109 @@
 {%- comment -%} Harness Details Section {%- endcomment -%}
 <div class="conditional-section" id="harness-details">
   <label>Leather Color</label>
-  <select name="properties[Leather Color]" form="product-form-{{ section.id }}">
-    <option value="">Select one</option>
-    {%- for color in leather_colors -%}
-      {%- assign color_clean = color | strip -%}
-      {%- if color_clean == '' -%}{% continue %}{% endif %}
-      <option>{{ color_clean }}</option>
-    {%- endfor -%}
-  </select>
-  <input
-    type="text"
-    name="properties[Leather Color - Text]"
-    class="custom-text"
-    placeholder="Enter custom color"
-    form="product-form-{{ section.id }}"
-  >
+  <div class="select-wrapper">
+    <select name="properties[Leather Color]" form="product-form-{{ section.id }}">
+      <option value="">Select one</option>
+      {%- for color in leather_colors -%}
+        {%- assign color_clean = color | strip -%}
+        {%- if color_clean == '' -%}{% continue %}{% endif %}
+        <option>{{ color_clean }}</option>
+      {%- endfor -%}
+    </select>
+  </div>
+  <div class="custom-text-wrapper">
+    <input
+      type="text"
+      name="properties[Leather Color - Text]"
+      class="custom-text"
+      placeholder="Enter custom color"
+      form="product-form-{{ section.id }}"
+    >
+  </div>
 
   <label>Left Front Plate</label>
-  <select name="properties[Left Front Plate]" form="product-form-{{ section.id }}">
-    <option value="">Select one</option>
-    {%- for plate in left_front_plates -%}
-      {%- assign plate_clean = plate | strip -%}
-      {%- if plate_clean == '' -%}{% continue %}{% endif %}
-      <option>{{ plate_clean }}</option>
-    {%- endfor -%}
-  </select>
-  <input
-    type="text"
-    name="properties[Left Front Plate - Text]"
-    class="custom-text"
-    placeholder="Enter custom plate"
-    form="product-form-{{ section.id }}"
-  >
+  <div class="select-wrapper">
+    <select name="properties[Left Front Plate]" form="product-form-{{ section.id }}">
+      <option value="">Select one</option>
+      {%- for plate in left_front_plates -%}
+        {%- assign plate_clean = plate | strip -%}
+        {%- if plate_clean == '' -%}{% continue %}{% endif %}
+        <option>{{ plate_clean }}</option>
+      {%- endfor -%}
+    </select>
+  </div>
+  <div class="custom-text-wrapper">
+    <input
+      type="text"
+      name="properties[Left Front Plate - Text]"
+      class="custom-text"
+      placeholder="Enter custom plate"
+      form="product-form-{{ section.id }}"
+    >
+  </div>
 
   <label>Right Front Plate</label>
-  <select name="properties[Right Front Plate]" form="product-form-{{ section.id }}">
-    <option value="">Select one</option>
-    {%- for plate in right_front_plates -%}
-      {%- assign plate_clean = plate | strip -%}
-      {%- if plate_clean == '' -%}{% continue %}{% endif %}
-      <option>{{ plate_clean }}</option>
-    {%- endfor -%}
-  </select>
-  <input
-    type="text"
-    name="properties[Right Front Plate - Text]"
-    class="custom-text"
-    placeholder="Enter custom plate"
-    form="product-form-{{ section.id }}"
-  >
+  <div class="select-wrapper">
+    <select name="properties[Right Front Plate]" form="product-form-{{ section.id }}">
+      <option value="">Select one</option>
+      {%- for plate in right_front_plates -%}
+        {%- assign plate_clean = plate | strip -%}
+        {%- if plate_clean == '' -%}{% continue %}{% endif %}
+        <option>{{ plate_clean }}</option>
+      {%- endfor -%}
+    </select>
+  </div>
+  <div class="custom-text-wrapper">
+    <input
+      type="text"
+      name="properties[Right Front Plate - Text]"
+      class="custom-text"
+      placeholder="Enter custom plate"
+      form="product-form-{{ section.id }}"
+    >
+  </div>
 
   <label>Back Plate</label>
-  <select name="properties[Back Plate]" form="product-form-{{ section.id }}">
-    <option value="">Select one</option>
-    {%- for plate in back_plates -%}
-      {%- assign plate_clean = plate | strip -%}
-      {%- if plate_clean == '' -%}{% continue %}{% endif %}
-      <option>{{ plate_clean }}</option>
-    {%- endfor -%}
-  </select>
-  <input
-    type="text"
-    name="properties[Back Plate - Text]"
-    class="custom-text"
-    placeholder="Enter custom plate"
-    form="product-form-{{ section.id }}"
-  >
+  <div class="select-wrapper">
+    <select name="properties[Back Plate]" form="product-form-{{ section.id }}">
+      <option value="">Select one</option>
+      {%- for plate in back_plates -%}
+        {%- assign plate_clean = plate | strip -%}
+        {%- if plate_clean == '' -%}{% continue %}{% endif %}
+        <option>{{ plate_clean }}</option>
+      {%- endfor -%}
+    </select>
+  </div>
+  <div class="custom-text-wrapper">
+    <input
+      type="text"
+      name="properties[Back Plate - Text]"
+      class="custom-text"
+      placeholder="Enter custom plate"
+      form="product-form-{{ section.id }}"
+    >
+  </div>
 
   <label>Long Sliders</label>
-  <select name="properties[Long Sliders]" form="product-form-{{ section.id }}">
-    <option value="">Select one</option>
-    {%- for slider in long_sliders -%}
-      {%- assign slider_clean = slider | strip -%}
-      {%- if slider_clean == '' -%}{% continue %}{% endif %}
-      <option>{{ slider_clean }}</option>
-    {%- endfor -%}
-  </select>
-  <input
-    type="text"
-    name="properties[Long Sliders - Text]"
-    class="custom-text"
-    placeholder="Enter custom sliders"
-    form="product-form-{{ section.id }}"
-  >
+  <div class="select-wrapper">
+    <select name="properties[Long Sliders]" form="product-form-{{ section.id }}">
+      <option value="">Select one</option>
+      {%- for slider in long_sliders -%}
+        {%- assign slider_clean = slider | strip -%}
+        {%- if slider_clean == '' -%}{% continue %}{% endif %}
+        <option>{{ slider_clean }}</option>
+      {%- endfor -%}
+    </select>
+  </div>
+  <div class="custom-text-wrapper">
+    <input
+      type="text"
+      name="properties[Long Sliders - Text]"
+      class="custom-text"
+      placeholder="Enter custom sliders"
+      form="product-form-{{ section.id }}"
+    >
+  </div>
 
   <div>
     <button type="button" class="button button--secondary" onclick="toggleCustomFields()">
@@ -378,42 +740,24 @@
   </div>
 </div>
 
-{%- comment -%} Associate Section {%- endcomment -%}
-<div class="conditional-section" id="associate-section">
-  <label>{{ 'custom_measurements.associate_label' | t }}</label>
-  <select name="properties[Associate]" id="associate-select" form="product-form-{{ section.id }}">
-    <option value="">Select one</option>
-    {%- for associate in associates -%}
-      {%- assign associate_clean = associate | strip -%}
-      {%- if associate_clean == '' -%}{% continue %}{% endif %}
-      <option value="{{ associate_clean }}">{{ associate_clean }}</option>
-    {%- endfor -%}
-  </select>
-  <input
-    type="text"
-    name="properties[Associate - Text]"
-    id="associate-text"
-    class="custom-text"
-    placeholder="{{ 'custom_measurements.associate_placeholder' | t }}"
-    form="product-form-{{ section.id }}"
-    style="display: none;"
-  >
-</div>
-
 {%- comment -%} Notes Section {%- endcomment -%}
 <div class="conditional-section" id="notes-section">
   <label>{{ 'custom_measurements.item_notes_label' | t }}</label>
-  <textarea
-    name="properties[Item Notes]"
-    placeholder="{{ 'custom_measurements.item_notes_placeholder' | t }}"
-    form="product-form-{{ section.id }}"
-  ></textarea>
+  <div class="textarea-wrapper">
+    <textarea
+      name="properties[Item Notes]"
+      placeholder="{{ 'custom_measurements.item_notes_placeholder' | t }}"
+      form="product-form-{{ section.id }}"
+    ></textarea>
+  </div>
   <label>{{ 'custom_measurements.event_notes_label' | t }}</label>
-  <textarea
-    name="properties[Event Notes]"
-    placeholder="{{ 'custom_measurements.event_notes_placeholder' | t }}"
-    form="product-form-{{ section.id }}"
-  ></textarea>
+  <div class="textarea-wrapper">
+    <textarea
+      name="properties[Event Notes]"
+      placeholder="{{ 'custom_measurements.event_notes_placeholder' | t }}"
+      form="product-form-{{ section.id }}"
+    ></textarea>
+  </div>
 </div>
 
 <script>
@@ -484,6 +828,7 @@
     const associateSection = document.getElementById('associate-section');
     const associateSelect = document.getElementById('associate-select');
     const associateText = document.getElementById('associate-text');
+    const associateTextWrapper = document.getElementById('associate-text-wrapper');
     const unitToggleInputs = document.querySelectorAll('#unitToggle input[type="radio"]');
 
     const productFormSelectors = [
@@ -823,20 +1168,20 @@
         associateSection.classList.add('active');
       }
 
-      document.querySelectorAll('.custom-text').forEach((el) => {
-        if (el.id !== 'associate-text') {
-          el.style.display = 'none';
+      document.querySelectorAll('.custom-text-wrapper').forEach((wrapper) => {
+        if (wrapper.id !== 'associate-text-wrapper') {
+          wrapper.style.display = 'none';
         }
       });
 
       // Handle associate "Other" option
-      if (associateSelect && associateText) {
+      if (associateSelect && associateTextWrapper) {
         const selectedValue = associateSelect.value;
         if (selectedValue === 'Other') {
-          associateText.style.display = 'block';
+          associateTextWrapper.style.display = 'block';
         } else {
-          associateText.style.display = 'none';
-          associateText.value = '';
+          associateTextWrapper.style.display = 'none';
+          if (associateText) associateText.value = '';
         }
       }
     }
@@ -899,19 +1244,20 @@
         });
       });
 
-      document.querySelectorAll('.custom-text').forEach((el) => {
-        if (el.id !== 'associate-text') {
-          el.style.display = 'none';
+      document.querySelectorAll('.custom-text-wrapper').forEach((wrapper) => {
+        if (wrapper.id !== 'associate-text-wrapper') {
+          wrapper.style.display = 'none';
         }
-        el.value = '';
+        const input = wrapper.querySelector('.custom-text');
+        if (input) input.value = '';
       });
 
       if (associateSelect) {
         associateSelect.selectedIndex = 0;
       }
-      if (associateText) {
-        associateText.style.display = 'none';
-        associateText.value = '';
+      if (associateTextWrapper) {
+        associateTextWrapper.style.display = 'none';
+        if (associateText) associateText.value = '';
       }
 
       currentUnit = 'in';
@@ -924,8 +1270,9 @@
         harnessSection.querySelectorAll('select').forEach((select) => {
           select.selectedIndex = 0;
         });
-        harnessSection.querySelectorAll('.custom-text').forEach((input) => {
-          input.value = '';
+        harnessSection.querySelectorAll('.custom-text-wrapper').forEach((wrapper) => {
+          const input = wrapper.querySelector('.custom-text');
+          if (input) input.value = '';
         });
       }
 
@@ -1043,12 +1390,12 @@
       associateSelect.addEventListener('change', function () {
         flagFormInteraction();
         const selectedValue = this.value;
-        if (associateText) {
+        if (associateTextWrapper) {
           if (selectedValue === 'Other') {
-            associateText.style.display = 'block';
+            associateTextWrapper.style.display = 'block';
           } else {
-            associateText.style.display = 'none';
-            associateText.value = '';
+            associateTextWrapper.style.display = 'none';
+            if (associateText) associateText.value = '';
           }
         }
         updateAddToCartButton();
@@ -1155,8 +1502,8 @@
   })();
 
   function toggleCustomFields() {
-    document.querySelectorAll('.custom-text').forEach((el) => {
-      el.style.display = 'block';
+    document.querySelectorAll('.custom-text-wrapper').forEach((wrapper) => {
+      wrapper.style.display = 'block';
     });
   }
 </script>
