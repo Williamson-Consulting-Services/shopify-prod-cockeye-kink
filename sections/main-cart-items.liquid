@@ -37,6 +37,7 @@
 
 {%- unless settings.cart_type == 'drawer' -%}
   <script src="{{ 'cart.js' | asset_url }}" defer="defer"></script>
+  <script src="{{ 'custom-cart-extension.js' | asset_url }}" defer="defer"></script>
 {%- endunless -%}
 
 <cart-items class="page-width{% if cart == empty %} is-empty{% else %} section-{{ section.id }}-padding{% endif %}">

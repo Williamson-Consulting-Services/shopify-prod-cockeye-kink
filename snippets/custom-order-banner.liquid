@@ -171,16 +171,20 @@
     function init() {
       render();
       refreshCart();
-      window.addEventListener('cart:updated', refreshCart);
+      subscribe(PUB_SUB_EVENTS.cartUpdate, (event) => {
+        if (event.cartState || event.itemCount !== undefined) {
+          refreshCart();
+        }
+        if (event.customOrderItemAdded) {
+          state.editing = false;
+          state.forceShow = false;
+          state.cartHasCustom = true;
+          render();
+          setTimeout(refreshCart, 200);
+        }
+      });
       window.addEventListener('custom-order:editing', () => notifyEditing(true));
       window.addEventListener('custom-order:editing-stop', () => notifyEditing(false));
-      window.addEventListener('custom-order:item-added', () => {
-        state.editing = false;
-        state.forceShow = false;
-        state.cartHasCustom = true;
-        render();
-        setTimeout(refreshCart, 200);
-      });
 
       const removalSelectors = [
         '[data-cart-remove]',
