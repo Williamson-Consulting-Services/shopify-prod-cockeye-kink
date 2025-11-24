@@ -1068,9 +1068,10 @@
 
     if (productForm) {
       const formId = productForm.id;
-      if (formId) {
+      // Ensure formId is a string before calling match
+      if (formId && typeof formId === 'string' && formId.trim() !== '') {
         const match = formId.match(/product-form-(.+)/);
-        if (match) {
+        if (match && match[1]) {
           sectionId = match[1];
         }
       }
