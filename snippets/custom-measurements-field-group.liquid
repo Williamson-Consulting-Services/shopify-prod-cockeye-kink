@@ -9,7 +9,7 @@
 
 {%- comment -%} Define measurement groups configuration {%- endcomment -%}
 {%- assign upper_body_measurements = 'Head Circumference,Neck,Shoulders,Chest,Torso,Sleeve Length,Bicep,Wrist,Palm Circumference,Hand Length' | split: ',' -%}
-{%- assign torso_hips_measurements = 'Stomach,Waist,Hips,Hip' | split: ',' -%}
+{%- assign torso_hips_measurements = 'Stomach,Waist,Hips' | split: ',' -%}
 {%- assign lower_body_measurements = 'Upper Thigh,Lower Thigh,Knee,Calf,Ankle,Inseam,Crotch,Butt Rise,Length' | split: ',' -%}
 {%- assign all_grouped_measurements = upper_body_measurements | concat: torso_hips_measurements | concat: lower_body_measurements -%}
 
