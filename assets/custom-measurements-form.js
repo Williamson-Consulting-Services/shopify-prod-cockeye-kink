@@ -188,6 +188,25 @@
         }
       }
 
+      // Validate leather color (always required)
+      const leatherColorSelect = document.getElementById('leather-color-select');
+      if (leatherColorSelect) {
+        const selectedOption = leatherColorSelect.options[leatherColorSelect.selectedIndex];
+        const hasSelectValue =
+          selectedOption &&
+          selectedOption.value !== '' &&
+          selectedOption.value !== null &&
+          selectedOption.value !== 'Select one' &&
+          selectedOption.value !== 'Other';
+
+        const leatherColorText = document.getElementById('leather-color-text');
+        const hasCustomText = leatherColorText && leatherColorText.value && leatherColorText.value.trim() !== '';
+
+        if (!hasSelectValue && !hasCustomText) {
+          return false;
+        }
+      }
+
       if (harnessSection && harnessSection.classList.contains('active')) {
         // Validate harness type selection
         const harnessTypeInputs = document.querySelectorAll('.harness-type-input');
@@ -201,9 +220,8 @@
           return false;
         }
 
-        // Validate harness fields
+        // Validate harness fields (excluding leather color which is always required)
         const harnessFields = [
-          'properties[Leather Color]',
           'properties[Left Front Plate]',
           'properties[Right Front Plate]',
           'properties[Back Plate]',
@@ -476,7 +494,12 @@
       });
     }
 
-    updateSectionVisibility(category, harnessSection, harnessTypeSelector, notesSection, associateSection) {
+    updateSectionVisibility(category, harnessSection, harnessTypeSelector, leatherColorSection, notesSection, associateSection) {
+      // Leather color is always available
+      if (leatherColorSection) {
+        leatherColorSection.classList.add('active');
+      }
+
       if (harnessSection) {
         const showHarness =
           (this.config.categoryConfig && this.config.categoryConfig.harness_details
@@ -556,6 +579,7 @@
 
       this.harnessSection = document.getElementById('harness-details');
       this.harnessTypeSelector = document.getElementById('harness-type-selector');
+      this.leatherColorSection = document.getElementById('leather-color-section');
       this.notesSection = document.getElementById('notes-section');
       this.associateSection = document.getElementById('associate-section');
       this.associateSelect = document.getElementById('associate-select');
@@ -568,6 +592,9 @@
       this.harnessSelects = document.querySelectorAll('#harness-details select');
       this.harnessCustomTexts = document.querySelectorAll('#harness-details .custom-text');
       this.harnessTypeInputs = document.querySelectorAll('.harness-type-input');
+      this.leatherColorSelect = document.getElementById('leather-color-select');
+      this.leatherColorText = document.getElementById('leather-color-text');
+      this.leatherColorTextWrapper = document.getElementById('leather-color-text-wrapper');
 
       this.setupEventListeners();
       this.initialize();
@@ -695,6 +722,7 @@
       this.selectedCategory = null;
 
       if (this.harnessSection) this.harnessSection.classList.remove('active');
+      // Leather color section is always active, don't remove it
       if (this.notesSection) this.notesSection.classList.remove('active');
       if (this.associateSection) this.associateSection.classList.remove('active');
 
@@ -722,13 +750,17 @@
       if (this.associateOtherHandler) {
         this.associateOtherHandler.reset();
       }
+      if (this.leatherColorOtherHandler) {
+        this.leatherColorOtherHandler.reset();
+      }
       if (this.harnessOtherHandlers) {
         this.harnessOtherHandlers.forEach((handler) => handler.reset());
       }
 
       // Reset all custom text wrappers (fallback for any not handled by classes)
       document.querySelectorAll('.custom-text-wrapper').forEach((wrapper) => {
-        if (wrapper.id !== 'associate-text-wrapper') {
+        // Don't hide associate or leather color wrappers (they're managed by handlers)
+        if (wrapper.id !== 'associate-text-wrapper' && wrapper.id !== 'leather-color-text-wrapper') {
           wrapper.style.display = 'none';
         }
         const input = wrapper.querySelector('.custom-text');
@@ -768,6 +800,11 @@
         this.associateSection.classList.add('active');
       }
 
+      // Leather color section is always active
+      if (this.leatherColorSection) {
+        this.leatherColorSection.classList.add('active');
+      }
+
       if (this.categoryInputs.length > 0) {
         const firstInput = this.categoryInputs[0];
         firstInput.checked = true;
@@ -777,6 +814,7 @@
             this.selectedCategory,
             this.harnessSection,
             this.harnessTypeSelector,
+            this.leatherColorSection,
             this.notesSection,
             this.associateSection
           );
@@ -840,6 +878,7 @@
             this.selectedCategory,
             this.harnessSection,
             this.harnessTypeSelector,
+            this.leatherColorSection,
             this.notesSection,
             this.associateSection
           );
@@ -942,9 +981,18 @@
         );
       }
 
-      // Harness "Other" option handlers
+      // Leather color "Other" option handler (always available)
+      if (this.leatherColorSelect && this.leatherColorTextWrapper && this.leatherColorText) {
+        this.leatherColorOtherHandler = new OtherOptionHandler(
+          'leather-color-select',
+          'leather-color-text-wrapper',
+          'leather-color-text',
+          onInteraction
+        );
+      }
+
+      // Harness "Other" option handlers (plates and sliders only)
       const harnessOtherConfigs = [
-        { select: 'leather-color-select', wrapper: 'leather-color-text-wrapper', text: 'leather-color-text' },
         { select: 'left-front-plate-select', wrapper: 'left-front-plate-text-wrapper', text: 'left-front-plate-text' },
         { select: 'right-front-plate-select', wrapper: 'right-front-plate-text-wrapper', text: 'right-front-plate-text' },
         { select: 'back-plate-select', wrapper: 'back-plate-text-wrapper', text: 'back-plate-text' },

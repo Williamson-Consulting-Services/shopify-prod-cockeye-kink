@@ -1,0 +1,31 @@
+{% comment %}
+  Leather Color Component (Always Available)
+  Parameters:
+    - leather_colors: Array of leather color options
+    - section_id: The section ID for form association
+{% endcomment %}
+<div class="conditional-section" id="leather-color-section">
+  <label>Leather Color</label>
+  <div class="select-wrapper">
+    <select name="properties[Leather Color]" id="leather-color-select" form="product-form-{{ section_id }}">
+      <option value="">Select one</option>
+      {%- for color in leather_colors -%}
+        {%- assign color_clean = color | strip -%}
+        {%- if color_clean == '' -%}{% continue %}{% endif %}
+        <option>{{ color_clean }}</option>
+      {%- endfor -%}
+      <option value="Other">Other</option>
+    </select>
+  </div>
+  <div class="custom-text-wrapper" id="leather-color-text-wrapper" style="display: none;">
+    <input
+      type="text"
+      name="properties[Leather Color - Text]"
+      id="leather-color-text"
+      class="custom-text"
+      placeholder="Enter custom color"
+      form="product-form-{{ section_id }}"
+    >
+  </div>
+</div>
+

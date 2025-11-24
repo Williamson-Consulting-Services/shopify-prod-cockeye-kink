@@ -1,36 +1,12 @@
 {% comment %}
   Harness Options Component
   Parameters:
-    - leather_colors: Array of leather color options
     - front_plate_options: Array of front plate options
     - back_plate_options: Array of back plate options (includes front + extra)
     - long_sliders: Array of long slider options
     - section_id: The section ID for form association
 {% endcomment %}
 <div class="conditional-section" id="harness-details">
-  <label>Leather Color</label>
-  <div class="select-wrapper">
-    <select name="properties[Leather Color]" id="leather-color-select" form="product-form-{{ section_id }}">
-      <option value="">Select one</option>
-      {%- for color in leather_colors -%}
-        {%- assign color_clean = color | strip -%}
-        {%- if color_clean == '' -%}{% continue %}{% endif %}
-        <option>{{ color_clean }}</option>
-      {%- endfor -%}
-      <option value="Other">Other</option>
-    </select>
-  </div>
-  <div class="custom-text-wrapper" id="leather-color-text-wrapper" style="display: none;">
-    <input
-      type="text"
-      name="properties[Leather Color - Text]"
-      id="leather-color-text"
-      class="custom-text"
-      placeholder="Enter custom color"
-      form="product-form-{{ section_id }}"
-    >
-  </div>
-
   <label>Left Front Plate</label>
   <div class="select-wrapper">
     <select name="properties[Left Front Plate]" id="left-front-plate-select" form="product-form-{{ section_id }}">
