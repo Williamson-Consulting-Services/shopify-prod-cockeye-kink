@@ -4,18 +4,61 @@
     - leather_colors: Array of leather color options
     - section_id: The section ID for form association
 {% endcomment %}
-<div class="conditional-section" id="leather-color-section">
-  <label>Leather Color</label>
-  <div class="select-wrapper">
-    <select name="properties[Leather Color]" id="leather-color-select" form="product-form-{{ section_id }}">
-      <option value="">Select one</option>
-      {%- for color in leather_colors -%}
-        {%- assign color_clean = color | strip -%}
-        {%- if color_clean == '' -%}{% continue %}{% endif %}
-        <option>{{ color_clean }}</option>
+{%- comment -%} Color mapping for common leather colors {%- endcomment -%}
+{%- assign color_map = 'Black:#000000,Brown:#8B4513,Gunmetal:#2C3539,Grey:#808080,Light Grey:#D3D3D3,White:#FFFFFF,Red:#DC143C,Blue:#0000FF,Green:#008000,Yellow:#FFD700,Orange:#FF8C00,Purple:#800080' | split: ',' -%}
+
+<div class="conditional-section active" id="leather-color-section">
+  <label>{{ 'custom_measurements.leather_color_label' | t }} <span style="color: red;">*</span></label>
+  <div class="leather-color-options" id="leather-color-options">
+    {%- for color in leather_colors -%}
+      {%- assign color_clean = color | strip -%}
+      {%- if color_clean == '' -%}{% continue %}{% endif %}
+      {%- assign color_handle = color_clean | handleize -%}
+      {%- assign color_value = '' -%}
+      {%- for color_entry in color_map -%}
+        {%- assign parts = color_entry | split: ':' -%}
+        {%- if parts[0] == color_clean -%}
+          {%- assign color_value = parts[1] -%}
+          {%- break -%}
+        {%- endif -%}
       {%- endfor -%}
-      <option value="Other">Other</option>
-    </select>
+      <div class="leather-color-option">
+        <input
+          type="radio"
+          name="properties[Leather Color]"
+          id="leather-color-{{ color_handle }}"
+          value="{{ color_clean }}"
+          form="product-form-{{ section_id }}"
+          class="leather-color-radio"
+        >
+        <label for="leather-color-{{ color_handle }}" class="leather-color-swatch">
+          {%- if color_value != '' -%}
+            <span class="color-swatch" style="background-color: {{ color_value }};{% if color_clean == 'White' or color_clean == 'Light Grey' %} border: 1px solid rgba(var(--color-foreground), 0.2);{% endif %}"></span>
+          {%- else -%}
+            <span class="color-swatch color-swatch-text">
+              <span class="swatch-text">{{ color_clean | upcase | truncate: 8 }}</span>
+            </span>
+          {%- endif -%}
+          <span class="color-label">{{ color_clean }}</span>
+        </label>
+      </div>
+    {%- endfor -%}
+    <div class="leather-color-option">
+      <input
+        type="radio"
+        name="properties[Leather Color]"
+        id="leather-color-other"
+        value="Other"
+        form="product-form-{{ section_id }}"
+        class="leather-color-radio"
+      >
+      <label for="leather-color-other" class="leather-color-swatch leather-color-other">
+        <span class="color-swatch color-swatch-other">
+          <span class="swatch-text">OTHER</span>
+        </span>
+        <span class="color-label">Other</span>
+      </label>
+    </div>
   </div>
   <div class="custom-text-wrapper" id="leather-color-text-wrapper" style="display: none;">
     <input
@@ -23,7 +66,7 @@
       name="properties[Leather Color - Text]"
       id="leather-color-text"
       class="custom-text"
-      placeholder="Enter custom color"
+      placeholder="{{ 'custom_measurements.leather_color_placeholder' | t }}"
       form="product-form-{{ section_id }}"
     >
   </div>

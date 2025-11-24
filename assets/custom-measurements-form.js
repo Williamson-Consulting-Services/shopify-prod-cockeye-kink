@@ -189,22 +189,24 @@
       }
 
       // Validate leather color (always required)
-      const leatherColorSelect = document.getElementById('leather-color-select');
-      if (leatherColorSelect) {
-        const selectedOption = leatherColorSelect.options[leatherColorSelect.selectedIndex];
-        const hasSelectValue =
-          selectedOption &&
-          selectedOption.value !== '' &&
-          selectedOption.value !== null &&
-          selectedOption.value !== 'Select one' &&
-          selectedOption.value !== 'Other';
-
-        const leatherColorText = document.getElementById('leather-color-text');
-        const hasCustomText = leatherColorText && leatherColorText.value && leatherColorText.value.trim() !== '';
-
-        if (!hasSelectValue && !hasCustomText) {
-          return false;
+      const leatherColorRadios = document.querySelectorAll('.leather-color-radio');
+      let hasLeatherColor = false;
+      let isLeatherColorOther = false;
+      
+      leatherColorRadios.forEach((radio) => {
+        if (radio.checked) {
+          hasLeatherColor = true;
+          if (radio.value === 'Other') {
+            isLeatherColorOther = true;
+          }
         }
+      });
+
+      const leatherColorText = document.getElementById('leather-color-text');
+      const hasCustomText = leatherColorText && leatherColorText.value && leatherColorText.value.trim() !== '';
+
+      if (!hasLeatherColor || (isLeatherColorOther && !hasCustomText)) {
+        return false;
       }
 
       if (harnessSection && harnessSection.classList.contains('active')) {
@@ -592,7 +594,7 @@
       this.harnessSelects = document.querySelectorAll('#harness-details select');
       this.harnessCustomTexts = document.querySelectorAll('#harness-details .custom-text');
       this.harnessTypeInputs = document.querySelectorAll('.harness-type-input');
-      this.leatherColorSelect = document.getElementById('leather-color-select');
+      this.leatherColorRadios = document.querySelectorAll('.leather-color-radio');
       this.leatherColorText = document.getElementById('leather-color-text');
       this.leatherColorTextWrapper = document.getElementById('leather-color-text-wrapper');
 
@@ -750,8 +752,13 @@
       if (this.associateOtherHandler) {
         this.associateOtherHandler.reset();
       }
-      if (this.leatherColorOtherHandler) {
-        this.leatherColorOtherHandler.reset();
+      // Reset leather color
+      if (this.leatherColorRadios && this.leatherColorTextWrapper && this.leatherColorText) {
+        this.leatherColorRadios.forEach((radio) => {
+          radio.checked = false;
+        });
+        this.leatherColorTextWrapper.style.display = 'none';
+        this.leatherColorText.value = '';
       }
       if (this.harnessOtherHandlers) {
         this.harnessOtherHandlers.forEach((handler) => handler.reset());
@@ -983,14 +990,19 @@
         );
       }
 
-      // Leather color "Other" option handler (always available)
-      if (this.leatherColorSelect && this.leatherColorTextWrapper && this.leatherColorText) {
-        this.leatherColorOtherHandler = new OtherOptionHandler(
-          'leather-color-select',
-          'leather-color-text-wrapper',
-          'leather-color-text',
-          onInteraction
-        );
+      // Leather color "Other" option handler (always available) - handles radio buttons
+      if (this.leatherColorRadios.length > 0 && this.leatherColorTextWrapper && this.leatherColorText) {
+        this.leatherColorRadios.forEach((radio) => {
+          radio.addEventListener('change', () => {
+            onInteraction();
+            if (radio.value === 'Other' && radio.checked) {
+              this.leatherColorTextWrapper.style.display = 'flex';
+            } else if (radio.checked) {
+              this.leatherColorTextWrapper.style.display = 'none';
+              this.leatherColorText.value = '';
+            }
+          });
+        });
       }
 
       // Harness "Other" option handlers (plates and sliders only)
