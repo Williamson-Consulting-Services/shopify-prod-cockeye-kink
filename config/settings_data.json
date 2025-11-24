@@ -85,11 +85,11 @@
     "badge_corner_radius": 40,
     "sale_badge_color_scheme": "accent-2",
     "sold_out_badge_color_scheme": "inverse",
-    "social_facebook_link": "https://www.facebook.com/cockeyekink/",
+    "social_facebook_link": "https://www.facebook.com/cockeyekink",
     "social_instagram_link": "https://www.instagram.com/cockeyekink/",
     "social_youtube_link": "",
     "social_tiktok_link": "",
-    "social_twitter_link": "",
+    "social_twitter_link": "https://x.com/cockeyekink",
     "social_snapchat_link": "",
     "social_pinterest_link": "",
     "social_tumblr_link": "",
@@ -103,6 +103,7 @@
     "show_cart_note": false,
     "custom_measurements_categories_order": "Hats, Dogtag/Pigtag, Shirt, Gloves, Deluxe Harness, Standard Harness, Suspender Harness, Suspenders, Belts, Pants, Chaps, Other",
     "custom_measurements_map": "Head Circumference: Hats, Other*\nNeck: Deluxe Harness, Standard Harness, Suspender Harness, Dogtag/Pigtag, Shirt, Other*\nShoulders: Deluxe Harness, Standard Harness, Suspender Harness, Shirt, Suspenders, Other*\nChest: Deluxe Harness, Standard Harness, Suspender Harness, Shirt, Suspenders, Other*\nTorso: Deluxe Harness, Standard Harness, Suspender Harness, Shirt, Other*\nSleeve Length: Shirt, Other*\nBicep: Shirt, Other*\nWrist: Shirt, Gloves, Other*\nPalm Circumference: Gloves, Other*\nHand Length: Gloves, Other*\nStomach: Shirt, Other*\nWaist: Deluxe Harness, Standard Harness, Suspender Harness, Chaps, Pants, Belts, Suspenders, Other*\nHips: Chaps, Pants, Belts, Other*\nButt (Seat): Pants, Chaps, Other*\nButt Rise: Pants, Other*\nUpper Thigh: Chaps, Pants, Other*\nLower Thigh: Chaps, Pants, Other*\nKnee: Chaps, Pants, Other*\nCalf: Chaps, Pants, Other*\nAnkle: Chaps, Pants, Other*\nInseam: Pants, Chaps, Other*\nCrotch: Pants, Other*",
+    "custom_measurements_associates": "Clair, Erik, Robert, Jack, Venn, Aspen, Other",
     "sections": {
       "announcement-bar": {
         "type": "announcement-bar",
