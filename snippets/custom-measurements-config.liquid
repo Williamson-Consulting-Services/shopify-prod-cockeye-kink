@@ -40,7 +40,7 @@
 {%- assign harness_types = harness_types_source | split: ',' -%}
 
 {%- comment -%} Parse tag options {%- endcomment -%}
-{%- assign default_tag_options = 'dog tag, pig tag, bear tag, puppy bone, puppy paw, other' -%}
+{%- assign default_tag_options = 'Dog Tag, Pig Tag, Bear Tag, Puppy Bone, Puppy Paw, Other' -%}
 {%- assign tag_options_source_raw = settings.custom_measurements_tag_options | default: default_tag_options -%}
 {%- assign tag_options_source = tag_options_source_raw | replace: '|', ',' -%}
 {%- assign tag_options = tag_options_source | split: ',' -%}
