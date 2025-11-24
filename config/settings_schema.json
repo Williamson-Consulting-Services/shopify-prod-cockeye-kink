@@ -1467,7 +1467,7 @@
         "type": "text",
         "id": "custom_order_banner_editing_text",
         "label": "t:settings_schema.custom_order_banner.settings.editing_text.label",
-        "default": "Custom order not in cart yet — make sure you add it before leaving this page."
+        "default": "Unsaved Draft: You are currently configuring this item. You must click 'Add to Cart' below to save these measurements."
       },
       {
         "type": "text",

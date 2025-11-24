@@ -10,8 +10,13 @@
 {
   "custom_order": {
     "banner": {
-      "editing": "Custom order not in cart yet — make sure you add it before leaving this page.",
+      "editing": "Unsaved Draft: You are currently configuring this item. You must click 'Add to Cart' below to save these measurements.",
       "cart": "Custom order is in cart"
+    },
+    "checkout_footer": {
+      "status_prefix": "Order in Progress:",
+      "item_count": "You have {{ count }} custom item(s) saved in the cart.",
+      "button_text": "Finish & Pay Now →"
     }
   },
   "general": {
