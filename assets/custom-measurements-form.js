@@ -496,10 +496,23 @@
       });
     }
 
-    updateSectionVisibility(category, harnessSection, harnessTypeSelector, leatherColorSection, notesSection, associateSection) {
+    updateSectionVisibility(category, harnessSection, harnessTypeSelector, tagTypeSelector, leatherColorSection, notesSection, associateSection) {
       // Leather color is always available
       if (leatherColorSection) {
         leatherColorSection.classList.add('active');
+      }
+
+      // Show/hide tag type selector
+      if (tagTypeSelector) {
+        const showTagType = category === 'Tag';
+        tagTypeSelector.style.display = showTagType ? 'block' : 'none';
+        if (!showTagType) {
+          // Reset tag type selection when hiding
+          const tagTypeInputs = tagTypeSelector.querySelectorAll('input[type="radio"]');
+          tagTypeInputs.forEach((input) => {
+            input.checked = false;
+          });
+        }
       }
 
       if (harnessSection) {
@@ -581,6 +594,7 @@
 
       this.harnessSection = document.getElementById('harness-details');
       this.harnessTypeSelector = document.getElementById('harness-type-selector');
+      this.tagTypeSelector = document.getElementById('tag-type-selector');
       this.leatherColorSection = document.getElementById('leather-color-section');
       this.notesSection = document.getElementById('notes-section');
       this.associateSection = document.getElementById('associate-section');
@@ -797,6 +811,12 @@
         });
       }
 
+      if (this.tagTypeSelector) {
+        this.tagTypeSelector.querySelectorAll('input[type="radio"]').forEach((input) => {
+          input.checked = false;
+        });
+      }
+
       if (this.notesSection) {
         this.notesSection.querySelectorAll('textarea').forEach((textarea) => {
           textarea.value = '';
@@ -821,6 +841,7 @@
             this.selectedCategory,
             this.harnessSection,
             this.harnessTypeSelector,
+            this.tagTypeSelector,
             this.leatherColorSection,
             this.notesSection,
             this.associateSection
@@ -886,6 +907,7 @@
             this.selectedCategory,
             this.harnessSection,
             this.harnessTypeSelector,
+            this.tagTypeSelector,
             this.leatherColorSection,
             this.notesSection,
             this.associateSection

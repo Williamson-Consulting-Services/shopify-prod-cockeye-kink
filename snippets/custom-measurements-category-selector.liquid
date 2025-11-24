@@ -5,6 +5,7 @@
     - measurement_map_lines: Array of measurement map lines (format: "Measurement: Category, Category*, ...")
     - harness_categories: Array of harness category names
     - harness_types: Array of harness type names (Deluxe, Standard, Suspender, Asymmetric)
+    - tag_options: Array of tag option names (dog tag, pig tag, bear tag, puppy bone, puppy paw, other)
     - section_id: The section ID for form association
     - preselected_category: Optional category to preselect (from product.type)
 {% endcomment %}
@@ -54,6 +55,11 @@
       {%- endif -%}
     {%- endfor -%}
 
+    {%- assign tag_match = false -%}
+    {%- if category_name == 'Tag' -%}
+      {%- assign tag_match = true -%}
+    {%- endif -%}
+
     {%- assign option_id = 'custom-category-' | append: section_id | append: '-' | append: forloop.index0 -%}
     {%- assign should_preselect = false -%}
     {%- if preselected_category and preselected_category != blank -%}
@@ -75,6 +81,7 @@
       data-required="{{ required_string }}"
       data-optional="{{ optional_string }}"
       data-show-harness="{% if harness_match %}true{% else %}false{% endif %}"
+      data-show-tag="{% if tag_match %}true{% else %}false{% endif %}"
       {% if should_preselect or forloop.first %}checked{% endif %}
     >
     <label for="{{ option_id }}">
@@ -102,6 +109,30 @@
       >
       <label for="{{ type_id }}">
         {{ type_name }}
+      </label>
+    {%- endfor -%}
+  </fieldset>
+{%- endif -%}
+
+{%- comment -%} Tag Type Selector (appears when Tag is selected) {%- endcomment -%}
+{%- if tag_options -%}
+  <fieldset class="product-form__input product-form__input--pill conditional-section" id="tag-type-selector" style="display: none;">
+    <legend class="form__label">{{ 'custom_measurements.tag_type_legend' | t }}</legend>
+    {%- for tag_option in tag_options -%}
+      {%- assign option_name = tag_option | strip -%}
+      {%- if option_name == '' -%}{% continue %}{% endif %}
+      {%- assign option_id = 'tag-type-' | append: section_id | append: '-' | append: forloop.index0 -%}
+      <input
+        type="radio"
+        id="{{ option_id }}"
+        class="tag-type-input"
+        name="properties[Tag Type]"
+        value="{{ option_name }}"
+        form="product-form-{{ section_id }}"
+        data-tag-type="{{ option_name }}"
+      >
+      <label for="{{ option_id }}">
+        {{ option_name }}
       </label>
     {%- endfor -%}
   </fieldset>

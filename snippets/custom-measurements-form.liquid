@@ -95,6 +95,11 @@
 {%- assign associates_source = associates_source_raw | replace: '|', ',' -%}
 {%- assign associates = associates_source | split: ',' -%}
 
+{%- assign default_tag_options = 'dog tag, pig tag, bear tag, puppy bone, puppy paw, other' -%}
+{%- assign tag_options_source_raw = settings.custom_measurements_tag_options | default: default_tag_options -%}
+{%- assign tag_options_source = tag_options_source_raw | replace: '|', ',' -%}
+{%- assign tag_options = tag_options_source | split: ',' -%}
+
 {%- comment -%} Render form components {%- endcomment -%}
 {%- render 'custom-measurements-associate', associates: associates, section_id: section_obj.id -%}
 
@@ -103,6 +108,7 @@
     measurement_map_lines: measurement_map_lines,
     harness_categories: harness_categories,
     harness_types: harness_types,
+    tag_options: tag_options,
     section_id: section_obj.id,
     preselected_category: product_type -%}
 

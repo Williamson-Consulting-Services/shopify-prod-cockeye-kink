@@ -89,6 +89,7 @@
     "group_torso_hips": "Torso/Hips",
     "group_lower_body": "Lower Body",
     "harness_type_legend": "Harness Type",
+    "tag_type_legend": "Tag Type",
     "characters": "characters",
     "leather_color_label": "Leather Color",
     "leather_color_placeholder": "Enter custom color"
