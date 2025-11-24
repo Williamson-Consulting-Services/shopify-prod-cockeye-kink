@@ -9,7 +9,8 @@
  */
 {
   "current": {
-    "logo": "shopify://shop_images/300pxls2CockEyeKinkTrnsprnt.png",
+    "logo": "shopify://shop_images/logo.webp",
+    "logo_width": 300,
     "type_header_font": "merriweather_sans_n4",
     "heading_scale": 120,
     "type_body_font": "archivo_narrow_n4",
