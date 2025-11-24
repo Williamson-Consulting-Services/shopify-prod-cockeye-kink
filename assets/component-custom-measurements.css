@@ -127,6 +127,30 @@
   letter-spacing: 0.1rem;
   line-height: 1.5;
   color: rgb(var(--color-foreground));
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* Scale down text for long measurement labels using container queries */
+.measurement-field {
+  container-type: inline-size;
+}
+
+.measurements-group label {
+  font-size: clamp(0.85rem, 4cqw, 1.4rem);
+}
+
+/* Fallback for browsers without container query support */
+@supports not (container-type: inline-size) {
+  .measurement-field {
+    container-type: normal;
+  }
+
+  .measurements-group label {
+    font-size: clamp(0.85rem, 2.5vw, 1.4rem);
+  }
 }
 
 .measurement-field--optional label {

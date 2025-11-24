@@ -9,8 +9,8 @@
 
 {%- comment -%} Define measurement groups configuration {%- endcomment -%}
 {%- assign upper_body_measurements = 'Head Circumference,Neck,Shoulders,Chest,Torso,Sleeve Length,Bicep,Wrist,Palm Circumference,Hand Length' | split: ',' -%}
-{%- assign torso_hips_measurements = 'Stomach,Waist,Hips' | split: ',' -%}
-{%- assign lower_body_measurements = 'Upper Thigh,Lower Thigh,Knee,Calf,Ankle,Inseam,Crotch,Butt Rise' | split: ',' -%}
+{%- assign torso_hips_measurements = 'Stomach,Waist,Hips,Hip' | split: ',' -%}
+{%- assign lower_body_measurements = 'Upper Thigh,Lower Thigh,Knee,Calf,Ankle,Inseam,Crotch,Butt Rise,Length' | split: ',' -%}
 {%- assign all_grouped_measurements = upper_body_measurements | concat: torso_hips_measurements | concat: lower_body_measurements -%}
 
 {%- comment -%} Helper: Check if measurement is in group {%- endcomment -%}
@@ -44,13 +44,20 @@
     section_id: section_id -%}
 
 {%- comment -%} Other measurements not in groups {%- endcomment -%}
+{%- comment -%} This group should only contain measurements that are NOT in any of the defined groups {%- endcomment -%}
 <div class="measurement-group" data-group="other" id="measurementsGroup-other" style="display: none;">
   <div class="measurements-group">
     {%- for meas_name in measurement_names -%}
       {%- assign measurement_label = meas_name | strip -%}
       {%- if measurement_label == '' -%}{% continue %}{% endif %}
-      {%- render 'custom-measurements-check-group', measurement_label: measurement_label, group_measurements: all_grouped_measurements -%}
-      {%- unless is_in_group -%}
+      {%- assign is_in_any_group = false -%}
+      {%- for group_meas in all_grouped_measurements -%}
+        {%- if measurement_label == group_meas -%}
+          {%- assign is_in_any_group = true -%}
+          {%- break -%}
+        {%- endif -%}
+      {%- endfor -%}
+      {%- unless is_in_any_group -%}
         {%- render 'custom-measurements-field', measurement_label: measurement_label, section_id: section_id -%}
       {%- endunless -%}
     {%- endfor -%}
