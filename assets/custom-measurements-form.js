@@ -153,7 +153,7 @@
       this.utils = utils;
     }
 
-    validateRequiredFields(selectedCategory, harnessSection) {
+    validateRequiredFields(selectedCategory, harnessSection, shouldScroll = false) {
       if (!selectedCategory || !this.config.measurements) return false;
 
       const activeFields = document.querySelectorAll('.measurement-field.active');
@@ -171,11 +171,13 @@
           const cmInput = field.querySelector('.measurement-cm');
           const hasValue = this.utils.hasValidNumber(inInput) || this.utils.hasValidNumber(cmInput);
           if (!hasValue) {
-            // Add error class and scroll to field
+            // Add error class and scroll to field (only on submit)
             field.classList.add('measurement-field--error');
             if (inInput) inInput.classList.add('measurement-input--error');
             if (cmInput) cmInput.classList.add('measurement-input--error');
-            field.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            if (shouldScroll) {
+              field.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
             return false;
           } else {
             // Remove error class on valid fields
@@ -192,52 +194,58 @@
         const selectedValue = associateSelect.value;
         if (!selectedValue || selectedValue === '') {
           associateSelect.classList.add('measurement-input--error');
-          associateSelect.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          if (shouldScroll) {
+            associateSelect.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
           return false;
         }
         if (selectedValue === 'Other') {
           const associateText = document.getElementById('associate-text');
           if (!associateText || !associateText.value || associateText.value.trim() === '') {
             associateText.classList.add('measurement-input--error');
-            associateText.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            if (shouldScroll) {
+              associateText.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
             return false;
           }
         }
         associateSelect.classList.remove('measurement-input--error');
       }
 
-      // Validate leather color (always required)
-      const leatherColorRadios = document.querySelectorAll('.leather-color-radio');
-      let hasLeatherColor = false;
-      let isLeatherColorOther = false;
-      let firstLeatherColorRadio = null;
+      // Validate leather color (required for all categories except Tag)
+      if (selectedCategory !== 'Tag') {
+        const leatherColorRadios = document.querySelectorAll('.leather-color-radio');
+        let hasLeatherColor = false;
+        let isLeatherColorOther = false;
+        let firstLeatherColorRadio = null;
 
-      leatherColorRadios.forEach((radio) => {
-        if (!firstLeatherColorRadio) firstLeatherColorRadio = radio;
-        if (radio.checked) {
-          hasLeatherColor = true;
-          if (radio.value === 'Other') {
-            isLeatherColorOther = true;
+        leatherColorRadios.forEach((radio) => {
+          if (!firstLeatherColorRadio) firstLeatherColorRadio = radio;
+          if (radio.checked) {
+            hasLeatherColor = true;
+            if (radio.value === 'Other') {
+              isLeatherColorOther = true;
+            }
           }
-        }
-      });
+        });
 
-      const leatherColorText = document.getElementById('leather-color-text');
-      const hasCustomText = leatherColorText && leatherColorText.value && leatherColorText.value.trim() !== '';
+        const leatherColorText = document.getElementById('leather-color-text');
+        const hasCustomText = leatherColorText && leatherColorText.value && leatherColorText.value.trim() !== '';
 
-      if (!hasLeatherColor || (isLeatherColorOther && !hasCustomText)) {
-        if (firstLeatherColorRadio) {
-          const leatherColorSection = document.getElementById('leather-color-section');
-          if (leatherColorSection) {
-            leatherColorSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        if (!hasLeatherColor || (isLeatherColorOther && !hasCustomText)) {
+          if (shouldScroll && firstLeatherColorRadio) {
+            const leatherColorSection = document.getElementById('leather-color-section');
+            if (leatherColorSection) {
+              leatherColorSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
           }
+          if (isLeatherColorOther && leatherColorText) {
+            leatherColorText.classList.add('measurement-input--error');
+          }
+          return false;
         }
-        if (isLeatherColorOther && leatherColorText) {
-          leatherColorText.classList.add('measurement-input--error');
-        }
-        return false;
+        if (leatherColorText) leatherColorText.classList.remove('measurement-input--error');
       }
-      if (leatherColorText) leatherColorText.classList.remove('measurement-input--error');
 
       if (harnessSection && harnessSection.classList.contains('active')) {
         // Validate harness type selection
@@ -251,7 +259,7 @@
           }
         });
         if (!hasHarnessType) {
-          if (firstHarnessTypeInput) {
+          if (shouldScroll && firstHarnessTypeInput) {
             const harnessTypeSelector = document.getElementById('harness-type-selector');
             if (harnessTypeSelector) {
               harnessTypeSelector.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -274,7 +282,7 @@
           }
         });
         if (!hasTagType) {
-          if (tagTypeSelector) {
+          if (shouldScroll && tagTypeSelector) {
             tagTypeSelector.scrollIntoView({ behavior: 'smooth', block: 'center' });
           }
           return false;
@@ -307,7 +315,7 @@
 
           if (!hasSelectValue && !hasCustomText) {
             select.classList.add('measurement-input--error');
-            if (select.closest('.select-wrapper')) {
+            if (shouldScroll && select.closest('.select-wrapper')) {
               select.closest('.select-wrapper').scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
             return false;
@@ -350,7 +358,21 @@
         if (candidate) {
           this.button = candidate;
           if (!this.listenerAttached) {
-            this.button.addEventListener('click', () => {
+            this.button.addEventListener('click', (event) => {
+              // If button is disabled, run validation with scrolling and prevent submission
+              if (this.button.disabled || this.button.hasAttribute('disabled') || this.button.getAttribute('aria-disabled') === 'true') {
+                event.preventDefault();
+                event.stopPropagation();
+                if (window.customMeasurementsForm && window.customMeasurementsForm.validationService) {
+                  window.customMeasurementsForm.validationService.validateRequiredFields(
+                    window.customMeasurementsForm.selectedCategory,
+                    window.customMeasurementsForm.harnessSection,
+                    true // Enable scrolling when clicking disabled button
+                  );
+                }
+                return false;
+              }
+              // If button is enabled, proceed normally
               if (window.customMeasurementsForm) {
                 window.customMeasurementsForm.setResetAfterAddToCartPending(true);
               }
@@ -596,9 +618,24 @@
         otherCategoryNotice.style.display = showNotice ? 'block' : 'none';
       }
 
-      // Leather color is always available
+      // Leather color is available for all categories except Tag
       if (leatherColorSection) {
-        leatherColorSection.classList.add('active');
+        if (category === 'Tag') {
+          leatherColorSection.classList.remove('active');
+          leatherColorSection.style.display = 'none';
+          // Reset leather color selection when hiding
+          const leatherColorRadios = leatherColorSection.querySelectorAll('.leather-color-radio');
+          leatherColorRadios.forEach((radio) => {
+            radio.checked = false;
+          });
+          const leatherColorText = document.getElementById('leather-color-text');
+          const leatherColorTextWrapper = document.getElementById('leather-color-text-wrapper');
+          if (leatherColorText) leatherColorText.value = '';
+          if (leatherColorTextWrapper) leatherColorTextWrapper.style.display = 'none';
+        } else {
+          leatherColorSection.classList.add('active');
+          leatherColorSection.style.display = '';
+        }
       }
 
       // Show/hide tag type selector
@@ -814,6 +851,16 @@
       this.updateBannerEditingState(true);
     }
 
+    clearAllErrorStates() {
+      // Clear error states from all measurement fields
+      document.querySelectorAll('.measurement-field--error').forEach((field) => {
+        field.classList.remove('measurement-field--error');
+      });
+      document.querySelectorAll('.measurement-input--error').forEach((input) => {
+        input.classList.remove('measurement-input--error');
+      });
+    }
+
     updateBannerEditingState(isEditing) {
       const eventName = isEditing ? 'custom-order:editing' : 'custom-order:editing-stop';
       try {
@@ -935,10 +982,8 @@
         this.associateSection.classList.add('active');
       }
 
-      // Leather color section is always active
-      if (this.leatherColorSection) {
-        this.leatherColorSection.classList.add('active');
-      }
+      // Leather color section visibility is managed by updateSectionVisibility
+      // Don't set it as always active here - let updateSectionVisibility handle it based on category
 
       if (this.categoryInputs.length > 0) {
         const firstInput = this.categoryInputs[0];
@@ -1014,7 +1059,7 @@
           this.currentCategoryStore = this.measurementManager.getCategoryStore(this.selectedCategory);
 
           // Clear all error states when category changes
-          this.categoryManager.clearAllErrorStates();
+          this.clearAllErrorStates();
 
           this.categoryManager.updateSectionVisibility(
             this.selectedCategory,
@@ -1240,7 +1285,7 @@
       // Form submission
       if (this.productForm) {
         this.productForm.addEventListener('submit', (event) => {
-          if (!this.validationService.validateRequiredFields(this.selectedCategory, this.harnessSection)) {
+          if (!this.validationService.validateRequiredFields(this.selectedCategory, this.harnessSection, false)) {
             event.preventDefault();
             alert('Please select a category and fill all required measurements.');
             this.resetAfterAddToCartPending = false;
