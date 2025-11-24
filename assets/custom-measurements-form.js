@@ -358,25 +358,53 @@
         if (candidate) {
           this.button = candidate;
           if (!this.listenerAttached) {
-            this.button.addEventListener('click', (event) => {
-              // If button is disabled, run validation with scrolling and prevent submission
-              if (this.button.disabled || this.button.hasAttribute('disabled') || this.button.getAttribute('aria-disabled') === 'true') {
-                event.preventDefault();
-                event.stopPropagation();
-                if (window.customMeasurementsForm && window.customMeasurementsForm.validationService) {
-                  window.customMeasurementsForm.validationService.validateRequiredFields(
-                    window.customMeasurementsForm.selectedCategory,
-                    window.customMeasurementsForm.harnessSection,
-                    true // Enable scrolling when clicking disabled button
-                  );
+            // Attach click handler to parent container since disabled buttons don't always register clicks
+            const buttonContainer = this.button.closest('.product-form__buttons') || this.button.parentElement;
+            if (buttonContainer) {
+              buttonContainer.addEventListener('click', (event) => {
+                // Only handle if clicking on or within the button
+                if (event.target === this.button || this.button.contains(event.target)) {
+                  // If button is disabled, run validation with scrolling and prevent submission
+                  if (this.button.disabled || this.button.hasAttribute('disabled') || this.button.getAttribute('aria-disabled') === 'true') {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    if (window.customMeasurementsForm && window.customMeasurementsForm.validationService) {
+                      window.customMeasurementsForm.validationService.validateRequiredFields(
+                        window.customMeasurementsForm.selectedCategory,
+                        window.customMeasurementsForm.harnessSection,
+                        true // Enable scrolling when clicking disabled button
+                      );
+                    }
+                    return false;
+                  }
+                  // If button is enabled, proceed normally
+                  if (window.customMeasurementsForm) {
+                    window.customMeasurementsForm.setResetAfterAddToCartPending(true);
+                  }
                 }
-                return false;
-              }
-              // If button is enabled, proceed normally
-              if (window.customMeasurementsForm) {
-                window.customMeasurementsForm.setResetAfterAddToCartPending(true);
-              }
-            });
+              });
+            } else {
+              // Fallback to button if no parent container found
+              this.button.addEventListener('click', (event) => {
+                // If button is disabled, run validation with scrolling and prevent submission
+                if (this.button.disabled || this.button.hasAttribute('disabled') || this.button.getAttribute('aria-disabled') === 'true') {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  if (window.customMeasurementsForm && window.customMeasurementsForm.validationService) {
+                    window.customMeasurementsForm.validationService.validateRequiredFields(
+                      window.customMeasurementsForm.selectedCategory,
+                      window.customMeasurementsForm.harnessSection,
+                      true // Enable scrolling when clicking disabled button
+                    );
+                  }
+                  return false;
+                }
+                // If button is enabled, proceed normally
+                if (window.customMeasurementsForm) {
+                  window.customMeasurementsForm.setResetAfterAddToCartPending(true);
+                }
+              });
+            }
             this.listenerAttached = true;
           }
           return this.button;
