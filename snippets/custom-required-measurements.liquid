@@ -43,7 +43,7 @@
 {%- assign harness_types_source = harness_types_source_raw | replace: '|', ',' -%}
 {%- assign harness_types = harness_types_source | split: ',' -%}
 
-{%- assign default_leather_colors = 'Black, White, Red, Blue, Green, Yellow, Orange, Purple' -%}
+{%- assign default_leather_colors = 'Black, Brown, Gunmetal, Grey, Light Grey, White, Red, Blue, Green, Yellow, Orange, Purple' -%}
 {%- assign leather_source_raw = settings.custom_measurements_leather_colors | default: default_leather_colors -%}
 {%- assign leather_source = leather_source_raw | replace: '|', ',' -%}
 {%- assign leather_colors = leather_source | split: ',' -%}
