@@ -1,0 +1,111 @@
+{% comment %}
+  Category Selector Component
+  Parameters:
+    - categories_order: Array of category names in order
+    - measurement_map_lines: Array of measurement map lines (format: "Measurement: Category, Category*, ...")
+    - harness_categories: Array of harness category names
+    - harness_types: Array of harness type names (Deluxe, Standard, Suspender, Asymmetric)
+    - section_id: The section ID for form association
+    - preselected_category: Optional category to preselect (from product.type)
+{% endcomment %}
+<fieldset class="product-form__input product-form__input--pill" id="optionButtons">
+  <legend class="form__label">{{ 'custom_measurements.category_legend' | t }}</legend>
+  {%- for category in categories_order -%}
+    {%- assign category_name = category | strip -%}
+    {%- if category_name == '' -%}{% continue %}{% endif %}
+    {%- assign required_list = '' | split: '|' -%}
+    {%- assign optional_list = '' | split: '|' -%}
+
+    {%- for measurement_line in measurement_map_lines -%}
+      {%- assign measurement_line = measurement_line | strip -%}
+      {%- if measurement_line == '' -%}{% continue %}{% endif %}
+      {%- assign parts = measurement_line | split: ':' -%}
+      {%- assign measurement_label = parts[0] | strip -%}
+      {%- if measurement_label == '' -%}{% continue %}{% endif %}
+      {%- assign categories_part = '' -%}
+      {%- if parts.size > 1 -%}
+        {%- assign categories_part = parts[1] -%}
+      {%- endif -%}
+      {%- assign category_tokens = categories_part | split: ',' -%}
+      {%- for token in category_tokens -%}
+        {%- assign token_clean = token | strip -%}
+        {%- if token_clean == '' -%}{% continue %}{% endif %}
+        {%- assign base_category = token_clean | remove: '*' | strip -%}
+        {%- if base_category == category_name -%}
+          {%- assign measurement_entry = measurement_label | split: '__split__' -%}
+          {%- if base_category != token_clean -%}
+            {%- assign optional_list = optional_list | concat: measurement_entry -%}
+          {%- else -%}
+            {%- assign required_list = required_list | concat: measurement_entry -%}
+          {%- endif -%}
+        {%- endif -%}
+      {%- endfor -%}
+    {%- endfor -%}
+
+    {%- assign required_string = required_list | uniq | join: '|' -%}
+    {%- assign optional_string = optional_list | uniq | join: '|' -%}
+
+    {%- assign harness_match = false -%}
+    {%- for harness in harness_categories -%}
+      {%- assign harness_clean = harness | strip -%}
+      {%- if harness_clean == category_name -%}
+        {%- assign harness_match = true -%}
+        {%- break -%}
+      {%- endif -%}
+    {%- endfor -%}
+
+    {%- assign option_id = 'custom-category-' | append: section_id | append: '-' | append: forloop.index0 -%}
+    {%- assign should_preselect = false -%}
+    {%- if preselected_category and preselected_category != blank -%}
+      {%- assign preselected_lower = preselected_category | downcase -%}
+      {%- assign category_lower = category_name | downcase -%}
+      {%- if category_lower contains preselected_lower or preselected_lower contains category_lower -%}
+        {%- assign should_preselect = true -%}
+      {%- endif -%}
+    {%- endif -%}
+    <input
+      type="radio"
+      id="{{ option_id }}"
+      class="category-option-input"
+      name="properties[Selected Option]"
+      value="{{ category_name }}"
+      form="product-form-{{ section_id }}"
+      data-index="{{ forloop.index0 }}"
+      data-label="{{ category_name }}"
+      data-required="{{ required_string }}"
+      data-optional="{{ optional_string }}"
+      data-show-harness="{% if harness_match %}true{% else %}false{% endif %}"
+      {% if should_preselect or forloop.first %}checked{% endif %}
+    >
+    <label for="{{ option_id }}">
+      {{ category_name }}
+    </label>
+  {%- endfor -%}
+</fieldset>
+
+{%- comment -%} Harness Type Selector (appears when Harness is selected) {%- endcomment -%}
+{%- if harness_types -%}
+  <fieldset class="product-form__input product-form__input--pill conditional-section" id="harness-type-selector" style="display: none;">
+    <legend class="form__label">{{ 'custom_measurements.harness_type_legend' | t }}</legend>
+    {%- for harness_type in harness_types -%}
+      {%- assign type_name = harness_type | strip -%}
+      {%- if type_name == '' -%}{% continue %}{% endif %}
+      {%- assign type_id = 'harness-type-' | append: section_id | append: '-' | append: forloop.index0 -%}
+      <input
+        type="radio"
+        id="{{ type_id }}"
+        class="harness-type-input"
+        name="properties[Harness Type]"
+        value="{{ type_name }}"
+        form="product-form-{{ section_id }}"
+        data-harness-type="{{ type_name }}"
+      >
+      <label for="{{ type_id }}">
+        {{ type_name }}
+      </label>
+    {%- endfor -%}
+  </fieldset>
+{%- endif -%}
+
+
+

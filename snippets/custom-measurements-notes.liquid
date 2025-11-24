@@ -1,0 +1,57 @@
+{% comment %}
+  Notes Section Component
+  Parameters:
+    - section_id: The section ID for form association
+{% endcomment %}
+<div class="conditional-section" id="notes-section">
+  <div class="collapsible-note-section">
+    <div class="collapsible-note-header">
+      <label>{{ 'custom_measurements.item_notes_label' | t }}</label>
+      <button type="button" class="collapsible-toggle" aria-expanded="false" data-target="item-notes-content">
+        <span class="toggle-icon toggle-plus">+</span>
+        <span class="toggle-icon toggle-minus" style="display: none;">-</span>
+      </button>
+    </div>
+    <div class="collapsible-note-content" id="item-notes-content" style="display: none;">
+      <div class="textarea-wrapper">
+        <textarea
+          name="properties[Item Notes]"
+          id="item-notes-textarea"
+          placeholder="{{ 'custom_measurements.item_notes_placeholder' | t }}"
+          form="product-form-{{ section_id }}"
+          maxlength="500"
+        ></textarea>
+        <div class="character-count">
+          <span class="character-count-text">0</span> / 500 {{ 'custom_measurements.characters' | t }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="collapsible-note-section">
+    <div class="collapsible-note-header">
+      <label>{{ 'custom_measurements.event_notes_label' | t }}</label>
+      <button type="button" class="collapsible-toggle" aria-expanded="false" data-target="event-notes-content">
+        <span class="toggle-icon toggle-plus">+</span>
+        <span class="toggle-icon toggle-minus" style="display: none;">-</span>
+      </button>
+    </div>
+    <div class="collapsible-note-content" id="event-notes-content" style="display: none;">
+      <div class="textarea-wrapper">
+        <textarea
+          name="properties[Event Notes]"
+          id="event-notes-textarea"
+          placeholder="{{ 'custom_measurements.event_notes_placeholder' | t }}"
+          form="product-form-{{ section_id }}"
+          maxlength="500"
+        ></textarea>
+        <div class="character-count">
+          <span class="character-count-text">0</span> / 500 {{ 'custom_measurements.characters' | t }}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+

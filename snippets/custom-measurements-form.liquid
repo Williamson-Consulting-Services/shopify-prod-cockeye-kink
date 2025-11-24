@@ -1,18 +1,44 @@
 {% comment %}
-  Custom Required Measurements Snippet
-  DEPRECATED: This snippet is maintained for backward compatibility.
-  New implementations should use: {% render 'custom-measurements-form', product: product, section: section %}
+  Custom Measurements Form - Main Orchestrator
+  Single reusable form for all custom measurement products
 
-  This version now uses the modular structure internally.
+  Parameters:
+    - product: Product object (optional, defaults to current product)
+    - section: Section object (required)
+
+  Features:
+    - Detects staff vs customer mode from product tags
+    - Preselects category based on product.type
+    - Configuration-driven rendering
 {% endcomment %}
 
-{%- comment -%} Load configuration {%- endcomment -%}
-{%- render 'custom-measurements-config' -%}
+{%- liquid
+  assign product_obj = product | default: product
+  assign section_obj = section | default: section
+
+  # Detect mode from product tags
+  assign is_staff_mode = false
+  if product_obj.tags
+    for tag in product_obj.tags
+      assign tag_lower = tag | downcase
+      if tag_lower contains '_custom-staff' or tag_lower contains '_custom-mode-staff' or tag_lower contains 'staff'
+        assign is_staff_mode = true
+        break
+      endif
+    endfor
+  endif
+
+  # Get product type for category preselection
+  assign product_type = product_obj.type | default: ''
+
+  # Load configuration
+  render 'custom-measurements-config'
+-%}
 
 {%- comment -%} Load CSS {%- endcomment -%}
 {{ 'component-custom-measurements.css' | asset_url | stylesheet_tag }}
 
-{%- comment -%} Parse config from theme settings for rendering (needed for backward compatibility) {%- endcomment -%}
+{%- comment -%} Parse config from theme settings for rendering {%- endcomment -%}
 {%- assign default_categories_order = 'Harness, Tag, Chaps, Shirt, Pants, Suspenders, Kilt, Other' -%}
 {%- assign categories_source = settings.custom_measurements_categories_order | default: default_categories_order -%}
 {%- assign categories_order = categories_source | split: ',' -%}
@@ -58,49 +84,47 @@
 {%- assign back_plate_extra_source = back_plate_extra_source_raw | replace: '|', ',' -%}
 {%- assign back_plate_extra = back_plate_extra_source | split: ',' -%}
 {%- assign back_plate_options = front_plate_options | concat: back_plate_extra -%}
-{%- assign left_front_plates = front_plate_options -%}
-{%- assign right_front_plates = front_plate_options -%}
-{%- assign back_plates = back_plate_options -%}
+
 {%- assign default_long_sliders = 'None, Brass, Steel' -%}
 {%- assign long_sliders_source_raw = settings.custom_measurements_long_sliders | default: default_long_sliders -%}
 {%- assign long_sliders_source = long_sliders_source_raw | replace: '|', ',' -%}
 {%- assign long_sliders = long_sliders_source | split: ',' -%}
+
 {%- assign default_associates = 'Clair, Erik, Other' -%}
 {%- assign associates_source_raw = settings.custom_measurements_associates | default: default_associates -%}
 {%- assign associates_source = associates_source_raw | replace: '|', ',' -%}
 {%- assign associates = associates_source | split: ',' -%}
 
-{%- liquid
-  assign order_tag_name = '_custom'
-  assign order_tag_value = 'custom'
--%}
-
-{%- comment -%} Render form components using modular snippets {%- endcomment -%}
-{%- render 'custom-measurements-associate', associates: associates, section_id: section.id -%}
+{%- comment -%} Render form components {%- endcomment -%}
+{%- render 'custom-measurements-associate', associates: associates, section_id: section_obj.id -%}
 
 {%- render 'custom-measurements-category-selector',
     categories_order: categories_order,
     measurement_map_lines: measurement_map_lines,
     harness_categories: harness_categories,
     harness_types: harness_types,
-    section_id: section.id -%}
+    section_id: section_obj.id,
+    preselected_category: product_type -%}
 
-{%- render 'custom-measurements-hidden-fields', section_id: section.id -%}
+{%- render 'custom-measurements-hidden-fields', section_id: section_obj.id -%}
 
-{%- render 'custom-measurements-unit-toggle', section_id: section.id -%}
+{%- render 'custom-measurements-unit-toggle', section_id: section_obj.id -%}
 
 {%- render 'custom-measurements-field-group',
     measurement_names: measurement_names,
-    section_id: section.id -%}
+    section_id: section_obj.id -%}
 
 {%- render 'custom-measurements-harness-options',
     leather_colors: leather_colors,
     front_plate_options: front_plate_options,
     back_plate_options: back_plate_options,
     long_sliders: long_sliders,
-    section_id: section.id -%}
+    section_id: section_obj.id -%}
 
-{%- render 'custom-measurements-notes', section_id: section.id -%}
+{%- render 'custom-measurements-notes', section_id: section_obj.id -%}
 
 {%- comment -%} Load JavaScript {%- endcomment -%}
 <script src="{{ 'custom-measurements-form.js' | asset_url }}" defer></script>
+
+
+

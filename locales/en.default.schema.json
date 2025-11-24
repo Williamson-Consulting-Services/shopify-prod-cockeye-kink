@@ -399,6 +399,14 @@
           "label": "Harness categories",
           "info": "Enter categories separated by commas."
         },
+        "harness_types": {
+          "label": "Harness types",
+          "info": "Enter harness type options separated by commas (e.g., Deluxe Harness, Standard Harness, Suspender Harness, Asymmetric Harness)."
+        },
+        "tag_options": {
+          "label": "Tag options",
+          "info": "Enter tag type options separated by commas (e.g., dogtag, pigtag, beartag, puppybone, puppypaw, other)."
+        },
         "header_options": {
           "content": "Customization options"
         },

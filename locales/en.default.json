@@ -84,7 +84,12 @@
     "item_notes_label": "Item Notes *",
     "item_notes_placeholder": "Enter your item notes here",
     "event_notes_label": "Event Notes *",
-    "event_notes_placeholder": "Event name or notes here"
+    "event_notes_placeholder": "Event name or notes here",
+    "group_upper_body": "Upper Body",
+    "group_torso_hips": "Torso/Hips",
+    "group_lower_body": "Lower Body",
+    "harness_type_legend": "Harness Type",
+    "characters": "characters"
   },
   "newsletter": {
     "label": "Email",

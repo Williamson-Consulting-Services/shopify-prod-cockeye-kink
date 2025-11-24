@@ -1,0 +1,31 @@
+{% comment %}
+  Measurement Group Component (Reusable)
+  Renders a single measurement group with its fields
+  Parameters:
+    - group_measurements: Array of measurement names in this group
+    - group_label: Translation key for the group header
+    - group_id: Data attribute ID for the group
+    - container_id: HTML ID for the measurements container
+    - measurement_names: Array of all measurement names
+    - section_id: The section ID for form association
+{% endcomment %}
+<div class="measurement-group" data-group="{{ group_id }}">
+  <h3 class="measurement-group-header">{{ group_label | t }}</h3>
+  <div class="measurements-group" id="{{ container_id }}">
+    {%- for meas_name in measurement_names -%}
+      {%- assign measurement_label = meas_name | strip -%}
+      {%- if measurement_label == '' -%}{% continue %}{% endif %}
+      {%- assign is_in_group = false -%}
+      {%- for group_meas in group_measurements -%}
+        {%- if measurement_label == group_meas -%}
+          {%- assign is_in_group = true -%}
+          {%- break -%}
+        {%- endif -%}
+      {%- endfor -%}
+      {%- if is_in_group -%}
+        {%- render 'custom-measurements-field', measurement_label: measurement_label, section_id: section_id -%}
+      {%- endif -%}
+    {%- endfor -%}
+  </div>
+</div>
+

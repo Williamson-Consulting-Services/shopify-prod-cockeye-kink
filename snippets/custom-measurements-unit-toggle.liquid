@@ -1,0 +1,18 @@
+{% comment %}
+  Unit Toggle Component
+  Allows users to switch between inches and centimeters
+{% endcomment %}
+<fieldset class="product-form__input product-form__input--pill unit-toggle" id="unitToggle">
+  <legend class="form__label">{{ 'custom_measurements.unit_legend' | t }}</legend>
+  <input id="unit-in" type="radio" name="unit_toggle" value="in" data-unit="in" form="product-form-{{ section.id }}" checked>
+  <label for="unit-in">
+    {{ 'custom_measurements.unit_inches' | t }}
+  </label>
+  <input id="unit-cm" type="radio" name="unit_toggle" value="cm" data-unit="cm" form="product-form-{{ section.id }}">
+  <label for="unit-cm">
+    {{ 'custom_measurements.unit_centimeters' | t }}
+  </label>
+</fieldset>
+
+
+

@@ -1,0 +1,67 @@
+{% comment %}
+  Measurement Field Group Component
+  Renders all measurement fields based on measurement names, organized into groups
+  Parameters:
+    - measurement_names: Array of measurement names
+    - section_id: The section ID for form association
+{% endcomment %}
+<p class="measurement-hint">{{ 'custom_measurements.measurement_hint' | t }}</p>
+
+{%- comment -%} Define measurement groups configuration {%- endcomment -%}
+{%- assign upper_body_measurements = 'Neck,Chest,Shoulders,Bicep' | split: ',' -%}
+{%- assign torso_hips_measurements = 'Stomach,Waist,Butt/Hips,Torso length,Hip' | split: ',' -%}
+{%- assign lower_body_measurements = 'Upper Thigh,Lower Thigh,Knee,Calf,Ankle,Inseam,Length' | split: ',' -%}
+{%- assign all_grouped_measurements = upper_body_measurements | concat: torso_hips_measurements | concat: lower_body_measurements -%}
+
+{%- comment -%} Helper: Check if measurement is in group {%- endcomment -%}
+{%- comment -%} Liquid doesn't support functions, so we use a reusable snippet pattern {%- endcomment -%}
+
+{%- comment -%} Group 1: Upper Body {%- endcomment -%}
+{%- render 'custom-measurements-group',
+    group_measurements: upper_body_measurements,
+    group_label: 'custom_measurements.group_upper_body',
+    group_id: 'upper-body',
+    container_id: 'measurementsGroup-upper',
+    measurement_names: measurement_names,
+    section_id: section_id -%}
+
+{%- comment -%} Group 2: Torso/Hips {%- endcomment -%}
+{%- render 'custom-measurements-group',
+    group_measurements: torso_hips_measurements,
+    group_label: 'custom_measurements.group_torso_hips',
+    group_id: 'torso-hips',
+    container_id: 'measurementsGroup-torso',
+    measurement_names: measurement_names,
+    section_id: section_id -%}
+
+{%- comment -%} Group 3: Lower Body {%- endcomment -%}
+{%- render 'custom-measurements-group',
+    group_measurements: lower_body_measurements,
+    group_label: 'custom_measurements.group_lower_body',
+    group_id: 'lower-body',
+    container_id: 'measurementsGroup-lower',
+    measurement_names: measurement_names,
+    section_id: section_id -%}
+
+{%- comment -%} Other measurements not in groups {%- endcomment -%}
+<div class="measurement-group" data-group="other" id="measurementsGroup-other" style="display: none;">
+  <div class="measurements-group">
+    {%- for meas_name in measurement_names -%}
+      {%- assign measurement_label = meas_name | strip -%}
+      {%- if measurement_label == '' -%}{% continue %}{% endif %}
+      {%- assign is_in_group = false -%}
+      {%- for group_meas in all_grouped_measurements -%}
+        {%- if measurement_label == group_meas -%}
+          {%- assign is_in_group = true -%}
+          {%- break -%}
+        {%- endif -%}
+      {%- endfor -%}
+      {%- unless is_in_group -%}
+        {%- render 'custom-measurements-field', measurement_label: measurement_label, section_id: section_id -%}
+      {%- endunless -%}
+    {%- endfor -%}
+  </div>
+</div>
+
+
+
