@@ -1,0 +1,15 @@
+{% comment %}
+  Helper: Check if measurement is in group
+  Parameters:
+    - measurement_label: The measurement name to check
+    - group_measurements: Array of measurement names in the group
+  Returns: is_in_group (boolean)
+{% endcomment %}
+{%- assign is_in_group = false -%}
+{%- for group_meas in group_measurements -%}
+  {%- if measurement_label == group_meas -%}
+    {%- assign is_in_group = true -%}
+    {%- break -%}
+  {%- endif -%}
+{%- endfor -%}
+

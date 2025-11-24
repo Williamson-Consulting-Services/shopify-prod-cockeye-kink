@@ -457,6 +457,23 @@
           if (cmInput) cmInput.value = '';
         }
       });
+
+      // Hide measurement group headers if they have no active measurements
+      this.updateMeasurementGroupVisibility();
+    }
+
+    updateMeasurementGroupVisibility() {
+      const measurementGroups = document.querySelectorAll('.measurement-group[data-group]');
+      measurementGroups.forEach((group) => {
+        const groupContainer = group.querySelector('.measurements-group');
+        if (!groupContainer) {
+          group.style.display = 'none';
+          return;
+        }
+
+        const hasActiveMeasurements = groupContainer.querySelectorAll('.measurement-field.active').length > 0;
+        group.style.display = hasActiveMeasurements ? '' : 'none';
+      });
     }
 
     updateSectionVisibility(category, harnessSection, harnessTypeSelector, notesSection, associateSection) {

@@ -8,9 +8,9 @@
 <p class="measurement-hint">{{ 'custom_measurements.measurement_hint' | t }}</p>
 
 {%- comment -%} Define measurement groups configuration {%- endcomment -%}
-{%- assign upper_body_measurements = 'Neck,Chest,Shoulders,Bicep' | split: ',' -%}
-{%- assign torso_hips_measurements = 'Stomach,Waist,Butt/Hips,Torso length,Hip' | split: ',' -%}
-{%- assign lower_body_measurements = 'Upper Thigh,Lower Thigh,Knee,Calf,Ankle,Inseam,Length' | split: ',' -%}
+{%- assign upper_body_measurements = 'Head Circumference,Neck,Shoulders,Chest,Torso,Sleeve Length,Bicep,Wrist,Palm Circumference,Hand Length' | split: ',' -%}
+{%- assign torso_hips_measurements = 'Stomach,Waist,Hips' | split: ',' -%}
+{%- assign lower_body_measurements = 'Upper Thigh,Lower Thigh,Knee,Calf,Ankle,Inseam,Crotch,Butt Rise' | split: ',' -%}
 {%- assign all_grouped_measurements = upper_body_measurements | concat: torso_hips_measurements | concat: lower_body_measurements -%}
 
 {%- comment -%} Helper: Check if measurement is in group {%- endcomment -%}
@@ -49,13 +49,7 @@
     {%- for meas_name in measurement_names -%}
       {%- assign measurement_label = meas_name | strip -%}
       {%- if measurement_label == '' -%}{% continue %}{% endif %}
-      {%- assign is_in_group = false -%}
-      {%- for group_meas in all_grouped_measurements -%}
-        {%- if measurement_label == group_meas -%}
-          {%- assign is_in_group = true -%}
-          {%- break -%}
-        {%- endif -%}
-      {%- endfor -%}
+      {%- render 'custom-measurements-check-group', measurement_label: measurement_label, group_measurements: all_grouped_measurements -%}
       {%- unless is_in_group -%}
         {%- render 'custom-measurements-field', measurement_label: measurement_label, section_id: section_id -%}
       {%- endunless -%}
