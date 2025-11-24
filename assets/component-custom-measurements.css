@@ -520,6 +520,9 @@
   font-size: 1.2rem;
   color: rgba(var(--color-foreground), 0.6);
   margin-top: 0.5rem;
+  padding-right: var(--spacing-3, 0.75rem);
+  padding-top: 0.5rem;
+  line-height: 1.4;
 }
 
 .character-count.character-limit-reached .character-count-text {
@@ -531,11 +534,26 @@
 #harness-type-selector {
   margin-top: var(--spacing-3, 0.75rem);
   margin-bottom: var(--spacing-3, 0.75rem);
+  background-color: transparent !important;
+  padding: 0 !important;
+  border-radius: 0;
 }
 
 #tag-type-selector {
   margin-top: var(--spacing-3, 0.75rem);
   margin-bottom: var(--spacing-3, 0.75rem);
+  background-color: transparent !important;
+  padding: 0 !important;
+  border-radius: 0;
+}
+
+/* Style the legend for tag and harness type selectors */
+#harness-type-selector legend,
+#tag-type-selector legend {
+  margin-bottom: var(--spacing-2, 0.5rem);
+  font-weight: var(--font-heading-weight, 600);
+  font-size: 1.4rem;
+  color: rgb(var(--color-foreground));
 }
 
 /* Leather Color Swatches */
