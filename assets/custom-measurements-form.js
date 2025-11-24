@@ -192,7 +192,7 @@
       const leatherColorRadios = document.querySelectorAll('.leather-color-radio');
       let hasLeatherColor = false;
       let isLeatherColorOther = false;
-      
+
       leatherColorRadios.forEach((radio) => {
         if (radio.checked) {
           hasLeatherColor = true;
@@ -831,7 +831,7 @@
           this.measurementFields
         );
         this.updateMeasurementOnUnitChange();
-        this.updateMeasurementGroupVisibility();
+        this.categoryManager.updateMeasurementGroupVisibility();
       }
 
       const button = this.buttonManager.resolveButton();
@@ -896,7 +896,7 @@
             this.measurementFields
           );
           this.updateMeasurementOnUnitChange();
-          this.updateMeasurementGroupVisibility();
+          this.categoryManager.updateMeasurementGroupVisibility();
           this.updateAddToCartButton();
         });
       });
