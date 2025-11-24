@@ -533,6 +533,11 @@
   margin-bottom: var(--spacing-3, 0.75rem);
 }
 
+#tag-type-selector {
+  margin-top: var(--spacing-3, 0.75rem);
+  margin-bottom: var(--spacing-3, 0.75rem);
+}
+
 /* Leather Color Swatches */
 .leather-color-options {
   display: flex;

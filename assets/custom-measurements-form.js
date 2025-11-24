@@ -505,8 +505,12 @@
       // Show/hide tag type selector
       if (tagTypeSelector) {
         const showTagType = category === 'Tag';
-        tagTypeSelector.style.display = showTagType ? 'block' : 'none';
-        if (!showTagType) {
+        if (showTagType) {
+          tagTypeSelector.style.display = 'block';
+          tagTypeSelector.classList.add('active');
+        } else {
+          tagTypeSelector.style.display = 'none';
+          tagTypeSelector.classList.remove('active');
           // Reset tag type selection when hiding
           const tagTypeInputs = tagTypeSelector.querySelectorAll('input[type="radio"]');
           tagTypeInputs.forEach((input) => {
@@ -527,8 +531,12 @@
       }
       if (harnessTypeSelector) {
         const showHarnessType = category === 'Harness';
-        harnessTypeSelector.style.display = showHarnessType ? 'block' : 'none';
-        if (!showHarnessType) {
+        if (showHarnessType) {
+          harnessTypeSelector.style.display = 'block';
+          harnessTypeSelector.classList.add('active');
+        } else {
+          harnessTypeSelector.style.display = 'none';
+          harnessTypeSelector.classList.remove('active');
           // Reset harness type selection when hiding
           const harnessTypeInputs = harnessTypeSelector.querySelectorAll('input[type="radio"]');
           harnessTypeInputs.forEach((input) => {
