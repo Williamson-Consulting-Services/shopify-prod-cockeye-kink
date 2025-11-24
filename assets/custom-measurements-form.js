@@ -1014,7 +1014,7 @@
           this.currentCategoryStore = this.measurementManager.getCategoryStore(this.selectedCategory);
 
           // Clear all error states when category changes
-          this.clearAllErrorStates();
+          this.categoryManager.clearAllErrorStates();
 
           this.categoryManager.updateSectionVisibility(
             this.selectedCategory,
