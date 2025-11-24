@@ -399,6 +399,7 @@
 .conditional-section .textarea-wrapper {
   position: relative;
   display: flex;
+  flex-direction: column;
   width: 100%;
   margin-bottom: var(--spacing-3, 0.75rem);
   transition: box-shadow var(--duration-short) ease;
@@ -520,9 +521,11 @@
   font-size: 1.2rem;
   color: rgba(var(--color-foreground), 0.6);
   margin-top: 0.5rem;
-  padding-right: var(--spacing-3, 0.75rem);
+  padding-right: var(--spacing-4, 1.5rem);
   padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
   line-height: 1.4;
+  align-self: flex-end;
 }
 
 .character-count.character-limit-reached .character-count-text {
