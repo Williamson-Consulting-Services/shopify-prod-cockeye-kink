@@ -1,1 +1,299 @@
-{"sections":{"image_banner":{"type":"image-banner","blocks":{"heading":{"type":"heading","settings":{"heading":"<strong>COCKEYE KINK<\/strong>","heading_size":"h0"}},"text":{"type":"text","settings":{"text":"Bringing cutting-edge technology to the forefront of fetish","text_style":"subtitle"}},"button":{"type":"buttons","settings":{"button_label_1":"Shop Now","button_link_1":"shopify:\/\/collections\/all","button_style_secondary_1":false,"button_label_2":"","button_link_2":"","button_style_secondary_2":false}}},"block_order":["heading","text","button"],"custom_css":["h2 {text-shadow: 3px 3px 15px black; letter-spacing: 0.35rem;}","p {margin-top: -10px; color: white; text-shadow: 3px 2px 5px black;}",".button {color: white; background-color: #c70000;}"],"settings":{"image":"shopify:\/\/shop_images\/cockeye_header.jpg","image_overlay_opacity":30,"image_height":"large","desktop_content_position":"bottom-center","show_text_box":false,"desktop_content_alignment":"center","color_scheme":"accent-1","image_behavior":"none","mobile_content_alignment":"center","stack_images_on_mobile":false,"show_text_below":false}},"featured_collection":{"type":"featured-collection","settings":{"title":"Featured products","heading_size":"h2","description":"","show_description":false,"description_style":"body","collection":"all","products_to_show":5,"columns_desktop":5,"full_width":false,"show_view_all":false,"view_all_style":"solid","enable_desktop_slider":false,"color_scheme":"accent-1","image_ratio":"portrait","image_shape":"default","show_secondary_image":true,"show_vendor":false,"show_rating":false,"enable_quick_add":false,"columns_mobile":"2","swipe_on_mobile":false,"padding_top":28,"padding_bottom":36}},"58116487-76ef-4c1f-9098-4a26f41cc0b3":{"type":"image-banner","blocks":{"template--15526048170037__58116487-76ef-4c1f-9098-4a26f41cc0b3-16871952192d27ea38-0":{"type":"heading","settings":{"heading":"EMBRACE YOUR FETISH, BE YOURSELF","heading_size":"h1"}},"template--15526048170037__58116487-76ef-4c1f-9098-4a26f41cc0b3-16871952192d27ea38-1":{"type":"text","settings":{"text":"With our cutting-edge (pun intended) water-jet cutting technology, we specialize in designing and creating unique harnesses, suspenders, pendants, and anything else that comes to our minds (or yours).","text_style":"body"}}},"block_order":["template--15526048170037__58116487-76ef-4c1f-9098-4a26f41cc0b3-16871952192d27ea38-0","template--15526048170037__58116487-76ef-4c1f-9098-4a26f41cc0b3-16871952192d27ea38-1"],"custom_css":[".banner {min-height: 15rem;}",".banner p {color: white;}",".banner p,.banner h2 {text-shadow: 1px 3px 5px black;}",".banner h2 {font-size: 225%;}"],"settings":{"image":"shopify:\/\/shop_images\/Fisting_Kink.jpg","image_overlay_opacity":60,"image_height":"small","desktop_content_position":"middle-center","show_text_box":false,"desktop_content_alignment":"center","color_scheme":"accent-1","image_behavior":"fixed","mobile_content_alignment":"center","stack_images_on_mobile":false,"show_text_below":false}},"video":{"type":"video","disabled":true,"settings":{"heading":"","heading_size":"h1","enable_video_looping":false,"video_url":"https:\/\/www.youtube.com\/watch?v=_9VUPq3SxOc","description":"","full_width":false,"color_scheme":"accent-1","padding_top":36,"padding_bottom":36}},"collage":{"type":"collage","blocks":{"collection-0":{"type":"collection","settings":{"collection":"harnesses"}},"product":{"type":"product","settings":{"product":"cockeye-kink-pig-tag","second_image":true}},"collection-1":{"type":"collection","settings":{"collection":"suspenders"}}},"block_order":["collection-0","product","collection-1"],"settings":{"heading":"","heading_size":"h2","desktop_layout":"left","mobile_layout":"collage","card_styles":"product-card-wrapper","color_scheme":"accent-1","padding_top":36,"padding_bottom":36}},"3852a66e-4c05-4a3f-9259-e253712ee53d":{"type":"newsletter","blocks":{"template--15526048170037__3852a66e-4c05-4a3f-9259-e253712ee53d-1687194242b75793b6-0":{"type":"heading","settings":{"heading":"Subscribe to our emails","heading_size":"h1"}},"template--15526048170037__3852a66e-4c05-4a3f-9259-e253712ee53d-1687194242b75793b6-1":{"type":"paragraph","settings":{"text":"<p>Be the first to know about new collections and exclusive offers.<\/p>"}},"template--15526048170037__3852a66e-4c05-4a3f-9259-e253712ee53d-1687194242b75793b6-2":{"type":"email_form","settings":{}}},"block_order":["template--15526048170037__3852a66e-4c05-4a3f-9259-e253712ee53d-1687194242b75793b6-0","template--15526048170037__3852a66e-4c05-4a3f-9259-e253712ee53d-1687194242b75793b6-1","template--15526048170037__3852a66e-4c05-4a3f-9259-e253712ee53d-1687194242b75793b6-2"],"custom_css":[".newsletter__wrapper {background-image: url(https:\/\/cdn.shopify.com\/s\/files\/1\/0590\/6648\/2741\/files\/CigarBull_Custom.jpg); background-size: cover; background-position: bottom;}",".newsletter__wrapper h2 {text-transform: uppercase; text-shadow: 1px 3px 5px black;}",".newsletter__wrapper p {text-shadow: 1px 3px 5px black; color: white;}"],"settings":{"color_scheme":"accent-1","full_width":true,"padding_top":40,"padding_bottom":52}},"multicolumn":{"type":"multicolumn","blocks":{"column1":{"type":"column","settings":{"image":"shopify:\/\/shop_images\/300pxls2CockEyeKinkTrnsprnt.png","title":"Clair","text":"<p>Pair text with an image to focus on your chosen product, collection, or blog post. Add details on availability, style, or even provide a review.<\/p>","link_label":"","link":""}},"column2":{"type":"column","settings":{"image":"shopify:\/\/shop_images\/300pxls2CockEyeKinkTrnsprnt.png","title":"Erik","text":"<p>Pair text with an image to focus on your chosen product, collection, or blog post. Add details on availability, style, or even provide a review.<\/p>","link_label":"","link":""}}},"block_order":["column1","column2"],"settings":{"title":"","heading_size":"h1","image_width":"half","image_ratio":"adapt","columns_desktop":2,"column_alignment":"center","background_style":"none","button_label":"","button_link":"","color_scheme":"accent-1","columns_mobile":"1","swipe_on_mobile":false,"padding_top":36,"padding_bottom":36}},"2988e253-683e-4051-a9fd-23973a751668":{"type":"contact-form","custom_css":["@media screen and (max-width: 600px) {.banner__heading {margin-top: 140px; }}",".gradient {background-image: url(https:\/\/cdn.shopify.com\/s\/files\/1\/0590\/6648\/2741\/files\/CockEyeKink_contact-v2.jpg); background-size: auto; background-attachment: fixed;}",".contact h2 {text-transform: uppercase; text-shadow: 1px 3px 5px black;}",".newsletter__wrapper p {text-shadow: 1px 3px 5px black; color: white;}"],"settings":{"heading":"Drop us a line!","heading_size":"h1","color_scheme":"accent-1","padding_top":36,"padding_bottom":36}}},"order":["image_banner","featured_collection","58116487-76ef-4c1f-9098-4a26f41cc0b3","video","collage","3852a66e-4c05-4a3f-9259-e253712ee53d","multicolumn","2988e253-683e-4051-a9fd-23973a751668"]}
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "image_banner": {
+      "type": "image-banner",
+      "blocks": {
+        "heading": {
+          "type": "heading",
+          "settings": {
+            "heading": "<strong>COCKEYE KINK</strong>",
+            "heading_size": "h0"
+          }
+        },
+        "text": {
+          "type": "text",
+          "settings": {
+            "text": "Bringing cutting-edge technology to the forefront of fetish",
+            "text_style": "subtitle"
+          }
+        },
+        "button": {
+          "type": "buttons",
+          "settings": {
+            "button_label_1": "Shop Now",
+            "button_link_1": "shopify://collections/all",
+            "button_style_secondary_1": false,
+            "button_label_2": "",
+            "button_link_2": "",
+            "button_style_secondary_2": false
+          }
+        }
+      },
+      "block_order": [
+        "heading",
+        "text",
+        "button"
+      ],
+      "custom_css": [
+        "h2 {text-shadow: 3px 3px 15px black; letter-spacing: 0.35rem;}",
+        "p {margin-top: -10px; color: white; text-shadow: 3px 2px 5px black;}",
+        ".button {color: white; background-color: #c70000;}"
+      ],
+      "settings": {
+        "image": "shopify://shop_images/cockeye_header.jpg",
+        "image_overlay_opacity": 30,
+        "image_height": "large",
+        "desktop_content_position": "bottom-center",
+        "show_text_box": false,
+        "desktop_content_alignment": "center",
+        "color_scheme": "accent-1",
+        "image_behavior": "none",
+        "mobile_content_alignment": "center",
+        "stack_images_on_mobile": false,
+        "show_text_below": false
+      }
+    },
+    "featured_collection": {
+      "type": "featured-collection",
+      "settings": {
+        "title": "Featured products",
+        "heading_size": "h2",
+        "description": "",
+        "show_description": false,
+        "description_style": "body",
+        "collection": "all",
+        "products_to_show": 5,
+        "columns_desktop": 5,
+        "full_width": false,
+        "show_view_all": false,
+        "view_all_style": "solid",
+        "enable_desktop_slider": false,
+        "color_scheme": "accent-1",
+        "image_ratio": "portrait",
+        "image_shape": "default",
+        "show_secondary_image": true,
+        "show_vendor": false,
+        "show_rating": false,
+        "enable_quick_add": false,
+        "columns_mobile": "2",
+        "swipe_on_mobile": false,
+        "padding_top": 28,
+        "padding_bottom": 36
+      }
+    },
+    "58116487-76ef-4c1f-9098-4a26f41cc0b3": {
+      "type": "image-banner",
+      "blocks": {
+        "template--15526048170037__58116487-76ef-4c1f-9098-4a26f41cc0b3-16871952192d27ea38-0": {
+          "type": "heading",
+          "settings": {
+            "heading": "EMBRACE YOUR FETISH, BE YOURSELF",
+            "heading_size": "h1"
+          }
+        },
+        "template--15526048170037__58116487-76ef-4c1f-9098-4a26f41cc0b3-16871952192d27ea38-1": {
+          "type": "text",
+          "settings": {
+            "text": "With our cutting-edge (pun intended) water-jet cutting technology, we specialize in designing and creating unique harnesses, suspenders, pendants, and anything else that comes to our minds (or yours).",
+            "text_style": "body"
+          }
+        }
+      },
+      "block_order": [
+        "template--15526048170037__58116487-76ef-4c1f-9098-4a26f41cc0b3-16871952192d27ea38-0",
+        "template--15526048170037__58116487-76ef-4c1f-9098-4a26f41cc0b3-16871952192d27ea38-1"
+      ],
+      "custom_css": [
+        ".banner {min-height: 15rem;}",
+        ".banner p {color: white;}",
+        ".banner p,.banner h2 {text-shadow: 1px 3px 5px black;}",
+        ".banner h2 {font-size: 225%;}"
+      ],
+      "settings": {
+        "image": "shopify://shop_images/Fisting_Kink.jpg",
+        "image_overlay_opacity": 60,
+        "image_height": "small",
+        "desktop_content_position": "middle-center",
+        "show_text_box": false,
+        "desktop_content_alignment": "center",
+        "color_scheme": "accent-1",
+        "image_behavior": "fixed",
+        "mobile_content_alignment": "center",
+        "stack_images_on_mobile": false,
+        "show_text_below": false
+      }
+    },
+    "video": {
+      "type": "video",
+      "disabled": true,
+      "settings": {
+        "heading": "",
+        "heading_size": "h1",
+        "enable_video_looping": false,
+        "video_url": "https://www.youtube.com/watch?v=_9VUPq3SxOc",
+        "description": "",
+        "full_width": false,
+        "color_scheme": "accent-1",
+        "padding_top": 36,
+        "padding_bottom": 36
+      }
+    },
+    "collage": {
+      "type": "collage",
+      "blocks": {
+        "collection-0": {
+          "type": "collection",
+          "settings": {
+            "collection": "harnesses"
+          }
+        },
+        "product": {
+          "type": "product",
+          "settings": {
+            "product": "cockeye-kink-pig-tag",
+            "second_image": true
+          }
+        },
+        "collection-1": {
+          "type": "collection",
+          "settings": {
+            "collection": "suspenders"
+          }
+        }
+      },
+      "block_order": [
+        "collection-0",
+        "product",
+        "collection-1"
+      ],
+      "settings": {
+        "heading": "",
+        "heading_size": "h2",
+        "desktop_layout": "left",
+        "mobile_layout": "collage",
+        "card_styles": "product-card-wrapper",
+        "color_scheme": "accent-1",
+        "padding_top": 36,
+        "padding_bottom": 36
+      }
+    },
+    "3852a66e-4c05-4a3f-9259-e253712ee53d": {
+      "type": "newsletter",
+      "blocks": {
+        "template--15526048170037__3852a66e-4c05-4a3f-9259-e253712ee53d-1687194242b75793b6-0": {
+          "type": "heading",
+          "settings": {
+            "heading": "Subscribe to our emails",
+            "heading_size": "h1"
+          }
+        },
+        "template--15526048170037__3852a66e-4c05-4a3f-9259-e253712ee53d-1687194242b75793b6-1": {
+          "type": "paragraph",
+          "settings": {
+            "text": "<p>Be the first to know about new collections and exclusive offers.</p>"
+          }
+        },
+        "template--15526048170037__3852a66e-4c05-4a3f-9259-e253712ee53d-1687194242b75793b6-2": {
+          "type": "email_form",
+          "settings": {}
+        }
+      },
+      "block_order": [
+        "template--15526048170037__3852a66e-4c05-4a3f-9259-e253712ee53d-1687194242b75793b6-0",
+        "template--15526048170037__3852a66e-4c05-4a3f-9259-e253712ee53d-1687194242b75793b6-1",
+        "template--15526048170037__3852a66e-4c05-4a3f-9259-e253712ee53d-1687194242b75793b6-2"
+      ],
+      "custom_css": [
+        ".newsletter__wrapper {background-image: url(https://cdn.shopify.com/s/files/1/0590/6648/2741/files/CigarBull_Custom.jpg); background-size: cover; background-position: bottom;}",
+        ".newsletter__wrapper h2 {text-transform: uppercase; text-shadow: 1px 3px 5px black;}",
+        ".newsletter__wrapper p {text-shadow: 1px 3px 5px black; color: white;}"
+      ],
+      "settings": {
+        "color_scheme": "accent-1",
+        "full_width": true,
+        "padding_top": 40,
+        "padding_bottom": 52
+      }
+    },
+    "multicolumn": {
+      "type": "multicolumn",
+      "blocks": {
+        "column1": {
+          "type": "column",
+          "settings": {
+            "image": "shopify://shop_images/300pxls2CockEyeKinkTrnsprnt.png",
+            "title": "Clair",
+            "text": "<p>Founder/CEO</p>",
+            "link_label": "",
+            "link": ""
+          }
+        },
+        "column2": {
+          "type": "column",
+          "settings": {
+            "image": "shopify://shop_images/300pxls2CockEyeKinkTrnsprnt.png",
+            "title": "Erik",
+            "text": "<p>Shop Manager/Designer</p>",
+            "link_label": "",
+            "link": ""
+          }
+        }
+      },
+      "block_order": [
+        "column1",
+        "column2"
+      ],
+      "settings": {
+        "title": "",
+        "heading_size": "h1",
+        "image_width": "half",
+        "image_ratio": "adapt",
+        "columns_desktop": 2,
+        "column_alignment": "center",
+        "background_style": "none",
+        "button_label": "",
+        "button_link": "",
+        "color_scheme": "accent-1",
+        "columns_mobile": "1",
+        "swipe_on_mobile": false,
+        "padding_top": 36,
+        "padding_bottom": 36
+      }
+    },
+    "2988e253-683e-4051-a9fd-23973a751668": {
+      "type": "contact-form",
+      "custom_css": [
+        "@media screen and (max-width: 600px) {.banner__heading {margin-top: 140px; }}",
+        ".gradient {background-image: url(https://cdn.shopify.com/s/files/1/0590/6648/2741/files/CockEyeKink_contact-v2.jpg); background-size: auto; background-attachment: fixed;}",
+        ".contact h2 {text-transform: uppercase; text-shadow: 1px 3px 5px black;}",
+        ".newsletter__wrapper p {text-shadow: 1px 3px 5px black; color: white;}"
+      ],
+      "settings": {
+        "heading": "Drop us a line!",
+        "heading_size": "h1",
+        "color_scheme": "accent-1",
+        "padding_top": 36,
+        "padding_bottom": 36
+      }
+    }
+  },
+  "order": [
+    "image_banner",
+    "featured_collection",
+    "58116487-76ef-4c1f-9098-4a26f41cc0b3",
+    "video",
+    "collage",
+    "3852a66e-4c05-4a3f-9259-e253712ee53d",
+    "multicolumn",
+    "2988e253-683e-4051-a9fd-23973a751668"
+  ]
+}
