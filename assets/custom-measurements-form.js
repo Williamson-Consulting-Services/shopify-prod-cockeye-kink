@@ -358,75 +358,49 @@
         if (candidate) {
           this.button = candidate;
           if (!this.listenerAttached) {
-            // Attach handlers to parent container since disabled buttons don't always register clicks
-            const buttonContainer = this.button.closest('.product-form__buttons') || this.button.parentElement;
-            const handleButtonInteraction = (event) => {
-              // Find the button element from the interaction target (handles clicks on button or its children)
-              const clickedButton = event.target.closest('button[type="submit"][name="add"]');
-
-              // Only handle if clicking on the submit button
-              if (clickedButton === this.button) {
-                // If button is disabled, run validation with scrolling and prevent submission
-                if (this.button.disabled || this.button.hasAttribute('disabled') || this.button.getAttribute('aria-disabled') === 'true') {
-                  event.preventDefault();
-                  event.stopPropagation();
-                  event.stopImmediatePropagation();
-                  if (window.customMeasurementsForm && window.customMeasurementsForm.validationService) {
-                    window.customMeasurementsForm.validationService.validateRequiredFields(
-                      window.customMeasurementsForm.selectedCategory,
-                      window.customMeasurementsForm.harnessSection,
-                      true // Enable scrolling when clicking disabled button
-                    );
-                  }
-                  return false;
+            // Attach handlers directly to the button using mousedown/pointerdown
+            // These events fire even on disabled buttons, unlike click events
+            const handleDisabledButton = (event) => {
+              // If button is disabled, run validation with scrolling and prevent submission
+              if (this.button.disabled || this.button.hasAttribute('disabled') || this.button.getAttribute('aria-disabled') === 'true') {
+                event.preventDefault();
+                event.stopPropagation();
+                event.stopImmediatePropagation();
+                if (window.customMeasurementsForm && window.customMeasurementsForm.validationService) {
+                  window.customMeasurementsForm.validationService.validateRequiredFields(
+                    window.customMeasurementsForm.selectedCategory,
+                    window.customMeasurementsForm.harnessSection,
+                    true // Enable scrolling when clicking disabled button
+                  );
                 }
-                // If button is enabled, proceed normally
-                if (window.customMeasurementsForm) {
-                  window.customMeasurementsForm.setResetAfterAddToCartPending(true);
-                }
+                return false;
               }
             };
 
-            if (buttonContainer) {
-              // Use mousedown/pointerdown which work better with disabled elements
-              buttonContainer.addEventListener('mousedown', handleButtonInteraction, true);
-              buttonContainer.addEventListener('pointerdown', handleButtonInteraction, true);
-              // Also keep click as fallback
-              buttonContainer.addEventListener('click', handleButtonInteraction, true);
-            } else {
-              // Fallback to button if no parent container found
-              this.button.addEventListener('mousedown', (event) => {
-                if (this.button.disabled || this.button.hasAttribute('disabled') || this.button.getAttribute('aria-disabled') === 'true') {
-                  event.preventDefault();
-                  event.stopPropagation();
-                  if (window.customMeasurementsForm && window.customMeasurementsForm.validationService) {
-                    window.customMeasurementsForm.validationService.validateRequiredFields(
-                      window.customMeasurementsForm.selectedCategory,
-                      window.customMeasurementsForm.harnessSection,
-                      true
-                    );
-                  }
-                  return false;
+            // mousedown and pointerdown work on disabled buttons
+            this.button.addEventListener('mousedown', handleDisabledButton, true);
+            this.button.addEventListener('pointerdown', handleDisabledButton, true);
+
+            // Also handle click for when button is enabled
+            this.button.addEventListener('click', (event) => {
+              if (this.button.disabled || this.button.hasAttribute('disabled') || this.button.getAttribute('aria-disabled') === 'true') {
+                event.preventDefault();
+                event.stopPropagation();
+                if (window.customMeasurementsForm && window.customMeasurementsForm.validationService) {
+                  window.customMeasurementsForm.validationService.validateRequiredFields(
+                    window.customMeasurementsForm.selectedCategory,
+                    window.customMeasurementsForm.harnessSection,
+                    true
+                  );
                 }
-              });
-              this.button.addEventListener('click', (event) => {
-                if (this.button.disabled || this.button.hasAttribute('disabled') || this.button.getAttribute('aria-disabled') === 'true') {
-                  event.preventDefault();
-                  event.stopPropagation();
-                  if (window.customMeasurementsForm && window.customMeasurementsForm.validationService) {
-                    window.customMeasurementsForm.validationService.validateRequiredFields(
-                      window.customMeasurementsForm.selectedCategory,
-                      window.customMeasurementsForm.harnessSection,
-                      true
-                    );
-                  }
-                  return false;
-                }
-                if (window.customMeasurementsForm) {
-                  window.customMeasurementsForm.setResetAfterAddToCartPending(true);
-                }
-              });
-            }
+                return false;
+              }
+              // If button is enabled, proceed normally
+              if (window.customMeasurementsForm) {
+                window.customMeasurementsForm.setResetAfterAddToCartPending(true);
+              }
+            });
+
             this.listenerAttached = true;
           }
           return this.button;
