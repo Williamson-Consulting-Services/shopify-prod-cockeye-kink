@@ -7,6 +7,14 @@
 {% endcomment %}
 <p class="measurement-hint">{{ 'custom_measurements.measurement_hint' | t }}</p>
 
+{%- comment -%} Notice banner for "Other" category {%- endcomment -%}
+<div class="other-category-notice" id="other-category-notice" style="display: none;">
+  <div class="notice-banner">
+    <span class="notice-icon">ℹ️</span>
+    <span class="notice-text">{{ 'custom_measurements.other_category_notice' | t }}</span>
+  </div>
+</div>
+
 {%- comment -%} Define measurement groups configuration {%- endcomment -%}
 {%- assign upper_body_measurements = 'Head Circumference,Neck,Shoulders,Chest,Torso,Sleeve Length,Bicep,Wrist,Palm Circumference,Hand Length' | split: ',' -%}
 {%- assign torso_hips_measurements = 'Stomach,Waist,Hips' | split: ',' -%}

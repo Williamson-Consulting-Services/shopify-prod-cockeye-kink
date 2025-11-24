@@ -22,6 +22,8 @@
   {%- assign parts = measurement_line | split: ':' -%}
   {%- assign measurement_label = parts[0] | strip -%}
   {%- if measurement_label == '' -%}{% continue %}{% endif %}
+  {%- comment -%} Strip asterisks from measurement label {%- endcomment -%}
+  {%- assign measurement_label = measurement_label | remove: '*' | strip -%}
   {%- assign measurement_entry = measurement_label | split: '__split__' -%}
   {%- assign measurement_names = measurement_names | concat: measurement_entry -%}
 {%- endfor -%}
@@ -98,7 +100,7 @@
                 {%- assign measurement_line = measurement_line | strip -%}
                 {%- if measurement_line == '' -%}{% continue %}{% endif %}
                 {%- assign parts = measurement_line | split: ':' -%}
-                {%- assign meas_label = parts[0] | strip -%}
+                {%- assign meas_label = parts[0] | strip | remove: '*' | strip -%}
                 {%- if meas_label != measurement_label -%}{% continue %}{% endif %}
                 {%- assign categories_part = '' -%}
                 {%- if parts.size > 1 -%}

@@ -127,10 +127,9 @@
   letter-spacing: 0.1rem;
   line-height: 1.5;
   color: rgb(var(--color-foreground));
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
   max-width: 100%;
+  height: auto;
 }
 
 /* Scale down text only when container is very narrow (responsive fallback) */
@@ -166,6 +165,83 @@
 
 .measurement-field--optional label {
   font-weight: var(--font-body-weight, 400);
+}
+
+/* Mandatory field indicator */
+.req-star {
+  color: #D80000;
+  display: inline;
+  font-weight: var(--font-heading-weight, 600);
+}
+
+/* Optional field indicator */
+.opt-tag {
+  font-style: italic;
+  color: rgba(var(--color-foreground), 0.7);
+  font-size: 0.85em;
+  display: inline;
+}
+
+/* Responsive: Force optional tag to new line on mobile */
+@media screen and (max-width: 749px) {
+  .opt-tag {
+    display: block;
+    margin-top: 0.2rem;
+  }
+}
+
+/* "Other" Category Notice Banner */
+.other-category-notice {
+  margin-bottom: var(--spacing-4, 1.5rem);
+}
+
+.notice-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-2, 0.5rem);
+  padding: var(--spacing-3, 0.75rem) var(--spacing-4, 1.5rem);
+  background-color: rgba(var(--color-foreground), 0.05);
+  border-left: 0.3rem solid rgba(var(--color-foreground), 0.3);
+  border-radius: var(--inputs-radius);
+  color: rgb(var(--color-foreground));
+}
+
+.notice-icon {
+  font-size: 1.6rem;
+  line-height: 1;
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+.notice-text {
+  font-size: 1.4rem;
+  line-height: 1.5;
+  flex: 1;
+}
+
+/* Error states for measurement fields */
+.measurement-field--error {
+  position: relative;
+}
+
+.measurement-input--error,
+.measurement-field--error .measurement-input-wrapper,
+.measurement-field--error .select-wrapper {
+  border-color: #D80000 !important;
+  box-shadow: 0 0 0 calc(0.1rem + var(--inputs-border-width)) rgba(216, 0, 0, 0.3) !important;
+}
+
+.measurement-input--error:focus,
+.measurement-input--error:focus-visible,
+.conditional-section select.measurement-input--error:focus,
+.conditional-section select.measurement-input--error:focus-visible {
+  outline: 0;
+  box-shadow: 0 0 0 calc(0.1rem + var(--inputs-border-width)) #D80000 !important;
+}
+
+/* Success state (optional - neutral border when valid) */
+.measurement-field:not(.measurement-field--error) .measurement-input-wrapper:has(.measurement-input:not(:placeholder-shown)) {
+  border-color: rgba(var(--color-foreground), 0.2);
 }
 
 /* Conditional Sections */

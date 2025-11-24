@@ -157,19 +157,32 @@
       if (!selectedCategory || !this.config.measurements) return false;
 
       const activeFields = document.querySelectorAll('.measurement-field.active');
-      for (const field of activeFields) {
-        const measName = field.dataset.measurement;
-        const measConfig = this.config.measurements[measName];
-        if (!measConfig) continue;
+      // Skip measurement validation when "Other" category is selected
+      if (selectedCategory !== 'Other') {
+        for (const field of activeFields) {
+          const measName = field.dataset.measurement;
+          const measConfig = this.config.measurements[measName];
+          if (!measConfig) continue;
 
-        const categoryInfo = measConfig.categories ? measConfig.categories[selectedCategory] : null;
-        if (!categoryInfo || !categoryInfo.required) continue;
+          const categoryInfo = measConfig.categories ? measConfig.categories[selectedCategory] : null;
+          if (!categoryInfo || !categoryInfo.required) continue;
 
-        const inInput = field.querySelector('.measurement-in');
-        const cmInput = field.querySelector('.measurement-cm');
-        const hasValue = this.utils.hasValidNumber(inInput) || this.utils.hasValidNumber(cmInput);
-        if (!hasValue) {
-          return false;
+          const inInput = field.querySelector('.measurement-in');
+          const cmInput = field.querySelector('.measurement-cm');
+          const hasValue = this.utils.hasValidNumber(inInput) || this.utils.hasValidNumber(cmInput);
+          if (!hasValue) {
+            // Add error class and scroll to field
+            field.classList.add('measurement-field--error');
+            if (inInput) inInput.classList.add('measurement-input--error');
+            if (cmInput) cmInput.classList.add('measurement-input--error');
+            field.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return false;
+          } else {
+            // Remove error class on valid fields
+            field.classList.remove('measurement-field--error');
+            if (inInput) inInput.classList.remove('measurement-input--error');
+            if (cmInput) cmInput.classList.remove('measurement-input--error');
+          }
         }
       }
 
@@ -178,22 +191,29 @@
       if (associateSelect) {
         const selectedValue = associateSelect.value;
         if (!selectedValue || selectedValue === '') {
+          associateSelect.classList.add('measurement-input--error');
+          associateSelect.scrollIntoView({ behavior: 'smooth', block: 'center' });
           return false;
         }
         if (selectedValue === 'Other') {
           const associateText = document.getElementById('associate-text');
           if (!associateText || !associateText.value || associateText.value.trim() === '') {
+            associateText.classList.add('measurement-input--error');
+            associateText.scrollIntoView({ behavior: 'smooth', block: 'center' });
             return false;
           }
         }
+        associateSelect.classList.remove('measurement-input--error');
       }
 
       // Validate leather color (always required)
       const leatherColorRadios = document.querySelectorAll('.leather-color-radio');
       let hasLeatherColor = false;
       let isLeatherColorOther = false;
+      let firstLeatherColorRadio = null;
 
       leatherColorRadios.forEach((radio) => {
+        if (!firstLeatherColorRadio) firstLeatherColorRadio = radio;
         if (radio.checked) {
           hasLeatherColor = true;
           if (radio.value === 'Other') {
@@ -206,22 +226,62 @@
       const hasCustomText = leatherColorText && leatherColorText.value && leatherColorText.value.trim() !== '';
 
       if (!hasLeatherColor || (isLeatherColorOther && !hasCustomText)) {
+        if (firstLeatherColorRadio) {
+          const leatherColorSection = document.getElementById('leather-color-section');
+          if (leatherColorSection) {
+            leatherColorSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }
+        if (isLeatherColorOther && leatherColorText) {
+          leatherColorText.classList.add('measurement-input--error');
+        }
         return false;
       }
+      if (leatherColorText) leatherColorText.classList.remove('measurement-input--error');
 
       if (harnessSection && harnessSection.classList.contains('active')) {
         // Validate harness type selection
         const harnessTypeInputs = document.querySelectorAll('.harness-type-input');
         let hasHarnessType = false;
+        let firstHarnessTypeInput = null;
         harnessTypeInputs.forEach((input) => {
+          if (!firstHarnessTypeInput) firstHarnessTypeInput = input;
           if (input.checked) {
             hasHarnessType = true;
           }
         });
         if (!hasHarnessType) {
+          if (firstHarnessTypeInput) {
+            const harnessTypeSelector = document.getElementById('harness-type-selector');
+            if (harnessTypeSelector) {
+              harnessTypeSelector.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+          }
           return false;
         }
+      }
 
+      // Validate tag type selection (if Tag category is selected)
+      const tagTypeSelector = document.getElementById('tag-type-selector');
+      if (tagTypeSelector && tagTypeSelector.style.display !== 'none') {
+        const tagTypeInputs = document.querySelectorAll('.tag-type-input');
+        let hasTagType = false;
+        let firstTagTypeInput = null;
+        tagTypeInputs.forEach((input) => {
+          if (!firstTagTypeInput) firstTagTypeInput = input;
+          if (input.checked) {
+            hasTagType = true;
+          }
+        });
+        if (!hasTagType) {
+          if (tagTypeSelector) {
+            tagTypeSelector.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+          return false;
+        }
+      }
+
+      if (harnessSection && harnessSection.classList.contains('active')) {
         // Validate harness fields (excluding leather color which is always required)
         const harnessFields = [
           'properties[Left Front Plate]',
@@ -246,7 +306,13 @@
           const hasCustomText = customText && customText.value && customText.value.trim() !== '';
 
           if (!hasSelectValue && !hasCustomText) {
+            select.classList.add('measurement-input--error');
+            if (select.closest('.select-wrapper')) {
+              select.closest('.select-wrapper').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
             return false;
+          } else {
+            select.classList.remove('measurement-input--error');
           }
         }
       }
@@ -451,16 +517,33 @@
         const inInput = field.querySelector('.measurement-in');
         const cmInput = field.querySelector('.measurement-cm');
         const categoryInfo = measConfig && measConfig.categories ? measConfig.categories[category] : null;
-        const baseLabel = field.dataset.labelBase || measName;
+        let baseLabel = field.dataset.labelBase || measName;
+
+        // Strip asterisks from baseLabel for display
+        baseLabel = baseLabel.replace(/\*+$/, '').trim();
+        // Store clean label without asterisk
+        field.dataset.labelBase = baseLabel;
+
         const labelElement = field.querySelector('label');
+        const isOtherCategory = category === 'Other';
 
         if (categoryInfo && categoryInfo.included) {
           field.classList.add('active');
           const isOptional = categoryInfo.required === false;
           field.classList.toggle('measurement-field--optional', isOptional);
           field.dataset.optional = isOptional ? 'true' : 'false';
+
           if (labelElement) {
-            labelElement.textContent = isOptional ? `${baseLabel} *` : baseLabel;
+            // Special case: "Other" category - no indicators
+            if (isOtherCategory) {
+              labelElement.innerHTML = baseLabel;
+            } else if (isOptional) {
+              // Optional field: show "(optional)" in italics
+              labelElement.innerHTML = `${baseLabel} <span class="opt-tag">(optional)</span>`;
+            } else {
+              // Mandatory field: show red asterisk
+              labelElement.innerHTML = `${baseLabel} <span class="req-star">*</span>`;
+            }
           }
           if (inInput) inInput.value = '';
           if (cmInput) cmInput.value = '';
@@ -469,7 +552,7 @@
           field.classList.remove('measurement-field--optional');
           field.removeAttribute('data-optional');
           if (labelElement) {
-            labelElement.textContent = baseLabel;
+            labelElement.innerHTML = baseLabel;
           }
           const inInput = field.querySelector('.measurement-in');
           const cmInput = field.querySelector('.measurement-cm');
@@ -496,7 +579,23 @@
       });
     }
 
-    updateSectionVisibility(category, harnessSection, harnessTypeSelector, tagTypeSelector, leatherColorSection, notesSection, associateSection) {
+    clearAllErrorStates() {
+      // Clear error states from all measurement fields
+      document.querySelectorAll('.measurement-field--error').forEach((field) => {
+        field.classList.remove('measurement-field--error');
+      });
+      document.querySelectorAll('.measurement-input--error').forEach((input) => {
+        input.classList.remove('measurement-input--error');
+      });
+    }
+
+    updateSectionVisibility(category, harnessSection, harnessTypeSelector, tagTypeSelector, leatherColorSection, notesSection, associateSection, otherCategoryNotice) {
+      // Show/hide "Other" category notice banner
+      if (otherCategoryNotice) {
+        const showNotice = category === 'Other';
+        otherCategoryNotice.style.display = showNotice ? 'block' : 'none';
+      }
+
       // Leather color is always available
       if (leatherColorSection) {
         leatherColorSection.classList.add('active');
@@ -606,6 +705,7 @@
       this.leatherColorSection = document.getElementById('leather-color-section');
       this.notesSection = document.getElementById('notes-section');
       this.associateSection = document.getElementById('associate-section');
+      this.otherCategoryNotice = document.getElementById('other-category-notice');
       this.associateSelect = document.getElementById('associate-select');
       this.associateText = document.getElementById('associate-text');
       this.associateTextWrapper = document.getElementById('associate-text-wrapper');
@@ -852,7 +952,8 @@
             this.tagTypeSelector,
             this.leatherColorSection,
             this.notesSection,
-            this.associateSection
+            this.associateSection,
+            this.otherCategoryNotice
           );
         this.categoryManager.updateMeasurementsForCategory(this.selectedCategory, this.measurementFields);
         this.measurementManager.restoreMeasurementsForCategory(
@@ -911,6 +1012,10 @@
           }
           this.selectedCategory = input.dataset.label;
           this.currentCategoryStore = this.measurementManager.getCategoryStore(this.selectedCategory);
+
+          // Clear all error states when category changes
+          this.clearAllErrorStates();
+
           this.categoryManager.updateSectionVisibility(
             this.selectedCategory,
             this.harnessSection,
@@ -918,7 +1023,8 @@
             this.tagTypeSelector,
             this.leatherColorSection,
             this.notesSection,
-            this.associateSection
+            this.associateSection,
+            this.otherCategoryNotice
           );
           this.categoryManager.updateMeasurementsForCategory(this.selectedCategory, this.measurementFields);
           this.measurementManager.restoreMeasurementsForCategory(
@@ -959,6 +1065,16 @@
       this.measurementInputs.forEach((input) => {
         input.addEventListener('input', () => {
           this.flagFormInteraction();
+          // Clear error state when user starts typing
+          const field = input.closest('.measurement-field');
+          if (field) {
+            field.classList.remove('measurement-field--error');
+            input.classList.remove('measurement-input--error');
+            const otherInput = field.querySelector('.measurement-in') === input
+              ? field.querySelector('.measurement-cm')
+              : field.querySelector('.measurement-in');
+            if (otherInput) otherInput.classList.remove('measurement-input--error');
+          }
           this.updateAddToCartButton();
         });
 
@@ -991,6 +1107,8 @@
       // Harness selects
       this.harnessSelects.forEach((select) => {
         select.addEventListener('change', () => {
+          // Clear error state when user makes selection
+          select.classList.remove('measurement-input--error');
           this.updateAddToCartButton();
           this.flagFormInteraction();
         });
@@ -999,10 +1117,36 @@
       // Harness custom texts
       this.harnessCustomTexts.forEach((input) => {
         input.addEventListener('input', () => {
+          // Clear error state when user types
+          input.classList.remove('measurement-input--error');
           this.flagFormInteraction();
           this.updateAddToCartButton();
         });
       });
+
+      // Harness type inputs - clear error on selection
+      if (this.harnessTypeSelector) {
+        const harnessTypeInputs = this.harnessTypeSelector.querySelectorAll('.harness-type-input');
+        harnessTypeInputs.forEach((input) => {
+          input.addEventListener('change', () => {
+            // Error state will be cleared by validation on next check
+            this.flagFormInteraction();
+            this.updateAddToCartButton();
+          });
+        });
+      }
+
+      // Tag type inputs - clear error on selection
+      if (this.tagTypeSelector) {
+        const tagTypeInputs = this.tagTypeSelector.querySelectorAll('.tag-type-input');
+        tagTypeInputs.forEach((input) => {
+          input.addEventListener('change', () => {
+            // Error state will be cleared by validation on next check
+            this.flagFormInteraction();
+            this.updateAddToCartButton();
+          });
+        });
+      }
 
       // Initialize "Other" option handlers using utility class
       const onInteraction = () => {
@@ -1018,6 +1162,18 @@
           'associate-text',
           onInteraction
         );
+        // Clear error state on associate select change
+        this.associateSelect.addEventListener('change', () => {
+          this.associateSelect.classList.remove('measurement-input--error');
+          if (this.associateText) {
+            this.associateText.classList.remove('measurement-input--error');
+          }
+        });
+        if (this.associateText) {
+          this.associateText.addEventListener('input', () => {
+            this.associateText.classList.remove('measurement-input--error');
+          });
+        }
       }
 
       // Leather color "Other" option handler (always available) - handles radio buttons
@@ -1025,6 +1181,10 @@
         this.leatherColorRadios.forEach((radio) => {
           radio.addEventListener('change', () => {
             onInteraction();
+            // Clear error state when user makes selection
+            if (this.leatherColorText) {
+              this.leatherColorText.classList.remove('measurement-input--error');
+            }
             if (radio.value === 'Other' && radio.checked) {
               this.leatherColorTextWrapper.style.display = 'flex';
             } else if (radio.checked) {
@@ -1033,6 +1193,11 @@
             }
           });
         });
+        if (this.leatherColorText) {
+          this.leatherColorText.addEventListener('input', () => {
+            this.leatherColorText.classList.remove('measurement-input--error');
+          });
+        }
       }
 
       // Harness "Other" option handlers (plates and sliders only)

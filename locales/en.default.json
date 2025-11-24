@@ -91,6 +91,7 @@
     "harness_type_legend": "Harness Type",
     "tag_type_legend": "Tag Type",
     "characters": "characters",
+    "other_category_notice": "Custom Project: All measurements are optional. Enter only dimensions relevant to the design notes.",
     "leather_color_label": "Leather Color",
     "leather_color_placeholder": "Enter custom color"
   },

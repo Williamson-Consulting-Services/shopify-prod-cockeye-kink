@@ -5,13 +5,14 @@
     - section_id: The section ID for form association
 {% endcomment %}
 {%- assign handle = measurement_label | handleize -%}
+{%- assign clean_label = measurement_label | remove: '*' | strip -%}
 <div
   class="measurement-field"
   id="measurement-{{ handle }}"
-  data-measurement="{{ measurement_label }}"
-  data-label-base="{{ measurement_label }}"
+  data-measurement="{{ clean_label }}"
+  data-label-base="{{ clean_label }}"
 >
-  <label for="{{ handle }}-in">{{ measurement_label }}</label>
+  <label for="{{ handle }}-in">{{ clean_label }}</label>
   <div class="measurement-input-wrapper">
     <input
       type="number"
