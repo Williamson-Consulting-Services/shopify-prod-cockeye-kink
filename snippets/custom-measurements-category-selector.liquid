@@ -115,9 +115,9 @@
 {%- endif -%}
 
 {%- comment -%} Tag Type Selector (appears when Tag is selected) {%- endcomment -%}
-{%- if tag_options -%}
-  <fieldset class="product-form__input product-form__input--pill conditional-section" id="tag-type-selector" style="display: none;">
-    <legend class="form__label">{{ 'custom_measurements.tag_type_legend' | t }}</legend>
+<fieldset class="product-form__input product-form__input--pill conditional-section" id="tag-type-selector" style="display: none;">
+  <legend class="form__label">{{ 'custom_measurements.tag_type_legend' | t }}</legend>
+  {%- if tag_options and tag_options.size > 0 -%}
     {%- for tag_option in tag_options -%}
       {%- assign option_name = tag_option | strip -%}
       {%- if option_name == '' -%}{% continue %}{% endif %}
@@ -135,8 +135,8 @@
         {{ option_name }}
       </label>
     {%- endfor -%}
-  </fieldset>
-{%- endif -%}
+  {%- endif -%}
+</fieldset>
 
 
 
