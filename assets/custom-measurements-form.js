@@ -824,6 +824,7 @@
           this.measurementFields
         );
         this.updateMeasurementOnUnitChange();
+        this.updateMeasurementGroupVisibility();
       }
 
       const button = this.buttonManager.resolveButton();
@@ -888,6 +889,7 @@
             this.measurementFields
           );
           this.updateMeasurementOnUnitChange();
+          this.updateMeasurementGroupVisibility();
           this.updateAddToCartButton();
         });
       });

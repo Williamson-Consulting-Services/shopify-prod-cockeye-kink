@@ -9,31 +9,24 @@
     - measurement_names: Array of all measurement names
     - section_id: The section ID for form association
 {% endcomment %}
-{%- comment -%} First, check if any measurements in this group exist in measurement_names {%- endcomment -%}
-{%- assign has_measurements = false -%}
-{%- for meas_name in measurement_names -%}
-  {%- assign measurement_label = meas_name | strip -%}
-  {%- if measurement_label == '' -%}{% continue %}{% endif %}
-  {%- render 'custom-measurements-check-group', measurement_label: measurement_label, group_measurements: group_measurements -%}
-  {%- if is_in_group -%}
-    {%- assign has_measurements = true -%}
-    {%- break -%}
-  {%- endif -%}
-{%- endfor -%}
-
-{%- if has_measurements -%}
-  <div class="measurement-group" data-group="{{ group_id }}">
-    <h3 class="measurement-group-header">{{ group_label | t }}</h3>
-    <div class="measurements-group" id="{{ container_id }}">
-      {%- for meas_name in measurement_names -%}
-        {%- assign measurement_label = meas_name | strip -%}
-        {%- if measurement_label == '' -%}{% continue %}{% endif %}
-        {%- render 'custom-measurements-check-group', measurement_label: measurement_label, group_measurements: group_measurements -%}
-        {%- if is_in_group -%}
-          {%- render 'custom-measurements-field', measurement_label: measurement_label, section_id: section_id -%}
+{%- comment -%} Always render the group - JavaScript will hide it if empty {%- endcomment -%}
+<div class="measurement-group" data-group="{{ group_id }}">
+  <h3 class="measurement-group-header">{{ group_label | t }}</h3>
+  <div class="measurements-group" id="{{ container_id }}">
+    {%- for meas_name in measurement_names -%}
+      {%- assign measurement_label = meas_name | strip -%}
+      {%- if measurement_label == '' -%}{% continue %}{% endif %}
+      {%- assign is_in_group = false -%}
+      {%- for group_meas in group_measurements -%}
+        {%- if measurement_label == group_meas -%}
+          {%- assign is_in_group = true -%}
+          {%- break -%}
         {%- endif -%}
       {%- endfor -%}
-    </div>
+      {%- if is_in_group -%}
+        {%- render 'custom-measurements-field', measurement_label: measurement_label, section_id: section_id -%}
+      {%- endif -%}
+    {%- endfor -%}
   </div>
-{%- endif -%}
+</div>
 
