@@ -69,6 +69,13 @@ window.CustomOrderCheckoutFooter = (function () {
         setTimeout(refreshCart, 200);
       } else if (event.itemCount !== undefined) {
         refreshCart();
+      } else if (event.source === 'product-form') {
+        // When item is added to cart from product form, refresh after a short delay
+        // to allow the cart API to update
+        setTimeout(refreshCart, 300);
+      } else {
+        // Fallback: refresh cart for any other cart update event
+        setTimeout(refreshCart, 200);
       }
     });
 
