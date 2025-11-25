@@ -23,7 +23,7 @@
             "text_style": "uppercase"
           }
         },
-        "description": {
+        "description_7Y6ArR": {
           "type": "description",
           "settings": {}
         },
@@ -77,18 +77,12 @@
             "content": "<p>Calfs must be measured at their widest to ensure accuracy.<br/><br/>Crotch is measured from top of waistband over the genitals to the taint. <br/><br/>Chest should be measured at nipple level. <br/><br/>Shoulders should be measured on back from where sleeves would attach.<br/><br/>Stomach at belly button level<br/><br/>Head measure the circumference of the head at forehead level</p>",
             "page": ""
           }
-        },
-        "share": {
-          "type": "share",
-          "settings": {
-            "share_label": "Share"
-          }
         }
       },
       "block_order": [
         "title",
         "vendor",
-        "description",
+        "description_7Y6ArR",
         "custom_liquid_i43zwU",
         "quantity_selector",
         "text_Yj8XCR",
@@ -115,6 +109,7 @@
     },
     "related-products": {
       "type": "related-products",
+      "disabled": true,
       "settings": {
         "heading": "You may also like",
         "heading_size": "h2",
