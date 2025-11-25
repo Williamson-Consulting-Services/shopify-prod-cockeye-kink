@@ -1,0 +1,27 @@
+{% comment %}
+  Hidden Fields Component
+  Stores unit of measure and custom order tag
+{% endcomment %}
+{%- liquid
+  assign order_tag_name = '_custom'
+  assign order_tag_value = 'custom'
+-%}
+{%- comment -%} Unit of Measure - First property to indicate measurement unit used {%- endcomment -%}
+<input
+  type="hidden"
+  id="unitOfMeasure"
+  name="properties[Unit of Measure]"
+  value="Measured in Inches"
+  form="product-form-{{ section.id }}"
+>
+
+{%- comment -%} Custom Order Tagging {%- endcomment -%}
+<input
+  type="hidden"
+  name="properties[{{ order_tag_name }}]"
+  value="{{ order_tag_value }}"
+  form="product-form-{{ section.id }}"
+>
+
+
+

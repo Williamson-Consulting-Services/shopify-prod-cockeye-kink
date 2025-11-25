@@ -1,0 +1,104 @@
+{% comment %}
+  Harness Options Component
+  Parameters:
+    - front_plate_options: Array of front plate options
+    - back_plate_options: Array of back plate options (includes front + extra)
+    - long_sliders: Array of long slider options
+    - section_id: The section ID for form association
+{% endcomment %}
+<div class="conditional-section" id="harness-details">
+  <label>Left Front Plate</label>
+  <div class="select-wrapper">
+    <select name="properties[Left Front Plate]" id="left-front-plate-select" form="product-form-{{ section_id }}">
+      <option value="">Select one</option>
+      {%- for plate in front_plate_options -%}
+        {%- assign plate_clean = plate | strip -%}
+        {%- if plate_clean == '' -%}{% continue %}{% endif %}
+        <option>{{ plate_clean }}</option>
+      {%- endfor -%}
+      <option value="Other">Other</option>
+    </select>
+  </div>
+  <div class="custom-text-wrapper" id="left-front-plate-text-wrapper" style="display: none;">
+    <input
+      type="text"
+      name="properties[Left Front Plate - Text]"
+      id="left-front-plate-text"
+      class="custom-text"
+      placeholder="Enter custom plate"
+      form="product-form-{{ section_id }}"
+    >
+  </div>
+
+  <label>Right Front Plate</label>
+  <div class="select-wrapper">
+    <select name="properties[Right Front Plate]" id="right-front-plate-select" form="product-form-{{ section_id }}">
+      <option value="">Select one</option>
+      {%- for plate in front_plate_options -%}
+        {%- assign plate_clean = plate | strip -%}
+        {%- if plate_clean == '' -%}{% continue %}{% endif %}
+        <option>{{ plate_clean }}</option>
+      {%- endfor -%}
+      <option value="Other">Other</option>
+    </select>
+  </div>
+  <div class="custom-text-wrapper" id="right-front-plate-text-wrapper" style="display: none;">
+    <input
+      type="text"
+      name="properties[Right Front Plate - Text]"
+      id="right-front-plate-text"
+      class="custom-text"
+      placeholder="Enter custom plate"
+      form="product-form-{{ section_id }}"
+    >
+  </div>
+
+  <label>Back Plate</label>
+  <div class="select-wrapper">
+    <select name="properties[Back Plate]" id="back-plate-select" form="product-form-{{ section_id }}">
+      <option value="">Select one</option>
+      {%- for plate in back_plate_options -%}
+        {%- assign plate_clean = plate | strip -%}
+        {%- if plate_clean == '' -%}{% continue %}{% endif %}
+        <option>{{ plate_clean }}</option>
+      {%- endfor -%}
+      <option value="Other">Other</option>
+    </select>
+  </div>
+  <div class="custom-text-wrapper" id="back-plate-text-wrapper" style="display: none;">
+    <input
+      type="text"
+      name="properties[Back Plate - Text]"
+      id="back-plate-text"
+      class="custom-text"
+      placeholder="Enter custom plate"
+      form="product-form-{{ section_id }}"
+    >
+  </div>
+
+  <label>Long Sliders</label>
+  <div class="select-wrapper">
+    <select name="properties[Long Sliders]" id="long-sliders-select" form="product-form-{{ section_id }}">
+      <option value="">Select one</option>
+      {%- for slider in long_sliders -%}
+        {%- assign slider_clean = slider | strip -%}
+        {%- if slider_clean == '' -%}{% continue %}{% endif %}
+        <option>{{ slider_clean }}</option>
+      {%- endfor -%}
+      <option value="Other">Other</option>
+    </select>
+  </div>
+  <div class="custom-text-wrapper" id="long-sliders-text-wrapper" style="display: none;">
+    <input
+      type="text"
+      name="properties[Long Sliders - Text]"
+      id="long-sliders-text"
+      class="custom-text"
+      placeholder="Enter custom sliders"
+      form="product-form-{{ section_id }}"
+    >
+  </div>
+</div>
+
+
+

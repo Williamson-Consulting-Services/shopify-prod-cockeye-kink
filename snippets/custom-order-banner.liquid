@@ -1,8 +1,6 @@
 {%- liquid
   assign banner_editing_translation = 'custom_order.banner.editing' | t
-  assign banner_cart_translation = 'custom_order.banner.cart' | t
   assign banner_editing_text = settings.custom_order_banner_editing_text | default: banner_editing_translation
-  assign banner_cart_text = settings.custom_order_banner_cart_text | default: banner_cart_translation
 
   assign banner_background_color = settings.custom_order_banner_background_color | default: '#ffec99'
   assign banner_text_color = settings.custom_order_banner_text_color | default: '#3f2f00'
@@ -24,9 +22,6 @@
     <span class="custom-order-banner__text custom-order-banner__text--editing" data-banner-editing hidden>
       {{ banner_editing_text | escape }}
     </span>
-    <span class="custom-order-banner__text custom-order-banner__text--cart" data-banner-cart hidden>
-      {{ banner_cart_text | escape }}
-    </span>
   </div>
 </div>
 
@@ -46,9 +41,6 @@
   }
 
   .custom-order-banner__inner {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
     max-width: var(--page-width, 1200px);
     margin: 0 auto;
     padding: 0.75rem 1.5rem;
@@ -76,15 +68,13 @@
     if (!banner) {
       return {
         setForceShow() {},
-        refreshCart() {},
         setBannerText() {},
+        notifyEditing() {},
       };
     }
 
     const editingElement = banner.querySelector('[data-banner-editing]');
-    const cartElement = banner.querySelector('[data-banner-cart]');
     const editingTextDefault = {{ banner_editing_text | json }};
-    const cartTextDefault = {{ banner_cart_text | json }};
     const suppressed =
       window.location.pathname.includes('/checkouts/') ||
       window.location.pathname.includes('/checkout') ||
@@ -92,9 +82,7 @@
 
     const state = {
       forceShow: false,
-      cartHasCustom: false,
       editing: false,
-      cartText: cartTextDefault,
       editingText: editingTextDefault,
     };
 
@@ -104,7 +92,6 @@
         return;
       }
       const showEditing = state.forceShow || state.editing;
-      const showCart = state.cartHasCustom;
 
       if (editingElement) {
         const text = state.editingText || editingTextDefault;
@@ -112,14 +99,7 @@
         editingElement.hidden = !showEditing;
       }
 
-      if (cartElement) {
-        const text = state.cartText || cartTextDefault;
-        if (typeof text === 'string') cartElement.textContent = text;
-        cartElement.hidden = !showCart;
-      }
-
-      banner.hidden = !(showEditing || showCart);
-      banner.classList.toggle('custom-order-banner--stacked', showEditing && showCart);
+      banner.hidden = !showEditing;
     }
 
     function setForceShow(value) {
@@ -127,37 +107,10 @@
       render();
     }
 
-    function setBannerText(value, mode = 'cart') {
+    function setBannerText(value) {
       const sanitized = value && value.trim() !== '' ? value.trim() : null;
-      if (mode === 'editing') {
-        state.editingText = sanitized || editingTextDefault;
-      } else {
-        state.cartText = sanitized || cartTextDefault;
-      }
+      state.editingText = sanitized || editingTextDefault;
       render();
-    }
-
-    async function refreshCart() {
-      if (suppressed) return;
-      try {
-        const cartUrl = `/cart.js?timestamp=${Date.now()}`;
-        const response = await fetch(cartUrl, {
-          credentials: 'same-origin',
-          cache: 'no-store',
-          headers: { 'Cache-Control': 'no-cache' },
-        });
-        if (!response.ok) throw new Error(response.statusText);
-        const cart = await response.json();
-        const hasCustom = (cart.items || []).some((item) => {
-          if (!item.properties) return false;
-          const customFlag = item.properties['_custom'] || item.properties['Order Type'];
-          return typeof customFlag === 'string' && customFlag.toLowerCase() === 'custom';
-        });
-        state.cartHasCustom = hasCustom;
-        render();
-      } catch (error) {
-        console.warn('CustomOrderBanner cart check failed:', error);
-      }
     }
 
     function notifyEditing(isEditing = true) {
@@ -170,42 +123,15 @@
 
     function init() {
       render();
-      refreshCart();
       subscribe(PUB_SUB_EVENTS.cartUpdate, (event) => {
-        if (event.cartState || event.itemCount !== undefined) {
-          refreshCart();
-        }
         if (event.customOrderItemAdded) {
           state.editing = false;
           state.forceShow = false;
-          state.cartHasCustom = true;
           render();
-          setTimeout(refreshCart, 200);
         }
       });
       window.addEventListener('custom-order:editing', () => notifyEditing(true));
       window.addEventListener('custom-order:editing-stop', () => notifyEditing(false));
-
-      const removalSelectors = [
-        '[data-cart-remove]',
-        '[data-cart-remove-button]',
-        '.cart-remove-button',
-        'button[name="remove"]',
-        'a[href*="cart/change"]',
-      ];
-
-      function handlePotentialRemoval(event) {
-        if (!event) return;
-        const target = event.target;
-        if (!target) return;
-        const shouldRefresh = removalSelectors.some((selector) => target.closest(selector));
-        if (shouldRefresh) {
-          setTimeout(refreshCart, 150);
-        }
-      }
-
-      document.addEventListener('click', handlePotentialRemoval, true);
-      document.addEventListener('submit', handlePotentialRemoval, true);
     }
 
     if (document.readyState === 'loading') {
@@ -216,7 +142,6 @@
 
     return {
       setForceShow,
-      refreshCart,
       setBannerText,
       notifyEditing,
     };

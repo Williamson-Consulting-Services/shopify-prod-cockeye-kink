@@ -1,0 +1,110 @@
+/**
+ * Custom Order Checkout Footer
+ * Sticky footer component for displaying cart status and checkout button
+ */
+
+.custom-order-checkout-footer {
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: rgb(var(--color-background, 18, 18, 18));
+  color: rgb(var(--color-foreground, 255, 255, 255));
+  z-index: 9999;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+  border-top: 4px solid #4CAF50; /* Success Green Stripe */
+}
+
+.custom-order-checkout-footer[hidden] {
+  display: none !important;
+}
+
+.checkout-footer__content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: var(--page-width, 1200px);
+  margin: 0 auto;
+  padding: 1.5rem;
+  gap: 1.5rem;
+}
+
+.checkout-footer__status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+  font-size: 1.4rem;
+  line-height: 1.5;
+}
+
+.checkout-footer__icon {
+  font-size: 1.6rem;
+}
+
+.checkout-footer__message {
+  display: inline;
+}
+
+.checkout-footer__count {
+  font-weight: 600;
+  color: #4CAF50;
+}
+
+.checkout-footer__button {
+  background-color: #4CAF50;
+  color: white;
+  padding: 1rem 2rem;
+  text-decoration: none;
+  border-radius: var(--buttons-radius, 4px);
+  font-weight: 600;
+  font-size: 1.4rem;
+  white-space: nowrap;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.checkout-footer__button:hover {
+  background-color: #45a049;
+  transform: translateY(-1px);
+}
+
+.checkout-footer__button:focus {
+  outline: 2px solid rgb(var(--color-foreground));
+  outline-offset: 2px;
+}
+
+.checkout-footer__button:active {
+  transform: translateY(0);
+}
+
+/* Mobile optimization */
+@media screen and (max-width: 749px) {
+  .checkout-footer__content {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+    padding: 1rem 1.5rem;
+  }
+
+  .checkout-footer__status {
+    flex-direction: column;
+    gap: 0.25rem;
+    font-size: 1.2rem;
+  }
+
+  .checkout-footer__button {
+    width: 100%;
+    padding: 0.875rem 1.5rem;
+  }
+}
+
+/* Ensure footer doesn't overlap with other fixed elements */
+@media screen and (min-width: 750px) {
+  .custom-order-checkout-footer {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
