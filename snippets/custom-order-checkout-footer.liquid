@@ -17,20 +17,18 @@
   assign footer_button_text = 'custom_order.checkout_footer.button_text' | t
 -%}
 
-{% if custom_item_count > 0 %}
-  <div class="custom-order-checkout-footer" data-custom-item-count="{{ custom_item_count }}" hidden>
-    <div class="checkout-footer__content">
-      <span class="checkout-footer__status">
-        <span class="checkout-footer__icon">✅</span>
-        <strong>{{ footer_status_prefix }}</strong>
-        <span class="checkout-footer__message">You have <span class="checkout-footer__count">{{ custom_item_count }}</span> custom item(s) saved in the cart.</span>
-      </span>
-      <a href="/checkout" class="button button--primary checkout-footer__button">
-        {{ footer_button_text }}
-      </a>
-    </div>
+<div class="custom-order-checkout-footer" data-custom-item-count="{{ custom_item_count }}"{% if custom_item_count == 0 %} hidden{% endif %}>
+  <div class="checkout-footer__content">
+    <span class="checkout-footer__status">
+      <span class="checkout-footer__icon">✅</span>
+      <strong>{{ footer_status_prefix }}</strong>
+      <span class="checkout-footer__message">You have <span class="checkout-footer__count">{{ custom_item_count }}</span> custom item(s) saved in the cart.</span>
+    </span>
+    <a href="/checkout" class="button button--primary checkout-footer__button">
+      {{ footer_button_text }}
+    </a>
   </div>
-{% endif %}
+</div>
 
 {{ 'component-custom-order-checkout-footer.css' | asset_url | stylesheet_tag }}
 <script src="{{ 'custom-order-checkout-footer.js' | asset_url }}" defer></script>

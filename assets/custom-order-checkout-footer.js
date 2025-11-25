@@ -44,11 +44,15 @@ window.CustomOrderCheckoutFooter = (function () {
   async function refreshCart() {
     if (suppressed) return;
     try {
-      const cartUrl = `/cart.js?timestamp=${Date.now()}`;
+      const cartUrl = `/cart.js?timestamp=${Date.now()}&_=${Date.now()}`;
       const response = await fetch(cartUrl, {
         credentials: 'same-origin',
         cache: 'no-store',
-        headers: { 'Cache-Control': 'no-cache' },
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        },
       });
       if (!response.ok) throw new Error(response.statusText);
       const cart = await response.json();
@@ -70,9 +74,9 @@ window.CustomOrderCheckoutFooter = (function () {
       } else if (event.itemCount !== undefined) {
         refreshCart();
       } else if (event.source === 'product-form') {
-        // When item is added to cart from product form, refresh after a short delay
-        // to allow the cart API to update
-        setTimeout(refreshCart, 300);
+        // When item is added to cart from product form, refresh after a delay
+        // to allow the cart API to update. Use a longer delay to ensure cart is updated.
+        setTimeout(refreshCart, 500);
       } else {
         // Fallback: refresh cart for any other cart update event
         setTimeout(refreshCart, 200);
