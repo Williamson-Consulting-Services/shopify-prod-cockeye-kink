@@ -33,15 +33,50 @@ See [Version Tracking Workflow](../.cursor/version-tracking-workflow.mdc) for de
 ### Fixed
 - (Items will be listed here)
 
-## [10.0.1] - YYYY-MM-DD
+## [10.0.1] - 2025-12-01
 
 ### Added
-- Initial custom features
-- Custom measurements form system
-- Custom order checkout footer
+- Custom measurements form system with modular architecture
+- Custom order checkout footer component with sticky positioning
+- Custom order edit functionality from cart (pencil icon button)
+- Property filtering system to remove empty/zero values from orders
+- Custom order utilities module (`custom-order-utils.js`) for centralized logic
+- Cart edit custom order handler (`cart-edit-custom-order.js`)
+- Custom order banner component for "Unsaved Draft" messaging
+- Custom scripts loader snippet for theme update resilience
+- Edit icon (`icon-edit.liquid`) matching Dawn's icon style
+- Cart item edit button snippet (`cart-item-edit-button.liquid`)
+- Filtered property display snippets for cart and cart drawer
+- Custom order product title setting (configurable in theme settings)
+- FormData filtering in fetch interceptor as safety net
+- URL query parameter cleanup after cart additions
+- Enhanced edit mode detection from URL parameters
+- Multi-language support for custom order features (20+ languages)
 
 ### Changed
-- Base theme: Dawn 10.0.0
+- Refactored custom measurements form from monolithic to modular architecture
+- Custom order identification now uses product title instead of properties
+- Cart property display now filters empty, zero, and internal properties
+- Edit button moved from text link to icon button next to remove button
+- Form submission now filters properties at both input and FormData levels
+- Custom order banner shows immediately on page load when editing
+- State management improved for banner and form reset after cart updates
+
+### Fixed
+- Empty properties no longer appear in Shopify admin order pages
+- Zero-value properties (0.000, 0.00, etc.) filtered from orders
+- Properties with "- Text" suffix filtered when empty
+- Internal properties (starting with "_") filtered from display
+- Edit button styling now matches remove button (size, spacing, no shadow)
+- URL query parameters cleared after adding item to cart
+- Banner state resets correctly after cart additions
+- Form state properly reinitializes after cart updates
+
+### Notes
+- Base: Dawn 10.0.0
+- No breaking changes
+- Custom orders identified by configurable product title (default: "Custom Order")
+- Version increment and git tagging required on merge to main
 
 ---
 
