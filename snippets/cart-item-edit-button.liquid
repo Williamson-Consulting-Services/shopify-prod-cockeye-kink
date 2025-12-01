@@ -35,15 +35,13 @@
 -%}
 
 {%- if is_custom_order -%}
-  <div class="cart-item__edit">
-    <button
-      type="button"
-      class="link cart-item__edit-link"
-      data-edit-custom-order="{{ item.index | plus: 1 }}"
-      aria-label="{{ 'customer.addresses.edit' | t }} {{ item.product.title | escape }}"
-    >
-      {{ 'customer.addresses.edit' | t }}
-    </button>
-  </div>
+  <button
+    type="button"
+    class="button button--tertiary cart-item__edit-button"
+    data-edit-custom-order="{{ item.index | plus: 1 }}"
+    aria-label="{{ 'customer.addresses.edit' | t }} {{ item.product.title | escape }}"
+  >
+    {% render 'icon-edit' %}
+  </button>
 {%- endif -%}
 

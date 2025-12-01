@@ -180,8 +180,6 @@
                             <p class="product-option">{{ item.selling_plan_allocation.selling_plan.name }}</p>
                           {%- endif -%}
 
-                          {%- render 'cart-item-edit-button', item: item -%}
-
                           <ul
                             class="discounts list-unstyled"
                             role="list"
@@ -284,6 +282,8 @@
                                 {% render 'icon-plus' %}
                               </button>
                             </quantity-input>
+
+                            {%- render 'cart-item-edit-button', item: item -%}
 
                             <cart-remove-button
                               id="CartDrawer-Remove-{{ item.index | plus: 1 }}"
