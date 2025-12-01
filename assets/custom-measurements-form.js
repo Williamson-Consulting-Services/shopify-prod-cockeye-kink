@@ -1054,6 +1054,9 @@
         return;
       }
 
+      // If we have URL parameters, we're in edit mode - show banner immediately
+      this.updateBannerEditingState(true);
+
       // Pre-fill category if present
       if (urlParams['Selected Option']) {
         const categoryValue = urlParams['Selected Option'];
