@@ -1,0 +1,30 @@
+{%- comment -%}
+  Custom Scripts Loader
+  Centralized loader for all custom JavaScript modules and settings
+
+  SOLID Principles:
+  - Single Responsibility: This snippet is solely responsible for loading custom scripts
+  - Open/Closed: Extend functionality by adding scripts here, not modifying core files
+  - Dependency Inversion: Scripts depend on window objects, not concrete implementations
+
+  Usage: Include this snippet in theme.liquid with:
+  {%- render 'custom-scripts-loader' -%}
+
+  If theme.liquid is overwritten, only this one line needs to be restored.
+{%- endcomment -%}
+
+{%- comment -%} Load custom order utilities (must load before other custom scripts that depend on it) {%- endcomment -%}
+<script src="{{ 'custom-order-utils.js' | asset_url }}" defer="defer"></script>
+
+{%- comment -%} Initialize custom order settings (available globally for all scripts) {%- endcomment -%}
+<script>
+  // Initialize custom order settings before other scripts load
+  // This ensures settings are available when scripts initialize
+  (function() {
+    if (!window.customOrderSettings) {
+      window.customOrderSettings = {};
+    }
+    window.customOrderSettings.productTitle = {{ settings.custom_order_product_title | default: 'Custom Order' | json }};
+  })();
+</script>
+

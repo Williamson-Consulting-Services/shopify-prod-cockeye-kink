@@ -1,6 +1,20 @@
-const isCustomOrder = (formData) => {
+const isCustomOrder = (formData, productTitle) => {
   if (!formData) return false;
-
+  
+  // Use utility function if available
+  if (window.CustomOrderUtils && window.CustomOrderUtils.isCustomOrderFromFormData) {
+    return window.CustomOrderUtils.isCustomOrderFromFormData(formData, productTitle);
+  }
+  
+  // Fallback: Check product title
+  if (productTitle && window.CustomOrderUtils) {
+    const customOrderTitle = window.CustomOrderUtils.getCustomOrderProductTitle();
+    if (String(productTitle).trim().toLowerCase() === customOrderTitle.toLowerCase()) {
+      return true;
+    }
+  }
+  
+  // Backward compatibility: Check properties (for migration period)
   const customFlag = formData.get('properties[_custom]');
   const orderTypeFlag = formData.get('properties[Order Type]');
 
@@ -16,6 +30,33 @@ class ProductFormExtension {
     this.cartUpdateUnsubscriber = undefined;
     this.setupFetchInterceptor();
     this.setupEventListeners();
+  }
+
+  getProductTitle() {
+    // Try to get from product title element
+    const titleElement = document.querySelector('h1.product__title, .product__title, [data-product-title]');
+    if (titleElement) {
+      return titleElement.textContent.trim();
+    }
+
+    // Try to get from meta tag
+    const metaTitle = document.querySelector('meta[property="product:title"]');
+    if (metaTitle && metaTitle.content) {
+      return metaTitle.content.trim();
+    }
+
+    // Try to get from product JSON-LD
+    const jsonLd = document.querySelector('script[type="application/ld+json"]');
+    if (jsonLd) {
+      try {
+        const data = JSON.parse(jsonLd.textContent);
+        if (data.name) return data.name.trim();
+      } catch (e) {
+        // Ignore parse errors
+      }
+    }
+
+    return null;
   }
 
   setupFetchInterceptor() {
@@ -90,7 +131,9 @@ class ProductFormExtension {
 
           publish(PUB_SUB_EVENTS.cartUpdate, { source: 'product-form-extension', cartState: response });
 
-          if (isCustomOrder(formData)) {
+          // Get product title from page context
+          const productTitle = this.getProductTitle();
+          if (isCustomOrder(formData, productTitle)) {
             publish(PUB_SUB_EVENTS.cartUpdate, {
               source: 'product-form-extension',
               customOrderItemAdded: true,

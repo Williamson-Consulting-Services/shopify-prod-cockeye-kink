@@ -17,11 +17,15 @@ window.CustomOrderCheckoutFooter = (function () {
 
   function countCustomItems(cart) {
     if (!cart || !cart.items) return 0;
-    return cart.items.filter((item) => {
-      if (!item.properties) return false;
-      const customFlag = item.properties['_custom'] || item.properties['Order Type'];
-      return typeof customFlag === 'string' && customFlag.toLowerCase() === 'custom';
-    }).length;
+    if (!window.CustomOrderUtils) {
+      // Fallback if utils not loaded yet
+      return cart.items.filter((item) => {
+        if (!item.properties) return false;
+        const customFlag = item.properties['_custom'] || item.properties['Order Type'];
+        return typeof customFlag === 'string' && customFlag.toLowerCase() === 'custom';
+      }).length;
+    }
+    return cart.items.filter((item) => window.CustomOrderUtils.isCustomOrderItem(item)).length;
   }
 
   function updateFooter(customCount) {

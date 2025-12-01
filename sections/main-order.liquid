@@ -81,7 +81,13 @@
                       {%- if property_size != 0 -%}
                         {%- for property in line_item.properties -%}
                           {% assign property_first_char = property.first | slice: 0 %}
-                          {%- if property.last != blank and property_first_char != '_' -%}
+                          {%- assign property_value = property.last | append: '' | strip -%}
+                          {%- assign num_value = property_value | plus: 0 -%}
+                          {%- assign is_zero = false -%}
+                          {%- if num_value == 0 and property_value == '0' or property_value == '0.0' or property_value == '0.00' or property_value == '0.000' or property_value == '0.0000' -%}
+                            {%- assign is_zero = true -%}
+                          {%- endif -%}
+                          {%- if property.last != blank and property_first_char != '_' and is_zero == false -%}
                             <span>{{ property.first }}:</span>
                             <span>
                               {%- if property.last contains '/uploads/' -%}

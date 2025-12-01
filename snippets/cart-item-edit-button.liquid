@@ -1,0 +1,49 @@
+{%- comment -%}
+  Cart Item Edit Button
+  Displays edit button for custom order items
+
+  SOLID Principles:
+  - Single Responsibility: Solely responsible for custom order detection and edit button display
+  - Open/Closed: Extend by modifying this snippet, not cart templates
+  - Dependency Inversion: Depends on theme settings abstraction, not concrete implementation
+
+  Usage:
+  {%- render 'cart-item-edit-button', item: item -%}
+
+  If cart templates are overwritten, add this snippet after property display.
+{%- endcomment -%}
+
+{%- liquid
+  assign is_custom_order = false
+  assign custom_order_title = settings.custom_order_product_title | default: 'Custom Order'
+
+  # Check product title first (primary method)
+  if item.product and item.product.title
+    assign product_title_lower = item.product.title | downcase | strip
+    assign custom_title_lower = custom_order_title | downcase | strip
+    if product_title_lower == custom_title_lower
+      assign is_custom_order = true
+    endif
+  endif
+
+  # Backward compatibility: Check properties (for migration period)
+  if is_custom_order == false and item.properties
+    if item.properties['Order Type'] == 'custom' or item.properties['_custom'] == 'custom'
+      assign is_custom_order = true
+    endif
+  endif
+-%}
+
+{%- if is_custom_order -%}
+  <div class="cart-item__edit">
+    <button
+      type="button"
+      class="link cart-item__edit-link"
+      data-edit-custom-order="{{ item.index | plus: 1 }}"
+      aria-label="{{ 'customer.addresses.edit' | t }} {{ item.product.title | escape }}"
+    >
+      {{ 'customer.addresses.edit' | t }}
+    </button>
+  </div>
+{%- endif -%}
+

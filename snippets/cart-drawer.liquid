@@ -7,6 +7,7 @@
 
 <script src="{{ 'cart.js' | asset_url }}" defer="defer"></script>
 <script src="{{ 'custom-cart-extension.js' | asset_url }}" defer="defer"></script>
+<script src="{{ 'cart-edit-custom-order.js' | asset_url }}" defer="defer"></script>
 
 <style>
   .drawer {
@@ -174,32 +175,13 @@
                                 {%- endfor -%}
                               {%- endif -%}
 
-                              {%- for property in item.properties -%}
-                                {%- assign property_first_char = property.first | slice: 0 -%}
-                                {%- if property.last != blank and property_first_char != '_' -%}
-                                  <div class="product-option">
-                                    <dt>{{ property.first }}:</dt>
-                                    <dd>
-                                      {%- if property.last contains '/uploads/' -%}
-                                        <a
-                                          href="{{ property.last }}"
-                                          class="link"
-                                          target="_blank"
-                                          aria-describedby="a11y-new-window-message"
-                                        >
-                                          {{ property.last | split: '/' | last }}
-                                        </a>
-                                      {%- else -%}
-                                        {{ property.last }}
-                                      {%- endif -%}
-                                    </dd>
-                                  </div>
-                                {%- endif -%}
-                              {%- endfor -%}
+                              {%- render 'cart-item-properties-filtered-drawer', item: item -%}
                             </dl>
 
                             <p class="product-option">{{ item.selling_plan_allocation.selling_plan.name }}</p>
                           {%- endif -%}
+
+                          {%- render 'cart-item-edit-button', item: item -%}
 
                           <ul
                             class="discounts list-unstyled"

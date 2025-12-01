@@ -1514,6 +1514,17 @@
     "settings": [
       {
         "type": "header",
+        "content": "t:settings_schema.custom_order_measurements_settings.settings.header_general.content"
+      },
+      {
+        "type": "text",
+        "id": "custom_order_product_title",
+        "label": "t:settings_schema.custom_order_measurements_settings.settings.custom_order_product_title.label",
+        "info": "t:settings_schema.custom_order_measurements_settings.settings.custom_order_product_title.info",
+        "default": "Custom Order"
+      },
+      {
+        "type": "header",
         "content": "t:settings_schema.custom_order_measurements_settings.settings.header_measurements.content"
       },
       {
