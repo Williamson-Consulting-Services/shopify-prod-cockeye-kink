@@ -16,6 +16,9 @@
 {%- comment -%} Load custom order utilities (must load before other custom scripts that depend on it) {%- endcomment -%}
 <script src="{{ 'custom-order-utils.js' | asset_url }}" defer="defer"></script>
 
+{%- comment -%} Load cart edit functionality {%- endcomment -%}
+<script src="{{ 'cart-edit-custom-order.js' | asset_url }}" defer="defer"></script>
+
 {%- comment -%} Initialize custom order settings (available globally for all scripts) {%- endcomment -%}
 <script>
   // Initialize custom order settings before other scripts load

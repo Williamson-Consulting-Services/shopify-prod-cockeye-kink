@@ -42,13 +42,19 @@ class CustomOrderUtils {
   static isCustomOrderItem(item) {
     if (!item) return false;
 
-    // Primary method: Check product title
     const customOrderTitle = this.getCustomOrderProductTitle();
+
+    // Primary method: Check product title
+    // Cart API may have product.title or product_title
+    let productTitle = null;
     if (item.product && item.product.title) {
-      const productTitle = String(item.product.title).trim();
-      if (productTitle.toLowerCase() === customOrderTitle.toLowerCase()) {
-        return true;
-      }
+      productTitle = String(item.product.title).trim();
+    } else if (item.product_title) {
+      productTitle = String(item.product_title).trim();
+    }
+
+    if (productTitle && productTitle.toLowerCase() === customOrderTitle.toLowerCase()) {
+      return true;
     }
 
     // Backward compatibility: Check properties (for migration period)

@@ -50,8 +50,19 @@
         }
 
         // Check if it's a custom order
-        if (!window.CustomOrderUtils || !window.CustomOrderUtils.isCustomOrderItem(item)) {
-          console.warn('Item is not a custom order');
+        if (!window.CustomOrderUtils) {
+          console.error('CustomOrderUtils not available');
+          return;
+        }
+
+        // Check if it's a custom order
+        if (!window.CustomOrderUtils.isCustomOrderItem(item)) {
+          console.warn('Item is not a custom order', {
+            itemTitle: item.product?.title || item.product_title,
+            customOrderTitle: window.CustomOrderUtils.getCustomOrderProductTitle(),
+            properties: item.properties,
+            fullItem: item,
+          });
           return;
         }
 
