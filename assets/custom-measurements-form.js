@@ -1609,11 +1609,21 @@
             if (!this.resetAfterAddToCartPending) {
               return;
             }
+            // Clear URL query parameters to reset to clean state
+            if (window.location.search) {
+              const cleanUrl = window.location.pathname + window.location.hash;
+              window.history.replaceState({}, document.title, cleanUrl);
+            }
             this.initialize();
             this.updateAddToCartButton();
             this.resetAfterAddToCartPending = false;
           }
           if (event.customOrderItemAdded) {
+            // Clear URL query parameters to reset to clean state
+            if (window.location.search) {
+              const cleanUrl = window.location.pathname + window.location.hash;
+              window.history.replaceState({}, document.title, cleanUrl);
+            }
             this.resetAfterAddToCartPending = false;
             this.initialize();
             this.updateAddToCartButton();
