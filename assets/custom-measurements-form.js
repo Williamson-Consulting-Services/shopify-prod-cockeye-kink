@@ -1536,6 +1536,8 @@
           });
 
           // Filter all property inputs (measurements and other properties)
+          // Remove name attribute to prevent them from being included in FormData
+          // This MUST happen before product-form.js creates FormData
           const allPropertyInputs = this.productForm.querySelectorAll('input[name^="properties["], select[name^="properties["], textarea[name^="properties["]');
           allPropertyInputs.forEach((input) => {
             const name = input.getAttribute('name');
@@ -1570,7 +1572,9 @@
                 const isIncluded = categoryInfo && categoryInfo.included === true;
 
                 // Remove if not included in category or if value is empty
-                if (!isIncluded || !propertyValue || propertyValue.trim() === '') {
+                const trimmedValue = String(propertyValue || '').trim();
+                if (!isIncluded || trimmedValue === '') {
+                  // Remove name attribute - this prevents the property from being included in FormData
                   input.removeAttribute('name');
                   input.setAttribute('data-removed', 'true');
                   return;
@@ -1579,7 +1583,9 @@
             }
 
             // Use CustomOrderUtils to filter empty, zero, and internal properties
+            // This will catch empty values, zero values, internal properties, and "- Text" properties
             if (window.CustomOrderUtils && window.CustomOrderUtils.shouldFilterProperty(propertyName, propertyValue)) {
+              // Remove name attribute - this prevents the property from being included in FormData
               input.removeAttribute('name');
               input.setAttribute('data-removed', 'true');
             }

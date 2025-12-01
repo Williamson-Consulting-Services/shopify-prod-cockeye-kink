@@ -1,11 +1,11 @@
 const isCustomOrder = (formData, productTitle) => {
   if (!formData) return false;
-  
+
   // Use utility function if available
   if (window.CustomOrderUtils && window.CustomOrderUtils.isCustomOrderFromFormData) {
     return window.CustomOrderUtils.isCustomOrderFromFormData(formData, productTitle);
   }
-  
+
   // Fallback: Check product title
   if (productTitle && window.CustomOrderUtils) {
     const customOrderTitle = window.CustomOrderUtils.getCustomOrderProductTitle();
@@ -13,7 +13,7 @@ const isCustomOrder = (formData, productTitle) => {
       return true;
     }
   }
-  
+
   // Backward compatibility: Check properties (for migration period)
   const customFlag = formData.get('properties[_custom]');
   const orderTypeFlag = formData.get('properties[Order Type]');
@@ -69,6 +69,39 @@ class ProductFormExtension {
         let formData = null;
         if (options.body instanceof FormData) {
           formData = options.body;
+
+          // Filter out empty properties from FormData before sending
+          // This is a safety net in case name attributes weren't removed
+          if (window.CustomOrderUtils) {
+            const filteredFormData = new FormData();
+
+            for (const [key, value] of formData.entries()) {
+              if (!key.startsWith('properties[')) {
+                // Not a property, keep it
+                filteredFormData.append(key, value);
+              } else {
+                // Extract property name from key like "properties[Property Name]"
+                const propMatch = key.match(/properties\[(.+?)\]/);
+                if (propMatch) {
+                  const propName = propMatch[1];
+                  const propValue = String(value || '').trim();
+
+                  // Only include if it should NOT be filtered
+                  if (!window.CustomOrderUtils.shouldFilterProperty(propName, propValue)) {
+                    filteredFormData.append(key, value);
+                  }
+                  // If it should be filtered, we don't append it - effectively removing it
+                } else {
+                  // Couldn't parse, keep it to be safe
+                  filteredFormData.append(key, value);
+                }
+              }
+            }
+
+            // Replace the original FormData with filtered one
+            options.body = filteredFormData;
+            formData = filteredFormData;
+          }
         }
 
         return originalFetch.call(window, ...args).then((response) => {
