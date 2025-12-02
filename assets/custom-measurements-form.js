@@ -1054,8 +1054,24 @@
         return;
       }
 
-      // If we have URL parameters, we're in edit mode - show banner immediately
-      this.updateBannerEditingState(true);
+      // Only show banner if URL contains edit-related parameters (not marketing/tracking params)
+      // Wait for config to be available before checking
+      if (
+        window.CustomOrderUtils &&
+        window.CustomOrderUtils.hasEditRelatedParams
+      ) {
+        window.CustomOrderUtils
+          .hasEditRelatedParams()
+          .then((hasEditParams) => {
+            if (hasEditParams) {
+              // If we have edit-related URL parameters, we're in edit mode - show banner immediately
+              this.updateBannerEditingState(true);
+            }
+          })
+          .catch((error) => {
+            console.warn('Error checking edit params:', error);
+          });
+      }
 
       // Pre-fill category if present
       if (urlParams['Selected Option']) {

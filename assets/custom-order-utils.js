@@ -181,6 +181,148 @@ class CustomOrderUtils {
   }
 
   /**
+   * Waits for customMeasurementsConfig to be available
+   * @param {number} timeout - Maximum time to wait in milliseconds (default: 2000)
+   * @returns {Promise<Object|null>} - Config object or null if timeout
+   */
+  static async waitForConfig(timeout = 2000) {
+    // If config is already available, return it immediately
+    if (window.customMeasurementsConfig) {
+      return window.customMeasurementsConfig;
+    }
+
+    // Wait for config to be loaded
+    return new Promise((resolve) => {
+      const startTime = Date.now();
+      const checkInterval = 50; // Check every 50ms
+
+      const checkConfig = () => {
+        if (window.customMeasurementsConfig) {
+          resolve(window.customMeasurementsConfig);
+          return;
+        }
+
+        const elapsed = Date.now() - startTime;
+        if (elapsed >= timeout) {
+          // Timeout reached, resolve with null
+          resolve(null);
+          return;
+        }
+
+        // Check again after interval
+        setTimeout(checkConfig, checkInterval);
+      };
+
+      checkConfig();
+    });
+  }
+
+  /**
+   * Checks if URL parameters contain edit-related parameters
+   * Used to distinguish edit mode from marketing/tracking parameters
+   * Derives parameter detection from theme settings config
+   * Waits for config to be available if needed
+   * @returns {Promise<boolean>} - True if URL contains edit-related parameters
+   */
+  static async hasEditRelatedParams() {
+    const urlParams = this.parseUrlParams();
+    if (!urlParams || Object.keys(urlParams).length === 0) {
+      return false;
+    }
+
+    // Wait for config to be available (with timeout)
+    const config = await this.waitForConfig(2000);
+    if (!config) {
+      // Fallback: if config not available after timeout, use pattern matching only
+      return this.hasEditRelatedParamsByPattern(urlParams);
+    }
+
+    // Build set of all valid option values from config
+    const validOptionValues = new Set();
+
+    // Add categories (for "Selected Option" param)
+    if (config.categories && Array.isArray(config.categories)) {
+      config.categories.forEach((cat) => validOptionValues.add(String(cat).trim()));
+    }
+
+    // Add all option values from config.options
+    if (config.options) {
+      const optionArrays = [
+        config.options.associates,
+        config.options.leatherColors,
+        config.options.harnessTypes,
+        config.options.tagOptions,
+        config.options.frontPlates,
+        config.options.backPlates,
+        config.options.longSliders,
+      ];
+
+      optionArrays.forEach((arr) => {
+        if (Array.isArray(arr)) {
+          arr.forEach((val) => validOptionValues.add(String(val).trim()));
+        }
+      });
+    }
+
+    // Build set of measurement names from config
+    const measurementNames = new Set();
+    if (config.measurements) {
+      Object.keys(config.measurements).forEach((name) => measurementNames.add(String(name).trim()));
+    }
+
+    // Check if any URL param value or name matches config data
+    for (const [paramName, paramValue] of Object.entries(urlParams)) {
+      const value = String(paramValue).trim();
+      const name = String(paramName).trim();
+
+      // Check if param value exactly matches any config option value
+      if (validOptionValues.has(value)) {
+        return true;
+      }
+
+      // Check if param name exactly matches a measurement name from config
+      if (measurementNames.has(name)) {
+        return true;
+      }
+
+      // Check if param name contains any measurement name from config as a substring
+      // This handles cases where measurement name appears in the param name
+      // (e.g., "Neck (in)" contains "Neck" from config)
+      for (const measName of measurementNames) {
+        if (name.includes(measName)) {
+          return true;
+        }
+      }
+
+      // Check if any word in param name matches a measurement name
+      // Split param name by common delimiters and check each part
+      const nameParts = name.split(/[\s\(\)\[\]_-]+/);
+      for (const part of nameParts) {
+        const trimmedPart = part.trim();
+        if (trimmedPart && measurementNames.has(trimmedPart)) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * Fallback method: checks for edit-related parameters by pattern matching
+   * Used when config is not available
+   * Without config, we cannot reliably detect edit params
+   * Return false to avoid false positives from marketing params
+   * @param {Object} urlParams - Parsed URL parameters
+   * @returns {boolean} - Always returns false (requires config for accurate detection)
+   */
+  static hasEditRelatedParamsByPattern(urlParams) {
+    // Without config, we cannot determine which params are edit-related
+    // Return false to avoid false positives from marketing/tracking parameters
+    return false;
+  }
+
+  /**
    * Determines if a FormData object represents a custom order
    * Used for form submission detection - checks if product title matches
    * @param {FormData} formData - Form data object
