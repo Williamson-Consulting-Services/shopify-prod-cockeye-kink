@@ -33,6 +33,18 @@ See [Version Tracking Workflow](../.cursor/version-tracking-workflow.mdc) for de
 ### Fixed
 - (Items will be listed here)
 
+## [10.0.3] - 2025-12-02
+
+### Changed
+- Version increment for release tracking (no code changes)
+
+### Notes
+- Base: Dawn 10.0.0
+- No breaking changes
+- Version bump only - no functional changes
+
+---
+
 ## [10.0.2] - 2025-12-02
 
 ### Added
