@@ -33,6 +33,28 @@ See [Version Tracking Workflow](../.cursor/version-tracking-workflow.mdc) for de
 ### Fixed
 - (Items will be listed here)
 
+## [10.0.2] - 2025-12-02
+
+### Added
+- New utility methods in `custom-order-utils.js` for checking edit-related URL parameters and waiting for configuration availability
+- Enhanced edit mode detection that waits for configuration before determining edit state
+
+### Changed
+- Improved edit mode detection in custom measurements form to show editing banner based on URL parameters
+- Enhanced configuration handling to ensure accurate edit mode detection by waiting for configuration availability
+- Updated GitHub Actions workflow (`release-on-merge.yml`) with enhanced permissions for write access to contents and read access to pull requests
+- Improved credential handling in GitHub Actions workflow checkout step for smoother release process
+
+### Fixed
+- Edit mode detection now reliably shows banner when product page loads with edit parameters
+- Configuration availability is properly awaited before determining edit mode state
+
+### Notes
+- Base: Dawn 10.0.0
+- No breaking changes
+
+---
+
 ## [10.0.1] - 2025-12-01
 
 ### Added
