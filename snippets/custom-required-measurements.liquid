@@ -75,10 +75,7 @@
 {%- assign tag_options_source = tag_options_source_raw | replace: '|', ',' -%}
 {%- assign tag_options = tag_options_source | split: ',' -%}
 
-{%- liquid
-  assign order_tag_name = '_custom'
-  assign order_tag_value = 'custom'
--%}
+{%- comment -%} Order Type is now set in custom-measurements-hidden-fields.liquid {%- endcomment -%}
 
 {%- comment -%} Render form components using modular snippets {%- endcomment -%}
 {%- render 'custom-measurements-associate', associates: associates, section_id: section.id -%}

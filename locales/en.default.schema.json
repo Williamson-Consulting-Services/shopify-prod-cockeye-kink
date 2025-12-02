@@ -384,6 +384,13 @@
     "custom_order_measurements_settings": {
       "name": "Custom measurements",
       "settings": {
+        "header_general": {
+          "content": "General settings"
+        },
+        "custom_order_product_title": {
+          "label": "Custom Order Product Title",
+          "info": "Product title used to identify custom orders (e.g., 'Custom Order'). Items with this product title will be treated as custom orders."
+        },
         "header_measurements": {
           "content": "Categories and measurements"
         },

@@ -12,6 +12,13 @@ class CartRemoveButton extends HTMLElement {
 
 customElements.define('cart-remove-button', CartRemoveButton);
 
+class CartEditButton extends HTMLElement {
+  // Custom element wrapper for edit button
+  // Click handling is done via event delegation in cart-edit-custom-order.js
+}
+
+customElements.define('cart-edit-button', CartEditButton);
+
 class CartItems extends HTMLElement {
   constructor() {
     super();

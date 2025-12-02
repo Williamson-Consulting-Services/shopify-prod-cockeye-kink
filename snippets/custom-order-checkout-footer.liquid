@@ -1,14 +1,30 @@
 {%- liquid
   assign custom_item_count = 0
+  assign custom_order_title = settings.custom_order_product_title | default: 'Custom Order'
   for item in cart.items
-    if item.properties
-      assign custom_flag = item.properties['_custom'] | default: item.properties['Order Type']
+    # Check product title first (primary method)
+    assign is_custom = false
+    if item.product and item.product.title
+      assign product_title_lower = item.product.title | downcase | strip
+      assign custom_title_lower = custom_order_title | downcase | strip
+      if product_title_lower == custom_title_lower
+        assign is_custom = true
+      endif
+    endif
+    
+    # Backward compatibility: Check properties (for migration period)
+    if is_custom == false and item.properties
+      assign custom_flag = item.properties['Order Type'] | default: item.properties['_custom']
       if custom_flag
         assign custom_flag_lower = custom_flag | downcase
         if custom_flag_lower == 'custom'
-          assign custom_item_count = custom_item_count | plus: 1
+          assign is_custom = true
         endif
       endif
+    endif
+    
+    if is_custom
+      assign custom_item_count = custom_item_count | plus: 1
     endif
   endfor
 

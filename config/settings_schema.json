@@ -2,7 +2,7 @@
   {
     "name": "theme_info",
     "theme_name": "Dawn",
-    "theme_version": "10.0.0",
+    "theme_version": "10.0.1",
     "theme_author": "Shopify",
     "theme_documentation_url": "https://help.shopify.com/manual/online-store/themes",
     "theme_support_url": "https://support.shopify.com/"
@@ -1512,6 +1512,17 @@
   {
     "name": "t:settings_schema.custom_order_measurements_settings.name",
     "settings": [
+      {
+        "type": "header",
+        "content": "t:settings_schema.custom_order_measurements_settings.settings.header_general.content"
+      },
+      {
+        "type": "text",
+        "id": "custom_order_product_title",
+        "label": "t:settings_schema.custom_order_measurements_settings.settings.custom_order_product_title.label",
+        "info": "t:settings_schema.custom_order_measurements_settings.settings.custom_order_product_title.info",
+        "default": "Custom Order"
+      },
       {
         "type": "header",
         "content": "t:settings_schema.custom_order_measurements_settings.settings.header_measurements.content"

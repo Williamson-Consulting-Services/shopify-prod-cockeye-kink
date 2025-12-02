@@ -122,6 +122,18 @@
     }
 
     function init() {
+      // Check if page loaded with edit parameters (indicating edit mode)
+      // Only show if we're on a product page with custom measurements form
+      const urlParams = new URLSearchParams(window.location.search);
+      const hasEditParams = urlParams.toString().trim() !== '';
+      const isProductPage = window.location.pathname.includes('/products/');
+      const hasCustomForm = document.querySelector('.measurement-field') || document.querySelector('.category-option-input');
+
+      // If URL has parameters and we're on a product page with custom form, we're in edit mode
+      if (hasEditParams && isProductPage && hasCustomForm) {
+        state.editing = true;
+      }
+
       render();
       subscribe(PUB_SUB_EVENTS.cartUpdate, (event) => {
         if (event.customOrderItemAdded) {

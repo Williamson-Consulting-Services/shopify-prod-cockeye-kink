@@ -1,0 +1,112 @@
+name: Release Process on Merge to Main
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'config/settings_schema.json'
+      - 'CHANGELOG.md'
+
+jobs:
+  verify-and-tag:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get current version
+        id: current_version
+        run: |
+          VERSION=$(grep -A 5 '"name": "theme_info"' config/settings_schema.json | grep '"theme_version"' | sed 's/.*"theme_version": "\([^"]*\)".*/\1/')
+          echo "current_version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Current version: $VERSION"
+
+      - name: Get previous version
+        id: previous_version
+        run: |
+          # Get the version from the previous commit on main
+          git checkout main~1 2>/dev/null || git checkout main
+          PREV_VERSION=$(grep -A 5 '"name": "theme_info"' config/settings_schema.json | grep '"theme_version"' | sed 's/.*"theme_version": "\([^"]*\)".*/\1/')
+          git checkout main
+          echo "previous_version=$PREV_VERSION" >> $GITHUB_OUTPUT
+          echo "Previous version: $PREV_VERSION"
+
+      - name: Verify version increment
+        run: |
+          CURRENT="${{ steps.current_version.outputs.current_version }}"
+          PREV="${{ steps.previous_version.outputs.previous_version }}"
+
+          if [ "$CURRENT" = "$PREV" ]; then
+            echo "❌ Version not incremented! Current: $CURRENT, Previous: $PREV"
+            echo "Please increment the version in config/settings_schema.json before merging to main"
+            exit 1
+          else
+            echo "✅ Version incremented: $PREV → $CURRENT"
+          fi
+
+      - name: Verify CHANGELOG updated
+        run: |
+          CURRENT_VERSION="${{ steps.current_version.outputs.current_version }}"
+          if grep -q "## \[$CURRENT_VERSION\]" CHANGELOG.md; then
+            echo "✅ CHANGELOG.md updated for version $CURRENT_VERSION"
+          else
+            echo "❌ CHANGELOG.md not updated for version $CURRENT_VERSION"
+            echo "Please add a [${CURRENT_VERSION}] section to CHANGELOG.md"
+            exit 1
+          fi
+
+      - name: Check if tag exists
+        id: tag_check
+        run: |
+          CURRENT_VERSION="${{ steps.current_version.outputs.current_version }}"
+          TAG="v$CURRENT_VERSION"
+
+          # Check if tag exists on remote
+          if git ls-remote --tags origin | grep -q "refs/tags/$TAG$"; then
+            echo "Tag $TAG already exists on remote"
+            echo "tag_exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "Tag $TAG does not exist"
+            echo "tag_exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create and push git tag
+        if: steps.tag_check.outputs.tag_exists == 'false'
+        run: |
+          CURRENT_VERSION="${{ steps.current_version.outputs.current_version }}"
+          TAG="v$CURRENT_VERSION"
+
+          # Configure git
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Create annotated tag
+          git tag -a "$TAG" -m "Release $TAG"
+
+          # Push tag
+          git push origin "$TAG"
+
+          echo "✅ Created and pushed tag $TAG"
+
+      - name: Summary
+        run: |
+          CURRENT_VERSION="${{ steps.current_version.outputs.current_version }}"
+          PREV_VERSION="${{ steps.previous_version.outputs.previous_version }}"
+          TAG="v$CURRENT_VERSION"
+
+          echo "## Release Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Version incremented: **$PREV_VERSION** → **$CURRENT_VERSION**" >> $GITHUB_STEP_SUMMARY
+          echo "✅ CHANGELOG.md updated" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.tag_check.outputs.tag_exists }}" == "false" ]; then
+            echo "✅ Git tag **$TAG** created and pushed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "ℹ️ Git tag **$TAG** already exists" >> $GITHUB_STEP_SUMMARY
+          fi
+
