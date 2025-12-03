@@ -49,9 +49,6 @@
 }
 
 .checkout-footer__status {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
   font-size: 1.4rem;
   line-height: 1.5;
 }
@@ -62,6 +59,7 @@
 
 .checkout-footer__message {
   white-space: nowrap;
+  display: inline;
 }
 
 .checkout-footer__icon {
@@ -225,24 +223,23 @@
 
   .checkout-footer__status {
     font-size: 1.1rem;
-    gap: 0.5rem;
-  }
-
-  .checkout-footer__prefix {
-    display: inline-block;
   }
 
   .checkout-footer__message-wrapper {
-    display: inline-flex;
+    display: inline-block;
     white-space: nowrap;
     position: relative;
     z-index: 1;
   }
 
   .checkout-footer__message {
-    display: inline-block;
+    display: inline;
     white-space: nowrap;
-    padding-right: 1rem;
+  }
+
+  .checkout-footer__message--duplicate {
+    display: inline;
+    padding-left: 2rem;
   }
 
   .checkout-footer__message-wrapper[data-needs-scroll='true'] {
