@@ -37,6 +37,37 @@ See [Version Tracking Workflow](../.cursor/version-tracking-workflow.mdc) for de
 
 - (Items will be listed here)
 
+## [15.4.1] - 2025-01-27
+
+### Added
+- Upgraded base theme from Dawn 10.0.0 to Dawn 15.4.0
+- All custom files preserved and integrated with Dawn 15.4.0 updates
+- Custom measurements system fully functional on new base
+- Custom order management features (banner, checkout footer) integrated
+- All custom JavaScript modules and CSS components updated
+
+### Changed
+- Base theme upgraded from Dawn 10.0.0 to Dawn 15.4.0
+- Applied custom modifications to 39 Dawn files (sections, snippets, layout, assets)
+- Merged custom settings into Dawn 15.4.0 settings schema
+- Merged custom translation keys into Dawn 15.4.0 locale files
+- Reverted non-English locale files to clean Dawn 15.4.0 versions (English-only customizations)
+- Applied Prettier formatting across repository
+
+### Technical Details
+- **Base Version**: Dawn 15.4.0
+- **Custom Files**: 47 files copied (assets, snippets, templates)
+- **Modified Dawn Files**: 39 files patched with custom changes
+- **Locale Files**: English customizations preserved, other locales reverted
+- **Configuration**: Settings schema and data merged with Dawn 15.4.0 structure
+
+### Notes
+- This is the first custom iteration (15.4.1) on the Dawn 15.4.0 base
+- All custom functionality has been preserved and tested
+- Ready for review and testing before merge to develop branch
+
+---
+
 ## [10.0.3] - 2025-12-02
 
 ### Changed
