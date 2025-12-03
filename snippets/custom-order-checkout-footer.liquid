@@ -43,9 +43,12 @@
   <div class="checkout-footer__content">
     <span class="checkout-footer__status">
       <strong class="checkout-footer__prefix">{{ footer_status_prefix }}</strong>
-      <span class="checkout-footer__message">
-        You have <span class="checkout-footer__count">{{ custom_item_count }}</span> custom item(s) saved in the cart.
-      </span>
+      <div class="checkout-footer__message-wrapper" data-message-wrapper>
+        <span class="checkout-footer__message">
+          You have <span class="checkout-footer__count">{{ custom_item_count }}</span> custom item(s) saved in the cart.
+        </span>
+        <span class="checkout-footer__message checkout-footer__message--duplicate" aria-hidden="true" hidden></span>
+      </div>
     </span>
     <a href="/checkout" class="button button--primary checkout-footer__button">
       {{ footer_button_text }}
@@ -57,7 +60,7 @@
       data-banner-close
     >
       <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 16 16">
-        <path d="M12.854 3.146a.5.5 0 0 0-.708 0L8 7.293 3.854 3.146a.5.5 0 1 0-.708.708L7.293 8l-4.147 4.146a.5.5 0 0 0 .708.708L8 8.707l4.146 4.147a.5.5 0 0 0 .708-.708L8.707 8l4.147-4.146a.5.5 0 0 0 0-.708z" fill="currentColor"/>
+        <path d="M8 12L3 7l1.414-1.414L8 9.172l3.586-3.586L13 7l-5 5z" fill="currentColor"/>
       </svg>
     </button>
   </div>

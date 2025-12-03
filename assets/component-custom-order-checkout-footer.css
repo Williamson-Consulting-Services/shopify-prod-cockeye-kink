@@ -82,6 +82,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .checkout-footer__button:hover {
@@ -204,7 +205,7 @@
   .checkout-footer__content {
     flex-direction: row;
     gap: 0.75rem;
-    padding: 1rem 3rem 1rem 1rem;
+    padding: 1rem 4rem 1rem 1rem;
     align-items: center;
   }
 
@@ -217,32 +218,19 @@
     position: relative;
   }
 
-  .checkout-footer__status::before,
-  .checkout-footer__status::after {
+  .checkout-footer__status[data-needs-scroll='true']::after {
     content: '';
     position: absolute;
     top: 0;
     bottom: 0;
+    right: 3.5rem;
     width: 2rem;
     z-index: 2;
     pointer-events: none;
-  }
-
-  .checkout-footer__status::before {
-    left: 0;
-    background: linear-gradient(
-      to right,
-      rgb(var(--color-background, 18, 18, 18)) 0%,
-      transparent 100%
-    );
-  }
-
-  .checkout-footer__status::after {
-    right: 3rem;
     background: linear-gradient(
       to left,
       rgb(var(--color-background, 18, 18, 18)) 0%,
-      transparent 100%
+      transparent 70%
     );
   }
 
@@ -250,20 +238,24 @@
     display: inline-block;
   }
 
-  .checkout-footer__message {
-    display: inline-block;
+  .checkout-footer__message-wrapper {
+    display: inline-flex;
     white-space: nowrap;
-    padding-right: 1rem;
-    will-change: transform;
     position: relative;
     z-index: 1;
   }
 
-  .checkout-footer__message[data-needs-scroll='true'] {
-    animation: scroll-text-footer 15s linear infinite;
+  .checkout-footer__message {
+    display: inline-block;
+    white-space: nowrap;
+    padding-right: 1rem;
   }
 
-  .checkout-footer__message[data-needs-scroll='true']:hover {
+  .checkout-footer__message-wrapper[data-needs-scroll='true'] {
+    animation: scroll-text-footer 25s linear infinite;
+  }
+
+  .checkout-footer__message-wrapper[data-needs-scroll='true']:hover {
     animation-play-state: paused;
   }
 
@@ -272,7 +264,7 @@
       transform: translateX(0);
     }
     100% {
-      transform: translateX(calc(-100% + 100vw - 12rem));
+      transform: translateX(-50%);
     }
   }
 
@@ -286,9 +278,10 @@
   .checkout-footer__close {
     right: 0.75rem;
     padding: 0.375rem;
-    z-index: 4;
+    z-index: 5;
     background: rgb(var(--color-background, 18, 18, 18));
     border-radius: 0.25rem;
+    box-shadow: 0 0 0.5rem rgb(var(--color-background, 18, 18, 18));
   }
 }
 

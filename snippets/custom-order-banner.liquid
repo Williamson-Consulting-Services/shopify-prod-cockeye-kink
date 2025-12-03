@@ -19,9 +19,12 @@
   style="--custom-order-banner-bg: {{ banner_background_color }}; --custom-order-banner-color: {{ banner_text_color }}; --custom-order-banner-shadow: {{ banner_shadow_rgba }};"
 >
   <div class="custom-order-banner__inner">
-    <span class="custom-order-banner__text custom-order-banner__text--editing" data-banner-editing hidden>
-      {{ banner_editing_text | escape }}
-    </span>
+    <div class="custom-order-banner__text-wrapper" data-text-wrapper>
+      <span class="custom-order-banner__text custom-order-banner__text--editing" data-banner-editing hidden>
+        {{ banner_editing_text | escape }}
+      </span>
+      <span class="custom-order-banner__text custom-order-banner__text--duplicate" aria-hidden="true" hidden></span>
+    </div>
     <button
       type="button"
       class="custom-order-banner__close"
@@ -29,7 +32,7 @@
       data-banner-close
     >
       <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 16 16">
-        <path d="M12.854 3.146a.5.5 0 0 0-.708 0L8 7.293 3.854 3.146a.5.5 0 1 0-.708.708L7.293 8l-4.147 4.146a.5.5 0 0 0 .708.708L8 8.707l4.146 4.147a.5.5 0 0 0 .708-.708L8.707 8l4.147-4.146a.5.5 0 0 0 0-.708z" fill="currentColor"/>
+        <path d="M8 4L3 9l1.414 1.414L8 6.828l3.586 3.586L13 9l-5-5z" fill="currentColor"/>
       </svg>
     </button>
   </div>
@@ -141,19 +144,27 @@
     function checkTextScroll() {
       if (!editingElement) return;
       const container = editingElement.closest('.custom-order-banner__inner');
-      if (!container) return;
+      const wrapper = editingElement.closest('[data-text-wrapper]');
+      const duplicate = wrapper?.querySelector('.custom-order-banner__text--duplicate');
+      if (!container || !wrapper) return;
 
       // Account for padding on both sides and close button width
       const containerWidth = container.offsetWidth;
-      const leftPadding = 3; // 3rem left padding
-      const rightPadding = 3; // 3rem right padding (for close button area)
-      const availableWidth = containerWidth - (leftPadding * 16) - (rightPadding * 16); // Convert rem to px approximation
+      const leftPadding = 16; // 1rem in pixels
+      const rightPadding = 56; // 3.5rem for close button area
+      const availableWidth = containerWidth - leftPadding - rightPadding;
       const textWidth = editingElement.scrollWidth;
 
-      if (textWidth > availableWidth) {
-        editingElement.setAttribute('data-needs-scroll', 'true');
+      if (textWidth > availableWidth && duplicate) {
+        // Duplicate text for seamless scrolling
+        duplicate.textContent = editingElement.textContent;
+        duplicate.hidden = false;
+        wrapper.setAttribute('data-needs-scroll', 'true');
+        container.setAttribute('data-needs-scroll', 'true');
       } else {
-        editingElement.removeAttribute('data-needs-scroll');
+        duplicate.hidden = true;
+        wrapper.removeAttribute('data-needs-scroll');
+        container.removeAttribute('data-needs-scroll');
       }
     }
 

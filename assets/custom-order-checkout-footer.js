@@ -10,7 +10,7 @@ window.CustomOrderCheckoutFooter = (function () {
   }
 
   const countElement = footer.querySelector('.checkout-footer__count');
-  const messageElement = footer.querySelector('.checkout-footer__message');
+  const messageElement = footer.querySelector('.checkout-footer__message:not(.checkout-footer__message--duplicate)');
   const suppressed =
     window.location.pathname.includes('/checkouts/') ||
     window.location.pathname.includes('/checkout') ||
@@ -18,20 +18,30 @@ window.CustomOrderCheckoutFooter = (function () {
 
   function checkTextScroll() {
     if (!messageElement || window.innerWidth > 749) {
-      if (messageElement) messageElement.removeAttribute('data-needs-scroll');
+      const wrapper = footer.querySelector('[data-message-wrapper]');
+      if (wrapper) wrapper.removeAttribute('data-needs-scroll');
       return;
     }
 
     const statusElement = footer.querySelector('.checkout-footer__status');
-    if (!statusElement) return;
+    const wrapper = footer.querySelector('[data-message-wrapper]');
+    const duplicate = wrapper?.querySelector('.checkout-footer__message--duplicate');
+    if (!statusElement || !wrapper) return;
 
     const statusWidth = statusElement.offsetWidth;
     const messageWidth = messageElement.scrollWidth;
+    const availableWidth = statusWidth - 80; // Account for padding and button space
 
-    if (messageWidth > statusWidth - 20) {
-      messageElement.setAttribute('data-needs-scroll', 'true');
+    if (messageWidth > availableWidth && duplicate) {
+      // Duplicate message for seamless scrolling
+      duplicate.innerHTML = messageElement.innerHTML;
+      duplicate.hidden = false;
+      wrapper.setAttribute('data-needs-scroll', 'true');
+      statusElement.setAttribute('data-needs-scroll', 'true');
     } else {
-      messageElement.removeAttribute('data-needs-scroll');
+      if (duplicate) duplicate.hidden = true;
+      wrapper.removeAttribute('data-needs-scroll');
+      statusElement.removeAttribute('data-needs-scroll');
     }
   }
 
@@ -60,6 +70,11 @@ window.CustomOrderCheckoutFooter = (function () {
         countElement.textContent = customCount;
       }
       footer.setAttribute('data-custom-item-count', customCount);
+      // Update duplicate message if it exists
+      const duplicate = footer.querySelector('.checkout-footer__message--duplicate');
+      if (duplicate && messageElement) {
+        duplicate.innerHTML = messageElement.innerHTML;
+      }
       // Check if text needs scrolling after update
       setTimeout(checkTextScroll, 100);
     } else {
