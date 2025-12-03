@@ -16,6 +16,9 @@
 {%- comment -%} Load custom order utilities (must load before other custom scripts that depend on it) {%- endcomment -%}
 <script src="{{ 'custom-order-utils.js' | asset_url }}" defer="defer"></script>
 
+{%- comment -%} Load banner manager (must load before banner components) {%- endcomment -%}
+<script src="{{ 'custom-banner-manager.js' | asset_url }}" defer="defer"></script>
+
 {%- comment -%} Load cart edit functionality {%- endcomment -%}
 <script src="{{ 'cart-edit-custom-order.js' | asset_url }}" defer="defer"></script>
 

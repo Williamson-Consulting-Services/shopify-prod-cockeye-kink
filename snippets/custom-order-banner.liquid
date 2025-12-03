@@ -43,163 +43,21 @@
     title="Tap to show notification"
   >
     <div class="custom-order-banner__minimized-bar">
-      <svg class="custom-order-banner__minimized-icon" aria-hidden="true" focusable="false" width="12" height="12" viewBox="0 0 12 12">
+      <svg
+        class="custom-order-banner__minimized-icon"
+        aria-hidden="true"
+        focusable="false"
+        width="12"
+        height="12"
+        viewBox="0 0 12 12"
+      >
         <path d="M6 2L2 6l4 4 4-4-4-4z" fill="currentColor" opacity="0.6"/>
       </svg>
     </div>
   </div>
 </div>
 
-<style>
-  .custom-order-banner {
-    position: sticky;
-    top: 0;
-    z-index: 120;
-    width: 100%;
-    background-color: var(--custom-order-banner-bg);
-    color: var(--custom-order-banner-color);
-    box-shadow: 0 2px 6px var(--custom-order-banner-shadow);
-  }
-
-  .custom-order-banner[hidden] {
-    display: none !important;
-  }
-
-  .custom-order-banner__inner {
-    position: relative;
-    max-width: var(--page-width, 1200px);
-    margin: 0 auto;
-    padding: 0.5rem 3rem 0.5rem 1.5rem;
-    text-align: center;
-    font-size: 1.2rem;
-    font-weight: 600;
-    letter-spacing: 0.04em;
-  }
-
-  .custom-order-banner__close {
-    position: absolute;
-    top: 50%;
-    right: 1rem;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-    padding: 0.5rem;
-    cursor: pointer;
-    color: var(--custom-order-banner-color);
-    opacity: 0.7;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: opacity 150ms ease;
-  }
-
-  .custom-order-banner__close:hover,
-  .custom-order-banner__close:focus {
-    opacity: 1;
-  }
-
-  .custom-order-banner__close:focus-visible {
-    outline: 2px solid var(--custom-order-banner-color);
-    outline-offset: 2px;
-  }
-
-  .custom-order-banner__minimized {
-    position: sticky;
-    top: 0;
-    z-index: 120;
-    width: 100%;
-    cursor: pointer;
-    touch-action: manipulation;
-    user-select: none;
-  }
-
-  .custom-order-banner__minimized[hidden] {
-    display: none !important;
-  }
-
-  .custom-order-banner__minimized-bar {
-    position: relative;
-    width: 100%;
-    height: 10px;
-    background-color: var(--custom-order-banner-bg);
-    box-shadow: 0 1px 3px var(--custom-order-banner-shadow);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background-color 150ms ease, height 200ms ease;
-  }
-
-  .custom-order-banner__minimized-bar:hover,
-  .custom-order-banner__minimized-bar:focus-within {
-    height: 12px;
-    background-color: color-mix(in srgb, var(--custom-order-banner-bg) 95%, var(--custom-order-banner-color));
-  }
-
-  .custom-order-banner__minimized-icon {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    color: var(--custom-order-banner-color);
-    opacity: 0.5;
-    transition: opacity 150ms ease, transform 200ms ease;
-    pointer-events: none;
-  }
-
-  .custom-order-banner__minimized:hover .custom-order-banner__minimized-icon,
-  .custom-order-banner__minimized:focus .custom-order-banner__minimized-icon {
-    opacity: 0.8;
-    transform: translate(-50%, -60%);
-  }
-
-  .custom-order-banner__minimized:active .custom-order-banner__minimized-icon {
-    transform: translate(-50%, -50%) scale(0.9);
-  }
-
-  @keyframes minimize-pulse {
-    0%, 100% {
-      opacity: 0.5;
-    }
-    50% {
-      opacity: 0.8;
-    }
-  }
-
-  .custom-order-banner__minimized[data-just-minimized="true"] .custom-order-banner__minimized-icon {
-    animation: minimize-pulse 1s ease-in-out 2;
-  }
-
-  .custom-order-banner--minimized .custom-order-banner__inner {
-    display: none;
-  }
-
-  @media (prefers-reduced-motion: no-preference) {
-    .custom-order-banner {
-      transition: transform 200ms ease, opacity 200ms ease;
-    }
-
-    .custom-order-banner[hidden] {
-      opacity: 0;
-      transform: translateY(-100%);
-    }
-
-    .custom-order-banner__minimized {
-      transition: opacity 200ms ease;
-    }
-  }
-
-  @media screen and (max-width: 749px) {
-    .custom-order-banner__inner {
-      padding: 0.5rem 2.5rem 0.5rem 1rem;
-      font-size: 1.1rem;
-    }
-
-    .custom-order-banner__close {
-      right: 0.75rem;
-      padding: 0.375rem;
-    }
-  }
-</style>
+{{ 'component-custom-order-banner.css' | asset_url | stylesheet_tag }}
 
 <script>
   window.CustomOrderBanner = (function () {
@@ -213,9 +71,7 @@
     }
 
     const editingElement = banner.querySelector('[data-banner-editing]');
-    const closeButton = banner.querySelector('[data-banner-close]');
     const minimizedBar = banner.querySelector('[data-banner-minimized]');
-    const minimizedBarElement = minimizedBar?.querySelector('.custom-order-banner__minimized-bar');
     const editingTextDefault = {{ banner_editing_text | json }};
     const suppressed =
       window.location.pathname.includes('/checkouts/') ||
@@ -226,34 +82,9 @@
       forceShow: false,
       editing: false,
       editingText: editingTextDefault,
-      minimized: false,
     };
 
-    let touchStartY = null;
-    let touchStartTime = null;
-    const SWIPE_THRESHOLD = 50;
-    const SWIPE_TIME_THRESHOLD = 300;
-
-    function minimize() {
-      state.minimized = true;
-      banner.classList.add('custom-order-banner--minimized');
-      if (minimizedBar) {
-        minimizedBar.hidden = false;
-        minimizedBar.setAttribute('data-just-minimized', 'true');
-        setTimeout(() => {
-          if (minimizedBar) minimizedBar.removeAttribute('data-just-minimized');
-        }, 2000);
-      }
-    }
-
-    function restore() {
-      state.minimized = false;
-      banner.classList.remove('custom-order-banner--minimized');
-      if (minimizedBar) {
-        minimizedBar.hidden = true;
-        minimizedBar.removeAttribute('data-just-minimized');
-      }
-    }
+    let bannerManager = null;
 
     function render() {
       if (suppressed) {
@@ -271,10 +102,10 @@
 
       if (showEditing) {
         banner.hidden = false;
-        if (state.minimized) {
-          minimize();
+        if (bannerManager && bannerManager.isMinimized()) {
+          banner.classList.add('custom-order-banner--minimized');
         } else {
-          restore();
+          banner.classList.remove('custom-order-banner--minimized');
         }
       } else {
         banner.hidden = true;
@@ -282,44 +113,10 @@
       }
     }
 
-    function handleClose() {
-      minimize();
-    }
-
-    function handleMinimizedBarClick() {
-      restore();
-    }
-
-    function handleTouchStart(e) {
-      if (state.minimized) return;
-      touchStartY = e.touches[0].clientY;
-      touchStartTime = Date.now();
-    }
-
-    function handleTouchMove(e) {
-      if (state.minimized || touchStartY === null) return;
-      const touchY = e.touches[0].clientY;
-      const deltaY = touchY - touchStartY;
-
-      if (deltaY > 0 && deltaY > SWIPE_THRESHOLD) {
-        const swipeTime = Date.now() - touchStartTime;
-        if (swipeTime < SWIPE_TIME_THRESHOLD) {
-          minimize();
-          touchStartY = null;
-          touchStartTime = null;
-        }
-      }
-    }
-
-    function handleTouchEnd() {
-      touchStartY = null;
-      touchStartTime = null;
-    }
-
     function setForceShow(value) {
       state.forceShow = Boolean(value);
-      if (value) {
-        state.minimized = false;
+      if (value && bannerManager) {
+        bannerManager.restore();
       }
       render();
     }
@@ -334,14 +131,45 @@
       const nextFlag = Boolean(isEditing);
       if (state.editing !== nextFlag) {
         state.editing = nextFlag;
-        if (!nextFlag) {
-          state.minimized = false;
+        if (nextFlag && bannerManager) {
+          bannerManager.restore();
         }
         render();
       }
     }
 
+    function checkTextScroll() {
+      if (!editingElement) return;
+      const text = editingElement.textContent || '';
+      const container = editingElement.closest('.custom-order-banner__inner');
+      if (!container) return;
+
+      const containerWidth = container.offsetWidth - 60; // Account for padding and close button
+      const textWidth = editingElement.scrollWidth;
+
+      if (textWidth > containerWidth) {
+        editingElement.setAttribute('data-needs-scroll', 'true');
+      } else {
+        editingElement.removeAttribute('data-needs-scroll');
+      }
+    }
+
     async function init() {
+      if (window.CustomBannerManager) {
+        bannerManager = window.CustomBannerManager.initBanner({
+          banner,
+          minimizedBar,
+          storageKey: 'editingBanner',
+          autoRestoreOnShow: true,
+        });
+      }
+
+      // Check if text needs scrolling on mobile
+      if (window.innerWidth <= 749) {
+        checkTextScroll();
+        window.addEventListener('resize', checkTextScroll);
+      }
+
       const isProductPage = window.location.pathname.includes('/products/');
       const hasCustomForm = document.querySelector('.measurement-field') || document.querySelector('.category-option-input');
 
@@ -359,34 +187,12 @@
         state.editing = true;
       }
 
-      if (closeButton) {
-        closeButton.addEventListener('click', handleClose);
-      }
-
-      if (minimizedBar) {
-        minimizedBar.addEventListener('click', handleMinimizedBarClick);
-        minimizedBar.addEventListener('touchend', (e) => {
-          e.preventDefault();
-          handleMinimizedBarClick();
-        });
-        minimizedBar.addEventListener('keydown', (e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            handleMinimizedBarClick();
-          }
-        });
-      }
-
-      banner.addEventListener('touchstart', handleTouchStart, { passive: true });
-      banner.addEventListener('touchmove', handleTouchMove, { passive: true });
-      banner.addEventListener('touchend', handleTouchEnd, { passive: true });
-
       render();
       subscribe(PUB_SUB_EVENTS.cartUpdate, (event) => {
         if (event.customOrderItemAdded) {
           state.editing = false;
           state.forceShow = false;
-          state.minimized = false;
+          if (bannerManager) bannerManager.restore();
           render();
         }
       });
@@ -407,4 +213,3 @@
     };
   })();
 </script>
-

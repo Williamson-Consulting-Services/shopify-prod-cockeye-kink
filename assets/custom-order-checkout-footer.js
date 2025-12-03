@@ -10,10 +10,30 @@ window.CustomOrderCheckoutFooter = (function () {
   }
 
   const countElement = footer.querySelector('.checkout-footer__count');
+  const messageElement = footer.querySelector('.checkout-footer__message');
   const suppressed =
     window.location.pathname.includes('/checkouts/') ||
     window.location.pathname.includes('/checkout') ||
     window.location.pathname.includes('/thank-you');
+
+  function checkTextScroll() {
+    if (!messageElement || window.innerWidth > 749) {
+      if (messageElement) messageElement.removeAttribute('data-needs-scroll');
+      return;
+    }
+
+    const statusElement = footer.querySelector('.checkout-footer__status');
+    if (!statusElement) return;
+
+    const statusWidth = statusElement.offsetWidth;
+    const messageWidth = messageElement.scrollWidth;
+
+    if (messageWidth > statusWidth - 20) {
+      messageElement.setAttribute('data-needs-scroll', 'true');
+    } else {
+      messageElement.removeAttribute('data-needs-scroll');
+    }
+  }
 
   function countCustomItems(cart) {
     if (!cart || !cart.items) return 0;
@@ -40,6 +60,8 @@ window.CustomOrderCheckoutFooter = (function () {
         countElement.textContent = customCount;
       }
       footer.setAttribute('data-custom-item-count', customCount);
+      // Check if text needs scrolling after update
+      setTimeout(checkTextScroll, 100);
     } else {
       footer.hidden = true;
     }
@@ -69,6 +91,13 @@ window.CustomOrderCheckoutFooter = (function () {
 
   function init() {
     refreshCart(); // Initial load
+
+    // Check text scroll on load and resize
+    if (window.innerWidth <= 749) {
+      setTimeout(checkTextScroll, 200);
+      window.addEventListener('resize', checkTextScroll);
+    }
+
     subscribe(PUB_SUB_EVENTS.cartUpdate, (event) => {
       if (event.cartState) {
         const customCount = countCustomItems(event.cartState);

@@ -11,7 +11,7 @@
         assign is_custom = true
       endif
     endif
-    
+
     # Backward compatibility: Check properties (for migration period)
     if is_custom == false and item.properties
       assign custom_flag = item.properties['Order Type'] | default: item.properties['_custom']
@@ -22,7 +22,7 @@
         endif
       endif
     endif
-    
+
     if is_custom
       assign custom_item_count = custom_item_count | plus: 1
     endif
@@ -33,19 +33,86 @@
   assign footer_button_text = 'custom_order.checkout_footer.button_text' | t
 -%}
 
-<div class="custom-order-checkout-footer" data-custom-item-count="{{ custom_item_count }}"{% if custom_item_count == 0 %} hidden{% endif %}>
+<div
+  class="custom-order-checkout-footer custom-banner"
+  data-custom-item-count="{{ custom_item_count }}"
+  {% if custom_item_count == 0 %}hidden{% endif %}
+>
   <div class="checkout-footer__content">
     <span class="checkout-footer__status">
       <span class="checkout-footer__icon">✅</span>
-      <strong>{{ footer_status_prefix }}</strong>
-      <span class="checkout-footer__message">You have <span class="checkout-footer__count">{{ custom_item_count }}</span> custom item(s) saved in the cart.</span>
+      <strong class="checkout-footer__prefix">{{ footer_status_prefix }}</strong>
+      <span class="checkout-footer__message">
+        You have <span class="checkout-footer__count">{{ custom_item_count }}</span> custom item(s) saved in the cart.
+      </span>
     </span>
     <a href="/checkout" class="button button--primary checkout-footer__button">
       {{ footer_button_text }}
     </a>
+    <button
+      type="button"
+      class="checkout-footer__close"
+      aria-label="Minimize banner"
+      data-banner-close
+    >
+      <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 16 16">
+        <path d="M12.854 3.146a.5.5 0 0 0-.708 0L8 7.293 3.854 3.146a.5.5 0 1 0-.708.708L7.293 8l-4.147 4.146a.5.5 0 0 0 .708.708L8 8.707l4.146 4.147a.5.5 0 0 0 .708-.708L8.707 8l4.147-4.146a.5.5 0 0 0 0-.708z" fill="currentColor"/>
+      </svg>
+    </button>
+  </div>
+  <div
+    class="checkout-footer__minimized"
+    data-banner-minimized
+    hidden
+    role="button"
+    tabindex="0"
+    aria-label="Tap to show notification"
+    title="Tap to show notification"
+  >
+    <div class="checkout-footer__minimized-bar">
+      <svg
+        class="checkout-footer__minimized-icon"
+        aria-hidden="true"
+        focusable="false"
+        width="12"
+        height="12"
+        viewBox="0 0 12 12"
+      >
+        <path d="M6 2L2 6l4 4 4-4-4-4z" fill="currentColor" opacity="0.6"/>
+      </svg>
+    </div>
   </div>
 </div>
 
 {{ 'component-custom-order-checkout-footer.css' | asset_url | stylesheet_tag }}
 <script src="{{ 'custom-order-checkout-footer.js' | asset_url }}" defer></script>
+<script>
+  (function () {
+    function initCheckoutFooterBanner() {
+      const footer = document.querySelector('.custom-order-checkout-footer');
+      if (!footer) return;
+
+      if (!window.CustomBannerManager) {
+        // Wait for banner manager to load
+        setTimeout(initCheckoutFooterBanner, 50);
+        return;
+      }
+
+      const minimizedBar = footer.querySelector('[data-banner-minimized]');
+
+      window.CustomBannerManager.initBanner({
+        banner: footer,
+        minimizedBar: minimizedBar,
+        storageKey: 'checkoutFooter',
+        autoRestoreOnShow: false,
+      });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initCheckoutFooterBanner);
+    } else {
+      initCheckoutFooterBanner();
+    }
+  })();
+</script>
 
