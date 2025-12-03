@@ -17,16 +17,24 @@ window.CustomOrderCheckoutFooter = (function () {
     window.location.pathname.includes('/thank-you');
 
   function checkTextScroll() {
-    if (!messageElement || window.innerWidth > 749) {
-      const wrapper = footer.querySelector('[data-message-wrapper]');
-      if (wrapper) wrapper.removeAttribute('data-needs-scroll');
-      return;
-    }
-
     const statusElement = footer.querySelector('.checkout-footer__status');
     const wrapper = footer.querySelector('[data-message-wrapper]');
     const duplicate = wrapper?.querySelector('.checkout-footer__message--duplicate');
-    if (!statusElement || !wrapper) return;
+
+    if (!messageElement || !statusElement || !wrapper) {
+      if (duplicate) duplicate.hidden = true;
+      if (wrapper) wrapper.removeAttribute('data-needs-scroll');
+      if (statusElement) statusElement.removeAttribute('data-needs-scroll');
+      return;
+    }
+
+    // Hide duplicate and remove scroll attributes on desktop
+    if (window.innerWidth > 749) {
+      if (duplicate) duplicate.hidden = true;
+      wrapper.removeAttribute('data-needs-scroll');
+      statusElement.removeAttribute('data-needs-scroll');
+      return;
+    }
 
     const statusWidth = statusElement.offsetWidth;
     const messageWidth = messageElement.scrollWidth;
@@ -70,12 +78,7 @@ window.CustomOrderCheckoutFooter = (function () {
         countElement.textContent = customCount;
       }
       footer.setAttribute('data-custom-item-count', customCount);
-      // Update duplicate message if it exists
-      const duplicate = footer.querySelector('.checkout-footer__message--duplicate');
-      if (duplicate && messageElement) {
-        duplicate.innerHTML = messageElement.innerHTML;
-      }
-      // Check if text needs scrolling after update
+      // Check if text needs scrolling after update - this will handle duplicate visibility
       setTimeout(checkTextScroll, 100);
     } else {
       footer.hidden = true;
@@ -107,11 +110,9 @@ window.CustomOrderCheckoutFooter = (function () {
   function init() {
     refreshCart(); // Initial load
 
-    // Check text scroll on load and resize
-    if (window.innerWidth <= 749) {
-      setTimeout(checkTextScroll, 200);
-      window.addEventListener('resize', checkTextScroll);
-    }
+    // Check text scroll on load and resize (always check to hide/show duplicate correctly)
+    setTimeout(checkTextScroll, 200);
+    window.addEventListener('resize', checkTextScroll);
 
     subscribe(PUB_SUB_EVENTS.cartUpdate, (event) => {
       if (event.cartState) {
