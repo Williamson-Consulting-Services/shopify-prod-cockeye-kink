@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Dict, Any
 
 
-DEFAULT_CONFIG_PATH = Path(__file__).parent.parent / '.upgrade-analysis' / 'version-config.json'
+DEFAULT_CONFIG_PATH = Path(__file__).parent.parent / 'version-config.json'
 
 
 def load_version_config(config_path: Path = None) -> Dict[str, Any]:

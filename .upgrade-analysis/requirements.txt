@@ -1,0 +1,5 @@
+# Python dependencies for Dawn upgrade analysis scripts
+
+# Deep comparison library for JSON diff analysis
+deepdiff>=6.7.0
+

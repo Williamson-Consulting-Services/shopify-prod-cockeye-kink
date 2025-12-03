@@ -18,7 +18,7 @@
   },
   "git_config": {
     "upstream_remote": "upstream",
-    "current_branch": "HEAD",
+    "current_branch": "develop",
     "comparison_ref": "v10.0.0",
     "destination_ref": "upstream/main"
   }

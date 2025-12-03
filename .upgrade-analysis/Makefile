@@ -14,14 +14,14 @@
 # Paths are relative to repository root when using: make -C .upgrade-analysis
 # Repository root is always parent directory when Makefile is in .upgrade-analysis/
 ROOT_DIR := ..
-SCRIPTS_DIR := $(ROOT_DIR)/scripts
-CONFIG_FILE := $(ROOT_DIR)/.upgrade-analysis/version-config.json
+SCRIPTS_DIR := .upgrade-analysis/scripts
+CONFIG_FILE := .upgrade-analysis/version-config.json
 
 # Configuration - paths relative to repository root
 PYTHON := python3
 
 # Helper function to get version values from config
-GET_VERSION = $(shell cd $(ROOT_DIR) && $(PYTHON) scripts/version_config.py $(1))
+GET_VERSION = $(shell cd $(ROOT_DIR) && $(PYTHON) $(SCRIPTS_DIR)/version_config.py $(1))
 
 # Dynamic paths using version config - use semantic names (comparison/destination)
 DIFFS_DIR := $(ROOT_DIR)/.upgrade-analysis/diffs
@@ -69,8 +69,8 @@ help:
 # Verify configuration file exists
 verify-config:
 	@echo "Verifying version configuration..."
-	@test -f $(CONFIG_FILE) || (echo "Error: $(CONFIG_FILE) not found! Make sure you run from repository root using: make -C .upgrade-analysis <target>" && exit 1)
-	@cd $(ROOT_DIR) && $(PYTHON) scripts/version_config.py
+	@test -f $(ROOT_DIR)/$(CONFIG_FILE) || (echo "Error: $(CONFIG_FILE) not found! Make sure you run from repository root using: make -C .upgrade-analysis <target>" && exit 1)
+	@cd $(ROOT_DIR) && $(PYTHON) $(SCRIPTS_DIR)/version_config.py
 
 # Fetch latest from upstream
 fetch:
@@ -82,83 +82,83 @@ fetch:
 # Extract Dawn reference files
 extract-dawn: verify-config
 	@echo "Extracting Dawn reference files..."
-	@cd $(ROOT_DIR) && $(PYTHON) scripts/extract-dawn-files.py
+	@cd $(ROOT_DIR) && $(PYTHON) $(SCRIPTS_DIR)/extract-dawn-files.py
 	@echo "✓ Extracted Dawn reference files"
 
 # Generate all three diff sets
 generate-diffs: verify-config
 	@echo "Generating all diff sets..."
-	@cd $(ROOT_DIR) && $(PYTHON) scripts/generate-all-diffs.py
+	@cd $(ROOT_DIR) && $(PYTHON) $(SCRIPTS_DIR)/generate-all-diffs.py
 	@echo "✓ Generated all diff sets"
 
 # Analyze JSON differences
 analyze-json: extract-dawn
 	@echo "Analyzing JSON differences..."
-	@cd $(ROOT_DIR) && $(PYTHON) scripts/analyze-all-json-diffs.py \
-		--v10-settings $(DAWN_COMPARISON_DIR)/config-settings_schema.json \
+	@cd $(ROOT_DIR) && $(PYTHON) $(SCRIPTS_DIR)/analyze-all-json-diffs.py \
+		--v10-settings .upgrade-analysis/dawn-comparison/config-settings_schema.json \
 		--current-settings config/settings_schema.json \
-		--v15-settings $(DAWN_DESTINATION_DIR)/config-settings_schema.json \
-		--v10-locale $(DAWN_COMPARISON_DIR)/locales-en.default.json \
+		--v15-settings .upgrade-analysis/dawn-destination/config-settings_schema.json \
+		--v10-locale .upgrade-analysis/dawn-comparison/locales-en.default.json \
 		--current-locale locales/en.default.json \
-		--v15-locale $(DAWN_DESTINATION_DIR)/locales-en.default.json \
-		--v10-locale-schema $(DAWN_COMPARISON_DIR)/locales-en.default.schema.json \
+		--v15-locale .upgrade-analysis/dawn-destination/locales-en.default.json \
+		--v10-locale-schema .upgrade-analysis/dawn-comparison/locales-en.default.schema.json \
 		--current-locale-schema locales/en.default.schema.json \
-		--v15-locale-schema $(DAWN_DESTINATION_DIR)/locales-en.default.schema.json \
-		--v10-settings-data $(DAWN_COMPARISON_DIR)/config-settings_data.json \
+		--v15-locale-schema .upgrade-analysis/dawn-destination/locales-en.default.schema.json \
+		--v10-settings-data .upgrade-analysis/dawn-comparison/config-settings_data.json \
 		--current-settings-data config/settings_data.json \
-		--v15-settings-data $(DAWN_DESTINATION_DIR)/config-settings_data.json \
-		--output $(REPORTS_DIR)/CUSTOM_JSON_CHANGES_ALL_COMPARISONS.json
+		--v15-settings-data .upgrade-analysis/dawn-destination/config-settings_data.json \
+		--output .upgrade-analysis/reports/CUSTOM_JSON_CHANGES_ALL_COMPARISONS.json
 	@echo "✓ Analyzed JSON differences"
 
 # Categorize file changes
 categorize: generate-diffs analyze-json
 	@echo "Categorizing file changes..."
-	@cd $(ROOT_DIR) && $(PYTHON) scripts/categorize-changes.py \
-		--file-changes $(DIFFS_DIR)/01-v10-upstream-vs-v10-custom-file-changes.txt \
-		--full-diff $(DIFFS_DIR)/01-v10-upstream-vs-v10-custom-full-diff.patch \
-		--liquid-diff $(DIFFS_DIR)/01-v10-upstream-vs-v10-custom-liquid.patch \
-		--js-diff $(DIFFS_DIR)/01-v10-upstream-vs-v10-custom-js.patch \
-		--css-diff $(DIFFS_DIR)/01-v10-upstream-vs-v10-custom-css.patch \
-		--json-changes $(REPORTS_DIR)/CUSTOM_JSON_CHANGES_ALL_COMPARISONS.json \
-		--diff-set-1 $(DIFFS_DIR)/01-v10-upstream-vs-v10-custom-file-changes.txt \
-		--diff-set-2 $(DIFFS_DIR)/02-v10-custom-vs-v15-upstream-file-changes.txt \
-		--diff-set-3 $(DIFFS_DIR)/03-v10-upstream-vs-v15-upstream-file-changes.txt \
-		--output $(REPORTS_DIR)/CUSTOM_CHANGES_INVENTORY.json
+	@cd $(ROOT_DIR) && $(PYTHON) $(SCRIPTS_DIR)/categorize-changes.py \
+		--file-changes .upgrade-analysis/diffs/01-v10-upstream-vs-v10-custom-file-changes.txt \
+		--full-diff .upgrade-analysis/diffs/01-v10-upstream-vs-v10-custom-full-diff.patch \
+		--liquid-diff .upgrade-analysis/diffs/01-v10-upstream-vs-v10-custom-liquid.patch \
+		--js-diff .upgrade-analysis/diffs/01-v10-upstream-vs-v10-custom-js.patch \
+		--css-diff .upgrade-analysis/diffs/01-v10-upstream-vs-v10-custom-css.patch \
+		--json-changes .upgrade-analysis/reports/CUSTOM_JSON_CHANGES_ALL_COMPARISONS.json \
+		--diff-set-1 .upgrade-analysis/diffs/01-v10-upstream-vs-v10-custom-file-changes.txt \
+		--diff-set-2 .upgrade-analysis/diffs/02-v10-custom-vs-v15-upstream-file-changes.txt \
+		--diff-set-3 .upgrade-analysis/diffs/03-v10-upstream-vs-v15-upstream-file-changes.txt \
+		--output .upgrade-analysis/reports/CUSTOM_CHANGES_INVENTORY.json
 	@echo "✓ Categorized file changes"
 
 # Generate JSON patch files
 generate-json-patches: verify-config
 	@echo "Generating JSON patch files..."
-	@cd $(ROOT_DIR) && $(PYTHON) scripts/generate-json-patches.py --output-dir $(JSON_PATCHES_DIR)
+	@cd $(ROOT_DIR) && $(PYTHON) $(SCRIPTS_DIR)/generate-json-patches.py --output-dir .upgrade-analysis/json-patches
 	@echo "✓ Generated JSON patch files"
 
 # Generate file patch files
 generate-file-patches: categorize verify-config
 	@echo "Generating file patch files..."
-	@test -f $(REPORTS_DIR)/CUSTOM_CHANGES_INVENTORY.json || (echo "Error: Run 'make categorize' first!" && exit 1)
-	@cd $(ROOT_DIR) && $(PYTHON) scripts/generate-file-patches.py \
-		--inventory $(REPORTS_DIR)/CUSTOM_CHANGES_INVENTORY.json \
-		--output-dir $(FILE_PATCHES_DIR)
+	@test -f $(ROOT_DIR)/.upgrade-analysis/reports/CUSTOM_CHANGES_INVENTORY.json || (echo "Error: Run 'make categorize' first!" && exit 1)
+	@cd $(ROOT_DIR) && $(PYTHON) $(SCRIPTS_DIR)/generate-file-patches.py \
+		--inventory .upgrade-analysis/reports/CUSTOM_CHANGES_INVENTORY.json \
+		--output-dir .upgrade-analysis/patches
 	@echo "✓ Generated file patch files"
 
 # Extract JSON changes to separate files
 extract-json-changes: analyze-json
 	@echo "Extracting JSON changes to separate files..."
-	@test -f $(REPORTS_DIR)/CUSTOM_JSON_CHANGES_ALL_COMPARISONS.json || (echo "Error: Run 'make analyze-json' first!" && exit 1)
-	@cd $(ROOT_DIR) && $(PYTHON) scripts/extract-json-changes.py \
-		--json-changes $(REPORTS_DIR)/CUSTOM_JSON_CHANGES_ALL_COMPARISONS.json \
-		--output-dir $(JSON_CHANGES_DIR)
+	@test -f $(ROOT_DIR)/.upgrade-analysis/reports/CUSTOM_JSON_CHANGES_ALL_COMPARISONS.json || (echo "Error: Run 'make analyze-json' first!" && exit 1)
+	@cd $(ROOT_DIR) && $(PYTHON) $(SCRIPTS_DIR)/extract-json-changes.py \
+		--json-changes .upgrade-analysis/reports/CUSTOM_JSON_CHANGES_ALL_COMPARISONS.json \
+		--output-dir .upgrade-analysis/json-changes
 	@echo "✓ Extracted JSON changes"
 
 # Generate documentation
 generate-docs: categorize extract-json-changes
 	@echo "Generating documentation..."
-	@test -f $(REPORTS_DIR)/CUSTOM_CHANGES_INVENTORY.json || (echo "Error: Run 'make categorize' first!" && exit 1)
-	@test -f $(REPORTS_DIR)/CUSTOM_JSON_CHANGES_ALL_COMPARISONS.json || (echo "Error: Run 'make analyze-json' first!" && exit 1)
-	@cd $(ROOT_DIR) && $(PYTHON) scripts/generate-diff-documentation.py \
-		--inventory $(REPORTS_DIR)/CUSTOM_CHANGES_INVENTORY.json \
-		--json-changes $(REPORTS_DIR)/CUSTOM_JSON_CHANGES_ALL_COMPARISONS.json \
-		--output $(DOC_OUTPUT) \
+	@test -f $(ROOT_DIR)/.upgrade-analysis/reports/CUSTOM_CHANGES_INVENTORY.json || (echo "Error: Run 'make categorize' first!" && exit 1)
+	@test -f $(ROOT_DIR)/.upgrade-analysis/reports/CUSTOM_JSON_CHANGES_ALL_COMPARISONS.json || (echo "Error: Run 'make analyze-json' first!" && exit 1)
+	@cd $(ROOT_DIR) && $(PYTHON) $(SCRIPTS_DIR)/generate-diff-documentation.py \
+		--inventory .upgrade-analysis/reports/CUSTOM_CHANGES_INVENTORY.json \
+		--json-changes .upgrade-analysis/reports/CUSTOM_JSON_CHANGES_ALL_COMPARISONS.json \
+		--output UPGRADE_CUSTOM_CHANGES.md \
 		--extract-json
 	@echo "✓ Generated documentation"
 
@@ -207,7 +207,7 @@ clean:
 # Create upgrade branches from Dawn destination version
 create-upgrade-branches: verify-config fetch
 	@echo "Creating upgrade branches..."
-	@cd $(ROOT_DIR) && bash scripts/create-upgrade-branches.sh
+	@cd $(ROOT_DIR) && bash $(SCRIPTS_DIR)/create-upgrade-branches.sh
 	@echo ""
 	@echo "✓ Upgrade branches created"
 	@echo ""
