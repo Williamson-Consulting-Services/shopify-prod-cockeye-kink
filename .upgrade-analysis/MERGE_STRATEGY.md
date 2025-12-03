@@ -206,10 +206,10 @@ with open('.upgrade-analysis/reports/CUSTOM_CHANGES_INVENTORY.json') as f:
         print(filepath)
 " | while read filepath; do
     echo "Processing: $filepath"
-    
+
     # Get Dawn 15.4.0 version
     git checkout upstream/main -- "$filepath"
-    
+
     # Apply patch if it exists
     patch_file=$(echo "$filepath" | sed 's/\//-/g')
     if [ -f ".upgrade-analysis/patches/${patch_file}.patch" ]; then
@@ -218,7 +218,7 @@ with open('.upgrade-analysis/reports/CUSTOM_CHANGES_INVENTORY.json') as f:
         # git apply --check ".upgrade-analysis/patches/${patch_file}.patch"
         # git apply ".upgrade-analysis/patches/${patch_file}.patch"
     fi
-    
+
     git add "$filepath"
 done
 
