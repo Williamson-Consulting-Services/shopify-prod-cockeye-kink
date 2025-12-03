@@ -19,11 +19,13 @@
   style="--custom-order-banner-bg: {{ banner_background_color }}; --custom-order-banner-color: {{ banner_text_color }}; --custom-order-banner-shadow: {{ banner_shadow_rgba }};"
 >
   <div class="custom-order-banner__inner">
-    <div class="custom-order-banner__text-wrapper" data-text-wrapper>
-      <span class="custom-order-banner__text custom-order-banner__text--editing" data-banner-editing hidden>
-        {{ banner_editing_text | escape }}
-      </span>
-      <span class="custom-order-banner__text custom-order-banner__text--duplicate" aria-hidden="true" hidden></span>
+    <div class="custom-order-banner__text-container">
+      <div class="custom-order-banner__text-wrapper" data-text-wrapper>
+        <span class="custom-order-banner__text custom-order-banner__text--editing" data-banner-editing hidden>
+          {{ banner_editing_text | escape }}
+        </span>
+        <span class="custom-order-banner__text custom-order-banner__text--duplicate" aria-hidden="true" hidden></span>
+      </div>
     </div>
     <button
       type="button"
@@ -110,11 +112,19 @@
         } else {
           banner.classList.remove('custom-order-banner--minimized');
         }
-        // Check if text needs scrolling after rendering
-        setTimeout(checkTextScroll, 100);
+        // Check if text needs scrolling after rendering (immediately for desktop)
+        if (window.innerWidth > 749) {
+          checkTextScroll();
+        } else {
+          setTimeout(checkTextScroll, 100);
+        }
       } else {
         banner.hidden = true;
         if (minimizedBar) minimizedBar.hidden = true;
+        // Ensure duplicate is hidden when banner is hidden
+        const wrapper = editingElement?.closest('[data-text-wrapper]');
+        const duplicate = wrapper?.querySelector('.custom-order-banner__text--duplicate');
+        if (duplicate) duplicate.hidden = true;
       }
     }
 

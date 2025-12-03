@@ -26,7 +26,21 @@
   font-size: 1.2rem;
   font-weight: 600;
   letter-spacing: 0.04em;
+  display: flex;
+  align-items: center;
+}
+
+.custom-order-banner__text-container {
+  flex: 1;
   overflow: hidden;
+  padding-right: 1rem;
+  min-width: 0;
+}
+
+@media screen and (min-width: 750px) {
+  .custom-order-banner__text--duplicate {
+    display: none !important;
+  }
 }
 
 .custom-order-banner__text {
@@ -163,25 +177,14 @@
 
 @media screen and (max-width: 749px) {
   .custom-order-banner__inner {
-    padding: 0.5rem 3rem 0.5rem 1rem;
+    padding: 0.5rem 3.5rem 0.5rem 1rem;
     font-size: 1.1rem;
     text-align: left;
-    overflow: hidden;
     position: relative;
   }
 
-  .custom-order-banner__inner[data-needs-scroll='true']::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    right: 3.5rem;
-    width: 2rem;
-    z-index: 2;
-    pointer-events: none;
-    background: linear-gradient(to left,
-        var(--custom-order-banner-bg) 0%,
-        transparent 70%);
+  .custom-order-banner__text-container {
+    padding-right: 0;
   }
 
   .custom-order-banner__text-wrapper {
@@ -223,16 +226,6 @@
     border-radius: 0.25rem;
     box-shadow: 0 0 1rem var(--custom-order-banner-bg);
     position: absolute;
-  }
-
-  .custom-order-banner__close::before {
-    content: '';
-    position: absolute;
-    left: -3.5rem;
-    top: 0;
-    bottom: 0;
-    width: 3.5rem;
-    background: var(--custom-order-banner-bg);
-    z-index: -1;
+    flex-shrink: 0;
   }
 }

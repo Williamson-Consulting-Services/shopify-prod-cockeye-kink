@@ -41,15 +41,17 @@
   {% endif %}
 >
   <div class="checkout-footer__content">
-    <span class="checkout-footer__status">
-      <strong class="checkout-footer__prefix">{{ footer_status_prefix }}</strong>
-      <div class="checkout-footer__message-wrapper" data-message-wrapper>
-        <span class="checkout-footer__message">
-          You have <span class="checkout-footer__count">{{ custom_item_count }}</span> custom item(s) saved in the cart.
-        </span>
-        <span class="checkout-footer__message checkout-footer__message--duplicate" aria-hidden="true" hidden></span>
-      </div>
-    </span>
+    <div class="checkout-footer__text-container">
+      <span class="checkout-footer__status">
+        <strong class="checkout-footer__prefix">{{ footer_status_prefix }}</strong>
+        <div class="checkout-footer__message-wrapper" data-message-wrapper>
+          <span class="checkout-footer__message">
+            You have <span class="checkout-footer__count">{{ custom_item_count }}</span> custom item(s) saved in the cart.
+          </span>
+          <span class="checkout-footer__message checkout-footer__message--duplicate" aria-hidden="true" hidden></span>
+        </div>
+      </span>
+    </div>
     <a href="/checkout" class="button button--primary checkout-footer__button">
       {{ footer_button_text }}
     </a>
