@@ -14,7 +14,7 @@
 
     # Backward compatibility: Check properties (for migration period)
     if is_custom == false and item.properties
-      assign custom_flag = item.properties['Order Type'] | default: item.properties['_custom']
+      assign custom_flag = item.properties['Order Type'] | default: item.properties._custom
       if custom_flag
         assign custom_flag_lower = custom_flag | downcase
         if custom_flag_lower == 'custom'
@@ -36,11 +36,12 @@
 <div
   class="custom-order-checkout-footer custom-banner"
   data-custom-item-count="{{ custom_item_count }}"
-  {% if custom_item_count == 0 %}hidden{% endif %}
+  {% if custom_item_count == 0 %}
+    hidden
+  {% endif %}
 >
   <div class="checkout-footer__content">
     <span class="checkout-footer__status">
-      <span class="checkout-footer__icon">✅</span>
       <strong class="checkout-footer__prefix">{{ footer_status_prefix }}</strong>
       <span class="checkout-footer__message">
         You have <span class="checkout-footer__count">{{ custom_item_count }}</span> custom item(s) saved in the cart.
@@ -115,4 +116,3 @@
     }
   })();
 </script>
-
