@@ -1,4 +1,24 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin language editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
+  "custom_order": {
+    "banner": {
+      "editing": "Unsaved Draft: You are currently configuring this item. You must click 'Add to Cart' below to save these measurements.",
+      "cart": "Custom order is in cart"
+    },
+    "checkout_footer": {
+      "status_prefix": "Order in Progress:",
+      "item_count": "You have {{ count }} custom item(s) saved in the cart.",
+      "button_text": "Finish & Pay Now →"
+    }
+  },
   "general": {
     "password_page": {
       "login_form_heading": "Enter store using password:",
@@ -56,6 +76,29 @@
       "previous_slide": "Slide left",
       "name": "Slider"
     }
+  },
+  "custom_measurements": {
+    "category_legend": "Custom product category",
+    "unit_legend": "Unit",
+    "unit_inches": "Inches",
+    "unit_centimeters": "Centimeters",
+    "measurement_hint": "Fields marked with <span class=\"req-star\">*</span> are required. Fields marked <span class=\"opt-tag\">(optional)</span> are optional.",
+    "custom_color_button": "Don't see a color listed? Click here",
+    "associate_label": "Associate",
+    "associate_placeholder": "Enter associate name",
+    "item_notes_label": "Item Notes",
+    "item_notes_placeholder": "Enter your item notes here",
+    "event_notes_label": "Event Notes",
+    "event_notes_placeholder": "Event name or notes here",
+    "group_upper_body": "Upper Body",
+    "group_torso_hips": "Torso/Hips",
+    "group_lower_body": "Lower Body",
+    "harness_type_legend": "Harness Type",
+    "tag_type_legend": "Tag Type",
+    "characters": "characters",
+    "other_category_notice": "Custom Project: All measurements are optional. Enter only dimensions relevant to the design notes.",
+    "leather_color_label": "Leather Color",
+    "leather_color_placeholder": "Enter custom color"
   },
   "newsletter": {
     "label": "Email",

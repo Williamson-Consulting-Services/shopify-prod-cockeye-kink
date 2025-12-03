@@ -26,6 +26,13 @@
               </div>
             {%- endfor -%}
           {%- endunless -%}
+
+          {%- comment %}
+            https://trello.com/c/xoRQnitG/15-12-dog-tag-bug-fix
+            MEETS: AC4 (Notification Display)
+            This block, identical to the one on the cart page, loops through
+            properties and displays them in the pop-up notification.
+          {%- endcomment -%}
           {%- for property in item.properties -%}
             {%- assign property_first_char = property.first | slice: 0 -%}
             {%- if property.last != blank and property_first_char != '_' -%}

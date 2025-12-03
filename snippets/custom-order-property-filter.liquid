@@ -1,0 +1,49 @@
+{%- comment -%}
+  Custom Order Property Filter
+  Helper snippet that provides filtering logic for properties
+
+  This snippet doesn't return a filtered array (Liquid limitation),
+  but provides the filtering conditions that should be used in templates.
+
+  Usage in templates:
+  {%- for property in item.properties -%}
+    {%- render 'custom-order-property-filter', property: property -%}
+    {%- if should_display_property -%}
+      {%- comment -%} Display property {%- endcomment -%}
+    {%- endif -%}
+  {%- endfor -%}
+{%- endcomment -%}
+
+{%- liquid
+  assign should_display_property = true
+  assign property_name = property.first
+  assign property_value = property.last
+
+  # Filter internal properties (starting with underscore)
+  assign first_char = property_name | slice: 0
+  if first_char == '_'
+    assign should_display_property = false
+  endif
+
+  # Filter empty/blank values
+  if should_display_property
+    if property_value == blank or property_value == null or property_value == ''
+      assign should_display_property = false
+    endif
+  endif
+
+  # Filter zero values (0, 0.0, 0.00, 0.000, etc.)
+  if should_display_property and property_value != blank
+    assign value_string = property_value | to_s | strip
+    assign num_value = value_string | plus: 0
+
+    # Check if it's zero
+    if num_value == 0
+      # Check various zero formats
+      if value_string == '0' or value_string == '0.0' or value_string == '0.00' or value_string == '0.000' or value_string == '0.0000'
+        assign should_display_property = false
+      endif
+    endif
+  endif
+-%}
+

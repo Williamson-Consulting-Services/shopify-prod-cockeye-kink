@@ -1,0 +1,50 @@
+{%- comment -%}
+  Cart Item Properties Filtered
+  Displays cart item properties with filtering (empty, zero, and internal properties removed)
+
+  SOLID Principles:
+  - Single Responsibility: Solely responsible for filtering and displaying properties
+  - Open/Closed: Extend by modifying this snippet, not cart templates
+
+  Usage:
+  {%- render 'cart-item-properties-filtered', item: item -%}
+
+  If cart templates are overwritten, replace property display blocks with this snippet.
+{%- endcomment -%}
+
+{%- if item.properties.size > 0 -%}
+  <div class="cart-item-properties">
+    {%- for property in item.properties -%}
+      {%- assign first_char = property.first | slice: 0 -%}
+      {%- assign property_value = property.last | append: '' | strip -%}
+
+      {%- comment -%} Skip if empty or internal property {%- endcomment -%}
+      {%- if property.last == blank or first_char == '_' -%}
+        {%- continue -%}
+      {%- endif -%}
+
+      {%- comment -%} Check if value is an "empty default" zero (has decimal precision, indicating form default) {%- endcomment -%}
+      {%- assign num_value = property_value | plus: 0 -%}
+      {%- assign is_empty_default_zero = false -%}
+      {%- if num_value == 0 -%}
+        {%- comment -%} Only filter zeros with decimal precision (0.0, 0.00, etc.) - these are form defaults {%- endcomment -%}
+        {%- comment -%} Keep integer "0" as potentially valid value {%- endcomment -%}
+        {%- if property_value contains '.' -%}
+          {%- comment -%} Check if it's a zero with trailing zeros (form default pattern) {%- endcomment -%}
+          {%- assign zero_patterns = '0.0,0.00,0.000,0.0000' | split: ',' -%}
+          {%- if zero_patterns contains property_value -%}
+            {%- assign is_empty_default_zero = true -%}
+          {%- endif -%}
+        {%- endif -%}
+      {%- endif -%}
+
+      {%- comment -%} Display property if not empty default zero {%- endcomment -%}
+      {%- if is_empty_default_zero == false -%}
+        <div>
+          <strong>{{ property.first }}:</strong> {{ property.last }}
+        </div>
+      {%- endif -%}
+    {%- endfor -%}
+  </div>
+{%- endif -%}
+

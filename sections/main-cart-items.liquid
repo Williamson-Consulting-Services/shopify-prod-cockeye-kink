@@ -17,10 +17,27 @@
       padding-bottom: {{ section.settings.padding_bottom }}px;
     }
   }
+
+  /*
+   Styles for the custom line item properties in the cart
+  */
+  .cart-item-properties {
+    margin-top: 8px;
+    font-size: 0.85rem; /* Makes it slightly smaller than the main text */
+  }
+
+  .cart-item-properties div {
+    margin-bottom: 3px;
+  }
+
+  .cart-item-properties strong {
+    font-weight: 500;
+  }
 {%- endstyle -%}
 
 {%- unless settings.cart_type == 'drawer' -%}
   <script src="{{ 'cart.js' | asset_url }}" defer="defer"></script>
+  <script src="{{ 'custom-cart-extension.js' | asset_url }}" defer="defer"></script>
 {%- endunless -%}
 
 <script src="{{ 'quantity-popover.js' | asset_url }}" defer="defer"></script>
@@ -110,6 +127,14 @@
 
                       <a href="{{ item.url }}" class="cart-item__name h4 break">{{ item.product.title | escape }}</a>
 
+                      {%- comment %}
+                        https://trello.com/c/xoRQnitG/15-12-dog-tag-bug-fix
+                         MEETS: AC3 (Cart Display)
+                         This block loops through all line item properties for this item
+                         and displays them (e.g., "Engraving: ABCDE").
+                      {%- endcomment %}
+                      {%- render 'cart-item-properties-filtered', item: item -%}
+
                       {%- if item.original_price != item.final_price -%}
                         <div class="cart-item__discounted-prices">
                           <span class="visually-hidden">
@@ -147,7 +172,19 @@
 
                           {%- for property in item.properties -%}
                             {%- assign property_first_char = property.first | slice: 0 -%}
-                            {%- if property.last != blank and property_first_char != '_' -%}
+                            {%- assign property_value = property.last | append: '' | strip -%}
+                            {%- assign num_value = property_value | plus: 0 -%}
+                            {%- assign is_zero = false -%}
+                            {%- if num_value == 0
+                              and property_value == '0'
+                              or property_value == '0.0'
+                              or property_value == '0.00'
+                              or property_value == '0.000'
+                              or property_value == '0.0000'
+                            -%}
+                              {%- assign is_zero = true -%}
+                            {%- endif -%}
+                            {%- if property.last != blank and property_first_char != '_' and is_zero == false -%}
                               <div class="product-option">
                                 <dt>{{ property.first }}:</dt>
                                 <dd>
@@ -291,6 +328,9 @@
                               </button>
                             </quantity-input>
                           </div>
+
+                          {%- render 'cart-item-edit-button', item: item -%}
+
                           <cart-remove-button
                             id="Remove-{{ item.index | plus: 1 }}"
                             data-index="{{ item.index | plus: 1 }}"

@@ -303,6 +303,10 @@ cart-drawer-items {
   .cart-drawer .cart-item cart-remove-button {
     margin-left: 0;
   }
+
+  .cart-drawer .cart-item cart-edit-button {
+    margin-left: 0;
+  }
 }
 
 .cart-drawer__footer > * + * {

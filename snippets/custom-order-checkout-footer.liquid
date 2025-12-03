@@ -1,0 +1,51 @@
+{%- liquid
+  assign custom_item_count = 0
+  assign custom_order_title = settings.custom_order_product_title | default: 'Custom Order'
+  for item in cart.items
+    # Check product title first (primary method)
+    assign is_custom = false
+    if item.product and item.product.title
+      assign product_title_lower = item.product.title | downcase | strip
+      assign custom_title_lower = custom_order_title | downcase | strip
+      if product_title_lower == custom_title_lower
+        assign is_custom = true
+      endif
+    endif
+    
+    # Backward compatibility: Check properties (for migration period)
+    if is_custom == false and item.properties
+      assign custom_flag = item.properties['Order Type'] | default: item.properties['_custom']
+      if custom_flag
+        assign custom_flag_lower = custom_flag | downcase
+        if custom_flag_lower == 'custom'
+          assign is_custom = true
+        endif
+      endif
+    endif
+    
+    if is_custom
+      assign custom_item_count = custom_item_count | plus: 1
+    endif
+  endfor
+
+  assign footer_status_prefix = 'custom_order.checkout_footer.status_prefix' | t
+  assign footer_item_count_text = 'custom_order.checkout_footer.item_count' | t
+  assign footer_button_text = 'custom_order.checkout_footer.button_text' | t
+-%}
+
+<div class="custom-order-checkout-footer" data-custom-item-count="{{ custom_item_count }}"{% if custom_item_count == 0 %} hidden{% endif %}>
+  <div class="checkout-footer__content">
+    <span class="checkout-footer__status">
+      <span class="checkout-footer__icon">✅</span>
+      <strong>{{ footer_status_prefix }}</strong>
+      <span class="checkout-footer__message">You have <span class="checkout-footer__count">{{ custom_item_count }}</span> custom item(s) saved in the cart.</span>
+    </span>
+    <a href="/checkout" class="button button--primary checkout-footer__button">
+      {{ footer_button_text }}
+    </a>
+  </div>
+</div>
+
+{{ 'component-custom-order-checkout-footer.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'custom-order-checkout-footer.js' | asset_url }}" defer></script>
+

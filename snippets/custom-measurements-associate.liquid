@@ -1,0 +1,32 @@
+{% comment %}
+  Associate Selection Component
+  Parameters:
+    - associates: Array of associate names
+    - section_id: The section ID for form association
+{% endcomment %}
+<div class="conditional-section" id="associate-section">
+  <label>{{ 'custom_measurements.associate_label' | t }}</label>
+  <div class="select-wrapper">
+    <select name="properties[Associate]" id="associate-select" form="product-form-{{ section_id }}">
+      <option value="">Select one</option>
+      {%- for associate in associates -%}
+        {%- assign associate_clean = associate | strip -%}
+        {%- if associate_clean == '' -%}{% continue %}{% endif %}
+        <option value="{{ associate_clean }}">{{ associate_clean }}</option>
+      {%- endfor -%}
+    </select>
+  </div>
+  <div class="custom-text-wrapper" id="associate-text-wrapper" style="display: none;">
+    <input
+      type="text"
+      name="properties[Associate - Text]"
+      id="associate-text"
+      class="custom-text"
+      placeholder="{{ 'custom_measurements.associate_placeholder' | t }}"
+      form="product-form-{{ section_id }}"
+    >
+  </div>
+</div>
+
+
+

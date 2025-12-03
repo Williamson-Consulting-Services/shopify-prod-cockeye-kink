@@ -1,0 +1,112 @@
+{% comment %}
+  Custom Required Measurements Snippet
+  DEPRECATED: This snippet is maintained for backward compatibility.
+  New implementations should use: {% render 'custom-measurements-form', product: product, section: section %}
+
+  This version now uses the modular structure internally.
+{% endcomment %}
+
+{%- comment -%} Load configuration {%- endcomment -%}
+{%- render 'custom-measurements-config' -%}
+
+{%- comment -%} Load CSS {%- endcomment -%}
+{{ 'component-custom-measurements.css' | asset_url | stylesheet_tag }}
+
+{%- comment -%} Parse config from theme settings for rendering (needed for backward compatibility) {%- endcomment -%}
+{%- assign default_categories_order = 'Hats, Tag, Shirt, Gloves, Harness, Suspenders, Belts, Pants, Kilt, Chaps, Other' -%}
+{%- assign categories_source = settings.custom_measurements_categories_order | default: default_categories_order -%}
+{%- assign categories_order = categories_source | split: ',' -%}
+
+{%- assign default_measurement_map = 'Head Circumference: Hats, Other*\nNeck: Harness, Tag*, Shirt, Other*\nShoulders: Harness, Shirt, Suspenders, Other*\nChest: Harness, Shirt, Suspenders, Other*\nTorso: Harness, Shirt, Other*\nSleeve Length: Shirt, Other*\nBicep: Shirt, Other*\nWrist: Shirt, Gloves, Other*\nPalm Circumference: Gloves, Other*\nHand Length: Gloves, Other*\nStomach: Shirt, Other*\nWaist: Harness, Chaps, Pants, Suspenders, Belts, Kilt, Other*\nHips: Chaps, Pants, Belts, Kilt, Other*\nUpper Thigh: Chaps, Pants, Other*\nLower Thigh: Chaps, Pants, Other*\nKnee: Chaps, Pants, Other*\nCalf: Chaps, Pants, Other*\nAnkle: Chaps, Pants, Other*\nInseam: Pants, Other*\nCrotch: Pants, Other*\nButt Rise: Pants, Other*\nLength: Kilt, Other*' -%}
+{%- assign measurement_map_source = settings.custom_measurements_map | default: default_measurement_map -%}
+{%- assign measurement_map_lines = measurement_map_source | newline_to_br | split: '<br />' -%}
+
+{%- assign measurement_names = '' | split: '|' -%}
+{%- for measurement_line in measurement_map_lines -%}
+  {%- assign measurement_line = measurement_line | strip -%}
+  {%- if measurement_line == '' -%}{% continue %}{% endif %}
+  {%- assign parts = measurement_line | split: ':' -%}
+  {%- assign measurement_label = parts[0] | strip -%}
+  {%- if measurement_label == '' -%}{% continue %}{% endif %}
+  {%- assign measurement_entry = measurement_label | split: '__split__' -%}
+  {%- assign measurement_names = measurement_names | concat: measurement_entry -%}
+{%- endfor -%}
+{%- assign measurement_names = measurement_names | uniq -%}
+
+{%- assign default_harness_categories = 'Harness' -%}
+{%- assign harness_source_raw = settings.custom_measurements_harness_categories | default: default_harness_categories -%}
+{%- assign harness_source = harness_source_raw | replace: '|', ',' -%}
+{%- assign harness_categories = harness_source | split: ',' -%}
+
+{%- assign default_harness_types = 'Deluxe Harness, Standard Harness, Suspender Harness, Asymmetric Harness' -%}
+{%- assign harness_types_source_raw = settings.custom_measurements_harness_types | default: default_harness_types -%}
+{%- assign harness_types_source = harness_types_source_raw | replace: '|', ',' -%}
+{%- assign harness_types = harness_types_source | split: ',' -%}
+
+{%- assign default_leather_colors = 'Black, Brown, Gunmetal, Grey, Light Grey, White, Red, Blue, Green, Yellow, Orange, Purple' -%}
+{%- assign leather_source_raw = settings.custom_measurements_leather_colors | default: default_leather_colors -%}
+{%- assign leather_source = leather_source_raw | replace: '|', ',' -%}
+{%- assign leather_colors = leather_source | split: ',' -%}
+
+{%- assign default_front_plate_options = 'Bear Paw, Puppy Paw, Fist Image, Pig Image, Boot Image, Biohazard Symbol, Cigar Man' -%}
+{%- assign front_plate_source_raw = settings.custom_measurements_front_plate_options | default: default_front_plate_options -%}
+{%- assign front_plate_source = front_plate_source_raw | replace: '|', ',' -%}
+{%- assign front_plate_options = front_plate_source | split: ',' -%}
+
+{%- assign default_back_plate_extra = 'Wesco Boot, Watersports, Happy Puppy' -%}
+{%- assign back_plate_extra_source_raw = settings.custom_measurements_back_plate_extra | default: default_back_plate_extra -%}
+{%- assign back_plate_extra_source = back_plate_extra_source_raw | replace: '|', ',' -%}
+{%- assign back_plate_extra = back_plate_extra_source | split: ',' -%}
+{%- assign back_plate_options = front_plate_options | concat: back_plate_extra -%}
+{%- assign left_front_plates = front_plate_options -%}
+{%- assign right_front_plates = front_plate_options -%}
+{%- assign back_plates = back_plate_options -%}
+{%- assign default_long_sliders = 'None, Brass, Steel' -%}
+{%- assign long_sliders_source_raw = settings.custom_measurements_long_sliders | default: default_long_sliders -%}
+{%- assign long_sliders_source = long_sliders_source_raw | replace: '|', ',' -%}
+{%- assign long_sliders = long_sliders_source | split: ',' -%}
+{%- assign default_associates = 'Clair, Erik, Other' -%}
+{%- assign associates_source_raw = settings.custom_measurements_associates | default: default_associates -%}
+{%- assign associates_source = associates_source_raw | replace: '|', ',' -%}
+{%- assign associates = associates_source | split: ',' -%}
+
+{%- assign default_tag_options = 'Dog Tag, Pig Tag, Bear Tag, Puppy Bone, Puppy Paw, Other' -%}
+{%- assign tag_options_source_raw = settings.custom_measurements_tag_options | default: default_tag_options -%}
+{%- assign tag_options_source = tag_options_source_raw | replace: '|', ',' -%}
+{%- assign tag_options = tag_options_source | split: ',' -%}
+
+{%- comment -%} Order Type is now set in custom-measurements-hidden-fields.liquid {%- endcomment -%}
+
+{%- comment -%} Render form components using modular snippets {%- endcomment -%}
+{%- render 'custom-measurements-associate', associates: associates, section_id: section.id -%}
+
+{%- render 'custom-measurements-category-selector',
+    categories_order: categories_order,
+    measurement_map_lines: measurement_map_lines,
+    harness_categories: harness_categories,
+    harness_types: harness_types,
+    tag_options: tag_options,
+    section_id: section.id -%}
+
+{%- render 'custom-measurements-hidden-fields', section_id: section.id -%}
+
+{%- render 'custom-measurements-unit-toggle', section_id: section.id -%}
+
+{%- render 'custom-measurements-field-group',
+    measurement_names: measurement_names,
+    section_id: section.id -%}
+
+{%- render 'custom-measurements-leather-color',
+    leather_colors: leather_colors,
+    section_id: section.id -%}
+
+{%- render 'custom-measurements-harness-options',
+    front_plate_options: front_plate_options,
+    back_plate_options: back_plate_options,
+    long_sliders: long_sliders,
+    section_id: section.id -%}
+
+{%- render 'custom-measurements-notes', section_id: section.id -%}
+
+{%- comment -%} Load JavaScript {%- endcomment -%}
+<script src="{{ 'custom-measurements-form.js' | asset_url }}" defer></script>

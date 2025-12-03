@@ -1,0 +1,46 @@
+{% comment %}
+  Single Measurement Field Component
+  Parameters:
+    - measurement_label: The label for the measurement (e.g., "Neck", "Chest")
+    - section_id: The section ID for form association
+{% endcomment %}
+{%- assign handle = measurement_label | handleize -%}
+{%- assign clean_label = measurement_label | remove: '*' | strip -%}
+<div
+  class="measurement-field"
+  id="measurement-{{ handle }}"
+  data-measurement="{{ clean_label }}"
+  data-label-base="{{ clean_label }}"
+>
+  <label for="{{ handle }}-in">{{ clean_label }}</label>
+  <div class="measurement-input-wrapper">
+    <input
+      type="number"
+      inputmode="decimal"
+      autocomplete="off"
+      id="{{ handle }}-in"
+      name="properties[{{ measurement_label }} (in)]"
+      form="product-form-{{ section_id }}"
+      class="measurement-input measurement-in"
+      data-measurement="{{ measurement_label }}"
+      placeholder="0.000"
+      min="0"
+    >
+    <input
+      type="number"
+      inputmode="decimal"
+      autocomplete="off"
+      id="{{ handle }}-cm"
+      name="properties[{{ measurement_label }} (cm)]"
+      form="product-form-{{ section_id }}"
+      class="measurement-input measurement-cm"
+      data-measurement="{{ measurement_label }}"
+      placeholder="0.000"
+      min="0"
+      style="display: none;"
+    >
+  </div>
+</div>
+
+
+

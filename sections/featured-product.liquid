@@ -468,8 +468,9 @@
     </div>
   </section>
 
-  <script src="{{ 'product-form.js' | asset_url }}" defer="defer"></script>
-  {%- if section.settings.image_zoom == 'hover' -%}
+<script src="{{ 'product-form.js' | asset_url }}" defer="defer"></script>
+<script src="{{ 'custom-product-form-extension.js' | asset_url }}" defer="defer"></script>
+{%- if section.settings.image_zoom == 'hover' -%}
     <script id="EnableZoomOnHover-featured" src="{{ 'magnify.js' | asset_url }}" defer="defer"></script>
   {%- endif %}
   {%- if request.design_mode -%}
@@ -1505,3 +1506,13 @@
   ]
 }
 {% endschema %}
+
+{% if product %}
+<script class="gpo-featured-product">
+  window.GPOConfigs = window.GPOConfigs || {}
+  window.GPOConfigs.featuredProduct = {{ product | json }} || null
+  window.GPOConfigs.featuredProduct.collections = {{ product.collections | map: 'id' | json }}
+</script>
+{% endif %}
+
+<!-- GPO installed -->

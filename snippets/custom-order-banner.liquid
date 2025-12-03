@@ -1,0 +1,172 @@
+{%- liquid
+  assign banner_editing_translation = 'custom_order.banner.editing' | t
+  assign banner_editing_text = settings.custom_order_banner_editing_text | default: banner_editing_translation
+
+  assign banner_background_color = settings.custom_order_banner_background_color | default: '#ffec99'
+  assign banner_text_color = settings.custom_order_banner_text_color | default: '#3f2f00'
+  assign banner_shadow_color = settings.custom_order_banner_shadow_color | default: '#000000'
+  assign banner_shadow_opacity = settings.custom_order_banner_shadow_opacity | default: 20
+  assign banner_shadow_alpha = banner_shadow_opacity | divided_by: 100.0
+  assign banner_shadow_rgba = banner_shadow_color | color_modify: 'alpha', banner_shadow_alpha
+-%}
+
+<div
+  id="custom-order-banner"
+  class="custom-order-banner"
+  role="status"
+  aria-live="polite"
+  hidden
+  style="--custom-order-banner-bg: {{ banner_background_color }}; --custom-order-banner-color: {{ banner_text_color }}; --custom-order-banner-shadow: {{ banner_shadow_rgba }};"
+>
+  <div class="custom-order-banner__inner">
+    <span class="custom-order-banner__text custom-order-banner__text--editing" data-banner-editing hidden>
+      {{ banner_editing_text | escape }}
+    </span>
+  </div>
+</div>
+
+<style>
+  .custom-order-banner {
+    position: sticky;
+    top: 0;
+    z-index: 120;
+    width: 100%;
+    background-color: var(--custom-order-banner-bg);
+    color: var(--custom-order-banner-color);
+    box-shadow: 0 2px 6px var(--custom-order-banner-shadow);
+  }
+
+  .custom-order-banner[hidden] {
+    display: none !important;
+  }
+
+  .custom-order-banner__inner {
+    max-width: var(--page-width, 1200px);
+    margin: 0 auto;
+    padding: 0.75rem 1.5rem;
+    text-align: center;
+    font-size: 1.4rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .custom-order-banner {
+      transition: transform 200ms ease, opacity 200ms ease;
+    }
+
+    .custom-order-banner[hidden] {
+      opacity: 0;
+      transform: translateY(-100%);
+    }
+  }
+</style>
+
+<script>
+  window.CustomOrderBanner = (function () {
+    const banner = document.getElementById('custom-order-banner');
+    if (!banner) {
+      return {
+        setForceShow() {},
+        setBannerText() {},
+        notifyEditing() {},
+      };
+    }
+
+    const editingElement = banner.querySelector('[data-banner-editing]');
+    const editingTextDefault = {{ banner_editing_text | json }};
+    const suppressed =
+      window.location.pathname.includes('/checkouts/') ||
+      window.location.pathname.includes('/checkout') ||
+      window.location.pathname.includes('/thank-you');
+
+    const state = {
+      forceShow: false,
+      editing: false,
+      editingText: editingTextDefault,
+    };
+
+    function render() {
+      if (suppressed) {
+        banner.hidden = true;
+        return;
+      }
+      const showEditing = state.forceShow || state.editing;
+
+      if (editingElement) {
+        const text = state.editingText || editingTextDefault;
+        if (typeof text === 'string') editingElement.textContent = text;
+        editingElement.hidden = !showEditing;
+      }
+
+      banner.hidden = !showEditing;
+    }
+
+    function setForceShow(value) {
+      state.forceShow = Boolean(value);
+      render();
+    }
+
+    function setBannerText(value) {
+      const sanitized = value && value.trim() !== '' ? value.trim() : null;
+      state.editingText = sanitized || editingTextDefault;
+      render();
+    }
+
+    function notifyEditing(isEditing = true) {
+      const nextFlag = Boolean(isEditing);
+      if (state.editing !== nextFlag) {
+        state.editing = nextFlag;
+        render();
+      }
+    }
+
+    async function init() {
+      // Check if page loaded with edit parameters (indicating edit mode)
+      // Only show if we're on a product page with custom measurements form
+      const isProductPage = window.location.pathname.includes('/products/');
+      const hasCustomForm = document.querySelector('.measurement-field') || document.querySelector('.category-option-input');
+
+      // Check if URL contains edit-related parameters (not marketing/tracking params)
+      // Wait for config to be available before checking
+      let hasEditParams = false;
+      if (window.CustomOrderUtils && window.CustomOrderUtils.hasEditRelatedParams) {
+        try {
+          hasEditParams = await window.CustomOrderUtils.hasEditRelatedParams();
+        } catch (error) {
+          console.warn('Error checking edit params:', error);
+          hasEditParams = false;
+        }
+      }
+
+      // If URL has edit-related parameters and we're on a product page with custom form, we're in edit mode
+      if (hasEditParams && isProductPage && hasCustomForm) {
+        state.editing = true;
+      }
+
+      render();
+      subscribe(PUB_SUB_EVENTS.cartUpdate, (event) => {
+        if (event.customOrderItemAdded) {
+          state.editing = false;
+          state.forceShow = false;
+          render();
+        }
+      });
+      window.addEventListener('custom-order:editing', () => notifyEditing(true));
+      window.addEventListener('custom-order:editing-stop', () => notifyEditing(false));
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+
+    return {
+      setForceShow,
+      setBannerText,
+      notifyEditing,
+    };
+  })();
+</script>
+
