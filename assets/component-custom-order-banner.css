@@ -44,7 +44,7 @@
 }
 
 .custom-order-banner__text {
-  display: block;
+  display: inline;
   white-space: nowrap;
 }
 
@@ -179,16 +179,24 @@
   }
 
   .custom-order-banner__text-wrapper {
-    display: inline-flex;
+    display: inline-block;
     white-space: nowrap;
     position: relative;
     z-index: 1;
   }
 
   .custom-order-banner__text {
-    display: inline-block;
+    display: inline;
     white-space: nowrap;
-    padding-right: 3rem;
+  }
+
+  .custom-order-banner__text--editing {
+    display: inline;
+  }
+
+  .custom-order-banner__text--duplicate {
+    display: inline;
+    padding-left: 2rem;
   }
 
   .custom-order-banner__text-wrapper[data-needs-scroll='true'] {
