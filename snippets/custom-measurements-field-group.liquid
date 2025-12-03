@@ -15,40 +15,50 @@
 </div>
 
 {%- comment -%} Define measurement groups configuration {%- endcomment -%}
-{%- assign upper_body_measurements = 'Head Circumference,Neck,Shoulders,Chest,Torso,Sleeve Length,Bicep,Wrist,Palm Circumference,Hand Length' | split: ',' -%}
-{%- assign torso_hips_measurements = 'Stomach,Waist,Hips' | split: ',' -%}
-{%- assign lower_body_measurements = 'Upper Thigh,Lower Thigh,Knee,Calf,Ankle,Inseam,Crotch,Butt Rise,Length' | split: ',' -%}
-{%- assign all_grouped_measurements = upper_body_measurements | concat: torso_hips_measurements | concat: lower_body_measurements -%}
+{%- assign upper_body_measurements = 'Head Circumference,Neck,Shoulders,Chest,Sleeve Length,Bicep,Wrist,Palm Circumference,Hand Length'
+  | split: ','
+-%}
+{%- assign torso_hips_measurements = 'Torso,Stomach,Waist,Hips' | split: ',' -%}
+{%- assign lower_body_measurements = 'Upper Thigh,Lower Thigh,Knee,Calf,Ankle,Inseam,Crotch,Butt Rise,Length'
+  | split: ','
+-%}
+{%- assign all_grouped_measurements = upper_body_measurements
+  | concat: torso_hips_measurements
+  | concat: lower_body_measurements
+-%}
 
 {%- comment -%} Helper: Check if measurement is in group {%- endcomment -%}
 {%- comment -%} Liquid doesn't support functions, so we use a reusable snippet pattern {%- endcomment -%}
 
 {%- comment -%} Group 1: Upper Body {%- endcomment -%}
 {%- render 'custom-measurements-group',
-    group_measurements: upper_body_measurements,
-    group_label: 'custom_measurements.group_upper_body',
-    group_id: 'upper-body',
-    container_id: 'measurementsGroup-upper',
-    measurement_names: measurement_names,
-    section_id: section_id -%}
+  group_measurements: upper_body_measurements,
+  group_label: 'custom_measurements.group_upper_body',
+  group_id: 'upper-body',
+  container_id: 'measurementsGroup-upper',
+  measurement_names: measurement_names,
+  section_id: section_id
+-%}
 
 {%- comment -%} Group 2: Torso/Hips {%- endcomment -%}
 {%- render 'custom-measurements-group',
-    group_measurements: torso_hips_measurements,
-    group_label: 'custom_measurements.group_torso_hips',
-    group_id: 'torso-hips',
-    container_id: 'measurementsGroup-torso',
-    measurement_names: measurement_names,
-    section_id: section_id -%}
+  group_measurements: torso_hips_measurements,
+  group_label: 'custom_measurements.group_torso_hips',
+  group_id: 'torso-hips',
+  container_id: 'measurementsGroup-torso',
+  measurement_names: measurement_names,
+  section_id: section_id
+-%}
 
 {%- comment -%} Group 3: Lower Body {%- endcomment -%}
 {%- render 'custom-measurements-group',
-    group_measurements: lower_body_measurements,
-    group_label: 'custom_measurements.group_lower_body',
-    group_id: 'lower-body',
-    container_id: 'measurementsGroup-lower',
-    measurement_names: measurement_names,
-    section_id: section_id -%}
+  group_measurements: lower_body_measurements,
+  group_label: 'custom_measurements.group_lower_body',
+  group_id: 'lower-body',
+  container_id: 'measurementsGroup-lower',
+  measurement_names: measurement_names,
+  section_id: section_id
+-%}
 
 {%- comment -%} Other measurements not in groups {%- endcomment -%}
 {%- comment -%} This group should only contain measurements that are NOT in any of the defined groups {%- endcomment -%}
@@ -70,6 +80,3 @@
     {%- endfor -%}
   </div>
 </div>
-
-
-
