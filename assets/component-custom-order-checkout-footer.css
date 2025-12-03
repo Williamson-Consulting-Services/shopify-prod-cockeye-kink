@@ -12,7 +12,8 @@
   color: rgb(var(--color-foreground, 255, 255, 255));
   z-index: 9999;
   box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
-  border-top: 4px solid #4caf50; /* Success Green Stripe */
+  border-top: 4px solid #4caf50;
+  /* Success Green Stripe */
 }
 
 .custom-order-checkout-footer[hidden] {
@@ -158,11 +159,9 @@
 .checkout-footer__minimized-bar:hover,
 .checkout-footer__minimized-bar:focus-within {
   height: 12px;
-  background-color: color-mix(
-    in srgb,
-    rgb(var(--color-background, 18, 18, 18)) 95%,
-    rgb(var(--color-foreground, 255, 255, 255))
-  );
+  background-color: color-mix(in srgb,
+      rgb(var(--color-background, 18, 18, 18)) 95%,
+      rgb(var(--color-foreground, 255, 255, 255)));
 }
 
 .checkout-footer__minimized-icon {
@@ -187,10 +186,12 @@
 }
 
 @keyframes minimize-pulse {
+
   0%,
   100% {
     opacity: 0.5;
   }
+
   50% {
     opacity: 0.8;
   }
@@ -227,11 +228,9 @@
     width: 2rem;
     z-index: 2;
     pointer-events: none;
-    background: linear-gradient(
-      to left,
-      rgb(var(--color-background, 18, 18, 18)) 0%,
-      transparent 70%
-    );
+    background: linear-gradient(to left,
+        rgb(var(--color-background, 18, 18, 18)) 0%,
+        transparent 70%);
   }
 
   .checkout-footer__prefix {
@@ -263,6 +262,7 @@
     0% {
       transform: translateX(0);
     }
+
     100% {
       transform: translateX(-50%);
     }

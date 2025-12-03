@@ -110,6 +110,8 @@
         } else {
           banner.classList.remove('custom-order-banner--minimized');
         }
+        // Check if text needs scrolling after rendering
+        setTimeout(checkTextScroll, 100);
       } else {
         banner.hidden = true;
         if (minimizedBar) minimizedBar.hidden = true;
@@ -146,9 +148,20 @@
       const container = editingElement.closest('.custom-order-banner__inner');
       const wrapper = editingElement.closest('[data-text-wrapper]');
       const duplicate = wrapper?.querySelector('.custom-order-banner__text--duplicate');
-      if (!container || !wrapper) return;
+      if (!container || !wrapper) {
+        if (duplicate) duplicate.hidden = true;
+        return;
+      }
 
-      // Account for padding on both sides and close button width
+      // Hide duplicate and remove scroll attributes on desktop
+      if (window.innerWidth > 749) {
+        if (duplicate) duplicate.hidden = true;
+        wrapper.removeAttribute('data-needs-scroll');
+        container.removeAttribute('data-needs-scroll');
+        return;
+      }
+
+      // Account for padding on both sides and close button width (mobile only)
       const containerWidth = container.offsetWidth;
       const leftPadding = 16; // 1rem in pixels
       const rightPadding = 56; // 3.5rem for close button area
@@ -162,7 +175,7 @@
         wrapper.setAttribute('data-needs-scroll', 'true');
         container.setAttribute('data-needs-scroll', 'true');
       } else {
-        duplicate.hidden = true;
+        if (duplicate) duplicate.hidden = true;
         wrapper.removeAttribute('data-needs-scroll');
         container.removeAttribute('data-needs-scroll');
       }
@@ -178,11 +191,9 @@
         });
       }
 
-      // Check if text needs scrolling on mobile
-      if (window.innerWidth <= 749) {
-        checkTextScroll();
-        window.addEventListener('resize', checkTextScroll);
-      }
+      // Check if text needs scrolling on all screen sizes (responds to resize)
+      checkTextScroll();
+      window.addEventListener('resize', checkTextScroll);
 
       const isProductPage = window.location.pathname.includes('/products/');
       const hasCustomForm = document.querySelector('.measurement-field') || document.querySelector('.category-option-input');

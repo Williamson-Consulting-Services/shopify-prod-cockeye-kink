@@ -34,34 +34,34 @@
   white-space: nowrap;
 }
 
-  .custom-order-banner__close {
-    position: absolute;
-    top: 50%;
-    right: 1rem;
-    transform: translateY(-50%);
-    background: var(--custom-order-banner-bg);
-    border: none;
-    padding: 0.5rem;
-    cursor: pointer;
-    color: var(--custom-order-banner-color);
-    opacity: 0.7;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: opacity 150ms ease;
-    z-index: 10;
-  }
+.custom-order-banner__close {
+  position: absolute;
+  top: 50%;
+  right: 1rem;
+  transform: translateY(-50%);
+  background: var(--custom-order-banner-bg);
+  border: none;
+  padding: 0.5rem;
+  cursor: pointer;
+  color: var(--custom-order-banner-color);
+  opacity: 0.7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 150ms ease;
+  z-index: 10;
+}
 
-  .custom-order-banner__close::before {
-    content: '';
-    position: absolute;
-    left: -3rem;
-    top: 0;
-    bottom: 0;
-    width: 3rem;
-    background: var(--custom-order-banner-bg);
-    z-index: -1;
-  }
+.custom-order-banner__close::before {
+  content: '';
+  position: absolute;
+  left: -3rem;
+  top: 0;
+  bottom: 0;
+  width: 3rem;
+  background: var(--custom-order-banner-bg);
+  z-index: -1;
+}
 
 .custom-order-banner__close:hover,
 .custom-order-banner__close:focus {
@@ -127,10 +127,12 @@
 }
 
 @keyframes minimize-pulse {
+
   0%,
   100% {
     opacity: 0.5;
   }
+
   50% {
     opacity: 0.8;
   }
@@ -177,11 +179,9 @@
     width: 2rem;
     z-index: 2;
     pointer-events: none;
-    background: linear-gradient(
-      to left,
-      var(--custom-order-banner-bg) 0%,
-      transparent 70%
-    );
+    background: linear-gradient(to left,
+        var(--custom-order-banner-bg) 0%,
+        transparent 70%);
   }
 
   .custom-order-banner__text-wrapper {
@@ -198,7 +198,7 @@
   }
 
   .custom-order-banner__text-wrapper[data-needs-scroll='true'] {
-    animation: scroll-text 20s linear infinite;
+    animation: scroll-text 12s linear infinite;
   }
 
   .custom-order-banner__text-wrapper[data-needs-scroll='true']:hover {
@@ -209,6 +209,7 @@
     0% {
       transform: translateX(0);
     }
+
     100% {
       transform: translateX(-50%);
     }
@@ -221,7 +222,7 @@
     background: var(--custom-order-banner-bg);
     border-radius: 0.25rem;
     box-shadow: 0 0 1rem var(--custom-order-banner-bg);
-    position: relative;
+    position: absolute;
   }
 
   .custom-order-banner__close::before {
@@ -235,4 +236,3 @@
     z-index: -1;
   }
 }
-
