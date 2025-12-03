@@ -14,14 +14,19 @@
   </div>
 </div>
 
-{%- comment -%} Define measurement groups configuration {%- endcomment -%}
-{%- assign upper_body_measurements = 'Head Circumference,Neck,Shoulders,Chest,Sleeve Length,Bicep,Wrist,Palm Circumference,Hand Length'
-  | split: ','
--%}
-{%- assign torso_hips_measurements = 'Torso,Stomach,Waist,Hips' | split: ',' -%}
-{%- assign lower_body_measurements = 'Upper Thigh,Lower Thigh,Knee,Calf,Ankle,Inseam,Crotch,Butt Rise,Length'
-  | split: ','
--%}
+{%- comment -%} Define measurement groups configuration from theme settings {%- endcomment -%}
+{%- assign default_upper_body = 'Head Circumference,Neck,Shoulders,Chest,Sleeve Length,Bicep,Wrist,Palm Circumference,Hand Length' -%}
+{%- assign default_torso_hips = 'Torso,Stomach,Waist,Hips' -%}
+{%- assign default_lower_body = 'Upper Thigh,Lower Thigh,Knee,Calf,Ankle,Inseam,Crotch,Butt Rise,Length' -%}
+
+{%- assign upper_body_source = settings.custom_measurements_group_upper_body | default: default_upper_body -%}
+{%- assign torso_hips_source = settings.custom_measurements_group_torso_hips | default: default_torso_hips -%}
+{%- assign lower_body_source = settings.custom_measurements_group_lower_body | default: default_lower_body -%}
+
+{%- assign upper_body_measurements = upper_body_source | split: ',' -%}
+{%- assign torso_hips_measurements = torso_hips_source | split: ',' -%}
+{%- assign lower_body_measurements = lower_body_source | split: ',' -%}
+
 {%- assign all_grouped_measurements = upper_body_measurements
   | concat: torso_hips_measurements
   | concat: lower_body_measurements

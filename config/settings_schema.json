@@ -1606,6 +1606,31 @@
         "min": 0,
         "max": 6,
         "step": 1
+      },
+      {
+        "type": "header",
+        "content": "t:settings_schema.custom_order_measurements_settings.settings.header_groups.content"
+      },
+      {
+        "type": "text",
+        "id": "custom_measurements_group_upper_body",
+        "label": "t:settings_schema.custom_order_measurements_settings.settings.group_upper_body.label",
+        "info": "t:settings_schema.custom_order_measurements_settings.settings.group_upper_body.info",
+        "default": "Head Circumference,Neck,Shoulders,Chest,Sleeve Length,Bicep,Wrist,Palm Circumference,Hand Length"
+      },
+      {
+        "type": "text",
+        "id": "custom_measurements_group_torso_hips",
+        "label": "t:settings_schema.custom_order_measurements_settings.settings.group_torso_hips.label",
+        "info": "t:settings_schema.custom_order_measurements_settings.settings.group_torso_hips.info",
+        "default": "Torso,Stomach,Waist,Hips"
+      },
+      {
+        "type": "text",
+        "id": "custom_measurements_group_lower_body",
+        "label": "t:settings_schema.custom_order_measurements_settings.settings.group_lower_body.label",
+        "info": "t:settings_schema.custom_order_measurements_settings.settings.group_lower_body.info",
+        "default": "Upper Thigh,Lower Thigh,Knee,Calf,Ankle,Inseam,Crotch,Butt Rise,Length"
       }
     ]
   }

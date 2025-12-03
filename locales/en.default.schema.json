@@ -459,6 +459,21 @@
         "precision": {
           "label": "Measurement precision",
           "info": "Number of decimal places for measurements (0-6)."
+        },
+        "header_groups": {
+          "content": "Measurement groups"
+        },
+        "group_upper_body": {
+          "label": "Upper body measurements",
+          "info": "Enter measurement names separated by commas. These will be displayed in the 'Upper Body' group."
+        },
+        "group_torso_hips": {
+          "label": "Torso/Hips measurements",
+          "info": "Enter measurement names separated by commas. These will be displayed in the 'Torso/Hips' group."
+        },
+        "group_lower_body": {
+          "label": "Lower body measurements",
+          "info": "Enter measurement names separated by commas. These will be displayed in the 'Lower Body' group."
         }
       }
     }
