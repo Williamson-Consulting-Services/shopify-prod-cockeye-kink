@@ -14,11 +14,12 @@
   <h3 class="measurement-group-header">{{ group_label | t }}</h3>
   <div class="measurements-group" id="{{ container_id }}">
     {%- for meas_name in measurement_names -%}
-      {%- assign measurement_label = meas_name | strip -%}
+      {%- assign measurement_label = meas_name | strip | remove: '*' | strip -%}
       {%- if measurement_label == '' -%}{% continue %}{% endif %}
       {%- assign is_in_group = false -%}
       {%- for group_meas in group_measurements -%}
-        {%- if measurement_label == group_meas -%}
+        {%- assign group_meas_stripped = group_meas | strip | remove: '*' | strip -%}
+        {%- if measurement_label == group_meas_stripped -%}
           {%- assign is_in_group = true -%}
           {%- break -%}
         {%- endif -%}

@@ -23,6 +23,7 @@
       {%- assign parts = measurement_line | split: ':' -%}
       {%- assign measurement_label = parts[0] | strip -%}
       {%- if measurement_label == '' -%}{% continue %}{% endif %}
+      {%- assign measurement_label = measurement_label | remove: '*' | strip -%}
       {%- assign categories_part = '' -%}
       {%- if parts.size > 1 -%}
         {%- assign categories_part = parts[1] -%}
@@ -82,7 +83,9 @@
       data-optional="{{ optional_string }}"
       data-show-harness="{% if harness_match %}true{% else %}false{% endif %}"
       data-show-tag="{% if tag_match %}true{% else %}false{% endif %}"
-      {% if should_preselect or forloop.first %}checked{% endif %}
+      {% if should_preselect or forloop.first %}
+        checked
+      {% endif %}
     >
     <label for="{{ option_id }}">
       {{ category_name }}
@@ -90,9 +93,12 @@
   {%- endfor -%}
 </fieldset>
 
-{%- comment -%} Harness Type Selector (appears when Harness is selected) {%- endcomment -%}
 {%- if harness_types -%}
-  <fieldset class="product-form__input product-form__input--pill conditional-section" id="harness-type-selector" style="display: none;">
+  <fieldset
+    class="product-form__input product-form__input--pill conditional-section"
+    id="harness-type-selector"
+    style="display: none;"
+  >
     <legend class="form__label">{{ 'custom_measurements.harness_type_legend' | t }}</legend>
     {%- for harness_type in harness_types -%}
       {%- assign type_name = harness_type | strip -%}
@@ -114,8 +120,11 @@
   </fieldset>
 {%- endif -%}
 
-{%- comment -%} Tag Type Selector (appears when Tag is selected) {%- endcomment -%}
-<fieldset class="product-form__input product-form__input--pill conditional-section" id="tag-type-selector" style="display: none;">
+<fieldset
+  class="product-form__input product-form__input--pill conditional-section"
+  id="tag-type-selector"
+  style="display: none;"
+>
   <legend class="form__label">{{ 'custom_measurements.tag_type_legend' | t }}</legend>
   {%- if tag_options and tag_options.size > 0 -%}
     {%- for tag_option in tag_options -%}
@@ -137,6 +146,3 @@
     {%- endfor -%}
   {%- endif -%}
 </fieldset>
-
-
-
