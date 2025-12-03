@@ -1,0 +1,25 @@
+{
+  "current_version": {
+    "dawn_base": "10.0.0",
+    "custom_patch": "3",
+    "full_version": "10.0.3",
+    "description": "Our current custom version based on Dawn 10.0.0"
+  },
+  "comparison_version": {
+    "dawn_base": "10.0.0",
+    "git_ref": "v10.0.0",
+    "description": "Original Dawn version we started from (for comparison)"
+  },
+  "destination_version": {
+    "dawn_base": "15.4.0",
+    "git_ref": "upstream/main",
+    "description": "Target Dawn version to upgrade to (latest from upstream/main)",
+    "note": "Using upstream/main to get latest fixes. The v15.4.0 tag had incorrect theme_version (15.3.0), which was corrected in upstream/main."
+  },
+  "git_config": {
+    "upstream_remote": "upstream",
+    "current_branch": "HEAD",
+    "comparison_ref": "v10.0.0",
+    "destination_ref": "upstream/main"
+  }
+}

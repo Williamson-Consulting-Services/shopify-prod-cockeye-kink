@@ -1,0 +1,11 @@
+.venv/
+*.pyc
+
+# Upgrade analysis outputs (keep config and Makefile)
+.upgrade-analysis/diffs/
+.upgrade-analysis/reports/
+.upgrade-analysis/dawn-*/
+.upgrade-analysis/json-patches/
+.upgrade-analysis/patches/
+.upgrade-analysis/json-changes/
+UPGRADE_CUSTOM_CHANGES.md
