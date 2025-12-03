@@ -22,6 +22,31 @@
     <span class="custom-order-banner__text custom-order-banner__text--editing" data-banner-editing hidden>
       {{ banner_editing_text | escape }}
     </span>
+    <button
+      type="button"
+      class="custom-order-banner__close"
+      aria-label="Minimize banner"
+      data-banner-close
+    >
+      <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 16 16">
+        <path d="M12.854 3.146a.5.5 0 0 0-.708 0L8 7.293 3.854 3.146a.5.5 0 1 0-.708.708L7.293 8l-4.147 4.146a.5.5 0 0 0 .708.708L8 8.707l4.146 4.147a.5.5 0 0 0 .708-.708L8.707 8l4.147-4.146a.5.5 0 0 0 0-.708z" fill="currentColor"/>
+      </svg>
+    </button>
+  </div>
+  <div
+    class="custom-order-banner__minimized"
+    data-banner-minimized
+    hidden
+    role="button"
+    tabindex="0"
+    aria-label="Tap to show notification"
+    title="Tap to show notification"
+  >
+    <div class="custom-order-banner__minimized-bar">
+      <svg class="custom-order-banner__minimized-icon" aria-hidden="true" focusable="false" width="12" height="12" viewBox="0 0 12 12">
+        <path d="M6 2L2 6l4 4 4-4-4-4z" fill="currentColor" opacity="0.6"/>
+      </svg>
+    </div>
   </div>
 </div>
 
@@ -41,13 +66,111 @@
   }
 
   .custom-order-banner__inner {
+    position: relative;
     max-width: var(--page-width, 1200px);
     margin: 0 auto;
-    padding: 0.75rem 1.5rem;
+    padding: 0.5rem 3rem 0.5rem 1.5rem;
     text-align: center;
-    font-size: 1.4rem;
+    font-size: 1.2rem;
     font-weight: 600;
     letter-spacing: 0.04em;
+  }
+
+  .custom-order-banner__close {
+    position: absolute;
+    top: 50%;
+    right: 1rem;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    padding: 0.5rem;
+    cursor: pointer;
+    color: var(--custom-order-banner-color);
+    opacity: 0.7;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 150ms ease;
+  }
+
+  .custom-order-banner__close:hover,
+  .custom-order-banner__close:focus {
+    opacity: 1;
+  }
+
+  .custom-order-banner__close:focus-visible {
+    outline: 2px solid var(--custom-order-banner-color);
+    outline-offset: 2px;
+  }
+
+  .custom-order-banner__minimized {
+    position: sticky;
+    top: 0;
+    z-index: 120;
+    width: 100%;
+    cursor: pointer;
+    touch-action: manipulation;
+    user-select: none;
+  }
+
+  .custom-order-banner__minimized[hidden] {
+    display: none !important;
+  }
+
+  .custom-order-banner__minimized-bar {
+    position: relative;
+    width: 100%;
+    height: 10px;
+    background-color: var(--custom-order-banner-bg);
+    box-shadow: 0 1px 3px var(--custom-order-banner-shadow);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 150ms ease, height 200ms ease;
+  }
+
+  .custom-order-banner__minimized-bar:hover,
+  .custom-order-banner__minimized-bar:focus-within {
+    height: 12px;
+    background-color: color-mix(in srgb, var(--custom-order-banner-bg) 95%, var(--custom-order-banner-color));
+  }
+
+  .custom-order-banner__minimized-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--custom-order-banner-color);
+    opacity: 0.5;
+    transition: opacity 150ms ease, transform 200ms ease;
+    pointer-events: none;
+  }
+
+  .custom-order-banner__minimized:hover .custom-order-banner__minimized-icon,
+  .custom-order-banner__minimized:focus .custom-order-banner__minimized-icon {
+    opacity: 0.8;
+    transform: translate(-50%, -60%);
+  }
+
+  .custom-order-banner__minimized:active .custom-order-banner__minimized-icon {
+    transform: translate(-50%, -50%) scale(0.9);
+  }
+
+  @keyframes minimize-pulse {
+    0%, 100% {
+      opacity: 0.5;
+    }
+    50% {
+      opacity: 0.8;
+    }
+  }
+
+  .custom-order-banner__minimized[data-just-minimized="true"] .custom-order-banner__minimized-icon {
+    animation: minimize-pulse 1s ease-in-out 2;
+  }
+
+  .custom-order-banner--minimized .custom-order-banner__inner {
+    display: none;
   }
 
   @media (prefers-reduced-motion: no-preference) {
@@ -58,6 +181,22 @@
     .custom-order-banner[hidden] {
       opacity: 0;
       transform: translateY(-100%);
+    }
+
+    .custom-order-banner__minimized {
+      transition: opacity 200ms ease;
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .custom-order-banner__inner {
+      padding: 0.5rem 2.5rem 0.5rem 1rem;
+      font-size: 1.1rem;
+    }
+
+    .custom-order-banner__close {
+      right: 0.75rem;
+      padding: 0.375rem;
     }
   }
 </style>
@@ -74,6 +213,9 @@
     }
 
     const editingElement = banner.querySelector('[data-banner-editing]');
+    const closeButton = banner.querySelector('[data-banner-close]');
+    const minimizedBar = banner.querySelector('[data-banner-minimized]');
+    const minimizedBarElement = minimizedBar?.querySelector('.custom-order-banner__minimized-bar');
     const editingTextDefault = {{ banner_editing_text | json }};
     const suppressed =
       window.location.pathname.includes('/checkouts/') ||
@@ -84,11 +226,39 @@
       forceShow: false,
       editing: false,
       editingText: editingTextDefault,
+      minimized: false,
     };
+
+    let touchStartY = null;
+    let touchStartTime = null;
+    const SWIPE_THRESHOLD = 50;
+    const SWIPE_TIME_THRESHOLD = 300;
+
+    function minimize() {
+      state.minimized = true;
+      banner.classList.add('custom-order-banner--minimized');
+      if (minimizedBar) {
+        minimizedBar.hidden = false;
+        minimizedBar.setAttribute('data-just-minimized', 'true');
+        setTimeout(() => {
+          if (minimizedBar) minimizedBar.removeAttribute('data-just-minimized');
+        }, 2000);
+      }
+    }
+
+    function restore() {
+      state.minimized = false;
+      banner.classList.remove('custom-order-banner--minimized');
+      if (minimizedBar) {
+        minimizedBar.hidden = true;
+        minimizedBar.removeAttribute('data-just-minimized');
+      }
+    }
 
     function render() {
       if (suppressed) {
         banner.hidden = true;
+        if (minimizedBar) minimizedBar.hidden = true;
         return;
       }
       const showEditing = state.forceShow || state.editing;
@@ -99,11 +269,58 @@
         editingElement.hidden = !showEditing;
       }
 
-      banner.hidden = !showEditing;
+      if (showEditing) {
+        banner.hidden = false;
+        if (state.minimized) {
+          minimize();
+        } else {
+          restore();
+        }
+      } else {
+        banner.hidden = true;
+        if (minimizedBar) minimizedBar.hidden = true;
+      }
+    }
+
+    function handleClose() {
+      minimize();
+    }
+
+    function handleMinimizedBarClick() {
+      restore();
+    }
+
+    function handleTouchStart(e) {
+      if (state.minimized) return;
+      touchStartY = e.touches[0].clientY;
+      touchStartTime = Date.now();
+    }
+
+    function handleTouchMove(e) {
+      if (state.minimized || touchStartY === null) return;
+      const touchY = e.touches[0].clientY;
+      const deltaY = touchY - touchStartY;
+
+      if (deltaY > 0 && deltaY > SWIPE_THRESHOLD) {
+        const swipeTime = Date.now() - touchStartTime;
+        if (swipeTime < SWIPE_TIME_THRESHOLD) {
+          minimize();
+          touchStartY = null;
+          touchStartTime = null;
+        }
+      }
+    }
+
+    function handleTouchEnd() {
+      touchStartY = null;
+      touchStartTime = null;
     }
 
     function setForceShow(value) {
       state.forceShow = Boolean(value);
+      if (value) {
+        state.minimized = false;
+      }
       render();
     }
 
@@ -117,18 +334,17 @@
       const nextFlag = Boolean(isEditing);
       if (state.editing !== nextFlag) {
         state.editing = nextFlag;
+        if (!nextFlag) {
+          state.minimized = false;
+        }
         render();
       }
     }
 
     async function init() {
-      // Check if page loaded with edit parameters (indicating edit mode)
-      // Only show if we're on a product page with custom measurements form
       const isProductPage = window.location.pathname.includes('/products/');
       const hasCustomForm = document.querySelector('.measurement-field') || document.querySelector('.category-option-input');
 
-      // Check if URL contains edit-related parameters (not marketing/tracking params)
-      // Wait for config to be available before checking
       let hasEditParams = false;
       if (window.CustomOrderUtils && window.CustomOrderUtils.hasEditRelatedParams) {
         try {
@@ -139,16 +355,38 @@
         }
       }
 
-      // If URL has edit-related parameters and we're on a product page with custom form, we're in edit mode
       if (hasEditParams && isProductPage && hasCustomForm) {
         state.editing = true;
       }
+
+      if (closeButton) {
+        closeButton.addEventListener('click', handleClose);
+      }
+
+      if (minimizedBar) {
+        minimizedBar.addEventListener('click', handleMinimizedBarClick);
+        minimizedBar.addEventListener('touchend', (e) => {
+          e.preventDefault();
+          handleMinimizedBarClick();
+        });
+        minimizedBar.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handleMinimizedBarClick();
+          }
+        });
+      }
+
+      banner.addEventListener('touchstart', handleTouchStart, { passive: true });
+      banner.addEventListener('touchmove', handleTouchMove, { passive: true });
+      banner.addEventListener('touchend', handleTouchEnd, { passive: true });
 
       render();
       subscribe(PUB_SUB_EVENTS.cartUpdate, (event) => {
         if (event.customOrderItemAdded) {
           state.editing = false;
           state.forceShow = false;
+          state.minimized = false;
           render();
         }
       });
