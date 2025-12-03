@@ -38,11 +38,7 @@
           }
         }
       },
-      "block_order": [
-        "heading",
-        "text",
-        "button"
-      ],
+      "block_order": ["heading", "text", "button"],
       "custom_css": [
         "h2 {text-shadow: 3px 3px 15px black; letter-spacing: 0.35rem;}",
         "p {margin-top: -10px; color: white; text-shadow: 3px 2px 5px black;}"
@@ -169,11 +165,7 @@
           }
         }
       },
-      "block_order": [
-        "collection-0",
-        "product",
-        "collection-1"
-      ],
+      "block_order": ["collection-0", "product", "collection-1"],
       "settings": {
         "heading": "",
         "heading_size": "h2",
@@ -247,10 +239,7 @@
           }
         }
       },
-      "block_order": [
-        "column1",
-        "column2"
-      ],
+      "block_order": ["column1", "column2"],
       "settings": {
         "title": "",
         "heading_size": "h1",
