@@ -34,22 +34,23 @@
   white-space: nowrap;
 }
 
-.custom-order-banner__close {
-  position: absolute;
-  top: 50%;
-  right: 1rem;
-  transform: translateY(-50%);
-  background: none;
-  border: none;
-  padding: 0.5rem;
-  cursor: pointer;
-  color: var(--custom-order-banner-color);
-  opacity: 0.7;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: opacity 150ms ease;
-}
+  .custom-order-banner__close {
+    position: absolute;
+    top: 50%;
+    right: 1rem;
+    transform: translateY(-50%);
+    background: var(--custom-order-banner-bg);
+    border: none;
+    padding: 0.5rem;
+    cursor: pointer;
+    color: var(--custom-order-banner-color);
+    opacity: 0.7;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 150ms ease;
+    z-index: 2;
+  }
 
 .custom-order-banner__close:hover,
 .custom-order-banner__close:focus {
@@ -128,7 +129,7 @@
   animation: minimize-pulse 1s ease-in-out 2;
 }
 
-.custom-order-banner--minimized .custom-order-banner__inner {
+.custom-order-banner.custom-banner--minimized .custom-order-banner__inner {
   display: none;
 }
 
@@ -149,22 +150,53 @@
 
 @media screen and (max-width: 749px) {
   .custom-order-banner__inner {
-    padding: 0.5rem 2.5rem 0.5rem 1rem;
+    padding: 0.5rem 3rem 0.5rem 1rem;
     font-size: 1.1rem;
     text-align: left;
     overflow: hidden;
     position: relative;
   }
 
+  .custom-order-banner__inner::before,
+  .custom-order-banner__inner::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 2rem;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  .custom-order-banner__inner::before {
+    left: 0;
+    background: linear-gradient(
+      to right,
+      var(--custom-order-banner-bg) 0%,
+      transparent 100%
+    );
+  }
+
+  .custom-order-banner__inner::after {
+    right: 3rem;
+    background: linear-gradient(
+      to left,
+      var(--custom-order-banner-bg) 0%,
+      transparent 100%
+    );
+  }
+
   .custom-order-banner__text {
     display: inline-block;
     white-space: nowrap;
-    padding-right: 2rem;
+    padding-right: 3rem;
     will-change: transform;
+    position: relative;
+    z-index: 1;
   }
 
   .custom-order-banner__text[data-needs-scroll='true'] {
-    animation: scroll-text 20s linear infinite;
+    animation: scroll-text 12s linear infinite;
   }
 
   .custom-order-banner__text[data-needs-scroll='true']:hover {
@@ -176,14 +208,16 @@
       transform: translateX(0);
     }
     100% {
-      transform: translateX(calc(-100% + 100vw - 4rem));
+      transform: translateX(calc(-100% + 100vw - 6rem));
     }
   }
 
   .custom-order-banner__close {
     right: 0.75rem;
     padding: 0.375rem;
-    z-index: 1;
+    z-index: 4;
+    background: var(--custom-order-banner-bg);
+    border-radius: 0.25rem;
   }
 }
 

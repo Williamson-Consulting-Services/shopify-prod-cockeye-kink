@@ -140,14 +140,17 @@
 
     function checkTextScroll() {
       if (!editingElement) return;
-      const text = editingElement.textContent || '';
       const container = editingElement.closest('.custom-order-banner__inner');
       if (!container) return;
 
-      const containerWidth = container.offsetWidth - 60; // Account for padding and close button
+      // Account for padding on both sides and close button width
+      const containerWidth = container.offsetWidth;
+      const leftPadding = 3; // 3rem left padding
+      const rightPadding = 3; // 3rem right padding (for close button area)
+      const availableWidth = containerWidth - (leftPadding * 16) - (rightPadding * 16); // Convert rem to px approximation
       const textWidth = editingElement.scrollWidth;
 
-      if (textWidth > containerWidth) {
+      if (textWidth > availableWidth) {
         editingElement.setAttribute('data-needs-scroll', 'true');
       } else {
         editingElement.removeAttribute('data-needs-scroll');
