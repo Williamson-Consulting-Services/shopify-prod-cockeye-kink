@@ -3,56 +3,110 @@
     "main": {
       "type": "main-product",
       "blocks": {
-        "vendor": { "type": "text", "settings": { "text": "{{ product.vendor }}", "text_style": "uppercase" } },
-        "title": { "type": "title", "settings": {} },
+        "vendor": {
+          "type": "text",
+          "settings": {
+            "text": "{{ product.vendor }}",
+            "text_style": "uppercase"
+          }
+        },
+        "title": {
+          "type": "title",
+          "settings": {}
+        },
         "caption": {
           "type": "text",
-          "settings": { "text": "{{ product.metafields.descriptors.subtitle.value }}", "text_style": "subtitle" }
+          "settings": {
+            "text": "{{ product.metafields.descriptors.subtitle.value }}",
+            "text_style": "subtitle"
+          }
         },
-        "price": { "type": "price", "settings": {} },
-        "variant_picker": { "type": "variant_picker", "settings": { "picker_type": "button" } },
-        "quantity_selector": { "type": "quantity_selector", "settings": {} },
+        "price": {
+          "type": "price",
+          "settings": {}
+        },
+        "variant_picker": {
+          "type": "variant_picker",
+          "settings": {
+            "picker_type": "button"
+          }
+        },
+        "quantity_selector": {
+          "type": "quantity_selector",
+          "settings": {}
+        },
         "text_J6M9gc": {
           "type": "text",
           "settings": {
-            "text": "Pants and Chaps require the following measurements: Waist, Butt\/Hips, Upper Thigh, Lower Thigh, Knee, Calf(Widest), Ankle, Inseam (Crotch top of waistband, over the genitals to the taint)",
+            "text": "Pants and Chaps require the following measurements: Waist, Butt/Hips, Upper Thigh, Lower Thigh, Knee, Calf(Widest), Ankle, Inseam (Crotch top of waistband, over the genitals to the taint)",
             "text_style": "body"
           }
         },
         "custom_liquid_qn4U3C": {
           "type": "custom_liquid",
           "settings": {
-            "custom_liquid": "<!-- Waist -->\n<style>\n  .measurement-input {\n    font-weight: bold;\n    color: black;\n    border: 1px solid #ccc;\n    border-radius: 4px;\n    padding: 5px;\n    width: 80px;\n    text-align: center;\n  }\n  .measurement-input::placeholder {\n    font-weight: bold;\n    color: black;\n  }\n<\/style>\n<input type=\"number\" step=\"0.1\" min=\"0\" id=\"measurement-waist\" placeholder=\"Waist (in)\" name=\"properties[Waist]\" required class=\"measurement-input\">"
+            "custom_liquid": "<!-- Waist -->\n<style>\n  .measurement-input {\n    font-weight: bold;\n    color: black;\n    border: 1px solid #ccc;\n    border-radius: 4px;\n    padding: 5px;\n    width: 80px;\n    text-align: center;\n  }\n  .measurement-input::placeholder {\n    font-weight: bold;\n    color: black;\n  }\n</style>\n<input type=\"number\" step=\"0.1\" min=\"0\" id=\"measurement-waist\" placeholder=\"Waist (in)\" name=\"properties[Waist]\" required class=\"measurement-input\">"
           }
         },
         "custom_liquid_dqqmHr": {
           "type": "custom_liquid",
           "settings": {
-            "custom_liquid": "<style>\n  \/* Style the textarea content *\/\n  #message2 {\n    font-weight: bold;\n    color: black;\n  }\n  \/* Style the placeholder text *\/\n  #message2::placeholder {\n    font-weight: bold;\n    color: black;\n  }\n<\/style>\n\n<textarea id=\"message2\"\n          placeholder=\"Message2\"\n          name=\"properties[Message2]\"\n          form=\"product-form-{{ section.id }}\"\n          maxlength=\"3\"\n          cols=\"3\"\n          rows=\"1\"\n          required>\n<\/textarea>"
+            "custom_liquid": "<style>\n  /* Style the textarea content */\n  #message2 {\n    font-weight: bold;\n    color: black;\n  }\n  /* Style the placeholder text */\n  #message2::placeholder {\n    font-weight: bold;\n    color: black;\n  }\n</style>\n\n<textarea id=\"message2\"\n          placeholder=\"Message2\"\n          name=\"properties[Message2]\"\n          form=\"product-form-{{ section.id }}\"\n          maxlength=\"3\"\n          cols=\"3\"\n          rows=\"1\"\n          required>\n</textarea>"
           }
         },
         "buy_buttons": {
           "type": "buy_buttons",
-          "settings": { "show_dynamic_checkout": true, "show_gift_card_recipient": false }
+          "settings": {
+            "show_dynamic_checkout": true,
+            "show_gift_card_recipient": false
+          }
         },
-        "description": { "type": "description", "settings": {} },
+        "description": {
+          "type": "description",
+          "settings": {}
+        },
         "collapsible-row-0": {
           "type": "collapsible_tab",
-          "settings": { "heading": "Materials", "icon": "leather", "content": "", "page": "" }
+          "settings": {
+            "heading": "Materials",
+            "icon": "leather",
+            "content": "",
+            "page": ""
+          }
         },
         "collapsible-row-1": {
           "type": "collapsible_tab",
-          "settings": { "heading": "Shipping & Returns", "icon": "truck", "content": "", "page": "" }
+          "settings": {
+            "heading": "Shipping & Returns",
+            "icon": "truck",
+            "content": "",
+            "page": ""
+          }
         },
         "collapsible-row-2": {
           "type": "collapsible_tab",
-          "settings": { "heading": "Dimensions", "icon": "ruler", "content": "", "page": "" }
+          "settings": {
+            "heading": "Dimensions",
+            "icon": "ruler",
+            "content": "",
+            "page": ""
+          }
         },
         "collapsible-row-3": {
           "type": "collapsible_tab",
-          "settings": { "heading": "Care Instructions", "icon": "heart", "content": "", "page": "" }
+          "settings": {
+            "heading": "Care Instructions",
+            "icon": "heart",
+            "content": "",
+            "page": ""
+          }
         },
-        "share": { "type": "share", "settings": { "share_label": "Share" } }
+        "share": {
+          "type": "share",
+          "settings": {
+            "share_label": "Share"
+          }
+        }
       },
       "block_order": [
         "vendor",
@@ -94,7 +148,7 @@
         "heading_size": "h2",
         "products_to_show": 4,
         "columns_desktop": 4,
-        "color_scheme": "background-1",
+        "color_scheme": "scheme-1",
         "image_ratio": "square",
         "image_shape": "default",
         "show_secondary_image": true,
@@ -108,11 +162,17 @@
     "image-with-text": {
       "type": "image-with-text",
       "blocks": {
-        "image-with-text-0": { "type": "heading", "settings": { "heading": "Image with text", "heading_size": "h1" } },
+        "image-with-text-0": {
+          "type": "heading",
+          "settings": {
+            "heading": "Image with text",
+            "heading_size": "h1"
+          }
+        },
         "image-with-text-1": {
           "type": "text",
           "settings": {
-            "text": "<p>Pair text with an image to focus on your chosen product, collection, or blog post. Add details on availability, style, or even provide a review.<\/p>",
+            "text": "<p>Pair text with an image to focus on your chosen product, collection, or blog post. Add details on availability, style, or even provide a review.</p>",
             "text_style": "body"
           }
         }
@@ -125,7 +185,7 @@
         "desktop_content_position": "top",
         "desktop_content_alignment": "left",
         "content_layout": "no-overlap",
-        "color_scheme": "background-2",
+        "color_scheme": "scheme-2",
         "image_behavior": "none",
         "mobile_content_alignment": "left",
         "padding_top": 36,
@@ -139,7 +199,7 @@
           "type": "column",
           "settings": {
             "title": "Free Shipping",
-            "text": "<p>Pair text with an image to focus on your chosen product, collection, or blog post. Add details on availability, style, or even provide a review.<\/p>",
+            "text": "<p>Pair text with an image to focus on your chosen product, collection, or blog post. Add details on availability, style, or even provide a review.</p>",
             "link_label": "",
             "link": ""
           }
@@ -148,7 +208,7 @@
           "type": "column",
           "settings": {
             "title": "Hassle-Free Exchanges",
-            "text": "<p>Pair text with an image to focus on your chosen product, collection, or blog post. Add details on availability, style, or even provide a review.<\/p>",
+            "text": "<p>Pair text with an image to focus on your chosen product, collection, or blog post. Add details on availability, style, or even provide a review.</p>",
             "link_label": "",
             "link": ""
           }
@@ -165,7 +225,7 @@
         "background_style": "none",
         "button_label": "",
         "button_link": "",
-        "color_scheme": "background-1",
+        "color_scheme": "scheme-1",
         "columns_mobile": "1",
         "swipe_on_mobile": false,
         "padding_top": 36,

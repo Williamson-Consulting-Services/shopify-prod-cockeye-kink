@@ -40,7 +40,7 @@
       },
       "block_order": ["footer-0", "footer-1", "footer-2"],
       "settings": {
-        "color_scheme": "inverse",
+        "color_scheme": "scheme-3",
         "newsletter_enable": false,
         "newsletter_heading": "Subscribe to our emails",
         "enable_follow_on_shop": true,
