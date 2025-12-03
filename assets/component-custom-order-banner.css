@@ -33,7 +33,7 @@
 .custom-order-banner__text-container {
   flex: 1;
   overflow: hidden;
-  padding-right: 1rem;
+  padding-right: 4rem;
   min-width: 0;
 }
 
@@ -64,17 +64,8 @@
   justify-content: center;
   transition: opacity 150ms ease;
   z-index: 10;
-}
-
-.custom-order-banner__close::before {
-  content: '';
-  position: absolute;
-  left: -3rem;
-  top: 0;
-  bottom: 0;
-  width: 3rem;
-  background: var(--custom-order-banner-bg);
-  z-index: -1;
+  flex-shrink: 0;
+  min-width: 2.5rem;
 }
 
 .custom-order-banner__close:hover,
@@ -184,7 +175,7 @@
   }
 
   .custom-order-banner__text-container {
-    padding-right: 0;
+    padding-right: 3.5rem;
   }
 
   .custom-order-banner__text-wrapper {
@@ -224,7 +215,6 @@
     z-index: 10;
     background: var(--custom-order-banner-bg);
     border-radius: 0.25rem;
-    box-shadow: 0 0 1rem var(--custom-order-banner-bg);
     position: absolute;
     flex-shrink: 0;
   }
