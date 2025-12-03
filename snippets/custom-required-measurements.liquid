@@ -11,6 +11,7 @@
 
 {%- comment -%} Load CSS {%- endcomment -%}
 {{ 'component-custom-measurements.css' | asset_url | stylesheet_tag }}
+{{ 'component-product-variant-picker.css' | asset_url | stylesheet_tag }}
 
 {%- comment -%} Parse config from theme settings for rendering (needed for backward compatibility) {%- endcomment -%}
 {%- assign default_categories_order = 'Hats, Tag, Shirt, Gloves, Harness, Suspenders, Belts, Pants, Kilt, Chaps, Other' -%}
@@ -34,7 +35,9 @@
 {%- assign measurement_names = measurement_names | uniq -%}
 
 {%- assign default_harness_categories = 'Harness' -%}
-{%- assign harness_source_raw = settings.custom_measurements_harness_categories | default: default_harness_categories -%}
+{%- assign harness_source_raw = settings.custom_measurements_harness_categories
+  | default: default_harness_categories
+-%}
 {%- assign harness_source = harness_source_raw | replace: '|', ',' -%}
 {%- assign harness_categories = harness_source | split: ',' -%}
 
@@ -49,12 +52,16 @@
 {%- assign leather_colors = leather_source | split: ',' -%}
 
 {%- assign default_front_plate_options = 'Bear Paw, Puppy Paw, Fist Image, Pig Image, Boot Image, Biohazard Symbol, Cigar Man' -%}
-{%- assign front_plate_source_raw = settings.custom_measurements_front_plate_options | default: default_front_plate_options -%}
+{%- assign front_plate_source_raw = settings.custom_measurements_front_plate_options
+  | default: default_front_plate_options
+-%}
 {%- assign front_plate_source = front_plate_source_raw | replace: '|', ',' -%}
 {%- assign front_plate_options = front_plate_source | split: ',' -%}
 
 {%- assign default_back_plate_extra = 'Wesco Boot, Watersports, Happy Puppy' -%}
-{%- assign back_plate_extra_source_raw = settings.custom_measurements_back_plate_extra | default: default_back_plate_extra -%}
+{%- assign back_plate_extra_source_raw = settings.custom_measurements_back_plate_extra
+  | default: default_back_plate_extra
+-%}
 {%- assign back_plate_extra_source = back_plate_extra_source_raw | replace: '|', ',' -%}
 {%- assign back_plate_extra = back_plate_extra_source | split: ',' -%}
 {%- assign back_plate_options = front_plate_options | concat: back_plate_extra -%}
@@ -81,30 +88,28 @@
 {%- render 'custom-measurements-associate', associates: associates, section_id: section.id -%}
 
 {%- render 'custom-measurements-category-selector',
-    categories_order: categories_order,
-    measurement_map_lines: measurement_map_lines,
-    harness_categories: harness_categories,
-    harness_types: harness_types,
-    tag_options: tag_options,
-    section_id: section.id -%}
+  categories_order: categories_order,
+  measurement_map_lines: measurement_map_lines,
+  harness_categories: harness_categories,
+  harness_types: harness_types,
+  tag_options: tag_options,
+  section_id: section.id
+-%}
 
 {%- render 'custom-measurements-hidden-fields', section_id: section.id -%}
 
 {%- render 'custom-measurements-unit-toggle', section_id: section.id -%}
 
-{%- render 'custom-measurements-field-group',
-    measurement_names: measurement_names,
-    section_id: section.id -%}
+{%- render 'custom-measurements-field-group', measurement_names: measurement_names, section_id: section.id -%}
 
-{%- render 'custom-measurements-leather-color',
-    leather_colors: leather_colors,
-    section_id: section.id -%}
+{%- render 'custom-measurements-leather-color', leather_colors: leather_colors, section_id: section.id -%}
 
 {%- render 'custom-measurements-harness-options',
-    front_plate_options: front_plate_options,
-    back_plate_options: back_plate_options,
-    long_sliders: long_sliders,
-    section_id: section.id -%}
+  front_plate_options: front_plate_options,
+  back_plate_options: back_plate_options,
+  long_sliders: long_sliders,
+  section_id: section.id
+-%}
 
 {%- render 'custom-measurements-notes', section_id: section.id -%}
 
