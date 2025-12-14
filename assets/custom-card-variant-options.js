@@ -18,8 +18,10 @@ class CustomCardVariantOptions {
       addToCart: this.container.getAttribute('data-translation-add-to-cart') || 'Add to cart',
       soldOut: this.container.getAttribute('data-translation-sold-out') || 'Sold out',
       chooseOptions: this.container.getAttribute('data-translation-choose-options') || 'Choose options',
-      inStockTemplate: this.container.getAttribute('data-translation-in-stock-template') || 'QUANTITY_PLACEHOLDER in stock',
-      lowStockTemplate: this.container.getAttribute('data-translation-low-stock-template') || 'Low stock: QUANTITY_PLACEHOLDER left',
+      inStockTemplate:
+        this.container.getAttribute('data-translation-in-stock-template') || 'QUANTITY_PLACEHOLDER in stock',
+      lowStockTemplate:
+        this.container.getAttribute('data-translation-low-stock-template') || 'Low stock: QUANTITY_PLACEHOLDER left',
     };
 
     this.init();
