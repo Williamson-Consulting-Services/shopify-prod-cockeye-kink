@@ -362,7 +362,11 @@
             // These events fire even on disabled buttons, unlike click events
             const handleDisabledButton = (event) => {
               // If button is disabled, run validation with scrolling and prevent submission
-              if (this.button.disabled || this.button.hasAttribute('disabled') || this.button.getAttribute('aria-disabled') === 'true') {
+              if (
+                this.button.disabled ||
+                this.button.hasAttribute('disabled') ||
+                this.button.getAttribute('aria-disabled') === 'true'
+              ) {
                 event.preventDefault();
                 event.stopPropagation();
                 event.stopImmediatePropagation();
@@ -370,7 +374,7 @@
                   window.customMeasurementsForm.validationService.validateRequiredFields(
                     window.customMeasurementsForm.selectedCategory,
                     window.customMeasurementsForm.harnessSection,
-                    true // Enable scrolling when clicking disabled button
+                    true, // Enable scrolling when clicking disabled button
                   );
                 }
                 return false;
@@ -383,14 +387,18 @@
 
             // Also handle click for when button is enabled
             this.button.addEventListener('click', (event) => {
-              if (this.button.disabled || this.button.hasAttribute('disabled') || this.button.getAttribute('aria-disabled') === 'true') {
+              if (
+                this.button.disabled ||
+                this.button.hasAttribute('disabled') ||
+                this.button.getAttribute('aria-disabled') === 'true'
+              ) {
                 event.preventDefault();
                 event.stopPropagation();
                 if (window.customMeasurementsForm && window.customMeasurementsForm.validationService) {
                   window.customMeasurementsForm.validationService.validateRequiredFields(
                     window.customMeasurementsForm.selectedCategory,
                     window.customMeasurementsForm.harnessSection,
-                    true
+                    true,
                   );
                 }
                 return false;
@@ -635,7 +643,16 @@
       });
     }
 
-    updateSectionVisibility(category, harnessSection, harnessTypeSelector, tagTypeSelector, leatherColorSection, notesSection, associateSection, otherCategoryNotice) {
+    updateSectionVisibility(
+      category,
+      harnessSection,
+      harnessTypeSelector,
+      tagTypeSelector,
+      leatherColorSection,
+      notesSection,
+      associateSection,
+      otherCategoryNotice,
+    ) {
       // Show/hide "Other" category notice banner
       if (otherCategoryNotice) {
         const showNotice = category === 'Other';
@@ -898,10 +915,7 @@
     }
 
     updateAddToCartButton() {
-      const isValid = this.validationService.validateRequiredFields(
-        this.selectedCategory,
-        this.harnessSection
-      );
+      const isValid = this.validationService.validateRequiredFields(this.selectedCategory, this.harnessSection);
       this.buttonManager.update(isValid);
     }
 
@@ -1014,21 +1028,18 @@
         firstInput.checked = true;
         this.selectedCategory = firstInput.dataset.label;
         this.currentCategoryStore = this.measurementManager.getCategoryStore(this.selectedCategory);
-          this.categoryManager.updateSectionVisibility(
-            this.selectedCategory,
-            this.harnessSection,
-            this.harnessTypeSelector,
-            this.tagTypeSelector,
-            this.leatherColorSection,
-            this.notesSection,
-            this.associateSection,
-            this.otherCategoryNotice
-          );
-        this.categoryManager.updateMeasurementsForCategory(this.selectedCategory, this.measurementFields);
-        this.measurementManager.restoreMeasurementsForCategory(
+        this.categoryManager.updateSectionVisibility(
           this.selectedCategory,
-          this.measurementFields
+          this.harnessSection,
+          this.harnessTypeSelector,
+          this.tagTypeSelector,
+          this.leatherColorSection,
+          this.notesSection,
+          this.associateSection,
+          this.otherCategoryNotice,
         );
+        this.categoryManager.updateMeasurementsForCategory(this.selectedCategory, this.measurementFields);
+        this.measurementManager.restoreMeasurementsForCategory(this.selectedCategory, this.measurementFields);
         this.updateMeasurementOnUnitChange();
         this.categoryManager.updateMeasurementGroupVisibility();
       }
@@ -1056,12 +1067,8 @@
 
       // Only show banner if URL contains edit-related parameters (not marketing/tracking params)
       // Wait for config to be available before checking
-      if (
-        window.CustomOrderUtils &&
-        window.CustomOrderUtils.hasEditRelatedParams
-      ) {
-        window.CustomOrderUtils
-          .hasEditRelatedParams()
+      if (window.CustomOrderUtils && window.CustomOrderUtils.hasEditRelatedParams) {
+        window.CustomOrderUtils.hasEditRelatedParams()
           .then((hasEditParams) => {
             if (hasEditParams) {
               // If we have edit-related URL parameters, we're in edit mode - show banner immediately
@@ -1076,9 +1083,7 @@
       // Pre-fill category if present
       if (urlParams['Selected Option']) {
         const categoryValue = urlParams['Selected Option'];
-        const categoryInput = Array.from(this.categoryInputs).find(
-          (input) => input.dataset.label === categoryValue
-        );
+        const categoryInput = Array.from(this.categoryInputs).find((input) => input.dataset.label === categoryValue);
         if (categoryInput) {
           categoryInput.checked = true;
           this.selectedCategory = categoryValue;
@@ -1091,7 +1096,7 @@
             this.leatherColorSection,
             this.notesSection,
             this.associateSection,
-            this.otherCategoryNotice
+            this.otherCategoryNotice,
           );
           this.categoryManager.updateMeasurementsForCategory(this.selectedCategory, this.measurementFields);
         }
@@ -1136,9 +1141,7 @@
       if (urlParams['Associate']) {
         if (this.associateSelect) {
           const associateValue = urlParams['Associate'];
-          const option = Array.from(this.associateSelect.options).find(
-            (opt) => opt.value === associateValue
-          );
+          const option = Array.from(this.associateSelect.options).find((opt) => opt.value === associateValue);
           if (option) {
             this.associateSelect.value = associateValue;
             if (associateValue === 'Other' && this.associateTextWrapper) {
@@ -1157,7 +1160,7 @@
       if (urlParams['Leather Color']) {
         const leatherColorValue = urlParams['Leather Color'];
         const leatherColorRadio = Array.from(this.leatherColorRadios).find(
-          (radio) => radio.value === leatherColorValue
+          (radio) => radio.value === leatherColorValue,
         );
         if (leatherColorRadio) {
           leatherColorRadio.checked = true;
@@ -1173,9 +1176,7 @@
       // Pre-fill harness type
       if (urlParams['Harness Type'] && this.harnessTypeSelector) {
         const harnessTypeValue = urlParams['Harness Type'];
-        const harnessTypeInput = Array.from(this.harnessTypeInputs).find(
-          (input) => input.value === harnessTypeValue
-        );
+        const harnessTypeInput = Array.from(this.harnessTypeInputs).find((input) => input.value === harnessTypeValue);
         if (harnessTypeInput) {
           harnessTypeInput.checked = true;
         }
@@ -1185,9 +1186,7 @@
       if (urlParams['Tag Type'] && this.tagTypeSelector) {
         const tagTypeValue = urlParams['Tag Type'];
         const tagTypeInputs = this.tagTypeSelector.querySelectorAll('.tag-type-input');
-        const tagTypeInput = Array.from(tagTypeInputs).find(
-          (input) => input.value === tagTypeValue
-        );
+        const tagTypeInput = Array.from(tagTypeInputs).find((input) => input.value === tagTypeValue);
         if (tagTypeInput) {
           tagTypeInput.checked = true;
         }
@@ -1287,10 +1286,7 @@
           if (!input.checked) return;
           this.flagFormInteraction();
           if (this.selectedCategory) {
-            this.measurementManager.saveCategoryMeasurements(
-              this.selectedCategory,
-              this.measurementFields
-            );
+            this.measurementManager.saveCategoryMeasurements(this.selectedCategory, this.measurementFields);
           }
           this.selectedCategory = input.dataset.label;
           this.currentCategoryStore = this.measurementManager.getCategoryStore(this.selectedCategory);
@@ -1306,13 +1302,10 @@
             this.leatherColorSection,
             this.notesSection,
             this.associateSection,
-            this.otherCategoryNotice
+            this.otherCategoryNotice,
           );
           this.categoryManager.updateMeasurementsForCategory(this.selectedCategory, this.measurementFields);
-          this.measurementManager.restoreMeasurementsForCategory(
-            this.selectedCategory,
-            this.measurementFields
-          );
+          this.measurementManager.restoreMeasurementsForCategory(this.selectedCategory, this.measurementFields);
           this.updateMeasurementOnUnitChange();
           this.categoryManager.updateMeasurementGroupVisibility();
           this.updateAddToCartButton();
@@ -1325,16 +1318,12 @@
           if (!input.checked) return;
           this.flagFormInteraction();
           if (this.selectedCategory) {
-            this.measurementManager.saveCategoryMeasurements(
-              this.selectedCategory,
-              this.measurementFields
-            );
+            this.measurementManager.saveCategoryMeasurements(this.selectedCategory, this.measurementFields);
           }
           this.currentUnit = input.dataset.unit;
 
           if (this.unitOfMeasureInput) {
-            const unitValue =
-              this.currentUnit === 'in' ? 'Measured in Inches' : 'Measured in Centimeters';
+            const unitValue = this.currentUnit === 'in' ? 'Measured in Inches' : 'Measured in Centimeters';
             this.unitOfMeasureInput.value = unitValue;
             this.unitOfMeasureInput.setAttribute('value', unitValue);
           }
@@ -1352,9 +1341,10 @@
           if (field) {
             field.classList.remove('measurement-field--error');
             input.classList.remove('measurement-input--error');
-            const otherInput = field.querySelector('.measurement-in') === input
-              ? field.querySelector('.measurement-cm')
-              : field.querySelector('.measurement-in');
+            const otherInput =
+              field.querySelector('.measurement-in') === input
+                ? field.querySelector('.measurement-cm')
+                : field.querySelector('.measurement-in');
             if (otherInput) otherInput.classList.remove('measurement-input--error');
           }
           this.updateAddToCartButton();
@@ -1442,7 +1432,7 @@
           'associate-select',
           'associate-text-wrapper',
           'associate-text',
-          onInteraction
+          onInteraction,
         );
         // Clear error state on associate select change
         this.associateSelect.addEventListener('change', () => {
@@ -1485,7 +1475,11 @@
       // Harness "Other" option handlers (plates and sliders only)
       const harnessOtherConfigs = [
         { select: 'left-front-plate-select', wrapper: 'left-front-plate-text-wrapper', text: 'left-front-plate-text' },
-        { select: 'right-front-plate-select', wrapper: 'right-front-plate-text-wrapper', text: 'right-front-plate-text' },
+        {
+          select: 'right-front-plate-select',
+          wrapper: 'right-front-plate-text-wrapper',
+          text: 'right-front-plate-text',
+        },
         { select: 'back-plate-select', wrapper: 'back-plate-text-wrapper', text: 'back-plate-text' },
         { select: 'long-sliders-select', wrapper: 'long-sliders-text-wrapper', text: 'long-sliders-text' },
       ];
@@ -1531,8 +1525,7 @@
           }
 
           if (this.unitOfMeasureInput) {
-            const unitValue =
-              this.currentUnit === 'in' ? 'Measured in Inches' : 'Measured in Centimeters';
+            const unitValue = this.currentUnit === 'in' ? 'Measured in Inches' : 'Measured in Centimeters';
             this.unitOfMeasureInput.value = unitValue;
             this.unitOfMeasureInput.setAttribute('value', unitValue);
           }
@@ -1554,7 +1547,9 @@
           // Filter all property inputs (measurements and other properties)
           // Remove name attribute to prevent them from being included in FormData
           // This MUST happen before product-form.js creates FormData
-          const allPropertyInputs = this.productForm.querySelectorAll('input[name^="properties["], select[name^="properties["], textarea[name^="properties["]');
+          const allPropertyInputs = this.productForm.querySelectorAll(
+            'input[name^="properties["], select[name^="properties["], textarea[name^="properties["]',
+          );
           allPropertyInputs.forEach((input) => {
             const name = input.getAttribute('name');
             if (!name) return;
@@ -1582,9 +1577,7 @@
                 const measName = measMatch[1] || measMatch[2];
                 const measConfig = this.config.measurements[measName];
                 const categoryInfo =
-                  measConfig && measConfig.categories
-                    ? measConfig.categories[this.selectedCategory]
-                    : null;
+                  measConfig && measConfig.categories ? measConfig.categories[this.selectedCategory] : null;
                 const isIncluded = categoryInfo && categoryInfo.included === true;
 
                 // Remove if not included in category or if value is empty
@@ -1619,11 +1612,7 @@
     }
 
     setupCartUpdateSubscription() {
-      if (
-        typeof subscribe === 'function' &&
-        typeof PUB_SUB_EVENTS !== 'undefined' &&
-        PUB_SUB_EVENTS.cartUpdate
-      ) {
+      if (typeof subscribe === 'function' && typeof PUB_SUB_EVENTS !== 'undefined' && PUB_SUB_EVENTS.cartUpdate) {
         subscribe(PUB_SUB_EVENTS.cartUpdate, (event) => {
           if (event.cartState || event.itemCount !== undefined) {
             this.hasInteractedWithForm = false;
@@ -1660,7 +1649,8 @@
   // Initialize when DOM is ready
   function initializeForm() {
     // Try to get section ID from the form or use a default
-    const productForm = document.querySelector('form[action*="/cart/add"]') || document.querySelector('form[id^="product-form"]');
+    const productForm =
+      document.querySelector('form[action*="/cart/add"]') || document.querySelector('form[id^="product-form"]');
     let sectionId = 'main';
 
     if (productForm) {
@@ -1703,6 +1693,4 @@
   } else {
     initializeForm();
   }
-
 })();
-

@@ -43,47 +43,43 @@
         "text",
         "button"
       ],
-      "custom_css": [
-        "h2 {text-shadow: 3px 3px 15px black; letter-spacing: 0.35rem;}",
-        "p {margin-top: -10px; color: white; text-shadow: 3px 2px 5px black;}",
-        ".button {color: white; background-color: #c70000;}"
-      ],
+      "custom_css": [],
       "settings": {
         "image": "shopify://shop_images/cockeye_header.jpg",
         "image_overlay_opacity": 30,
         "image_height": "large",
-        "desktop_content_position": "bottom-center",
-        "show_text_box": false,
-        "desktop_content_alignment": "center",
-        "color_scheme": "accent-1",
         "image_behavior": "none",
-        "mobile_content_alignment": "center",
+        "desktop_content_position": "bottom-center",
+        "desktop_content_alignment": "center",
+        "show_text_box": false,
+        "color_scheme": "scheme-4",
         "stack_images_on_mobile": false,
+        "mobile_content_alignment": "center",
         "show_text_below": false
       }
     },
     "featured_collection": {
       "type": "featured-collection",
       "settings": {
+        "collection": "all",
+        "products_to_show": 5,
         "title": "Featured products",
         "heading_size": "h2",
         "description": "",
         "show_description": false,
         "description_style": "body",
-        "collection": "all",
-        "products_to_show": 5,
         "columns_desktop": 5,
+        "enable_desktop_slider": false,
         "full_width": false,
         "show_view_all": false,
         "view_all_style": "solid",
-        "enable_desktop_slider": false,
-        "color_scheme": "accent-1",
+        "color_scheme": "scheme-4",
         "image_ratio": "portrait",
         "image_shape": "default",
         "show_secondary_image": true,
         "show_vendor": false,
         "show_rating": false,
-        "enable_quick_add": false,
+        "quick_add": "none",
         "columns_mobile": "2",
         "swipe_on_mobile": false,
         "padding_top": 28,
@@ -112,23 +108,18 @@
         "template--15526048170037__58116487-76ef-4c1f-9098-4a26f41cc0b3-16871952192d27ea38-0",
         "template--15526048170037__58116487-76ef-4c1f-9098-4a26f41cc0b3-16871952192d27ea38-1"
       ],
-      "custom_css": [
-        ".banner {min-height: 15rem;}",
-        ".banner p {color: white;}",
-        ".banner p,.banner h2 {text-shadow: 1px 3px 5px black;}",
-        ".banner h2 {font-size: 225%;}"
-      ],
+      "custom_css": [],
       "settings": {
         "image": "shopify://shop_images/Fisting_Kink.jpg",
         "image_overlay_opacity": 60,
         "image_height": "small",
-        "desktop_content_position": "middle-center",
-        "show_text_box": false,
-        "desktop_content_alignment": "center",
-        "color_scheme": "accent-1",
         "image_behavior": "fixed",
-        "mobile_content_alignment": "center",
+        "desktop_content_position": "middle-center",
+        "desktop_content_alignment": "center",
+        "show_text_box": false,
+        "color_scheme": "scheme-4",
         "stack_images_on_mobile": false,
+        "mobile_content_alignment": "center",
         "show_text_below": false
       }
     },
@@ -142,7 +133,7 @@
         "video_url": "https://www.youtube.com/watch?v=_9VUPq3SxOc",
         "description": "",
         "full_width": false,
-        "color_scheme": "accent-1",
+        "color_scheme": "scheme-4",
         "padding_top": 36,
         "padding_bottom": 36
       }
@@ -181,7 +172,7 @@
         "desktop_layout": "left",
         "mobile_layout": "collage",
         "card_styles": "product-card-wrapper",
-        "color_scheme": "accent-1",
+        "color_scheme": "scheme-4",
         "padding_top": 36,
         "padding_bottom": 36
       }
@@ -212,13 +203,10 @@
         "template--15526048170037__3852a66e-4c05-4a3f-9259-e253712ee53d-1687194242b75793b6-1",
         "template--15526048170037__3852a66e-4c05-4a3f-9259-e253712ee53d-1687194242b75793b6-2"
       ],
-      "custom_css": [
-        ".newsletter__wrapper {background-image: url(https://cdn.shopify.com/s/files/1/0590/6648/2741/files/CigarBull_Custom.jpg); background-size: cover; background-position: bottom;}",
-        ".newsletter__wrapper h2 {text-transform: uppercase; text-shadow: 1px 3px 5px black;}",
-        ".newsletter__wrapper p {text-shadow: 1px 3px 5px black; color: white;}"
-      ],
+      "custom_css": [],
       "settings": {
-        "color_scheme": "accent-1",
+        "color_scheme": "scheme-4",
+        "background_image": "shopify://shop_images/CigarBull_Custom.jpg",
         "full_width": true,
         "padding_top": 40,
         "padding_bottom": 52
@@ -257,12 +245,12 @@
         "heading_size": "h1",
         "image_width": "half",
         "image_ratio": "adapt",
+        "button_label": "",
+        "button_link": "",
         "columns_desktop": 2,
         "column_alignment": "center",
         "background_style": "none",
-        "button_label": "",
-        "button_link": "",
-        "color_scheme": "accent-1",
+        "color_scheme": "scheme-4",
         "columns_mobile": "1",
         "swipe_on_mobile": false,
         "padding_top": 36,
@@ -271,16 +259,12 @@
     },
     "2988e253-683e-4051-a9fd-23973a751668": {
       "type": "contact-form",
-      "custom_css": [
-        "@media screen and (max-width: 600px) {.banner__heading {margin-top: 140px; }}",
-        ".gradient {background-image: url(https://cdn.shopify.com/s/files/1/0590/6648/2741/files/CockEyeKink_contact-v2.jpg); background-size: auto; background-attachment: fixed;}",
-        ".contact h2 {text-transform: uppercase; text-shadow: 1px 3px 5px black;}",
-        ".newsletter__wrapper p {text-shadow: 1px 3px 5px black; color: white;}"
-      ],
+      "custom_css": [],
       "settings": {
         "heading": "Drop us a line!",
         "heading_size": "h1",
-        "color_scheme": "accent-1",
+        "color_scheme": "scheme-4",
+        "background_image": "shopify://shop_images/CockEyeKink_contact-v2.jpg",
         "padding_top": 36,
         "padding_bottom": 36
       }

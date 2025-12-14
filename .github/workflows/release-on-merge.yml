@@ -112,4 +112,3 @@ jobs:
           else
             echo "ℹ️ Git tag **$TAG** already exists" >> $GITHUB_STEP_SUMMARY
           fi
-

@@ -10,10 +10,48 @@ window.CustomOrderCheckoutFooter = (function () {
   }
 
   const countElement = footer.querySelector('.checkout-footer__count');
+  const messageElement = footer.querySelector('.checkout-footer__message:not(.checkout-footer__message--duplicate)');
   const suppressed =
     window.location.pathname.includes('/checkouts/') ||
     window.location.pathname.includes('/checkout') ||
     window.location.pathname.includes('/thank-you');
+
+  function checkTextScroll() {
+    const statusElement = footer.querySelector('.checkout-footer__status');
+    const wrapper = footer.querySelector('[data-message-wrapper]');
+    const duplicate = wrapper?.querySelector('.checkout-footer__message--duplicate');
+
+    if (!messageElement || !statusElement || !wrapper) {
+      if (duplicate) duplicate.hidden = true;
+      if (wrapper) wrapper.removeAttribute('data-needs-scroll');
+      if (statusElement) statusElement.removeAttribute('data-needs-scroll');
+      return;
+    }
+
+    // Hide duplicate and remove scroll attributes on desktop
+    if (window.innerWidth > 749) {
+      if (duplicate) duplicate.hidden = true;
+      wrapper.removeAttribute('data-needs-scroll');
+      statusElement.removeAttribute('data-needs-scroll');
+      return;
+    }
+
+    const statusWidth = statusElement.offsetWidth;
+    const messageWidth = messageElement.scrollWidth;
+    const availableWidth = statusWidth - 80; // Account for padding and button space
+
+    if (messageWidth > availableWidth && duplicate) {
+      // Duplicate message for seamless scrolling
+      duplicate.innerHTML = messageElement.innerHTML;
+      duplicate.hidden = false;
+      wrapper.setAttribute('data-needs-scroll', 'true');
+      statusElement.setAttribute('data-needs-scroll', 'true');
+    } else {
+      if (duplicate) duplicate.hidden = true;
+      wrapper.removeAttribute('data-needs-scroll');
+      statusElement.removeAttribute('data-needs-scroll');
+    }
+  }
 
   function countCustomItems(cart) {
     if (!cart || !cart.items) return 0;
@@ -40,6 +78,8 @@ window.CustomOrderCheckoutFooter = (function () {
         countElement.textContent = customCount;
       }
       footer.setAttribute('data-custom-item-count', customCount);
+      // Check if text needs scrolling after update - this will handle duplicate visibility
+      setTimeout(checkTextScroll, 100);
     } else {
       footer.hidden = true;
     }
@@ -54,8 +94,8 @@ window.CustomOrderCheckoutFooter = (function () {
         cache: 'no-store',
         headers: {
           'Cache-Control': 'no-cache, no-store, must-revalidate',
-          'Pragma': 'no-cache',
-          'Expires': '0'
+          Pragma: 'no-cache',
+          Expires: '0',
         },
       });
       if (!response.ok) throw new Error(response.statusText);
@@ -69,6 +109,11 @@ window.CustomOrderCheckoutFooter = (function () {
 
   function init() {
     refreshCart(); // Initial load
+
+    // Check text scroll on load and resize (always check to hide/show duplicate correctly)
+    setTimeout(checkTextScroll, 200);
+    window.addEventListener('resize', checkTextScroll);
+
     subscribe(PUB_SUB_EVENTS.cartUpdate, (event) => {
       if (event.cartState) {
         const customCount = countCustomItems(event.cartState);
@@ -119,4 +164,3 @@ window.CustomOrderCheckoutFooter = (function () {
 
   return { update: updateFooter, refresh: refreshCart };
 })();
-

@@ -6,7 +6,6 @@
     - section_id: The section ID for form association
 {% endcomment %}
 
-{%- comment -%} Notice banner for "Other" category {%- endcomment -%}
 <div class="other-category-notice" id="other-category-notice" style="display: none;">
   <div class="notice-banner">
     <span class="notice-icon">ℹ️</span>
@@ -14,52 +13,58 @@
   </div>
 </div>
 
-{%- comment -%} Define measurement groups configuration {%- endcomment -%}
-{%- assign upper_body_measurements = 'Head Circumference,Neck,Shoulders,Chest,Torso,Sleeve Length,Bicep,Wrist,Palm Circumference,Hand Length' | split: ',' -%}
-{%- assign torso_hips_measurements = 'Stomach,Waist,Hips' | split: ',' -%}
-{%- assign lower_body_measurements = 'Upper Thigh,Lower Thigh,Knee,Calf,Ankle,Inseam,Crotch,Butt Rise,Length' | split: ',' -%}
-{%- assign all_grouped_measurements = upper_body_measurements | concat: torso_hips_measurements | concat: lower_body_measurements -%}
+{%- assign default_upper_body = 'Head Circumference,Neck,Shoulders,Chest,Sleeve Length,Bicep,Wrist,Palm Circumference,Hand Length' -%}
+{%- assign default_torso_hips = 'Torso,Stomach,Waist,Hips' -%}
+{%- assign default_lower_body = 'Upper Thigh,Lower Thigh,Knee,Calf,Ankle,Inseam,Crotch,Butt Rise,Length' -%}
 
-{%- comment -%} Helper: Check if measurement is in group {%- endcomment -%}
-{%- comment -%} Liquid doesn't support functions, so we use a reusable snippet pattern {%- endcomment -%}
+{%- assign upper_body_source = settings.custom_measurements_group_upper_body | default: default_upper_body -%}
+{%- assign torso_hips_source = settings.custom_measurements_group_torso_hips | default: default_torso_hips -%}
+{%- assign lower_body_source = settings.custom_measurements_group_lower_body | default: default_lower_body -%}
 
-{%- comment -%} Group 1: Upper Body {%- endcomment -%}
+{%- assign upper_body_measurements = upper_body_source | split: ',' -%}
+{%- assign torso_hips_measurements = torso_hips_source | split: ',' -%}
+{%- assign lower_body_measurements = lower_body_source | split: ',' -%}
+
+{%- assign all_grouped_measurements = upper_body_measurements
+  | concat: torso_hips_measurements
+  | concat: lower_body_measurements
+-%}
+
 {%- render 'custom-measurements-group',
-    group_measurements: upper_body_measurements,
-    group_label: 'custom_measurements.group_upper_body',
-    group_id: 'upper-body',
-    container_id: 'measurementsGroup-upper',
-    measurement_names: measurement_names,
-    section_id: section_id -%}
+  group_measurements: upper_body_measurements,
+  group_label: 'custom_measurements.group_upper_body',
+  group_id: 'upper-body',
+  container_id: 'measurementsGroup-upper',
+  measurement_names: measurement_names,
+  section_id: section_id
+-%}
 
-{%- comment -%} Group 2: Torso/Hips {%- endcomment -%}
 {%- render 'custom-measurements-group',
-    group_measurements: torso_hips_measurements,
-    group_label: 'custom_measurements.group_torso_hips',
-    group_id: 'torso-hips',
-    container_id: 'measurementsGroup-torso',
-    measurement_names: measurement_names,
-    section_id: section_id -%}
+  group_measurements: torso_hips_measurements,
+  group_label: 'custom_measurements.group_torso_hips',
+  group_id: 'torso-hips',
+  container_id: 'measurementsGroup-torso',
+  measurement_names: measurement_names,
+  section_id: section_id
+-%}
 
-{%- comment -%} Group 3: Lower Body {%- endcomment -%}
 {%- render 'custom-measurements-group',
-    group_measurements: lower_body_measurements,
-    group_label: 'custom_measurements.group_lower_body',
-    group_id: 'lower-body',
-    container_id: 'measurementsGroup-lower',
-    measurement_names: measurement_names,
-    section_id: section_id -%}
-
-{%- comment -%} Other measurements not in groups {%- endcomment -%}
-{%- comment -%} This group should only contain measurements that are NOT in any of the defined groups {%- endcomment -%}
+  group_measurements: lower_body_measurements,
+  group_label: 'custom_measurements.group_lower_body',
+  group_id: 'lower-body',
+  container_id: 'measurementsGroup-lower',
+  measurement_names: measurement_names,
+  section_id: section_id
+-%}
 <div class="measurement-group" data-group="other" id="measurementsGroup-other" style="display: none;">
   <div class="measurements-group">
     {%- for meas_name in measurement_names -%}
-      {%- assign measurement_label = meas_name | strip -%}
+      {%- assign measurement_label = meas_name | strip | remove: '*' | strip -%}
       {%- if measurement_label == '' -%}{% continue %}{% endif %}
       {%- assign is_in_any_group = false -%}
       {%- for group_meas in all_grouped_measurements -%}
-        {%- if measurement_label == group_meas -%}
+        {%- assign group_meas_stripped = group_meas | strip | remove: '*' | strip -%}
+        {%- if measurement_label == group_meas_stripped -%}
           {%- assign is_in_any_group = true -%}
           {%- break -%}
         {%- endif -%}
@@ -70,6 +75,3 @@
     {%- endfor -%}
   </div>
 </div>
-
-
-

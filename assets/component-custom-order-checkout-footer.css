@@ -12,30 +12,54 @@
   color: rgb(var(--color-foreground, 255, 255, 255));
   z-index: 9999;
   box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
-  border-top: 4px solid #4CAF50; /* Success Green Stripe */
+  border-top: 4px solid #4caf50;
+  /* Success Green Stripe */
 }
 
 .custom-order-checkout-footer[hidden] {
   display: none !important;
 }
 
+.custom-order-checkout-footer.custom-banner--minimized .checkout-footer__content {
+  display: none;
+}
+
 .checkout-footer__content {
+  position: relative;
   display: flex;
   justify-content: space-between;
   align-items: center;
   max-width: var(--page-width, 1200px);
   margin: 0 auto;
-  padding: 1.5rem;
+  padding: 1.5rem 5rem 1.5rem 1.5rem;
   gap: 1.5rem;
 }
 
-.checkout-footer__status {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+.checkout-footer__text-container {
   flex: 1;
+  overflow: hidden;
+  padding-right: 1.5rem;
+  min-width: 0;
+}
+
+@media screen and (min-width: 750px) {
+  .checkout-footer__message--duplicate {
+    display: none !important;
+  }
+}
+
+.checkout-footer__status {
   font-size: 1.4rem;
   line-height: 1.5;
+}
+
+.checkout-footer__prefix {
+  white-space: nowrap;
+}
+
+.checkout-footer__message {
+  white-space: nowrap;
+  display: inline;
 }
 
 .checkout-footer__icon {
@@ -48,11 +72,11 @@
 
 .checkout-footer__count {
   font-weight: 600;
-  color: #4CAF50;
+  color: #4caf50;
 }
 
 .checkout-footer__button {
-  background-color: #4CAF50;
+  background-color: #4caf50;
   color: white;
   padding: 1rem 2rem;
   text-decoration: none;
@@ -60,10 +84,13 @@
   font-weight: 600;
   font-size: 1.4rem;
   white-space: nowrap;
-  transition: background-color 0.2s ease, transform 0.1s ease;
+  transition:
+    background-color 0.2s ease,
+    transform 0.1s ease;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .checkout-footer__button:hover {
@@ -80,24 +107,175 @@
   transform: translateY(0);
 }
 
+.checkout-footer__close {
+  position: absolute;
+  top: 50%;
+  right: 1rem;
+  transform: translateY(-50%);
+  background: rgb(var(--color-background, 18, 18, 18));
+  border: none;
+  padding: 0.5rem;
+  cursor: pointer;
+  color: rgb(var(--color-foreground, 255, 255, 255));
+  opacity: 0.7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 150ms ease;
+  z-index: 3;
+  border-radius: 0.25rem;
+}
+
+.checkout-footer__close:hover,
+.checkout-footer__close:focus {
+  opacity: 1;
+}
+
+.checkout-footer__close:focus-visible {
+  outline: 2px solid rgb(var(--color-foreground, 255, 255, 255));
+  outline-offset: 2px;
+}
+
+.checkout-footer__minimized {
+  position: sticky;
+  bottom: 0;
+  z-index: 9999;
+  width: 100%;
+  cursor: pointer;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+.checkout-footer__minimized[hidden] {
+  display: none !important;
+}
+
+.checkout-footer__minimized-bar {
+  position: relative;
+  width: 100%;
+  height: 10px;
+  background-color: rgb(var(--color-background, 18, 18, 18));
+  border-top: 4px solid #4caf50;
+  box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 150ms ease, height 200ms ease;
+}
+
+.checkout-footer__minimized-bar:hover,
+.checkout-footer__minimized-bar:focus-within {
+  height: 12px;
+  background-color: color-mix(in srgb,
+      rgb(var(--color-background, 18, 18, 18)) 95%,
+      rgb(var(--color-foreground, 255, 255, 255)));
+}
+
+.checkout-footer__minimized-icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(180deg);
+  color: rgb(var(--color-foreground, 255, 255, 255));
+  opacity: 0.5;
+  transition: opacity 150ms ease, transform 200ms ease;
+  pointer-events: none;
+}
+
+.checkout-footer__minimized:hover .checkout-footer__minimized-icon,
+.checkout-footer__minimized:focus .checkout-footer__minimized-icon {
+  opacity: 0.8;
+  transform: translate(-50%, -60%) rotate(180deg);
+}
+
+.checkout-footer__minimized:active .checkout-footer__minimized-icon {
+  transform: translate(-50%, -50%) scale(0.9) rotate(180deg);
+}
+
+@keyframes minimize-pulse {
+
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+
+  50% {
+    opacity: 0.8;
+  }
+}
+
+.checkout-footer__minimized[data-just-minimized='true'] .checkout-footer__minimized-icon {
+  animation: minimize-pulse 1s ease-in-out 2;
+}
+
 /* Mobile optimization */
 @media screen and (max-width: 749px) {
   .checkout-footer__content {
-    flex-direction: column;
-    gap: 1rem;
-    text-align: center;
-    padding: 1rem 1.5rem;
+    flex-direction: row;
+    gap: 0.75rem;
+    padding: 1rem 4rem 1rem 1rem;
+    align-items: center;
+  }
+
+  .checkout-footer__text-container {
+    padding-right: 3.5rem;
   }
 
   .checkout-footer__status {
-    flex-direction: column;
-    gap: 0.25rem;
-    font-size: 1.2rem;
+    font-size: 1.1rem;
+  }
+
+  .checkout-footer__message-wrapper {
+    display: inline-block;
+    white-space: nowrap;
+    position: relative;
+    z-index: 1;
+  }
+
+  .checkout-footer__message {
+    display: inline;
+    white-space: nowrap;
+  }
+
+  .checkout-footer__message--duplicate {
+    display: inline;
+    padding-left: 2rem;
+  }
+
+  .checkout-footer__message-wrapper[data-needs-scroll='true'] {
+    animation: scroll-text-footer 25s linear infinite;
+  }
+
+  .checkout-footer__message-wrapper[data-needs-scroll='true']:hover {
+    animation-play-state: paused;
+  }
+
+  @keyframes scroll-text-footer {
+    0% {
+      transform: translateX(0);
+    }
+
+    100% {
+      transform: translateX(-50%);
+    }
   }
 
   .checkout-footer__button {
-    width: 100%;
-    padding: 0.875rem 1.5rem;
+    flex-shrink: 0;
+    padding: 0.75rem 1.25rem;
+    font-size: 1.2rem;
+    white-space: nowrap;
+  }
+
+  .checkout-footer__close {
+    right: 0.75rem;
+    padding: 0.375rem;
+    z-index: 5;
+    background: rgb(var(--color-background, 18, 18, 18));
+    border-radius: 0.25rem;
+    position: absolute;
+    flex-shrink: 0;
+    min-width: 2.5rem;
   }
 }
 
@@ -107,4 +285,3 @@
     padding-bottom: env(safe-area-inset-bottom);
   }
 }
-

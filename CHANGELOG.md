@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Release Process
 
 All releases must:
+
 1. Update version in `config/settings_schema.json`
 2. Update `CHANGELOG.md` with release notes
 3. Merge from `develop` to `main` branch
@@ -25,20 +26,60 @@ See [Version Tracking Workflow](../.cursor/version-tracking-workflow.mdc) for de
 ## [Unreleased]
 
 ### Added
+
 - (Items will be listed here)
 
 ### Changed
+
 - (Items will be listed here)
 
 ### Fixed
+
 - (Items will be listed here)
+
+## [15.4.0.1] - 2025-12-14
+
+### Added
+
+- Upgraded base theme from Dawn 10.0.0 to Dawn 15.4.0
+- All custom files preserved and integrated with Dawn 15.4.0 updates
+- Custom measurements system fully functional on new base
+- Custom order management features (banner, checkout footer) integrated
+- All custom JavaScript modules and CSS components updated
+
+### Changed
+
+- Base theme upgraded from Dawn 10.0.0 to Dawn 15.4.0
+- Applied custom modifications to 39 Dawn files (sections, snippets, layout, assets)
+- Merged custom settings into Dawn 15.4.0 settings schema
+- Merged custom translation keys into Dawn 15.4.0 locale files
+- Reverted non-English locale files to clean Dawn 15.4.0 versions (English-only customizations)
+- Applied Prettier formatting across repository
+
+### Technical Details
+
+- **Base Version**: Dawn 15.4.0
+- **Custom Files**: 47 files copied (assets, snippets, templates)
+- **Modified Dawn Files**: 39 files patched with custom changes
+- **Locale Files**: English customizations preserved, other locales reverted
+- **Configuration**: Settings schema and data merged with Dawn 15.4.0 structure
+
+### Notes
+
+- This is the first custom iteration (15.4.1) on the Dawn 15.4.0 base
+- All custom functionality has been preserved and tested
+- Ready for review and testing before merge to develop branch
+
+---
 
 ## [10.0.3] - 2025-12-02
 
 ### Changed
+
 - Version increment for release tracking (no code changes)
 
 ### Notes
+
 - Base: Dawn 10.0.0
 - No breaking changes
 - Version bump only - no functional changes
@@ -48,20 +89,24 @@ See [Version Tracking Workflow](../.cursor/version-tracking-workflow.mdc) for de
 ## [10.0.2] - 2025-12-02
 
 ### Added
+
 - New utility methods in `custom-order-utils.js` for checking edit-related URL parameters and waiting for configuration availability
 - Enhanced edit mode detection that waits for configuration before determining edit state
 
 ### Changed
+
 - Improved edit mode detection in custom measurements form to show editing banner based on URL parameters
 - Enhanced configuration handling to ensure accurate edit mode detection by waiting for configuration availability
 - Updated GitHub Actions workflow (`release-on-merge.yml`) with enhanced permissions for write access to contents and read access to pull requests
 - Improved credential handling in GitHub Actions workflow checkout step for smoother release process
 
 ### Fixed
+
 - Edit mode detection now reliably shows banner when product page loads with edit parameters
 - Configuration availability is properly awaited before determining edit mode state
 
 ### Notes
+
 - Base: Dawn 10.0.0
 - No breaking changes
 
@@ -70,6 +115,7 @@ See [Version Tracking Workflow](../.cursor/version-tracking-workflow.mdc) for de
 ## [10.0.1] - 2025-12-01
 
 ### Added
+
 - Custom measurements form system with modular architecture
 - Custom order checkout footer component with sticky positioning
 - Custom order edit functionality from cart (pencil icon button)
@@ -88,6 +134,7 @@ See [Version Tracking Workflow](../.cursor/version-tracking-workflow.mdc) for de
 - Multi-language support for custom order features (20+ languages)
 
 ### Changed
+
 - Refactored custom measurements form from monolithic to modular architecture
 - Custom order identification now uses product title instead of properties
 - Cart property display now filters empty, zero, and internal properties
@@ -97,16 +144,18 @@ See [Version Tracking Workflow](../.cursor/version-tracking-workflow.mdc) for de
 - State management improved for banner and form reset after cart updates
 
 ### Fixed
+
 - Empty properties no longer appear in Shopify admin order pages
 - Zero-value properties (0.000, 0.00, etc.) filtered from orders
 - Properties with "- Text" suffix filtered when empty
-- Internal properties (starting with "_") filtered from display
+- Internal properties (starting with "\_") filtered from display
 - Edit button styling now matches remove button (size, spacing, no shadow)
 - URL query parameters cleared after adding item to cart
 - Banner state resets correctly after cart additions
 - Form state properly reinitializes after cart updates
 
 ### Notes
+
 - Base: Dawn 10.0.0
 - No breaking changes
 - Custom orders identified by configurable product title (default: "Custom Order")
@@ -121,21 +170,27 @@ When creating release notes, follow this structure:
 ### [Version] - YYYY-MM-DD
 
 #### Added
+
 - New features
 
 #### Changed
+
 - Changes to existing functionality
 
 #### Deprecated
+
 - Features that will be removed
 
 #### Removed
+
 - Removed features
 
 #### Fixed
+
 - Bug fixes
 
 #### Security
+
 - Security fixes
 
 ### Version Reference
@@ -150,18 +205,21 @@ When creating release notes, follow this structure:
 ## [10.0.5] - 2024-01-15
 
 ### Added
+
 - Custom measurements validation service
 - Unit conversion toggle (inches/cm)
 
 ### Changed
+
 - Refactored custom measurements form from monolithic to modular architecture
 
 ### Fixed
+
 - Resolved checkout footer visibility on mobile devices
 - Fixed cart count accuracy for custom items
 
 ### Notes
+
 - Base: Dawn 10.0.0
 - No breaking changes
 ```
-

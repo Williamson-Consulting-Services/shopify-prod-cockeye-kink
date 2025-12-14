@@ -15,6 +15,15 @@
   }
 {%- endstyle -%}
 
+{%- render 'background-image-styles',
+  image: section.settings.background_image,
+  section_id: section.id,
+  target_class: 'newsletter__wrapper',
+  class_suffix: 'padding',
+  background_size: 'cover',
+  background_position: 'bottom'
+-%}
+
 <div class="newsletter center {% if section.settings.full_width == false %}newsletter--narrow page-width{% endif %}">
   <div class="newsletter__wrapper color-{{ section.settings.color_scheme }} gradient content-container isolate{% if section.settings.full_width %} content-container--full-width{% endif %} section-{{ section.id }}-padding">
     {%- for block in section.blocks -%}
@@ -85,12 +94,16 @@
                     id="Subscribe"
                     aria-label="{{ 'newsletter.button_label' | t }}"
                   >
-                    {% render 'icon-arrow' %}
+                    <span class="svg-wrapper">
+                      {{- 'icon-arrow.svg' | inline_asset_content -}}
+                    </span>
                   </button>
                 </div>
                 {%- if form.errors -%}
                   <small class="newsletter-form__message form__message" id="Newsletter-error--{{ section.id }}">
-                    {%- render 'icon-error' -%}
+                    <span class="svg-wrapper">
+                      {{- 'icon-error.svg' | inline_asset_content -}}
+                    </span>
                     {{- form.errors.translated_fields.email | capitalize }}
                     {{ form.errors.messages.email -}}
                   </small>
@@ -103,7 +116,9 @@
                   tabindex="-1"
                   autofocus
                 >
-                  {% render 'icon-success' -%}
+                  <span class="svg-wrapper">
+                    {{- 'icon-success.svg' | inline_asset_content -}}
+                  </span>
                   {{- 'newsletter.success' | t }}
                 </h3>
               {%- endif -%}
@@ -124,20 +139,25 @@
   },
   "settings": [
     {
+      "type": "paragraph",
+      "content": "t:sections.newsletter.settings.paragraph.content"
+    },
+    {
       "type": "color_scheme",
       "id": "color_scheme",
       "label": "t:sections.all.colors.label",
-      "default": "background-1"
+      "default": "scheme-1"
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image",
+      "label": "Background image"
     },
     {
       "type": "checkbox",
       "id": "full_width",
       "default": true,
       "label": "t:sections.newsletter.settings.full_width.label"
-    },
-    {
-      "type": "paragraph",
-      "content": "t:sections.newsletter.settings.paragraph.content"
     },
     {
       "type": "header",
@@ -173,7 +193,7 @@
         {
           "type": "inline_richtext",
           "id": "heading",
-          "default": "Subscribe to our emails",
+          "default": "t:sections.newsletter.blocks.heading.settings.heading.default",
           "label": "t:sections.newsletter.blocks.heading.settings.heading.label"
         },
         {
@@ -191,6 +211,14 @@
             {
               "value": "h0",
               "label": "t:sections.all.heading_size.options__3.label"
+            },
+            {
+              "value": "hxl",
+              "label": "t:sections.all.heading_size.options__4.label"
+            },
+            {
+              "value": "hxxl",
+              "label": "t:sections.all.heading_size.options__5.label"
             }
           ],
           "default": "h1",
@@ -206,7 +234,7 @@
         {
           "type": "richtext",
           "id": "text",
-          "default": "<p>Be the first to know about new collections and exclusive offers.</p>",
+          "default": "t:sections.newsletter.blocks.paragraph.settings.paragraph.default",
           "label": "t:sections.newsletter.blocks.paragraph.settings.paragraph.label"
         }
       ]

@@ -34,7 +34,7 @@
 
   # Filter zero values (0, 0.0, 0.00, 0.000, etc.)
   if should_display_property and property_value != blank
-    assign value_string = property_value | to_s | strip
+    assign value_string = property_value | append: '' | strip
     assign num_value = value_string | plus: 0
 
     # Check if it's zero
@@ -46,4 +46,3 @@
     endif
   endif
 -%}
-

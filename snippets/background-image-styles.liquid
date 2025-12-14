@@ -1,0 +1,50 @@
+{% comment %}
+  Renders background image styles for sections
+
+  Accepts:
+  - image: {Object} Image object from section settings (e.g., section.settings.background_image)
+  - section_id: {String} Section ID for scoping (required, e.g., section.id)
+  - target_class: {String} Target class name to combine with section class (optional, e.g., 'newsletter__wrapper'). If provided, creates combined selector like '.section-{id}-padding.newsletter__wrapper'
+  - class_suffix: {String} Section class suffix (default: 'padding', e.g., 'padding' for '.section-{id}-padding', 'gradient' for '.section-{id}-gradient')
+  - background_size: {String} CSS background-size value (default: "cover")
+  - background_position: {String} CSS background-position value (default: "center")
+  - background_attachment: {String} CSS background-attachment value (optional, e.g., "fixed")
+  - image_width: {Number} Width for image_url filter (default: 1920)
+
+  Usage:
+  {% render 'background-image-styles',
+    image: section.settings.background_image,
+    section_id: section.id,
+    target_class: 'newsletter__wrapper',
+    class_suffix: 'padding',
+    background_size: 'cover',
+    background_position: 'bottom'
+  %}
+{% endcomment %}
+
+{%- if image != blank and section_id != blank -%}
+  {%- liquid
+    assign bg_size = background_size | default: 'cover'
+    assign bg_position = background_position | default: 'center'
+    assign img_width = image_width | default: 1920
+    assign image_url_value = image | image_url: width: img_width
+    assign suffix = class_suffix | default: 'padding'
+
+    # Build selector: combine with target_class if provided, otherwise use section class only
+    if target_class != blank and target_class != ''
+      assign scoped_selector = '.section-' | append: section_id | append: '-' | append: suffix | append: '.' | append: target_class
+    else
+      assign scoped_selector = '.section-' | append: section_id | append: '-' | append: suffix
+    endif
+  -%}
+  {%- style -%}
+    {{ scoped_selector }} {
+      background-image: url({{ image_url_value }});
+      background-size: {{ bg_size }};
+      background-position: {{ bg_position }};
+      {%- if background_attachment != blank -%}
+      background-attachment: {{ background_attachment }};
+      {%- endif -%}
+    }
+  {%- endstyle -%}
+{%- endif -%}

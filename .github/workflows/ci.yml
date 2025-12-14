@@ -1,0 +1,34 @@
+name: CI
+on: [push]
+jobs:
+  lhci:
+    name: Lighthouse
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v6
+      - name: Lighthouse
+        uses: shopify/lighthouse-ci-action@v1
+        with:
+          store: ${{ secrets.SHOP_STORE_OS2 }}
+          password: ${{ secrets.SHOP_PASSWORD_OS2 }}
+          access_token: ${{ secrets.SHOP_ACCESS_TOKEN }}
+          collection_handle: ${{ secrets.SHOP_COLLECTION_HANDLE }}
+          lhci_github_app_token: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+          pull_theme: ${{ secrets.SHOP_PULL_THEME }}
+  theme-check:
+    name: Theme Check
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v6
+      - name: Theme Check
+        uses: shopify/theme-check-action@v2
+        with:
+          token: ${{ github.token }}

@@ -1,12 +1,3 @@
-/*
- * ------------------------------------------------------------
- * IMPORTANT: The contents of this file are auto-generated.
- *
- * This file may be updated by the Shopify admin language editor
- * or related systems. Please exercise caution as any changes
- * made to this file may be overwritten.
- * ------------------------------------------------------------
- */
 {
   "general": {
     "password_page": {
@@ -22,11 +13,11 @@
     "social": {
       "alt_text": {
         "share_on_facebook": "Megosztás a Facebookon",
-        "share_on_twitter": "Közzététel a Twitteren",
+        "share_on_twitter": "Megosztás az X-en",
         "share_on_pinterest": "Közzététel a Pinteresten"
       },
       "links": {
-        "twitter": "Twitter",
+        "twitter": "X (Twitter)",
         "facebook": "Facebook",
         "pinterest": "Pinterest",
         "instagram": "Instagram",
@@ -127,7 +118,11 @@
         "minimum_of": "Minimum: {{ quantity }}",
         "maximum_of": "Maximum: {{ quantity }}",
         "multiples_of": "Növekvés: {{ quantity }}",
-        "in_cart_html": "Kosárban lévő mennyiség: <span class=\"quantity-cart\">{{ quantity }}</span>"
+        "in_cart_html": "Kosárban lévő mennyiség: <span class=\"quantity-cart\">{{ quantity }}</span>",
+        "note": "Mennyiségi szabályok megtekintése",
+        "min_of": "Min. {{ quantity }}",
+        "max_of": "Max. {{ quantity }}",
+        "in_cart_aria_label": "Mennyiség ({{ quantity }} a kosárban)"
       },
       "price": {
         "from_price_html": "Legalacsonyabb ár: {{ price }}",
@@ -161,8 +156,8 @@
         "load_video": "{{ index }}. videó lejátszása galérianézetben",
         "image_available": "{{ index }}. kép betöltve galérianézetben"
       },
+      "nested_label": "{{ title }} – {{ parent_title }}",
       "view_full_details": "Minden részlet megtekintése",
-      "include_taxes": "Tartalmazza az adót.",
       "shipping_policy_html": "A <a href=\"{{ link }}\">szállítási költséget</a> a megrendeléskor számítjuk ki.",
       "choose_options": "Válassz a lehetőségek közül",
       "choose_product_options": "Termékváltozatok – {{ product_name }}",
@@ -174,7 +169,17 @@
       "inventory_low_stock_show_count": "Alacsony készlet: csak {{ quantity }} van raktáron",
       "inventory_out_of_stock": "Nincs készleten",
       "inventory_out_of_stock_continue_selling": "Raktáron",
-      "sku": "Termékváltozat"
+      "sku": "Termékváltozat",
+      "volume_pricing": {
+        "title": "Mennyiségi árszabás",
+        "note": "Mennyiségi árszabás rendelkezésre áll",
+        "minimum": "{{ quantity }}+",
+        "price_range": "{{ minimum }} – {{ maximum }}",
+        "price_at_each_html": "{{ price }}/db"
+      },
+      "taxes_included": "Tartalmazza az adókat.",
+      "duties_included": "Tartalmazza a vámokat.",
+      "duties_and_taxes_included": "Tartalmazza a vámokat és az adókat."
     },
     "modal": {
       "label": "Médiatár"
@@ -207,14 +212,11 @@
       "clear_filter": "Szűrő eltávolítása",
       "filter_selected_accessibility": "{{ type }} ({{ count }} szűrő kiválasztva)",
       "show_more": "Több részlet",
-      "show_less": "Kevesebb részlet"
+      "show_less": "Kevesebb részlet",
+      "filter_and_operator_subtitle": "Az összesnek megfelelő"
     }
   },
   "templates": {
-    "404": {
-      "title": "Nem találjuk az oldalt",
-      "subtext": "404-es hiba történt."
-    },
     "search": {
       "no_results": "Nincs találat erre: {{ terms }}. Ellenőrizd a helyesírást, vagy írj be egy másik szót vagy kifejezést.",
       "results_with_count": {
@@ -258,6 +260,10 @@
         "error_heading": "Kérjük, helyesbítsd a következőket:",
         "title": "Kapcsolattartói űrlap"
       }
+    },
+    "404": {
+      "title": "Nem találjuk az oldalt",
+      "subtext": "404-es hiba történt."
     }
   },
   "sections": {
@@ -273,17 +279,11 @@
       "title": "Kosár",
       "caption": "Kosárban lévő termékek",
       "remove_title": "{{ title }} eltávolítása",
-      "subtotal": "Részösszeg:",
-      "new_subtotal": "Új részösszeg:",
       "note": "Megjegyzések a rendeléssel kapcsolatban",
       "checkout": "Megrendelés",
       "empty": "A kosarad üres",
       "cart_error": "Hiba történt a kosár frissítése közben. Próbálkozz újra.",
       "cart_quantity_error_html": "Ebből a termékből legfeljebb {{ quantity }} darabot rakhatsz a kosárba.",
-      "taxes_and_shipping_policy_at_checkout_html": "Az adókat és a <a href=\"{{ link }}\">szállítási költséget</a> a megrendeléskor számítjuk ki",
-      "taxes_included_but_shipping_at_checkout": "Tartalmazza a megrendeléskor kiszámított adót és szállítási költséget.",
-      "taxes_included_and_shipping_policy_html": "Tartalmazza az adót. A megrendeléskor kiszámított <a href=\"{{ link }}\">szállítási költség</a>.",
-      "taxes_and_shipping_at_checkout": "Az adókat és a szállítási költséget a megrendeléskor számítjuk ki",
       "headings": {
         "product": "Termék",
         "price": "Ár",
@@ -295,7 +295,17 @@
       "login": {
         "title": "Már van fiókod?",
         "paragraph_html": "<a href=\"{{ link }}\" class=\"link underlined-link\">Jelentkezz be</a> a gyorsabb fizetéshez."
-      }
+      },
+      "estimated_total": "Becsült végösszeg",
+      "new_estimated_total": "Új becsült végösszeg",
+      "duties_and_taxes_included_shipping_at_checkout_with_policy_html": "Tartalmazza a vámokat és az adókat. A kedvezményeket és a <a href=\"{{ link }}\">szállítási költséget</a> a megrendeléskor számítjuk ki.",
+      "duties_and_taxes_included_shipping_at_checkout_without_policy": "Tartalmazza a vámokat és az adókat. A kedvezményeket és a szállítási költséget a megrendeléskor számítjuk ki.",
+      "taxes_included_shipping_at_checkout_with_policy_html": "Tartalmazza az adókat. A kedvezményeket és a <a href=\"{{ link }}\">szállítási költséget</a> a megrendeléskor számítjuk ki.",
+      "taxes_included_shipping_at_checkout_without_policy": "Tartalmazza az adókat. A kedvezményeket és a szállítási költséget a megrendeléskor számítjuk ki.",
+      "duties_included_taxes_at_checkout_shipping_at_checkout_with_policy_html": "Tartalmazza a vámokat. Az adókat, a kedvezményeket és a <a href=\"{{ link }}\">szállítási költséget</a> a megrendeléskor számítjuk ki.",
+      "duties_included_taxes_at_checkout_shipping_at_checkout_without_policy": "Tartalmazza a vámokat. Az adókat, a kedvezményeket és a szállítási költséget a megrendeléskor számítjuk ki",
+      "taxes_at_checkout_shipping_at_checkout_with_policy_html": "Az adókat, a kedvezményeket és a <a href=\"{{ link }}\">szállítási költséget</a> a megrendeléskor számítjuk ki.",
+      "taxes_at_checkout_shipping_at_checkout_without_policy": "Az adókat, a kedvezményeket és a szállítási költséget a megrendeléskor számítjuk ki"
     },
     "footer": {
       "payment": "Fizetési módok"
@@ -338,13 +348,41 @@
       "carousel": "Forgótár",
       "announcement": "Közlemény",
       "announcement_bar": "Közleménysáv"
+    },
+    "quick_order_list": {
+      "product_total": "Termék részösszege",
+      "view_cart": "Kosár megtekintése",
+      "each": "{{ money }}/db",
+      "product": "Termék",
+      "variant": "Változat",
+      "variant_total": "Változat összesen",
+      "items_added": {
+        "one": "{{ quantity }} termék hozzáadva",
+        "other": "{{ quantity }} termék hozzáadva"
+      },
+      "items_removed": {
+        "one": "{{ quantity }} termék eltávolítva",
+        "other": "{{ quantity }} termék eltávolítva"
+      },
+      "product_variants": "Termékváltozatok",
+      "total_items": "Összes termék",
+      "remove_all_items_confirmation": "Eltávolítod mind a(z) {{ quantity }} terméket a kosárból?",
+      "remove_all": "Az összes eltávolítása",
+      "cancel": "Mégse",
+      "remove_all_single_item_confirmation": "Eltávolítod ezt a(z) 1 terméket a kosárból?",
+      "min_error": "A termék minimális mennyisége {{ min }}",
+      "max_error": "A termék maximális mennyisége {{ max }}",
+      "step_error": "A termék mennyisége csak {{ step }} darabos lépésekben növelhető"
     }
   },
   "localization": {
     "country_label": "Ország/régió",
     "language_label": "Nyelv",
     "update_language": "Nyelv módosítása",
-    "update_country": "Ország/régió frissítése"
+    "update_country": "Ország/régió frissítése",
+    "search": "Keresés",
+    "popular_countries_regions": "Népszerű országok/régiók",
+    "country_results_count": "{{ count }} ország/régió található"
   },
   "customer": {
     "account": {
@@ -397,7 +435,8 @@
       "password": "Jelszó",
       "title": "Felhasználónév",
       "sign_in": "Bejelentkezés",
-      "submit": "Küldés"
+      "submit": "Küldés",
+      "alternate_provider_separator": "vagy"
     },
     "orders": {
       "title": "Korábbi rendelések",
@@ -483,25 +522,9 @@
       "max_characters": "Maximum {{ max_chars }} karakter",
       "email_label_optional_for_no_js_behavior": "Címzett e-mail-címe (nem kötelező)",
       "send_on": "ÉÉÉÉ-HH-NN",
-      "send_on_label": "Küldés dátuma (nem kötelező)"
+      "send_on_label": "Küldés dátuma (nem kötelező)",
+      "expanded": "Ajándékkártya címzettjének űrlapja kibontva",
+      "collapsed": "Ajándékkártya címzettjének űrlapja összecsukva"
     }
-  },
-  "custom_order": {
-    "banner": {
-      "editing": "Custom order not in cart yet — make sure you add it before leaving this page.",
-      "cart": "Custom order is in cart"
-    }
-  },
-  "custom_measurements": {
-    "category_legend": "Custom product category",
-    "unit_legend": "Unit",
-    "unit_inches": "Inches",
-    "unit_centimeters": "Centimeters",
-    "measurement_hint": "Measurements marked with * are optional for the selected category.",
-    "custom_color_button": "Don't see a color listed? Click here",
-    "item_notes_label": "Item Notes *",
-    "item_notes_placeholder": "Enter your item notes here",
-    "event_notes_label": "Event Notes *",
-    "event_notes_placeholder": "Event name or notes here"
   }
 }

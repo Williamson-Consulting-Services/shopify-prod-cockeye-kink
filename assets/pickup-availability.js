@@ -13,6 +13,8 @@ if (!customElements.get('pickup-availability')) {
       }
 
       fetchAvailability(variantId) {
+        if (!variantId) return;
+
         let rootUrl = this.dataset.rootUrl;
         if (!rootUrl.endsWith('/')) {
           rootUrl = rootUrl + '/';
@@ -34,8 +36,17 @@ if (!customElements.get('pickup-availability')) {
           });
       }
 
-      onClickRefreshList(evt) {
+      onClickRefreshList() {
         this.fetchAvailability(this.dataset.variantId);
+      }
+
+      update(variant) {
+        if (variant?.available) {
+          this.fetchAvailability(variant.id);
+        } else {
+          this.removeAttribute('available');
+          this.innerHTML = '';
+        }
       }
 
       renderError() {
@@ -58,6 +69,10 @@ if (!customElements.get('pickup-availability')) {
         this.setAttribute('available', '');
 
         document.body.appendChild(sectionInnerHTML.querySelector('pickup-availability-drawer'));
+        const colorClassesToApply = this.dataset.productPageColorScheme.split(' ');
+        colorClassesToApply.forEach((colorClass) => {
+          document.querySelector('pickup-availability-drawer').classList.add(colorClass);
+        });
 
         const button = this.querySelector('button');
         if (button)
@@ -65,7 +80,7 @@ if (!customElements.get('pickup-availability')) {
             document.querySelector('pickup-availability-drawer').show(evt.target);
           });
       }
-    }
+    },
   );
 }
 
@@ -112,6 +127,6 @@ if (!customElements.get('pickup-availability-drawer')) {
         document.body.classList.add('overflow-hidden');
         trapFocus(this);
       }
-    }
+    },
   );
 }

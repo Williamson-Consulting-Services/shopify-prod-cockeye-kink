@@ -353,4 +353,3 @@ class CustomOrderUtils {
 
 // Export to window namespace (following theme pattern)
 window.CustomOrderUtils = CustomOrderUtils;
-

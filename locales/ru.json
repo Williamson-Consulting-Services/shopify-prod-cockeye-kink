@@ -1,12 +1,3 @@
-/*
- * ------------------------------------------------------------
- * IMPORTANT: The contents of this file are auto-generated.
- *
- * This file may be updated by the Shopify admin language editor
- * or related systems. Please exercise caution as any changes
- * made to this file may be overwritten.
- * ------------------------------------------------------------
- */
 {
   "general": {
     "password_page": {
@@ -22,11 +13,11 @@
     "social": {
       "alt_text": {
         "share_on_facebook": "Поделиться в Facebook",
-        "share_on_twitter": "Опубликовать в Твиттере",
+        "share_on_twitter": "Поделиться в X",
         "share_on_pinterest": "Сохранить в Pinterest"
       },
       "links": {
-        "twitter": "Твиттер",
+        "twitter": "X (Твиттер)",
         "facebook": "Facebook",
         "pinterest": "Pinterest",
         "instagram": "Instagram",
@@ -120,7 +111,6 @@
       "add_to_cart": "Добавить в корзину",
       "description": "Описание",
       "on_sale": "Распродажа",
-      "product_variants": "Варианты товара",
       "share": "Поделиться этим продуктом",
       "sold_out": "Продано",
       "unavailable": "Недоступно",
@@ -136,7 +126,11 @@
         "minimum_of": "Минимум {{ quantity }}",
         "maximum_of": "Максимум {{ quantity }}",
         "multiples_of": "Прирост: {{ quantity }}",
-        "in_cart_html": "В корзине: <span class=\"quantity-cart\">{{ quantity }}</span>"
+        "in_cart_html": "В корзине: <span class=\"quantity-cart\">{{ quantity }}</span>",
+        "note": "Просмотреть правила количества позиций",
+        "min_of": "Мин. {{ quantity }}",
+        "max_of": "Макс. {{ quantity }}",
+        "in_cart_aria_label": "Количество ({{ quantity }} в корзине)"
       },
       "price": {
         "from_price_html": "От {{ price }}",
@@ -163,8 +157,8 @@
         "load_video": "Загрузить видео {{ index }} в средство просмотра галереи",
         "image_available": "Изображение {{ index }} доступно в средстве просмотра галереи"
       },
+      "nested_label": "{{ title }} для товара \"{{ parent_title }}\"",
       "view_full_details": "Просмотреть всю информацию",
-      "include_taxes": "Сумма налога включена.",
       "shipping_policy_html": "<a href=\"{{ link }}\">Стоимость доставки</a> рассчитывается при оформлении заказа.",
       "choose_options": "Выберите варианты",
       "choose_product_options": "Выберите варианты для {{ product_name }}",
@@ -176,7 +170,18 @@
       "inventory_low_stock_show_count": "Заканчивается. Осталось: {{ quantity }}",
       "inventory_out_of_stock": "Нет в наличии",
       "inventory_out_of_stock_continue_selling": "В наличии",
-      "sku": "Артикул"
+      "sku": "Артикул",
+      "volume_pricing": {
+        "title": "Оптовая цена",
+        "note": "Доступны оптовые цены",
+        "minimum": "{{ quantity }}+",
+        "price_range": "{{ minimum }} — {{ maximum }}",
+        "price_at_each_html": "по цене {{ price }} за штуку"
+      },
+      "product_variants": "Варианты товара",
+      "taxes_included": "Налоги включены.",
+      "duties_included": "Пошлины включены.",
+      "duties_and_taxes_included": "Пошлины и налоги включены."
     },
     "modal": {
       "label": "Галерея мультимедиа"
@@ -215,14 +220,11 @@
       "clear_filter": "Снять фильтр",
       "filter_selected_accessibility": "{{ type }} (установлены фильтры: {{ count }})",
       "show_more": "Показать больше",
-      "show_less": "Показать меньше"
+      "show_less": "Показать меньше",
+      "filter_and_operator_subtitle": "Выбрать все"
     }
   },
   "templates": {
-    "404": {
-      "title": "Страница не найдена",
-      "subtext": "404"
-    },
     "search": {
       "no_results": "По запросу «{{ terms }}» ничего не найдено. Проверьте правописание или выберите другие слова либо фразу.",
       "title": "Результаты поиска",
@@ -276,6 +278,10 @@
         "error_heading": "Измените следующие элементы:",
         "title": "Форма для связи"
       }
+    },
+    "404": {
+      "title": "Страница не найдена",
+      "subtext": "404"
     }
   },
   "sections": {
@@ -293,17 +299,11 @@
       "title": "Корзина",
       "caption": "Товары в корзине",
       "remove_title": "Удалить «{{ title }}»",
-      "subtotal": "Промежуточный итог",
-      "new_subtotal": "Новый промежуточный итог",
       "note": "Получить специальные инструкции",
       "checkout": "Оформить заказ",
       "empty": "Корзина пуста.",
       "cart_error": "Не удалось обновить корзину. Повторите попытку.",
       "cart_quantity_error_html": "Максимально допустимое количество единиц этого товара в корзине: {{ quantity }}.",
-      "taxes_and_shipping_policy_at_checkout_html": "Налоги и стоимость <a href=\"{{ link }}\">доставки</a>, рассчитанные при оформлении заказа",
-      "taxes_included_but_shipping_at_checkout": "Сумма налога и стоимость доставки, рассчитанные при оформлении заказа",
-      "taxes_included_and_shipping_policy_html": "Налоги включены. <a href=\"{{ link }}\">Стоимость доставки</a> рассчитывается при оформлении заказа.",
-      "taxes_and_shipping_at_checkout": "Налоги и стоимость доставки, рассчитанные при оформлении заказа",
       "update": "Обновить",
       "headings": {
         "product": "Товар",
@@ -315,7 +315,17 @@
       "login": {
         "title": "Уже есть учетная запись?",
         "paragraph_html": "<a href=\"{{ link }}\" class=\"link underlined-link\">Войти</a>, чтобы оформить заказ быстрее."
-      }
+      },
+      "estimated_total": "Ориентировочная общая сумма",
+      "new_estimated_total": "Новая ориентировочная общая сумма",
+      "duties_and_taxes_included_shipping_at_checkout_with_policy_html": "Пошлины и налоги включены. Скидки и <a href=\"{{ link }}\">стоимость доставки</a> рассчитываются при оформлении заказа.",
+      "duties_and_taxes_included_shipping_at_checkout_without_policy": "Пошлины и налоги включены. Скидки и стоимость доставки рассчитываются при оформлении заказа.",
+      "taxes_included_shipping_at_checkout_with_policy_html": "Налоги включены. Скидки и <a href=\"{{ link }}\">стоимость доставки</a> рассчитываются при оформлении заказа.",
+      "taxes_included_shipping_at_checkout_without_policy": "Налоги включены. Скидки и стоимость доставки рассчитываются при оформлении заказа.",
+      "duties_included_taxes_at_checkout_shipping_at_checkout_with_policy_html": "Пошлины включены. Налоги, скидки и <a href=\"{{ link }}\">стоимость доставки</a> рассчитываются при оформлении заказа.",
+      "duties_included_taxes_at_checkout_shipping_at_checkout_without_policy": "Пошлины включены. Налоги, скидки и стоимость доставки рассчитываются при оформлении заказа.",
+      "taxes_at_checkout_shipping_at_checkout_with_policy_html": "Налоги, скидки и <a href=\"{{ link }}\">стоимость доставки</a> рассчитываются при оформлении заказа.",
+      "taxes_at_checkout_shipping_at_checkout_without_policy": "Налоги, скидки и стоимость доставки рассчитываются при оформлении заказа."
     },
     "footer": {
       "payment": "Способы оплаты"
@@ -358,13 +368,45 @@
       "carousel": "Карусель",
       "announcement": "Объявление",
       "announcement_bar": "Строка объявления"
+    },
+    "quick_order_list": {
+      "product_total": "Промежуточный итог по товару",
+      "view_cart": "Просмотреть корзину",
+      "each": "{{ money }}/кажд.",
+      "product": "Товар",
+      "variant": "Вариант",
+      "variant_total": "Всего вариантов",
+      "items_added": {
+        "one": "Добавлен товар: {{ quantity }}",
+        "other": "Добавлены товары: {{ quantity }}",
+        "few": "Добавлены товары: {{ quantity }}",
+        "many": "Добавлены товары: {{ quantity }}"
+      },
+      "items_removed": {
+        "one": "Удален товар: {{ quantity }}",
+        "other": "Удалены товары: {{ quantity }}",
+        "few": "Удалены товары: {{ quantity }}",
+        "many": "Удалены товары: {{ quantity }}"
+      },
+      "product_variants": "Варианты товара",
+      "total_items": "Общее количество товаров",
+      "remove_all_items_confirmation": "Удалить все товары ({{ quantity }}) из корзины?",
+      "remove_all": "Удалить все",
+      "cancel": "Отменить",
+      "remove_all_single_item_confirmation": "Удалить 1 товар из корзины?",
+      "min_error": "Минимальное количество этого товара — {{ min }}",
+      "max_error": "Максимальное количество этого товара — {{ max }}",
+      "step_error": "Вы можете добавить этот товар только в количестве, кратном {{ step }}"
     }
   },
   "localization": {
     "country_label": "Страна/регион",
     "language_label": "Язык",
     "update_language": "Изменить язык",
-    "update_country": "Изменить данные о стране/регионе"
+    "update_country": "Изменить данные о стране/регионе",
+    "search": "Поиск",
+    "popular_countries_regions": "Популярные страны / регионы",
+    "country_results_count": "Найдены страны / регионы: {{ count }}"
   },
   "customer": {
     "account": {
@@ -417,7 +459,8 @@
       "password": "Пароль",
       "title": "Вход",
       "sign_in": "Войти в систему",
-      "submit": "Отправить"
+      "submit": "Отправить",
+      "alternate_provider_separator": "или"
     },
     "orders": {
       "title": "История заказов",
@@ -503,25 +546,9 @@
       "max_characters": "Не больше {{ max_chars }} симв.",
       "email_label_optional_for_no_js_behavior": "Электронный адрес получателя (необязательно)",
       "send_on": "ГГГГ-ММ-ДД",
-      "send_on_label": "Дата отправки (необязательно)"
+      "send_on_label": "Дата отправки (необязательно)",
+      "expanded": "Форма с данными получателя подарочной карты развернута",
+      "collapsed": "Форма с данными получателя подарочной карты свернута"
     }
-  },
-  "custom_order": {
-    "banner": {
-      "editing": "Custom order not in cart yet — make sure you add it before leaving this page.",
-      "cart": "Custom order is in cart"
-    }
-  },
-  "custom_measurements": {
-    "category_legend": "Custom product category",
-    "unit_legend": "Unit",
-    "unit_inches": "Inches",
-    "unit_centimeters": "Centimeters",
-    "measurement_hint": "Measurements marked with * are optional for the selected category.",
-    "custom_color_button": "Don't see a color listed? Click here",
-    "item_notes_label": "Item Notes *",
-    "item_notes_placeholder": "Enter your item notes here",
-    "event_notes_label": "Event Notes *",
-    "event_notes_placeholder": "Event name or notes here"
   }
 }

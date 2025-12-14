@@ -19,48 +19,50 @@
   style="--custom-order-banner-bg: {{ banner_background_color }}; --custom-order-banner-color: {{ banner_text_color }}; --custom-order-banner-shadow: {{ banner_shadow_rgba }};"
 >
   <div class="custom-order-banner__inner">
-    <span class="custom-order-banner__text custom-order-banner__text--editing" data-banner-editing hidden>
-      {{ banner_editing_text | escape }}
-    </span>
+    <div class="custom-order-banner__text-container">
+      <div class="custom-order-banner__text-wrapper" data-text-wrapper>
+        <span class="custom-order-banner__text custom-order-banner__text--editing" data-banner-editing hidden>
+          {{ banner_editing_text | escape }}
+        </span>
+        <span class="custom-order-banner__text custom-order-banner__text--duplicate" aria-hidden="true" hidden></span>
+      </div>
+    </div>
+    <button
+      type="button"
+      class="custom-order-banner__close"
+      aria-label="Minimize banner"
+      data-banner-close
+    >
+      <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 16 16">
+        <path d="M8 4L3 9l1.414 1.414L8 6.828l3.586 3.586L13 9l-5-5z" fill="currentColor"/>
+      </svg>
+    </button>
+  </div>
+  <div
+    class="custom-order-banner__minimized"
+    data-banner-minimized
+    hidden
+    role="button"
+    tabindex="0"
+    aria-label="Tap to show notification"
+    title="Tap to show notification"
+  >
+    <div class="custom-order-banner__minimized-bar">
+      <svg
+        class="custom-order-banner__minimized-icon"
+        aria-hidden="true"
+        focusable="false"
+        width="12"
+        height="12"
+        viewBox="0 0 12 12"
+      >
+        <path d="M6 2L2 6l4 4 4-4-4-4z" fill="currentColor" opacity="0.6"/>
+      </svg>
+    </div>
   </div>
 </div>
 
-<style>
-  .custom-order-banner {
-    position: sticky;
-    top: 0;
-    z-index: 120;
-    width: 100%;
-    background-color: var(--custom-order-banner-bg);
-    color: var(--custom-order-banner-color);
-    box-shadow: 0 2px 6px var(--custom-order-banner-shadow);
-  }
-
-  .custom-order-banner[hidden] {
-    display: none !important;
-  }
-
-  .custom-order-banner__inner {
-    max-width: var(--page-width, 1200px);
-    margin: 0 auto;
-    padding: 0.75rem 1.5rem;
-    text-align: center;
-    font-size: 1.4rem;
-    font-weight: 600;
-    letter-spacing: 0.04em;
-  }
-
-  @media (prefers-reduced-motion: no-preference) {
-    .custom-order-banner {
-      transition: transform 200ms ease, opacity 200ms ease;
-    }
-
-    .custom-order-banner[hidden] {
-      opacity: 0;
-      transform: translateY(-100%);
-    }
-  }
-</style>
+{{ 'component-custom-order-banner.css' | asset_url | stylesheet_tag }}
 
 <script>
   window.CustomOrderBanner = (function () {
@@ -74,6 +76,7 @@
     }
 
     const editingElement = banner.querySelector('[data-banner-editing]');
+    const minimizedBar = banner.querySelector('[data-banner-minimized]');
     const editingTextDefault = {{ banner_editing_text | json }};
     const suppressed =
       window.location.pathname.includes('/checkouts/') ||
@@ -86,9 +89,12 @@
       editingText: editingTextDefault,
     };
 
+    let bannerManager = null;
+
     function render() {
       if (suppressed) {
         banner.hidden = true;
+        if (minimizedBar) minimizedBar.hidden = true;
         return;
       }
       const showEditing = state.forceShow || state.editing;
@@ -99,11 +105,34 @@
         editingElement.hidden = !showEditing;
       }
 
-      banner.hidden = !showEditing;
+      if (showEditing) {
+        banner.hidden = false;
+        if (bannerManager && bannerManager.isMinimized()) {
+          banner.classList.add('custom-order-banner--minimized');
+        } else {
+          banner.classList.remove('custom-order-banner--minimized');
+        }
+        // Check if text needs scrolling after rendering (immediately for desktop)
+        if (window.innerWidth > 749) {
+          checkTextScroll();
+        } else {
+          setTimeout(checkTextScroll, 100);
+        }
+      } else {
+        banner.hidden = true;
+        if (minimizedBar) minimizedBar.hidden = true;
+        // Ensure duplicate is hidden when banner is hidden
+        const wrapper = editingElement?.closest('[data-text-wrapper]');
+        const duplicate = wrapper?.querySelector('.custom-order-banner__text--duplicate');
+        if (duplicate) duplicate.hidden = true;
+      }
     }
 
     function setForceShow(value) {
       state.forceShow = Boolean(value);
+      if (value && bannerManager) {
+        bannerManager.restore();
+      }
       render();
     }
 
@@ -117,18 +146,68 @@
       const nextFlag = Boolean(isEditing);
       if (state.editing !== nextFlag) {
         state.editing = nextFlag;
+        if (nextFlag && bannerManager) {
+          bannerManager.restore();
+        }
         render();
       }
     }
 
+    function checkTextScroll() {
+      if (!editingElement) return;
+      const container = editingElement.closest('.custom-order-banner__inner');
+      const wrapper = editingElement.closest('[data-text-wrapper]');
+      const duplicate = wrapper?.querySelector('.custom-order-banner__text--duplicate');
+      if (!container || !wrapper) {
+        if (duplicate) duplicate.hidden = true;
+        return;
+      }
+
+      // Hide duplicate and remove scroll attributes on desktop
+      if (window.innerWidth > 749) {
+        if (duplicate) duplicate.hidden = true;
+        wrapper.removeAttribute('data-needs-scroll');
+        container.removeAttribute('data-needs-scroll');
+        return;
+      }
+
+      // Account for padding on both sides and close button width (mobile only)
+      const containerWidth = container.offsetWidth;
+      const leftPadding = 16; // 1rem in pixels
+      const rightPadding = 56; // 3.5rem for close button area
+      const availableWidth = containerWidth - leftPadding - rightPadding;
+      const textWidth = editingElement.scrollWidth;
+
+      if (textWidth > availableWidth && duplicate) {
+        // Duplicate text for seamless scrolling
+        duplicate.textContent = editingElement.textContent;
+        duplicate.hidden = false;
+        wrapper.setAttribute('data-needs-scroll', 'true');
+        container.setAttribute('data-needs-scroll', 'true');
+      } else {
+        if (duplicate) duplicate.hidden = true;
+        wrapper.removeAttribute('data-needs-scroll');
+        container.removeAttribute('data-needs-scroll');
+      }
+    }
+
     async function init() {
-      // Check if page loaded with edit parameters (indicating edit mode)
-      // Only show if we're on a product page with custom measurements form
+      if (window.CustomBannerManager) {
+        bannerManager = window.CustomBannerManager.initBanner({
+          banner,
+          minimizedBar,
+          storageKey: 'editingBanner',
+          autoRestoreOnShow: true,
+        });
+      }
+
+      // Check if text needs scrolling on all screen sizes (responds to resize)
+      checkTextScroll();
+      window.addEventListener('resize', checkTextScroll);
+
       const isProductPage = window.location.pathname.includes('/products/');
       const hasCustomForm = document.querySelector('.measurement-field') || document.querySelector('.category-option-input');
 
-      // Check if URL contains edit-related parameters (not marketing/tracking params)
-      // Wait for config to be available before checking
       let hasEditParams = false;
       if (window.CustomOrderUtils && window.CustomOrderUtils.hasEditRelatedParams) {
         try {
@@ -139,7 +218,6 @@
         }
       }
 
-      // If URL has edit-related parameters and we're on a product page with custom form, we're in edit mode
       if (hasEditParams && isProductPage && hasCustomForm) {
         state.editing = true;
       }
@@ -149,6 +227,7 @@
         if (event.customOrderItemAdded) {
           state.editing = false;
           state.forceShow = false;
+          if (bannerManager) bannerManager.restore();
           render();
         }
       });
@@ -169,4 +248,3 @@
     };
   })();
 </script>
-

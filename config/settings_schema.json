@@ -2,7 +2,7 @@
   {
     "name": "theme_info",
     "theme_name": "Dawn",
-    "theme_version": "10.0.3",
+    "theme_version": "15.4.0.1",
     "theme_author": "Shopify",
     "theme_documentation_url": "https://help.shopify.com/manual/online-store/themes",
     "theme_support_url": "https://support.shopify.com/"
@@ -112,8 +112,7 @@
         "type": "font_picker",
         "id": "type_header_font",
         "default": "assistant_n4",
-        "label": "t:settings_schema.typography.settings.type_header_font.label",
-        "info": "t:settings_schema.typography.settings.type_header_font.info"
+        "label": "t:settings_schema.typography.settings.type_header_font.label"
       },
       {
         "type": "range",
@@ -133,8 +132,7 @@
         "type": "font_picker",
         "id": "type_body_font",
         "default": "assistant_n4",
-        "label": "t:settings_schema.typography.settings.type_body_font.label",
-        "info": "t:settings_schema.typography.settings.type_body_font.info"
+        "label": "t:settings_schema.typography.settings.type_body_font.label"
       },
       {
         "type": "range",
@@ -219,8 +217,12 @@
             "label": "t:settings_schema.animations.settings.animations_hover_elements.options__1.label"
           },
           {
-            "value": "3d-lift",
+            "value": "vertical-lift",
             "label": "t:settings_schema.animations.settings.animations_hover_elements.options__2.label"
+          },
+          {
+            "value": "3d-lift",
+            "label": "t:settings_schema.animations.settings.animations_hover_elements.options__3.label"
           }
         ],
         "default": "default",
@@ -535,7 +537,7 @@
         "type": "color_scheme",
         "id": "card_color_scheme",
         "label": "t:sections.all.colors.label",
-        "default": "background-2"
+        "default": "scheme-2"
       },
       {
         "type": "header",
@@ -670,7 +672,7 @@
         "type": "color_scheme",
         "id": "collection_card_color_scheme",
         "label": "t:sections.all.colors.label",
-        "default": "background-2"
+        "default": "scheme-2"
       },
       {
         "type": "header",
@@ -805,7 +807,7 @@
         "type": "color_scheme",
         "id": "blog_card_color_scheme",
         "label": "t:sections.all.colors.label",
-        "default": "background-2"
+        "default": "scheme-2"
       },
       {
         "type": "header",
@@ -1254,13 +1256,13 @@
         "type": "color_scheme",
         "id": "sale_badge_color_scheme",
         "label": "t:settings_schema.badges.settings.sale_badge_color_scheme.label",
-        "default": "accent-2"
+        "default": "scheme-5"
       },
       {
         "type": "color_scheme",
         "id": "sold_out_badge_color_scheme",
         "label": "t:settings_schema.badges.settings.sold_out_badge_color_scheme.label",
-        "default": "inverse"
+        "default": "scheme-3"
       }
     ]
   },
@@ -1302,72 +1304,64 @@
     "name": "t:settings_schema.social-media.name",
     "settings": [
       {
-        "type": "header",
-        "content": "t:settings_schema.social-media.settings.header.content"
-      },
-      {
         "type": "text",
         "id": "social_facebook_link",
         "label": "t:settings_schema.social-media.settings.social_facebook_link.label",
-        "info": "t:settings_schema.social-media.settings.social_facebook_link.info"
+        "placeholder": "t:settings_schema.social-media.settings.social_facebook_link.info"
       },
       {
         "type": "text",
         "id": "social_instagram_link",
         "label": "t:settings_schema.social-media.settings.social_instagram_link.label",
-        "info": "t:settings_schema.social-media.settings.social_instagram_link.info"
+        "placeholder": "t:settings_schema.social-media.settings.social_instagram_link.info"
       },
       {
         "type": "text",
         "id": "social_youtube_link",
         "label": "t:settings_schema.social-media.settings.social_youtube_link.label",
-        "info": "t:settings_schema.social-media.settings.social_youtube_link.info"
+        "placeholder": "t:settings_schema.social-media.settings.social_youtube_link.info"
       },
       {
         "type": "text",
         "id": "social_tiktok_link",
         "label": "t:settings_schema.social-media.settings.social_tiktok_link.label",
-        "info": "t:settings_schema.social-media.settings.social_tiktok_link.info"
+        "placeholder": "t:settings_schema.social-media.settings.social_tiktok_link.info"
       },
       {
         "type": "text",
         "id": "social_twitter_link",
         "label": "t:settings_schema.social-media.settings.social_twitter_link.label",
-        "info": "t:settings_schema.social-media.settings.social_twitter_link.info"
+        "placeholder": "t:settings_schema.social-media.settings.social_twitter_link.info"
       },
       {
         "type": "text",
         "id": "social_snapchat_link",
         "label": "t:settings_schema.social-media.settings.social_snapchat_link.label",
-        "info": "t:settings_schema.social-media.settings.social_snapchat_link.info"
+        "placeholder": "t:settings_schema.social-media.settings.social_snapchat_link.info"
       },
       {
         "type": "text",
         "id": "social_pinterest_link",
         "label": "t:settings_schema.social-media.settings.social_pinterest_link.label",
-        "info": "t:settings_schema.social-media.settings.social_pinterest_link.info"
+        "placeholder": "t:settings_schema.social-media.settings.social_pinterest_link.info"
       },
       {
         "type": "text",
         "id": "social_tumblr_link",
         "label": "t:settings_schema.social-media.settings.social_tumblr_link.label",
-        "info": "t:settings_schema.social-media.settings.social_tumblr_link.info"
+        "placeholder": "t:settings_schema.social-media.settings.social_tumblr_link.info"
       },
       {
         "type": "text",
         "id": "social_vimeo_link",
         "label": "t:settings_schema.social-media.settings.social_vimeo_link.label",
-        "info": "t:settings_schema.social-media.settings.social_vimeo_link.info"
+        "placeholder": "t:settings_schema.social-media.settings.social_vimeo_link.info"
       }
     ]
   },
   {
     "name": "t:settings_schema.search_input.name",
     "settings": [
-      {
-        "type": "header",
-        "content": "t:settings_schema.search_input.settings.header.content"
-      },
       {
         "type": "checkbox",
         "id": "predictive_search_enabled",
@@ -1393,10 +1387,6 @@
   {
     "name": "t:settings_schema.currency_format.name",
     "settings": [
-      {
-        "type": "header",
-        "content": "t:settings_schema.currency_format.settings.content"
-      },
       {
         "type": "paragraph",
         "content": "t:settings_schema.currency_format.settings.paragraph"
@@ -1453,6 +1443,12 @@
         "id": "cart_drawer_collection",
         "label": "t:settings_schema.cart.settings.cart_drawer.collection.label",
         "info": "t:settings_schema.cart.settings.cart_drawer.collection.info"
+      },
+      {
+        "type": "color_scheme",
+        "id": "cart_color_scheme",
+        "label": "t:sections.all.colors.label",
+        "default": "scheme-1"
       }
     ]
   },
@@ -1610,6 +1606,31 @@
         "min": 0,
         "max": 6,
         "step": 1
+      },
+      {
+        "type": "header",
+        "content": "t:settings_schema.custom_order_measurements_settings.settings.header_groups.content"
+      },
+      {
+        "type": "text",
+        "id": "custom_measurements_group_upper_body",
+        "label": "t:settings_schema.custom_order_measurements_settings.settings.group_upper_body.label",
+        "info": "t:settings_schema.custom_order_measurements_settings.settings.group_upper_body.info",
+        "default": "Head Circumference,Neck,Shoulders,Chest,Sleeve Length,Bicep,Wrist,Palm Circumference,Hand Length"
+      },
+      {
+        "type": "text",
+        "id": "custom_measurements_group_torso_hips",
+        "label": "t:settings_schema.custom_order_measurements_settings.settings.group_torso_hips.label",
+        "info": "t:settings_schema.custom_order_measurements_settings.settings.group_torso_hips.info",
+        "default": "Torso,Stomach,Waist,Hips"
+      },
+      {
+        "type": "text",
+        "id": "custom_measurements_group_lower_body",
+        "label": "t:settings_schema.custom_order_measurements_settings.settings.group_lower_body.label",
+        "info": "t:settings_schema.custom_order_measurements_settings.settings.group_lower_body.info",
+        "default": "Upper Thigh,Lower Thigh,Knee,Calf,Ankle,Inseam,Crotch,Butt Rise,Length"
       }
     ]
   }
