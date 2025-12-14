@@ -206,6 +206,7 @@
       "custom_css": [],
       "settings": {
         "color_scheme": "scheme-4",
+        "background_image": "shopify://shop_images/CigarBull_Custom.jpg",
         "full_width": true,
         "padding_top": 40,
         "padding_bottom": 52
