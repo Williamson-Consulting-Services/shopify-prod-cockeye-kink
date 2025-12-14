@@ -37,6 +37,29 @@ See [Version Tracking Workflow](../.cursor/version-tracking-workflow.mdc) for de
 
 - (Items will be listed here)
 
+## [15.4.1.2] - 2025-12-14
+
+### Added
+
+- Custom card variant options display component (`custom-card-variant-options.liquid`)
+- Variant option display on product cards in collection grids
+- Color swatch display for products with multiple color variants
+- Size button display for products with multiple size variants
+- Inventory-aware strikethrough styling for unavailable variant options
+- Component CSS (`component-custom-card-variant-options.css`) with responsive design
+- Variant options display when multiple values exist (colors if multiple colors, sizes if multiple sizes)
+- Unavailable options (inventory tracked and quantity 0) are visually struck out
+
+### Notes
+
+- Base: Dawn 15.4.0
+- Modular snippet design following custom- prefix pattern for theme update resilience
+- Variant options display independently: shows colors if multiple colors exist, shows sizes if multiple sizes exist
+- Strikethrough only applies when `inventory_management == 'shopify'` and `inventory_quantity == 0`
+- No breaking changes
+
+---
+
 ## [15.4.0.1] - 2025-12-14
 
 ### Added
