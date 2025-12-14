@@ -14,13 +14,6 @@
     "footer": {
       "type": "footer",
       "blocks": {
-        "link_list_g37qbD": {
-          "type": "link_list",
-          "settings": {
-            "heading": "Quick links",
-            "menu": "footer"
-          }
-        },
         "footer-0": {
           "type": "link_list",
           "disabled": true,
@@ -46,7 +39,6 @@
         }
       },
       "block_order": [
-        "link_list_g37qbD",
         "footer-0",
         "footer-1",
         "footer-2"
@@ -57,8 +49,8 @@
         "newsletter_heading": "Subscribe to our emails",
         "enable_follow_on_shop": true,
         "show_social": true,
-        "enable_country_selector": true,
-        "enable_language_selector": true,
+        "enable_country_selector": false,
+        "enable_language_selector": false,
         "payment_enable": true,
         "show_policy": true,
         "margin_top": 0,
