@@ -37,10 +37,32 @@
   border: 0.1rem solid rgba(var(--color-foreground), 0.1);
   border-radius: 0.2rem;
   transition: border-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+/* Multiple colors indicator */
+.custom-card-variant-options__multiple-colors-indicator {
+  font-size: 1rem;
+  font-weight: bold;
+  color: rgba(var(--color-foreground), 0.6);
+  line-height: 1;
+}
+
+.custom-card-variant-options__option--swatch {
+  cursor: pointer;
 }
 
 .custom-card-variant-options__option--swatch:hover .swatch {
   border-color: rgba(var(--color-foreground), 0.3);
+}
+
+.custom-card-variant-options__option--swatch.custom-card-variant-options__option--selected .swatch {
+  border-color: rgba(var(--color-foreground), 0.6);
+  border-width: 0.2rem;
+  box-shadow: 0 0 0 0.1rem rgba(var(--color-foreground), 0.1);
 }
 
 /* Button Styles (Size Options) */
@@ -65,9 +87,19 @@
   transition: border-color 0.2s ease, background-color 0.2s ease;
 }
 
+.custom-card-variant-options__option--button {
+  cursor: pointer;
+}
+
 .custom-card-variant-options__option--button:hover {
   border-color: rgba(var(--color-foreground), 0.4);
   background-color: rgba(var(--color-foreground), 0.05);
+}
+
+.custom-card-variant-options__option--button.custom-card-variant-options__option--selected {
+  border-color: rgba(var(--color-foreground), 0.6);
+  border-width: 0.15rem;
+  background-color: rgba(var(--color-foreground), 0.1);
 }
 
 .custom-card-variant-options__button-text {
@@ -93,36 +125,54 @@
   padding: 0.2rem 0.4rem;
 }
 
-/* Unavailable State (Strikethrough) */
+/* Unavailable State (Greyed Out & Disabled) */
 .custom-card-variant-options__option--unavailable {
-  opacity: 0.6;
+  opacity: 0.4;
   cursor: not-allowed;
+  filter: grayscale(100%);
 }
 
-.custom-card-variant-options__option--unavailable::after {
+/* Greyed out swatch styling */
+.custom-card-variant-options__option--swatch.custom-card-variant-options__option--unavailable .swatch {
+  border-color: rgba(var(--color-foreground), 0.2);
+  opacity: 0.5;
+}
+
+.custom-card-variant-options__option--swatch.custom-card-variant-options__option--unavailable:hover .swatch {
+  border-color: rgba(var(--color-foreground), 0.2);
+}
+
+/* Greyed out button styling */
+.custom-card-variant-options__option--button.custom-card-variant-options__option--unavailable {
+  background-color: rgba(var(--color-foreground), 0.05);
+  border-color: rgba(var(--color-foreground), 0.15);
+  color: rgba(var(--color-foreground), 0.5);
+}
+
+.custom-card-variant-options__option--button.custom-card-variant-options__option--unavailable:hover {
+  border-color: rgba(var(--color-foreground), 0.15);
+  background-color: rgba(var(--color-foreground), 0.05);
+}
+
+.custom-card-variant-options__option--button.custom-card-variant-options__option--unavailable .custom-card-variant-options__button-text {
+  color: rgba(var(--color-foreground), 0.5);
+  text-decoration: line-through;
+  text-decoration-thickness: 0.1rem;
+}
+
+/* Subtle strikethrough for swatches only (overlay, not interfering) */
+.custom-card-variant-options__option--swatch.custom-card-variant-options__option--unavailable::after {
   content: '';
   position: absolute;
   top: 50%;
-  left: 0;
-  right: 0;
-  height: 0.1rem;
-  background-color: currentColor;
-  transform: translateY(-50%) rotate(-45deg);
+  left: 50%;
+  width: 120%;
+  height: 0.08rem;
+  background-color: rgba(var(--color-foreground), 0.6);
+  transform: translate(-50%, -50%) rotate(-45deg);
   transform-origin: center;
   pointer-events: none;
-}
-
-/* Ensure strikethrough works for swatches */
-.custom-card-variant-options__option--swatch.custom-card-variant-options__option--unavailable::after {
-  left: -0.2rem;
-  right: -0.2rem;
-  height: 0.15rem;
-}
-
-/* Ensure strikethrough works for buttons */
-.custom-card-variant-options__option--button.custom-card-variant-options__option--unavailable::after {
-  left: 0.2rem;
-  right: 0.2rem;
+  z-index: 1;
 }
 
 /* Responsive adjustments */

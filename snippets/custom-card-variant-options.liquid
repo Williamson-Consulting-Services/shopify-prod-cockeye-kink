@@ -34,32 +34,33 @@
 
   {%- comment -%} Display if color or size options have multiple values {%- endcomment -%}
   {%- if show_color_option or show_size_option -%}
-    {%- comment -%} Load CSS only once per page {%- endcomment -%}
-    {%- unless custom_card_variant_options_loaded -%}
-      {{ 'component-custom-card-variant-options.css' | asset_url | stylesheet_tag }}
-      {%- assign custom_card_variant_options_loaded = true -%}
-    {%- endunless -%}
+  {%- comment -%} Load CSS only once per page {%- endcomment -%}
+  {%- unless custom_card_variant_options_loaded -%}
+    {{ 'component-custom-card-variant-options.css' | asset_url | stylesheet_tag }}
+    <script src="{{ 'custom-card-variant-options.js' | asset_url }}" defer="defer"></script>
+    {%- assign custom_card_variant_options_loaded = true -%}
+  {%- endunless -%}
 
-    <div class="custom-card-variant-options">
+    <div class="custom-card-variant-options" data-product-id="{{ product.id }}"{% if color_option %} data-color-position="{{ color_option.position }}"{% endif %}{% if size_option %} data-size-position="{{ size_option.position }}"{% endif %}>
       {%- comment -%} Display Color Option (only if multiple values) {%- endcomment -%}
       {%- if show_color_option and color_option -%}
-        <div class="custom-card-variant-options__group" data-option-name="{{ color_option.name | escape }}">
+        <div class="custom-card-variant-options__group" data-option-name="{{ color_option.name | escape }}" data-option-position="{{ color_option.position }}">
           <div class="custom-card-variant-options__swatches">
             {%- for value in color_option.values -%}
               {%- liquid
                 assign value_unavailable = true
 
                 for variant in product.variants
-                  assign variant_has_value = false
+                  assign variant_has_color = false
                   if color_option.position == 1 and variant.option1 == value
-                    assign variant_has_value = true
+                    assign variant_has_color = true
                   elsif color_option.position == 2 and variant.option2 == value
-                    assign variant_has_value = true
+                    assign variant_has_color = true
                   elsif color_option.position == 3 and variant.option3 == value
-                    assign variant_has_value = true
+                    assign variant_has_color = true
                   endif
 
-                  if variant_has_value
+                  if variant_has_color
                     if variant.inventory_management == 'shopify'
                       if variant.inventory_quantity > 0
                         assign value_unavailable = false
@@ -73,12 +74,80 @@
                 endfor
               -%}
 
+              {%- liquid
+                assign has_swatch_image = false
+                assign has_swatch_color = false
+                assign swatch_display_value = value
+
+                if value.swatch.image
+                  assign has_swatch_image = true
+                elsif value.swatch.color
+                  assign has_swatch_color = true
+                endif
+
+                assign value_name_lower = value | downcase
+                assign is_multiple_colors = false
+                if value_name_lower contains 'other' or value_name_lower contains 'multiple' or value_name_lower contains 'various'
+                  assign is_multiple_colors = true
+                endif
+              -%}
+
               <div
-                class="custom-card-variant-options__option custom-card-variant-options__option--swatch{% if value_unavailable %} custom-card-variant-options__option--unavailable{% endif %}"
+                class="custom-card-variant-options__option custom-card-variant-options__option--swatch{% if value_unavailable %} custom-card-variant-options__option--unavailable{% endif %}{% if is_multiple_colors %} custom-card-variant-options__option--multiple-colors{% endif %}"
                 title="{{ value | escape }}"
                 aria-label="{{ value | escape }}{% if value_unavailable %} - {{ 'products.product.sold_out' | t }}{% endif %}"
+                data-option-type="color"
+                data-option-value="{{ value | escape }}"
               >
-                {% render 'swatch', swatch: value.swatch, shape: 'square' %}
+                {%- if has_swatch_image or has_swatch_color -%}
+                  {% render 'swatch', swatch: value.swatch, shape: 'square' %}
+                {%- else -%}
+                  {%- comment -%} Fallback: Create a color swatch from color name or use default {%- endcomment -%}
+                  {%- liquid
+                    assign fallback_color = '#cccccc'
+                    assign value_name_clean = value | downcase | strip
+
+                    case value_name_clean
+                      when 'red'
+                        assign fallback_color = '#ff0000'
+                      when 'blue'
+                        assign fallback_color = '#0000ff'
+                      when 'green'
+                        assign fallback_color = '#008000'
+                      when 'yellow'
+                        assign fallback_color = '#ffff00'
+                      when 'orange'
+                        assign fallback_color = '#ffa500'
+                      when 'purple'
+                        assign fallback_color = '#800080'
+                      when 'pink'
+                        assign fallback_color = '#ffc0cb'
+                      when 'black'
+                        assign fallback_color = '#000000'
+                      when 'white'
+                        assign fallback_color = '#ffffff'
+                      when 'grey', 'gray'
+                        assign fallback_color = '#808080'
+                      when 'brown'
+                        assign fallback_color = '#a52a2a'
+                      when 'navy'
+                        assign fallback_color = '#000080'
+                      when 'tan', 'beige'
+                        assign fallback_color = '#f5f5dc'
+                      when 'olive'
+                        assign fallback_color = '#808000'
+                    endcase
+
+                    if is_multiple_colors
+                      assign fallback_color = '#cccccc'
+                    endif
+                  -%}
+                  <span class="swatch swatch--square" style="--swatch--background: {{ fallback_color }};">
+                    {%- if is_multiple_colors -%}
+                      <span class="custom-card-variant-options__multiple-colors-indicator" aria-hidden="true">+</span>
+                    {%- endif -%}
+                  </span>
+                {%- endif -%}
               </div>
             {%- endfor -%}
           </div>
@@ -87,23 +156,23 @@
 
       {%- comment -%} Display Size Option (only if multiple values) {%- endcomment -%}
       {%- if show_size_option and size_option -%}
-        <div class="custom-card-variant-options__group" data-option-name="{{ size_option.name | escape }}">
+        <div class="custom-card-variant-options__group" data-option-name="{{ size_option.name | escape }}" data-option-position="{{ size_option.position }}">
           <div class="custom-card-variant-options__buttons">
             {%- for value in size_option.values -%}
               {%- liquid
                 assign value_unavailable = true
 
                 for variant in product.variants
-                  assign variant_has_value = false
+                  assign variant_has_size = false
                   if size_option.position == 1 and variant.option1 == value
-                    assign variant_has_value = true
+                    assign variant_has_size = true
                   elsif size_option.position == 2 and variant.option2 == value
-                    assign variant_has_value = true
+                    assign variant_has_size = true
                   elsif size_option.position == 3 and variant.option3 == value
-                    assign variant_has_value = true
+                    assign variant_has_size = true
                   endif
 
-                  if variant_has_value
+                  if variant_has_size
                     if variant.inventory_management == 'shopify'
                       if variant.inventory_quantity > 0
                         assign value_unavailable = false
@@ -121,6 +190,8 @@
                 class="custom-card-variant-options__option custom-card-variant-options__option--button{% if value_unavailable %} custom-card-variant-options__option--unavailable{% endif %}"
                 title="{{ value | escape }}{% if value_unavailable %} - {{ 'products.product.sold_out' | t }}{% endif %}"
                 aria-label="{{ value | escape }}{% if value_unavailable %} - {{ 'products.product.sold_out' | t }}{% endif %}"
+                data-option-type="size"
+                data-option-value="{{ value | escape }}"
               >
                 <span class="custom-card-variant-options__button-text">{{ value | escape }}</span>
               </div>
