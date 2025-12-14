@@ -31,7 +31,7 @@
     assign image_url_value = image | image_url: width: img_width
     assign suffix = class_suffix | default: 'padding'
     assign combine = combine_with_target | default: true
-    
+
     if combine
       assign scoped_selector = '.section-' | append: section_id | append: '-' | append: suffix | append: '.' | append: target_class
     else
