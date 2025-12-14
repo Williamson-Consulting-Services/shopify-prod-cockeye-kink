@@ -47,9 +47,9 @@
       "settings": {
         "image": "shopify://shop_images/cockeye_header.jpg",
         "image_overlay_opacity": 30,
-        "image_height": "large",
+        "image_height": "medium",
         "image_behavior": "none",
-        "desktop_content_position": "bottom-center",
+        "desktop_content_position": "middle-center",
         "desktop_content_alignment": "center",
         "show_text_box": false,
         "color_scheme": "scheme-4",
