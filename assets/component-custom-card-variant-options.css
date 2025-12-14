@@ -41,6 +41,19 @@
   align-items: center;
   justify-content: center;
   position: relative;
+  background-color: var(--swatch--background, #cccccc);
+}
+
+/* Multi-color swatch styling - diagonal split */
+.custom-card-variant-options__option--swatch .swatch.swatch--multi-color {
+  position: relative;
+  overflow: hidden;
+  background: var(--swatch--background, #cccccc);
+}
+
+/* Ensure gradient from inline style takes precedence */
+.custom-card-variant-options__option--swatch .swatch.swatch--multi-color[style*="linear-gradient"] {
+  background-image: var(--swatch-gradient, none);
 }
 
 /* Multiple colors indicator */

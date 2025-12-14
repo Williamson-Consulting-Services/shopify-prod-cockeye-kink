@@ -34,17 +34,33 @@
 
   {%- comment -%} Display if color or size options have multiple values {%- endcomment -%}
   {%- if show_color_option or show_size_option -%}
-  {%- comment -%} Load CSS only once per page {%- endcomment -%}
-  {%- unless custom_card_variant_options_loaded -%}
-    {{ 'component-custom-card-variant-options.css' | asset_url | stylesheet_tag }}
-    <script src="{{ 'custom-card-variant-options.js' | asset_url }}" defer="defer"></script>
-    {%- assign custom_card_variant_options_loaded = true -%}
-  {%- endunless -%}
+    {%- comment -%} Load CSS only once per page {%- endcomment -%}
+    {%- unless custom_card_variant_options_loaded -%}
+      {{ 'component-custom-card-variant-options.css' | asset_url | stylesheet_tag }}
+      <script src="{{ 'custom-card-variant-options.js' | asset_url }}" defer="defer"></script>
+      {%- assign custom_card_variant_options_loaded = true -%}
+    {%- endunless -%}
 
-    <div class="custom-card-variant-options" data-product-id="{{ product.id }}"{% if color_option %} data-color-position="{{ color_option.position }}"{% endif %}{% if size_option %} data-size-position="{{ size_option.position }}"{% endif %}>
+    <div
+      class="custom-card-variant-options"
+      data-product-id="{{ product.id }}"
+      data-translation-add-to-cart="{{ 'products.product.add_to_cart' | t }}"
+      data-translation-sold-out="{{ 'products.product.sold_out' | t }}"
+      data-translation-choose-options="{{ 'products.product.choose_options' | t }}"
+      {% if color_option %}
+        data-color-position="{{ color_option.position }}"
+      {% endif -%}
+      {% if size_option %}
+        data-size-position="{{ size_option.position }}"
+      {% endif %}
+    >
       {%- comment -%} Display Color Option (only if multiple values) {%- endcomment -%}
       {%- if show_color_option and color_option -%}
-        <div class="custom-card-variant-options__group" data-option-name="{{ color_option.name | escape }}" data-option-position="{{ color_option.position }}">
+        <div
+          class="custom-card-variant-options__group"
+          data-option-name="{{ color_option.name | escape }}"
+          data-option-position="{{ color_option.position }}"
+        >
           <div class="custom-card-variant-options__swatches">
             {%- for value in color_option.values -%}
               {%- liquid
@@ -105,9 +121,35 @@
                   {%- comment -%} Fallback: Create a color swatch from color name or use default {%- endcomment -%}
                   {%- liquid
                     assign fallback_color = '#cccccc'
+                    assign fallback_color_2 = '#000000'
                     assign value_name_clean = value | downcase | strip
+                    assign primary_color = value_name_clean
+                    assign secondary_color = 'black'
+                    assign has_multiple_colors_in_name = false
 
-                    case value_name_clean
+                    comment
+                      Handle multi-color values like "Red / Black" - extract both colors
+                    endcomment
+                    if value_name_clean contains ' / '
+                      assign color_parts = value_name_clean | split: ' / '
+                      assign primary_color = color_parts[0] | strip
+                      if color_parts[1]
+                        assign secondary_color = color_parts[1] | strip
+                      endif
+                      assign has_multiple_colors_in_name = true
+                    elsif value_name_clean contains '/'
+                      assign color_parts = value_name_clean | split: '/'
+                      assign primary_color = color_parts[0] | strip
+                      if color_parts[1]
+                        assign secondary_color = color_parts[1] | strip
+                      endif
+                      assign has_multiple_colors_in_name = true
+                    endif
+
+                    comment
+                      Map color names to hex values
+                    endcomment
+                    case primary_color
                       when 'red'
                         assign fallback_color = '#ff0000'
                       when 'blue'
@@ -138,12 +180,50 @@
                         assign fallback_color = '#808000'
                     endcase
 
+                    comment
+                      Map secondary color
+                    endcomment
+                    case secondary_color
+                      when 'red'
+                        assign fallback_color_2 = '#ff0000'
+                      when 'blue'
+                        assign fallback_color_2 = '#0000ff'
+                      when 'green'
+                        assign fallback_color_2 = '#008000'
+                      when 'yellow'
+                        assign fallback_color_2 = '#ffff00'
+                      when 'orange'
+                        assign fallback_color_2 = '#ffa500'
+                      when 'purple'
+                        assign fallback_color_2 = '#800080'
+                      when 'pink'
+                        assign fallback_color_2 = '#ffc0cb'
+                      when 'black'
+                        assign fallback_color_2 = '#000000'
+                      when 'white'
+                        assign fallback_color_2 = '#ffffff'
+                      when 'grey', 'gray'
+                        assign fallback_color_2 = '#808080'
+                      when 'brown'
+                        assign fallback_color_2 = '#a52a2a'
+                      when 'navy'
+                        assign fallback_color_2 = '#000080'
+                      when 'tan', 'beige'
+                        assign fallback_color_2 = '#f5f5dc'
+                      when 'olive'
+                        assign fallback_color_2 = '#808000'
+                    endcase
+
                     if is_multiple_colors
                       assign fallback_color = '#cccccc'
+                      assign fallback_color_2 = '#cccccc'
                     endif
                   -%}
-                  <span class="swatch swatch--square" style="--swatch--background: {{ fallback_color }};">
-                    {%- if is_multiple_colors -%}
+                  <span
+                    class="swatch swatch--square{% if has_multiple_colors_in_name %} swatch--multi-color{% endif %}"
+                    style="--swatch--background: {{ fallback_color }};{% if has_multiple_colors_in_name %} background: linear-gradient(135deg, {{ fallback_color }} 0%, {{ fallback_color }} 50%, {{ fallback_color_2 }} 50%, {{ fallback_color_2 }} 100%);{% endif %}"
+                  >
+                    {%- if is_multiple_colors or has_multiple_colors_in_name -%}
                       <span class="custom-card-variant-options__multiple-colors-indicator" aria-hidden="true">+</span>
                     {%- endif -%}
                   </span>
@@ -156,7 +236,11 @@
 
       {%- comment -%} Display Size Option (only if multiple values) {%- endcomment -%}
       {%- if show_size_option and size_option -%}
-        <div class="custom-card-variant-options__group" data-option-name="{{ size_option.name | escape }}" data-option-position="{{ size_option.position }}">
+        <div
+          class="custom-card-variant-options__group"
+          data-option-name="{{ size_option.name | escape }}"
+          data-option-position="{{ size_option.position }}"
+        >
           <div class="custom-card-variant-options__buttons">
             {%- for value in size_option.values -%}
               {%- liquid

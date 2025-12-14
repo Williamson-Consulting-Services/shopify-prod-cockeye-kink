@@ -10,6 +10,14 @@ class CustomCardVariantOptions {
     this.selectedColor = null;
     this.selectedSize = null;
     this.variants = [];
+
+    // Get translations from data attributes
+    this.translations = {
+      addToCart: this.container.getAttribute('data-translation-add-to-cart') || 'Add to cart',
+      soldOut: this.container.getAttribute('data-translation-sold-out') || 'Sold out',
+      chooseOptions: this.container.getAttribute('data-translation-choose-options') || 'Choose options',
+    };
+
     this.init();
   }
 
@@ -308,23 +316,67 @@ class CustomCardVariantOptions {
         }
 
         // Update button state
-        const buttonText = addToCartButton.querySelector('span:first-child');
+        // Find text element - could be in a span or directly in button
+        let buttonText = addToCartButton.querySelector('span:first-child:not(.icon-wrap):not(.loading__spinner)');
+
+        if (!buttonText) {
+          // Check if text is directly in button (not wrapped in span)
+          const textNodes = Array.from(addToCartButton.childNodes).filter(
+            (node) => node.nodeType === Node.TEXT_NODE && node.textContent.trim()
+          );
+          if (textNodes.length > 0) {
+            // Wrap first text node in span for easier manipulation
+            buttonText = document.createElement('span');
+            buttonText.textContent = textNodes[0].textContent.trim();
+            textNodes[0].replaceWith(buttonText);
+          }
+        }
+
         if (buttonText) {
           if (isAvailable) {
             addToCartButton.disabled = false;
-            // If it's a quick add button, keep "Choose options", otherwise show "Add to cart"
-            if (quickAddButton && quickAddButton.hasAttribute('data-product-url')) {
-              // Quick add button - keep original text or update to show variant is ready
-              if (!buttonText.textContent.includes('Choose')) {
-                buttonText.textContent = 'Add to cart';
-              }
-            } else {
-              // Direct add button
-              buttonText.textContent = 'Add to cart';
+            // Update button text using translation
+            const chooseOptionsText = this.translations.chooseOptions;
+            const addToCartText = this.translations.addToCart;
+            buttonText.textContent = buttonText.textContent.trim().replace(
+              new RegExp(chooseOptionsText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i'),
+              addToCartText
+            );
+            if (!buttonText.textContent.includes(addToCartText) && !buttonText.textContent.includes(this.translations.soldOut)) {
+              buttonText.textContent = addToCartText;
             }
           } else {
             addToCartButton.disabled = true;
-            buttonText.textContent = 'Sold out';
+            buttonText.textContent = this.translations.soldOut;
+          }
+        } else {
+          // Fallback: update button text directly (preserve other elements)
+          const chooseOptionsText = this.translations.chooseOptions;
+          const addToCartText = this.translations.addToCart;
+          const soldOutText = this.translations.soldOut;
+
+          if (isAvailable) {
+            addToCartButton.disabled = false;
+            // Replace text while preserving spinner and other elements
+            addToCartButton.childNodes.forEach((node) => {
+              if (node.nodeType === Node.TEXT_NODE && node.textContent.trim()) {
+                node.textContent = node.textContent.replace(
+                  new RegExp(chooseOptionsText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i'),
+                  addToCartText
+                );
+              }
+            });
+          } else {
+            addToCartButton.disabled = true;
+            addToCartButton.childNodes.forEach((node) => {
+              if (node.nodeType === Node.TEXT_NODE && node.textContent.trim()) {
+                const regex = new RegExp(
+                  `(${chooseOptionsText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}|${addToCartText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`,
+                  'i'
+                );
+                node.textContent = node.textContent.replace(regex, soldOutText);
+              }
+            });
           }
         }
 
@@ -339,14 +391,32 @@ class CustomCardVariantOptions {
         quickAddButton.removeAttribute('data-selected-variant-id');
       }
 
-      const buttonText = addToCartButton.querySelector('span:first-child');
-      if (buttonText && buttonText.textContent === 'Sold out') {
-        // Reset to original state if it was sold out
-        addToCartButton.disabled = false;
-        if (quickAddButton && quickAddButton.hasAttribute('data-product-url')) {
-          buttonText.textContent = 'Choose options';
-        } else {
-          buttonText.textContent = 'Add to cart';
+      // Reset button state when selections are cleared
+      const addToCartText = this.translations.addToCart;
+      const soldOutText = this.translations.soldOut;
+      const chooseOptionsText = this.translations.chooseOptions;
+
+      let buttonText = addToCartButton.querySelector('span:first-child');
+      if (buttonText) {
+        if (buttonText.textContent === soldOutText || buttonText.textContent === addToCartText) {
+          addToCartButton.disabled = false;
+          if (quickAddButton && quickAddButton.hasAttribute('data-product-url')) {
+            buttonText.textContent = chooseOptionsText;
+          } else {
+            buttonText.textContent = addToCartText;
+          }
+        }
+      } else {
+        // Fallback: update button text directly
+        if (addToCartButton.textContent.includes(soldOutText) || addToCartButton.textContent.includes(addToCartText)) {
+          addToCartButton.disabled = false;
+          if (quickAddButton && quickAddButton.hasAttribute('data-product-url')) {
+            const regex = new RegExp(
+              `(${soldOutText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}|${addToCartText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`,
+              'i'
+            );
+            addToCartButton.textContent = addToCartButton.textContent.replace(regex, chooseOptionsText);
+          }
         }
       }
     }
