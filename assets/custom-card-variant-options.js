@@ -287,19 +287,17 @@ class CustomCardVariantOptions {
     const colorOptions = this.container.querySelectorAll('.custom-card-variant-options__option--swatch');
     colorOptions.forEach((option) => {
       // Click handler - stop all propagation to prevent navigation
-      option.addEventListener(
-        'click',
-        (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          e.stopImmediatePropagation();
-          this.selectColor(option);
-          // Update image on click
-          this.updateCardImage(option.getAttribute('data-option-value') || option.getAttribute('title'));
-          return false;
-        },
-        true
-      ); // Use capture phase to intercept early
+      const clickHandler = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        this.selectColor(option);
+        // Update image on click
+        this.updateCardImage(option.getAttribute('data-option-value') || option.getAttribute('title'));
+        return false;
+      };
+
+      option.addEventListener('click', clickHandler, true); // Use capture phase to intercept early
 
       // Hover handler
       option.addEventListener('mouseenter', () => {
@@ -320,17 +318,15 @@ class CustomCardVariantOptions {
     // Size selection
     const sizeOptions = this.container.querySelectorAll('.custom-card-variant-options__option--button');
     sizeOptions.forEach((option) => {
-      option.addEventListener(
-        'click',
-        (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          e.stopImmediatePropagation();
-          this.selectSize(option);
-          return false;
-        },
-        true
-      ); // Use capture phase to intercept early
+      const clickHandler = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        this.selectSize(option);
+        return false;
+      };
+
+      option.addEventListener('click', clickHandler, true); // Use capture phase to intercept early
     });
   }
 
@@ -351,6 +347,9 @@ class CustomCardVariantOptions {
     // Add selection to clicked option
     option.classList.add('custom-card-variant-options__option--selected');
     this.selectedColor = option.getAttribute('data-option-value') || option.getAttribute('title');
+
+    // Remove unavailable class from selected color (it might have been marked unavailable initially)
+    option.classList.remove('custom-card-variant-options__option--unavailable');
 
     // Update size availability based on selected color
     this.updateSizeAvailability();
@@ -374,13 +373,19 @@ class CustomCardVariantOptions {
       option.getAttribute('data-option-value') ||
       option.querySelector('.custom-card-variant-options__button-text')?.textContent.trim();
 
+    // Remove unavailable class from selected size (it might have been marked unavailable initially)
+    option.classList.remove('custom-card-variant-options__option--unavailable');
+
     // Update color availability based on selected size
     this.updateColorAvailability();
     this.updateAddToCartButton();
   }
 
   updateSizeAvailability() {
-    if (!this.selectedColor || !this.variants.length) return;
+    if (!this.selectedColor || !this.variants.length) {
+      // If no color selected, restore initial availability state from Liquid
+      return;
+    }
 
     const sizeOptions = this.container.querySelectorAll('.custom-card-variant-options__option--button');
 
@@ -390,6 +395,7 @@ class CustomCardVariantOptions {
         sizeOption.querySelector('.custom-card-variant-options__button-text')?.textContent.trim();
       const isAvailable = this.isVariantAvailable(this.selectedColor, sizeValue);
 
+      // Always update based on current selection - remove unavailable if available, add if not
       if (isAvailable) {
         sizeOption.classList.remove('custom-card-variant-options__option--unavailable');
       } else {

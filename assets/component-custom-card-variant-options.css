@@ -149,8 +149,9 @@
 /* Unavailable State (Slightly Darker & Disabled) */
 .custom-card-variant-options__option--unavailable {
   opacity: 0.7;
-  cursor: not-allowed;
+  cursor: pointer;
   filter: brightness(0.75);
+  pointer-events: auto;
 }
 
 /* Slightly darker swatch styling (not fully greyscale) */
