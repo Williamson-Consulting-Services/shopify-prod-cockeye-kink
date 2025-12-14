@@ -71,30 +71,34 @@ class CustomCardVariantOptions {
     // Listen for quick add button clicks
     const quickAddButton = card.querySelector('.quick-add__submit[data-product-url]');
     if (quickAddButton) {
-      quickAddButton.addEventListener('click', (e) => {
-        // If both color and size are selected, check if we should add directly to cart
-        if (this.selectedColor && this.selectedSize && this.variants.length) {
-          const variant = this.findMatchingVariant(this.selectedColor, this.selectedSize);
-          if (variant) {
-            // Check if product has only color and size options (no other options)
-            const hasOnlyColorAndSize = this.checkIfOnlyColorAndSize();
+      quickAddButton.addEventListener(
+        'click',
+        (e) => {
+          // If both color and size are selected, check if we should add directly to cart
+          if (this.selectedColor && this.selectedSize && this.variants.length) {
+            const variant = this.findMatchingVariant(this.selectedColor, this.selectedSize);
+            if (variant) {
+              // Check if product has only color and size options (no other options)
+              const hasOnlyColorAndSize = this.checkIfOnlyColorAndSize();
 
-            if (hasOnlyColorAndSize && quickAddButton.getAttribute('data-direct-add') === 'true') {
-              // Prevent modal from opening and add directly to cart
-              e.preventDefault();
-              e.stopPropagation();
-              e.stopImmediatePropagation();
-              this.addToCartDirectly(variant, card);
-              return false;
-            } else {
-              // Store selected variant info before modal opens
-              quickAddButton.setAttribute('data-preselect-variant-id', variant.id);
-              quickAddButton.setAttribute('data-preselect-color', this.selectedColor);
-              quickAddButton.setAttribute('data-preselect-size', this.selectedSize);
+              if (hasOnlyColorAndSize && quickAddButton.getAttribute('data-direct-add') === 'true') {
+                // Prevent modal from opening and add directly to cart
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                this.addToCartDirectly(variant, card);
+                return false;
+              } else {
+                // Store selected variant info before modal opens
+                quickAddButton.setAttribute('data-preselect-variant-id', variant.id);
+                quickAddButton.setAttribute('data-preselect-color', this.selectedColor);
+                quickAddButton.setAttribute('data-preselect-size', this.selectedSize);
+              }
             }
           }
-        }
-      }, true); // Use capture phase to intercept before modal opener
+        },
+        true
+      ); // Use capture phase to intercept before modal opener
     }
 
     // Listen for modal content loaded to pre-select variant
@@ -124,10 +128,7 @@ class CustomCardVariantOptions {
 
   async addToCartDirectly(variant, card) {
     // Check if variant is available
-    const isAvailable =
-      variant.inventory_management === 'shopify'
-        ? variant.inventory_quantity > 0
-        : variant.available;
+    const isAvailable = variant.inventory_management === 'shopify' ? variant.inventory_quantity > 0 : variant.available;
 
     if (!isAvailable) {
       return; // Sold out
@@ -286,15 +287,19 @@ class CustomCardVariantOptions {
     const colorOptions = this.container.querySelectorAll('.custom-card-variant-options__option--swatch');
     colorOptions.forEach((option) => {
       // Click handler - stop all propagation to prevent navigation
-      option.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        e.stopImmediatePropagation();
-        this.selectColor(option);
-        // Update image on click
-        this.updateCardImage(option.getAttribute('data-option-value') || option.getAttribute('title'));
-        return false;
-      }, true); // Use capture phase to intercept early
+      option.addEventListener(
+        'click',
+        (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          e.stopImmediatePropagation();
+          this.selectColor(option);
+          // Update image on click
+          this.updateCardImage(option.getAttribute('data-option-value') || option.getAttribute('title'));
+          return false;
+        },
+        true
+      ); // Use capture phase to intercept early
 
       // Hover handler
       option.addEventListener('mouseenter', () => {
@@ -315,13 +320,17 @@ class CustomCardVariantOptions {
     // Size selection
     const sizeOptions = this.container.querySelectorAll('.custom-card-variant-options__option--button');
     sizeOptions.forEach((option) => {
-      option.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        e.stopImmediatePropagation();
-        this.selectSize(option);
-        return false;
-      }, true); // Use capture phase to intercept early
+      option.addEventListener(
+        'click',
+        (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          e.stopImmediatePropagation();
+          this.selectSize(option);
+          return false;
+        },
+        true
+      ); // Use capture phase to intercept early
     });
   }
 
@@ -510,10 +519,9 @@ class CustomCardVariantOptions {
             }
 
             // Replace choose options text
-            buttonText.textContent = buttonText.textContent.trim().replace(
-              new RegExp(chooseOptionsText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i'),
-              addToCartText
-            );
+            buttonText.textContent = buttonText.textContent
+              .trim()
+              .replace(new RegExp(chooseOptionsText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i'), addToCartText);
 
             // Ensure it shows add to cart if neither text is present
             if (!buttonText.textContent.includes(addToCartText) && !buttonText.textContent.includes(soldOutText)) {
@@ -526,10 +534,18 @@ class CustomCardVariantOptions {
             const chooseOptionsText = this.translations.chooseOptions;
 
             // Replace any existing button text with sold out
-            buttonText.textContent = buttonText.textContent.trim().replace(
-              new RegExp(`(${addToCartText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}|${chooseOptionsText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'i'),
-              soldOutText
-            );
+            buttonText.textContent = buttonText.textContent
+              .trim()
+              .replace(
+                new RegExp(
+                  `(${addToCartText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}|${chooseOptionsText.replace(
+                    /[.*+?^${}()|[\]\\]/g,
+                    '\\$&'
+                  )})`,
+                  'i'
+                ),
+                soldOutText
+              );
 
             // Ensure it shows sold out
             if (!buttonText.textContent.includes(soldOutText)) {
@@ -558,7 +574,10 @@ class CustomCardVariantOptions {
             addToCartButton.childNodes.forEach((node) => {
               if (node.nodeType === Node.TEXT_NODE && node.textContent.trim()) {
                 const regex = new RegExp(
-                  `(${chooseOptionsText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}|${addToCartText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`,
+                  `(${chooseOptionsText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}|${addToCartText.replace(
+                    /[.*+?^${}()|[\]\\]/g,
+                    '\\$&'
+                  )})`,
                   'i'
                 );
                 node.textContent = node.textContent.replace(regex, soldOutText);
@@ -609,7 +628,10 @@ class CustomCardVariantOptions {
           addToCartButton.disabled = false;
           if (quickAddButton && quickAddButton.hasAttribute('data-product-url')) {
             const regex = new RegExp(
-              `(${soldOutText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}|${addToCartText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`,
+              `(${soldOutText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}|${addToCartText.replace(
+                /[.*+?^${}()|[\]\\]/g,
+                '\\$&'
+              )})`,
               'i'
             );
             addToCartButton.textContent = addToCartButton.textContent.replace(regex, chooseOptionsText);
@@ -777,10 +799,7 @@ class CustomCardVariantOptions {
       if (variantImage.srcset) {
         cardImage.setAttribute('srcset', variantImage.srcset);
       } else {
-        const srcset = this.buildImageSrcset(
-          variantImage.src,
-          variantImage.width
-        );
+        const srcset = this.buildImageSrcset(variantImage.src, variantImage.width);
         if (srcset) {
           cardImage.setAttribute('srcset', srcset);
         }
