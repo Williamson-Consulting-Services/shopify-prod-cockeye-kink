@@ -228,3 +228,21 @@
 .card__information .custom-card-variant-options:first-child {
   margin-top: 0;
 }
+
+/* Inventory Count Display */
+.custom-card-variant-options__inventory {
+  margin-top: 0.4rem;
+  font-size: 1.2rem;
+  line-height: 1.4;
+  color: rgba(var(--color-foreground), 0.7);
+}
+
+.custom-card-variant-options__inventory-text {
+  display: inline-block;
+}
+
+/* Low stock styling */
+.custom-card-variant-options__inventory--low-stock {
+  color: rgb(238, 148, 65);
+  font-weight: 500;
+}

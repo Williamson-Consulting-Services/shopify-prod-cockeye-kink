@@ -18,6 +18,8 @@ class CustomCardVariantOptions {
       addToCart: this.container.getAttribute('data-translation-add-to-cart') || 'Add to cart',
       soldOut: this.container.getAttribute('data-translation-sold-out') || 'Sold out',
       chooseOptions: this.container.getAttribute('data-translation-choose-options') || 'Choose options',
+      inStockTemplate: this.container.getAttribute('data-translation-in-stock-template') || 'QUANTITY_PLACEHOLDER in stock',
+      lowStockTemplate: this.container.getAttribute('data-translation-low-stock-template') || 'Low stock: QUANTITY_PLACEHOLDER left',
     };
 
     this.init();
@@ -567,6 +569,9 @@ class CustomCardVariantOptions {
           variantIdInput.disabled = !isAvailable;
         }
 
+        // Update inventory count display
+        this.updateInventoryDisplay(matchingVariant);
+
         // Update button state
         // Find text element - could be in a span or directly in button
         let buttonText = addToCartButton.querySelector('span:first-child:not(.icon-wrap):not(.loading__spinner)');
@@ -742,6 +747,8 @@ class CustomCardVariantOptions {
         }
       } else {
         // Some variants available - show "Choose options"
+        // Hide inventory display when no variant selected
+        this.updateInventoryDisplay(null);
         addToCartButton.disabled = false;
         if (buttonText) {
           if (buttonText.textContent === soldOutText || buttonText.textContent === addToCartText) {
@@ -753,7 +760,10 @@ class CustomCardVariantOptions {
           }
         } else {
           // Fallback
-          if (addToCartButton.textContent.includes(soldOutText) || addToCartButton.textContent.includes(addToCartText)) {
+          if (
+            addToCartButton.textContent.includes(soldOutText) ||
+            addToCartButton.textContent.includes(addToCartText)
+          ) {
             if (quickAddButton && quickAddButton.hasAttribute('data-product-url')) {
               const regex = new RegExp(
                 `(${soldOutText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}|${addToCartText.replace(
@@ -796,6 +806,55 @@ class CustomCardVariantOptions {
   updateAvailability() {
     // Initial availability is already set by Liquid
     // This method can be used for dynamic updates if needed
+  }
+
+  updateInventoryDisplay(variant) {
+    if (!variant) {
+      // Hide inventory display if no variant
+      const inventoryDisplay = this.container.querySelector('.custom-card-variant-options__inventory');
+      if (inventoryDisplay) {
+        inventoryDisplay.style.display = 'none';
+      }
+      return;
+    }
+
+    // Check if inventory tracking is enabled
+    if (variant.inventory_management !== 'shopify') {
+      // Hide inventory display if not tracking inventory
+      const inventoryDisplay = this.container.querySelector('.custom-card-variant-options__inventory');
+      if (inventoryDisplay) {
+        inventoryDisplay.style.display = 'none';
+      }
+      return;
+    }
+
+    const quantity = variant.inventory_quantity || 0;
+    const inventoryDisplay = this.container.querySelector('.custom-card-variant-options__inventory');
+    const inventoryText = this.container.querySelector('.custom-card-variant-options__inventory-text');
+
+    if (!inventoryDisplay || !inventoryText) return;
+
+    // Show inventory display
+    inventoryDisplay.style.display = 'block';
+
+    // Determine if low stock (using threshold of 5, can be made configurable)
+    const lowStockThreshold = 5;
+    const isLowStock = quantity > 0 && quantity <= lowStockThreshold;
+
+    // Get translation template
+    let template = isLowStock ? this.translations.lowStockTemplate : this.translations.inStockTemplate;
+
+    // Replace QUANTITY_PLACEHOLDER with actual quantity
+    const inventoryMessage = template.replace(/QUANTITY_PLACEHOLDER/g, quantity.toString());
+
+    inventoryText.textContent = inventoryMessage;
+
+    // Add low stock class for styling
+    if (isLowStock) {
+      inventoryDisplay.classList.add('custom-card-variant-options__inventory--low-stock');
+    } else {
+      inventoryDisplay.classList.remove('custom-card-variant-options__inventory--low-stock');
+    }
   }
 
   findVariantByColor(color, size = null) {

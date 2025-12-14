@@ -47,6 +47,8 @@
       data-translation-add-to-cart="{{ 'products.product.add_to_cart' | t }}"
       data-translation-sold-out="{{ 'products.product.sold_out' | t }}"
       data-translation-choose-options="{{ 'products.product.choose_options' | t }}"
+      data-translation-in-stock-template="{{ 'products.product.inventory_in_stock_show_count' | t: quantity: 'QUANTITY_PLACEHOLDER' }}"
+      data-translation-low-stock-template="{{ 'products.product.inventory_low_stock_show_count' | t: quantity: 'QUANTITY_PLACEHOLDER' }}"
       {% if color_option %}
         data-color-position="{{ color_option.position }}"
       {% endif -%}
@@ -54,6 +56,10 @@
         data-size-position="{{ size_option.position }}"
       {% endif %}
     >
+      {%- comment -%} Inventory count display (hidden by default, shown when variant selected) {%- endcomment -%}
+      <div class="custom-card-variant-options__inventory" style="display: none;">
+        <span class="custom-card-variant-options__inventory-text"></span>
+      </div>
       {%- comment -%} Display Color Option (only if multiple values) {%- endcomment -%}
       {%- if show_color_option and color_option -%}
         <div
