@@ -15,10 +15,11 @@
   }
 {%- endstyle -%}
 
-{%-
-  render 'background-image-styles',
+{%- render 'background-image-styles',
   image: section.settings.background_image,
-  target_selector: '.section-' | append: section.id | append: '-padding.newsletter__wrapper',
+  section_id: section.id,
+  target_class: 'newsletter__wrapper',
+  class_suffix: 'padding',
   background_size: 'cover',
   background_position: 'bottom'
 -%}

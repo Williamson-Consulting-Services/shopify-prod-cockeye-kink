@@ -14,10 +14,11 @@
   }
 {%- endstyle -%}
 
-{%-
-  render 'background-image-styles',
+{%- render 'background-image-styles',
   image: section.settings.background_image,
-  target_selector: '.section-' | append: section.id | append: '-gradient',
+  section_id: section.id,
+  class_suffix: 'gradient',
+  combine_with_target: false,
   background_size: 'auto',
   background_attachment: 'fixed'
 -%}

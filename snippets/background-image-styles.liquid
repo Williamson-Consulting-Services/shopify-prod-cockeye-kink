@@ -3,7 +3,10 @@
 
   Accepts:
   - image: {Object} Image object from section settings (e.g., section.settings.background_image)
-  - target_selector: {String} CSS selector to apply background image to (must be section-specific, e.g., '.section-123-padding.newsletter__wrapper', '.section-123-gradient')
+  - section_id: {String} Section ID for scoping (required, e.g., section.id)
+  - target_class: {String} Target class name without section prefix (e.g., 'newsletter__wrapper', 'gradient')
+  - class_suffix: {String} Section class suffix (default: 'padding', e.g., 'padding' for '.section-{id}-padding', 'gradient' for '.section-{id}-gradient')
+  - combine_with_target: {Boolean} If true, combines section class with target_class (default: true). If false, only uses section class.
   - background_size: {String} CSS background-size value (default: "cover")
   - background_position: {String} CSS background-position value (default: "center")
   - background_attachment: {String} CSS background-attachment value (optional, e.g., "fixed")
@@ -12,21 +15,31 @@
   Usage:
   {% render 'background-image-styles',
     image: section.settings.background_image,
-    target_selector: '.section-' | append: section.id | append: '-padding.newsletter__wrapper',
+    section_id: section.id,
+    target_class: 'newsletter__wrapper',
+    class_suffix: 'padding',
     background_size: 'cover',
     background_position: 'bottom'
   %}
 {% endcomment %}
 
-{%- if image != blank -%}
+{%- if image != blank and section_id != blank -%}
   {%- liquid
     assign bg_size = background_size | default: 'cover'
     assign bg_position = background_position | default: 'center'
     assign img_width = image_width | default: 1920
     assign image_url_value = image | image_url: width: img_width
+    assign suffix = class_suffix | default: 'padding'
+    assign combine = combine_with_target | default: true
+    
+    if combine
+      assign scoped_selector = '.section-' | append: section_id | append: '-' | append: suffix | append: '.' | append: target_class
+    else
+      assign scoped_selector = '.section-' | append: section_id | append: '-' | append: suffix
+    endif
   -%}
   {%- style -%}
-    {{ target_selector }} {
+    {{ scoped_selector }} {
       background-image: url({{ image_url_value }});
       background-size: {{ bg_size }};
       background-position: {{ bg_position }};
