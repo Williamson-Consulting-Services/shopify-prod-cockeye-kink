@@ -37,7 +37,7 @@ See [Version Tracking Workflow](../.cursor/version-tracking-workflow.mdc) for de
 
 - (Items will be listed here)
 
-## [15.4.1] - 2025-01-27
+## [15.4.0.1] - 2025-12-14
 
 ### Added
 
