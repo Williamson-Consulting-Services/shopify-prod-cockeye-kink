@@ -1,0 +1,189 @@
+╭─ info ───────────────────────────────────────────────────────────────────────╮
+│                                                                              │
+│  layout/password.liquid                                                      │
+│                                                                              │
+│                                                                              │
+│  [warning]: UndefinedObject                                                  │
+│  Unknown object 'scheme_classes' used.                                       │
+│                                                                              │
+│  40  {% assign scheme_classes = scheme_classes | append: ', .color-' |       │
+│  append: scheme.id %}                                                        │
+│                                                                              │
+╰──────────────────────────────────────────────────────────────────────────────╯
+
+╭─ info ───────────────────────────────────────────────────────────────────────╮
+│                                                                              │
+│  layout/theme.liquid                                                         │
+│                                                                              │
+│                                                                              │
+│  [warning]: UndefinedObject                                                  │
+│  Unknown object 'scheme_classes' used.                                       │
+│                                                                              │
+│  59  {% assign scheme_classes = scheme_classes | append: ', .color-' |       │
+│  append: scheme.id %}                                                        │
+│                                                                              │
+╰──────────────────────────────────────────────────────────────────────────────╯
+
+╭─ info ───────────────────────────────────────────────────────────────────────╮
+│                                                                              │
+│  sections/featured-product.liquid                                            │
+│                                                                              │
+│                                                                              │
+│  [warning]: UnusedAssign                                                     │
+│  The variable 'seo_media' is assigned but not used                           │
+│                                                                              │
+│  491  assign seo_media = product.featured_media                              │
+│                                                                              │
+╰──────────────────────────────────────────────────────────────────────────────╯
+
+╭─ info ───────────────────────────────────────────────────────────────────────╮
+│                                                                              │
+│  sections/main-article.liquid                                                │
+│                                                                              │
+│                                                                              │
+│  [warning]: VariableName                                                     │
+│  The variable 'anchorId' uses wrong naming format                            │
+│                                                                              │
+│  102  {%- assign anchorId = '#Comments-' | append: article.id -%}            │
+│                                                                              │
+╰──────────────────────────────────────────────────────────────────────────────╯
+
+╭─ info ───────────────────────────────────────────────────────────────────────╮
+│                                                                              │
+│  sections/main-list-collections.liquid                                       │
+│                                                                              │
+│                                                                              │
+│  [warning]: VariableName                                                     │
+│  The variable 'moduloResult' uses wrong naming format                        │
+│                                                                              │
+│  20  assign moduloResult = 28 | modulo: section.settings.columns_desktop     │
+│                                                                              │
+╰──────────────────────────────────────────────────────────────────────────────╯
+
+╭─ info ───────────────────────────────────────────────────────────────────────╮
+│                                                                              │
+│  sections/main-product.liquid                                                │
+│                                                                              │
+│                                                                              │
+│  [warning]: UnusedAssign                                                     │
+│  The variable 'seo_media' is assigned but not used                           │
+│                                                                              │
+│  732  assign seo_media = product.featured_media                              │
+│                                                                              │
+│                                                                              │
+│  [warning]: UndefinedObject                                                  │
+│  Unknown object 'continue' used.                                             │
+│                                                                              │
+│  588  offset: continue                                                       │
+│                                                                              │
+╰──────────────────────────────────────────────────────────────────────────────╯
+
+╭─ info ───────────────────────────────────────────────────────────────────────╮
+│                                                                              │
+│  sections/main-search.liquid                                                 │
+│                                                                              │
+│                                                                              │
+│  [warning]: UnusedAssign                                                     │
+│  The variable 'product_settings' is assigned but not used                    │
+│                                                                              │
+│  274  {%- capture product_settings -%}{%- if                                 │
+│  section.settings.product_show_vendor -%}vendor,{%- endif -%}title,price{%-  │
+│   endcapture -%}                                                             │
+│                                                                              │
+╰──────────────────────────────────────────────────────────────────────────────╯
+
+╭─ info ───────────────────────────────────────────────────────────────────────╮
+│                                                                              │
+│  snippets/custom-measurements-check-group.liquid                             │
+│                                                                              │
+│                                                                              │
+│  [warning]: UnusedAssign                                                     │
+│  The variable 'is_in_group' is assigned but not used                         │
+│                                                                              │
+│  11  {%- assign is_in_group = true -%}                                       │
+│                                                                              │
+╰──────────────────────────────────────────────────────────────────────────────╯
+
+╭─ info ───────────────────────────────────────────────────────────────────────╮
+│                                                                              │
+│  snippets/custom-measurements-config.liquid                                  │
+│                                                                              │
+│                                                                              │
+│  [warning]: UnusedAssign                                                     │
+│  The variable 'is_optional' is assigned but not used                         │
+│                                                                              │
+│  117  {%- assign is_optional = true -%}                                      │
+│                                                                              │
+╰──────────────────────────────────────────────────────────────────────────────╯
+
+╭─ info ───────────────────────────────────────────────────────────────────────╮
+│                                                                              │
+│  snippets/custom-measurements-form.liquid                                    │
+│                                                                              │
+│                                                                              │
+│  [warning]: UnusedAssign                                                     │
+│  The variable 'is_staff_mode' is assigned but not used                       │
+│                                                                              │
+│  25  assign is_staff_mode = true                                             │
+│                                                                              │
+╰──────────────────────────────────────────────────────────────────────────────╯
+
+╭─ info ───────────────────────────────────────────────────────────────────────╮
+│                                                                              │
+│  snippets/custom-order-checkout-footer.liquid                                │
+│                                                                              │
+│                                                                              │
+│  [warning]: UnusedAssign                                                     │
+│  The variable 'footer_item_count_text' is assigned but not used              │
+│                                                                              │
+│  32  assign footer_item_count_text =                                         │
+│  'custom_order.checkout_footer.item_count' | t                               │
+│                                                                              │
+╰──────────────────────────────────────────────────────────────────────────────╯
+
+╭─ info ───────────────────────────────────────────────────────────────────────╮
+│                                                                              │
+│  snippets/custom-order-property-filter.liquid                                │
+│                                                                              │
+│                                                                              │
+│  [error]: UnknownFilter                                                      │
+│  Unknown filter 'to_s' used.                                                 │
+│                                                                              │
+│  37  assign value_string = property_value | to_s | strip                     │
+│                                                                              │
+╰──────────────────────────────────────────────────────────────────────────────╯
+
+╭─ info ───────────────────────────────────────────────────────────────────────╮
+│                                                                              │
+│  snippets/custom-required-measurements.liquid                                │
+│                                                                              │
+│                                                                              │
+│  [warning]: UnusedAssign                                                     │
+│  The variable 'left_front_plates' is assigned but not used                   │
+│                                                                              │
+│  61  {%- assign left_front_plates = front_plate_options -%}                  │
+│                                                                              │
+│                                                                              │
+│  [warning]: UnusedAssign                                                     │
+│  The variable 'right_front_plates' is assigned but not used                  │
+│                                                                              │
+│  62  {%- assign right_front_plates = front_plate_options -%}                 │
+│                                                                              │
+│                                                                              │
+│  [warning]: UnusedAssign                                                     │
+│  The variable 'back_plates' is assigned but not used                         │
+│                                                                              │
+│  63  {%- assign back_plates = back_plate_options -%}                         │
+│                                                                              │
+╰──────────────────────────────────────────────────────────────────────────────╯
+
+╭─ info ───────────────────────────────────────────────────────────────────────╮
+│                                                                              │
+│  Theme Check Summary.                                                        │
+│                                                                              │
+│  203 files inspected with 16 total offenses found across 13 files.           │
+│  1 errors.                                                                   │
+│  15 warnings.                                                                │
+│                                                                              │
+╰──────────────────────────────────────────────────────────────────────────────╯
+
