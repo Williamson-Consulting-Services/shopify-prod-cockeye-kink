@@ -129,120 +129,164 @@
                     assign extracted_colors = ''
 
                     comment
-                      Extract all color names from the value (e.g., "Red Camo Yellow Camo" -> "red,yellow,green,blue")
+                      Handle special cases first: "Black with Chain", "Distressed Brown"
                     endcomment
-                    assign color_keywords = 'red,blue,green,yellow,orange,purple,pink,black,white,grey,gray,brown,navy,tan,beige,olive' | split: ','
-                    assign found_colors = ''
-
-                    for keyword in color_keywords
-                      if value_name_clean contains keyword
-                        if found_colors == ''
-                          assign found_colors = keyword
-                        else
-                          assign found_colors = found_colors | append: ',' | append: keyword
-                        endif
-                      endif
-                    endfor
-
-                    comment
-                      Handle multi-color values like "Red / Black" - extract both colors
-                    endcomment
-                    if value_name_clean contains ' / '
-                      assign color_parts = value_name_clean | split: ' / '
-                      assign primary_color = color_parts[0] | strip
-                      if color_parts[1]
-                        assign secondary_color = color_parts[1] | strip
-                      endif
+                    if value_name_clean contains 'black' and value_name_clean contains 'chain'
+                      assign primary_color = 'black'
+                      assign secondary_color = 'grey'
                       assign has_multiple_colors_in_name = true
-                    elsif value_name_clean contains '/'
-                      assign color_parts = value_name_clean | split: '/'
-                      assign primary_color = color_parts[0] | strip
-                      if color_parts[1]
-                        assign secondary_color = color_parts[1] | strip
-                      endif
-                      assign has_multiple_colors_in_name = true
-                    elsif found_colors != ''
+                    elsif value_name_clean contains 'distressed' and value_name_clean contains 'brown'
+                      assign primary_color = 'brown'
+                    elsif value_name_clean contains 'distressed'
                       comment
-                        Multiple colors found in name (e.g., "Red Camo Yellow Camo Green Camo Blue Camo")
+                        Handle other distressed colors
                       endcomment
-                      assign color_array = found_colors | split: ','
-                      if color_array.size > 1
-                        assign primary_color = color_array[0]
-                        assign secondary_color = color_array[1]
+                      if value_name_clean contains 'brown'
+                        assign primary_color = 'brown'
+                      endif
+                    else
+                      comment
+                        Extract all color names from the value (e.g., "Red Camo Yellow Camo" -> "red,yellow,green,blue")
+                      endcomment
+                      assign color_keywords = 'red,blue,green,yellow,orange,purple,pink,black,white,grey,gray,brown,navy,tan,beige,olive' | split: ','
+                      assign found_colors = ''
+
+                      for keyword in color_keywords
+                        if value_name_clean contains keyword
+                          if found_colors == ''
+                            assign found_colors = keyword
+                          else
+                            assign found_colors = found_colors | append: ',' | append: keyword
+                          endif
+                        endif
+                      endfor
+
+                      comment
+                        Handle multi-color values like "Red / Black" - extract both colors
+                      endcomment
+                      if value_name_clean contains ' / '
+                        assign color_parts = value_name_clean | split: ' / '
+                        assign primary_color = color_parts[0] | strip
+                        if color_parts[1]
+                          assign secondary_color = color_parts[1] | strip
+                        endif
                         assign has_multiple_colors_in_name = true
-                        assign extracted_colors = found_colors
-                      else
-                        assign primary_color = color_array[0]
+                      elsif value_name_clean contains '/'
+                        assign color_parts = value_name_clean | split: '/'
+                        assign primary_color = color_parts[0] | strip
+                        if color_parts[1]
+                          assign secondary_color = color_parts[1] | strip
+                        endif
+                        assign has_multiple_colors_in_name = true
+                      elsif found_colors != ''
+                        comment
+                          Multiple colors found in name (e.g., "Red Camo Yellow Camo Green Camo Blue Camo")
+                        endcomment
+                        assign color_array = found_colors | split: ','
+                        if color_array.size > 1
+                          assign primary_color = color_array[0]
+                          assign secondary_color = color_array[1]
+                          assign has_multiple_colors_in_name = true
+                          assign extracted_colors = found_colors
+                        else
+                          assign primary_color = color_array[0]
+                        endif
                       endif
                     endif
 
                     comment
                       Map color names to hex values
+                      Handle special cases like "distressed brown", "black with chain"
                     endcomment
-                    case primary_color
-                      when 'red'
-                        assign fallback_color = '#ff0000'
-                      when 'blue'
-                        assign fallback_color = '#0000ff'
-                      when 'green'
-                        assign fallback_color = '#008000'
-                      when 'yellow'
-                        assign fallback_color = '#ffff00'
-                      when 'orange'
-                        assign fallback_color = '#ffa500'
-                      when 'purple'
-                        assign fallback_color = '#800080'
-                      when 'pink'
-                        assign fallback_color = '#ffc0cb'
-                      when 'black'
-                        assign fallback_color = '#000000'
-                      when 'white'
-                        assign fallback_color = '#ffffff'
-                      when 'grey', 'gray'
-                        assign fallback_color = '#808080'
-                      when 'brown'
-                        assign fallback_color = '#a52a2a'
-                      when 'navy'
-                        assign fallback_color = '#000080'
-                      when 'tan', 'beige'
-                        assign fallback_color = '#f5f5dc'
-                      when 'olive'
-                        assign fallback_color = '#808000'
-                    endcase
+                    if value_name_clean contains 'distressed' and value_name_clean contains 'brown'
+                      assign fallback_color = '#8b4513'
+                    elsif value_name_clean contains 'chain' and value_name_clean contains 'black'
+                      assign fallback_color = '#000000'
+                      if secondary_color != 'grey'
+                        assign secondary_color = 'grey'
+                        assign has_multiple_colors_in_name = true
+                      endif
+                    else
+                      case primary_color
+                        when 'red'
+                          assign fallback_color = '#ff0000'
+                        when 'blue'
+                          assign fallback_color = '#0000ff'
+                        when 'green'
+                          assign fallback_color = '#008000'
+                        when 'yellow'
+                          assign fallback_color = '#ffff00'
+                        when 'orange'
+                          assign fallback_color = '#ffa500'
+                        when 'purple'
+                          assign fallback_color = '#800080'
+                        when 'pink'
+                          assign fallback_color = '#ffc0cb'
+                        when 'black'
+                          assign fallback_color = '#000000'
+                        when 'white'
+                          assign fallback_color = '#ffffff'
+                        when 'grey', 'gray'
+                          assign fallback_color = '#808080'
+                        when 'brown'
+                          assign fallback_color = '#a52a2a'
+                        when 'navy'
+                          assign fallback_color = '#000080'
+                        when 'tan', 'beige'
+                          assign fallback_color = '#f5f5dc'
+                        when 'olive'
+                          assign fallback_color = '#808000'
+                        else
+                          comment
+                            Fallback for unrecognized colors - try to extract from value_name_clean
+                          endcomment
+                          if value_name_clean contains 'brown'
+                            assign fallback_color = '#a52a2a'
+                          elsif value_name_clean contains 'black'
+                            assign fallback_color = '#000000'
+                          else
+                            assign fallback_color = '#cccccc'
+                          endif
+                      endcase
+                    endif
 
                     comment
                       Map secondary color
                     endcomment
-                    case secondary_color
-                      when 'red'
-                        assign fallback_color_2 = '#ff0000'
-                      when 'blue'
-                        assign fallback_color_2 = '#0000ff'
-                      when 'green'
-                        assign fallback_color_2 = '#008000'
-                      when 'yellow'
-                        assign fallback_color_2 = '#ffff00'
-                      when 'orange'
-                        assign fallback_color_2 = '#ffa500'
-                      when 'purple'
-                        assign fallback_color_2 = '#800080'
-                      when 'pink'
-                        assign fallback_color_2 = '#ffc0cb'
-                      when 'black'
-                        assign fallback_color_2 = '#000000'
-                      when 'white'
-                        assign fallback_color_2 = '#ffffff'
-                      when 'grey', 'gray'
-                        assign fallback_color_2 = '#808080'
-                      when 'brown'
-                        assign fallback_color_2 = '#a52a2a'
-                      when 'navy'
-                        assign fallback_color_2 = '#000080'
-                      when 'tan', 'beige'
-                        assign fallback_color_2 = '#f5f5dc'
-                      when 'olive'
-                        assign fallback_color_2 = '#808000'
-                    endcase
+                    if secondary_color == 'grey' or secondary_color == 'gray'
+                      assign fallback_color_2 = '#808080'
+                    else
+                      case secondary_color
+                        when 'red'
+                          assign fallback_color_2 = '#ff0000'
+                        when 'blue'
+                          assign fallback_color_2 = '#0000ff'
+                        when 'green'
+                          assign fallback_color_2 = '#008000'
+                        when 'yellow'
+                          assign fallback_color_2 = '#ffff00'
+                        when 'orange'
+                          assign fallback_color_2 = '#ffa500'
+                        when 'purple'
+                          assign fallback_color_2 = '#800080'
+                        when 'pink'
+                          assign fallback_color_2 = '#ffc0cb'
+                        when 'black'
+                          assign fallback_color_2 = '#000000'
+                        when 'white'
+                          assign fallback_color_2 = '#ffffff'
+                        when 'grey', 'gray'
+                          assign fallback_color_2 = '#808080'
+                        when 'brown'
+                          assign fallback_color_2 = '#a52a2a'
+                        when 'navy'
+                          assign fallback_color_2 = '#000080'
+                        when 'tan', 'beige'
+                          assign fallback_color_2 = '#f5f5dc'
+                        when 'olive'
+                          assign fallback_color_2 = '#808000'
+                      endcase
+                    endif
 
                     if is_multiple_colors
                       assign fallback_color = '#cccccc'
