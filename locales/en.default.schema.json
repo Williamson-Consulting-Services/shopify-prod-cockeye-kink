@@ -3511,6 +3511,18 @@
       "presets": {
         "name": "Collapsible content"
       }
+    },
+    "custom-order-measurements": {
+      "name": "Custom Order Measurements",
+      "settings": {
+        "custom_order_measurements": {
+          "label": "Custom Order Measurements",
+          "info": "Display the custom measurements form for custom orders"
+        }
+      },
+      "presets": {
+        "name": "Custom Order Measurements"
+      }
     }
   }
 }
