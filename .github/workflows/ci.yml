@@ -10,6 +10,19 @@ jobs:
       pull-requests: write
     steps:
       - uses: actions/checkout@v6
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        id: buildx
+        with:
+          driver-opts: |
+            image=moby/buildkit:latest
+      - name: Enable Docker BuildKit
+        run: |
+          echo "DOCKER_BUILDKIT=1" >> $GITHUB_ENV
+          echo "BUILDKIT_PROGRESS=plain" >> $GITHUB_ENV
+      - name: Pre-pull base image for caching
+        run: |
+          docker pull cpclermont/lighthouse-ci-action:2.0.0 || true
       - name: Lighthouse
         uses: shopify/lighthouse-ci-action@v1
         with:
