@@ -203,9 +203,7 @@
         "template--15526048170037__3852a66e-4c05-4a3f-9259-e253712ee53d-1687194242b75793b6-1",
         "template--15526048170037__3852a66e-4c05-4a3f-9259-e253712ee53d-1687194242b75793b6-2"
       ],
-      "custom_css": [
-        ".newsletter__wrapper {background-image: url(https://cdn.shopify.com/s/files/1/0590/6648/2741/files/CigarBull_Custom.jpg); background-size: cover; background-position: bottom;}"
-      ],
+      "custom_css": [],
       "settings": {
         "color_scheme": "scheme-4",
         "full_width": true,
@@ -260,9 +258,7 @@
     },
     "2988e253-683e-4051-a9fd-23973a751668": {
       "type": "contact-form",
-      "custom_css": [
-        ".gradient {background-image: url(https://cdn.shopify.com/s/files/1/0590/6648/2741/files/CockEyeKink_contact-v2.jpg); background-size: auto; background-attachment: fixed;}"
-      ],
+      "custom_css": [],
       "settings": {
         "heading": "Drop us a line!",
         "heading_size": "h1",

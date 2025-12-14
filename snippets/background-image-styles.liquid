@@ -1,0 +1,38 @@
+{% comment %}
+  Renders background image styles for sections
+
+  Accepts:
+  - image: {Object} Image object from section settings (e.g., section.settings.background_image)
+  - target_selector: {String} CSS selector to apply background image to (must be section-specific, e.g., '.section-123-padding.newsletter__wrapper', '.section-123-gradient')
+  - background_size: {String} CSS background-size value (default: "cover")
+  - background_position: {String} CSS background-position value (default: "center")
+  - background_attachment: {String} CSS background-attachment value (optional, e.g., "fixed")
+  - image_width: {Number} Width for image_url filter (default: 1920)
+
+  Usage:
+  {% render 'background-image-styles',
+    image: section.settings.background_image,
+    target_selector: '.section-' | append: section.id | append: '-padding.newsletter__wrapper',
+    background_size: 'cover',
+    background_position: 'bottom'
+  %}
+{% endcomment %}
+
+{%- if image != blank -%}
+  {%- liquid
+    assign bg_size = background_size | default: 'cover'
+    assign bg_position = background_position | default: 'center'
+    assign img_width = image_width | default: 1920
+    assign image_url_value = image | image_url: width: img_width
+  -%}
+  {%- style -%}
+    {{ target_selector }} {
+      background-image: url({{ image_url_value }});
+      background-size: {{ bg_size }};
+      background-position: {{ bg_position }};
+      {%- if background_attachment != blank -%}
+      background-attachment: {{ background_attachment }};
+      {%- endif -%}
+    }
+  {%- endstyle -%}
+{%- endif -%}

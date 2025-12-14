@@ -14,7 +14,15 @@
   }
 {%- endstyle -%}
 
-<div class="color-{{ section.settings.color_scheme }} gradient">
+{%-
+  render 'background-image-styles',
+  image: section.settings.background_image,
+  target_selector: '.section-' | append: section.id | append: '-gradient',
+  background_size: 'auto',
+  background_attachment: 'fixed'
+-%}
+
+<div class="color-{{ section.settings.color_scheme }} gradient section-{{ section.id }}-gradient">
   <div class="contact page-width page-width--narrow section-{{ section.id }}-padding">
     {%- if section.settings.heading != blank -%}
       <h2 class="title title-wrapper--no-top-margin inline-richtext {{ section.settings.heading_size }}{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}">
@@ -183,6 +191,11 @@
       "id": "color_scheme",
       "label": "t:sections.all.colors.label",
       "default": "scheme-1"
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image",
+      "label": "Background image"
     },
     {
       "type": "header",
