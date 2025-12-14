@@ -4,9 +4,8 @@
   Accepts:
   - image: {Object} Image object from section settings (e.g., section.settings.background_image)
   - section_id: {String} Section ID for scoping (required, e.g., section.id)
-  - target_class: {String} Target class name without section prefix (e.g., 'newsletter__wrapper', 'gradient')
+  - target_class: {String} Target class name to combine with section class (optional, e.g., 'newsletter__wrapper'). If provided, creates combined selector like '.section-{id}-padding.newsletter__wrapper'
   - class_suffix: {String} Section class suffix (default: 'padding', e.g., 'padding' for '.section-{id}-padding', 'gradient' for '.section-{id}-gradient')
-  - combine_with_target: {Boolean} If true, combines section class with target_class (default: true). If false, only uses section class.
   - background_size: {String} CSS background-size value (default: "cover")
   - background_position: {String} CSS background-position value (default: "center")
   - background_attachment: {String} CSS background-attachment value (optional, e.g., "fixed")
@@ -30,9 +29,9 @@
     assign img_width = image_width | default: 1920
     assign image_url_value = image | image_url: width: img_width
     assign suffix = class_suffix | default: 'padding'
-    assign combine = combine_with_target | default: true
 
-    if combine
+    # Build selector: combine with target_class if provided, otherwise use section class only
+    if target_class != blank and target_class != ''
       assign scoped_selector = '.section-' | append: section_id | append: '-' | append: suffix | append: '.' | append: target_class
     else
       assign scoped_selector = '.section-' | append: section_id | append: '-' | append: suffix
