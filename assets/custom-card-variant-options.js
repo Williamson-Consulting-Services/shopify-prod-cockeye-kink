@@ -285,13 +285,16 @@ class CustomCardVariantOptions {
     // Color selection
     const colorOptions = this.container.querySelectorAll('.custom-card-variant-options__option--swatch');
     colorOptions.forEach((option) => {
-      // Click handler
+      // Click handler - stop all propagation to prevent navigation
       option.addEventListener('click', (e) => {
         e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
         this.selectColor(option);
         // Update image on click
         this.updateCardImage(option.getAttribute('data-option-value') || option.getAttribute('title'));
-      });
+        return false;
+      }, true); // Use capture phase to intercept early
 
       // Hover handler
       option.addEventListener('mouseenter', () => {
@@ -314,8 +317,11 @@ class CustomCardVariantOptions {
     sizeOptions.forEach((option) => {
       option.addEventListener('click', (e) => {
         e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
         this.selectSize(option);
-      });
+        return false;
+      }, true); // Use capture phase to intercept early
     });
   }
 
