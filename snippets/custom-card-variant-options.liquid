@@ -126,6 +126,23 @@
                     assign primary_color = value_name_clean
                     assign secondary_color = 'black'
                     assign has_multiple_colors_in_name = false
+                    assign extracted_colors = ''
+
+                    comment
+                      Extract all color names from the value (e.g., "Red Camo Yellow Camo" -> "red,yellow,green,blue")
+                    endcomment
+                    assign color_keywords = 'red,blue,green,yellow,orange,purple,pink,black,white,grey,gray,brown,navy,tan,beige,olive' | split: ','
+                    assign found_colors = ''
+
+                    for keyword in color_keywords
+                      if value_name_clean contains keyword
+                        if found_colors == ''
+                          assign found_colors = keyword
+                        else
+                          assign found_colors = found_colors | append: ',' | append: keyword
+                        endif
+                      endif
+                    endfor
 
                     comment
                       Handle multi-color values like "Red / Black" - extract both colors
@@ -144,6 +161,19 @@
                         assign secondary_color = color_parts[1] | strip
                       endif
                       assign has_multiple_colors_in_name = true
+                    elsif found_colors != ''
+                      comment
+                        Multiple colors found in name (e.g., "Red Camo Yellow Camo Green Camo Blue Camo")
+                      endcomment
+                      assign color_array = found_colors | split: ','
+                      if color_array.size > 1
+                        assign primary_color = color_array[0]
+                        assign secondary_color = color_array[1]
+                        assign has_multiple_colors_in_name = true
+                        assign extracted_colors = found_colors
+                      else
+                        assign primary_color = color_array[0]
+                      endif
                     endif
 
                     comment
@@ -218,10 +248,70 @@
                       assign fallback_color = '#cccccc'
                       assign fallback_color_2 = '#cccccc'
                     endif
+
+                    comment
+                      Build gradient for multiple colors (more than 2)
+                    endcomment
+                    assign gradient_colors = ''
+                    assign has_multi_gradient = false
+                    if extracted_colors != '' and has_multiple_colors_in_name
+                      assign color_list = extracted_colors | split: ','
+                      if color_list.size > 2
+                        assign has_multi_gradient = true
+                        assign gradient_stops = ''
+                        assign total_colors = color_list.size
+                        assign segment_size = 100.0 | divided_by: total_colors
+
+                        for color_item in color_list
+                          assign color_name = color_item | strip
+                          assign color_hex = '#cccccc'
+                          case color_name
+                            when 'red'
+                              assign color_hex = '#ff0000'
+                            when 'blue'
+                              assign color_hex = '#0000ff'
+                            when 'green'
+                              assign color_hex = '#008000'
+                            when 'yellow'
+                              assign color_hex = '#ffff00'
+                            when 'orange'
+                              assign color_hex = '#ffa500'
+                            when 'purple'
+                              assign color_hex = '#800080'
+                            when 'pink'
+                              assign color_hex = '#ffc0cb'
+                            when 'black'
+                              assign color_hex = '#000000'
+                            when 'white'
+                              assign color_hex = '#ffffff'
+                            when 'grey', 'gray'
+                              assign color_hex = '#808080'
+                            when 'brown'
+                              assign color_hex = '#a52a2a'
+                            when 'navy'
+                              assign color_hex = '#000080'
+                            when 'tan', 'beige'
+                              assign color_hex = '#f5f5dc'
+                            when 'olive'
+                              assign color_hex = '#808000'
+                          endcase
+
+                          assign start_percent = forloop.index0 | times: segment_size
+                          assign end_percent = forloop.index | times: segment_size
+
+                          if gradient_stops == ''
+                            assign gradient_stops = color_hex | append: ' ' | append: start_percent | append: '%, ' | append: color_hex | append: ' ' | append: end_percent | append: '%'
+                          else
+                            assign gradient_stops = gradient_stops | append: ', ' | append: color_hex | append: ' ' | append: start_percent | append: '%, ' | append: color_hex | append: ' ' | append: end_percent | append: '%'
+                          endif
+                        endfor
+                        assign gradient_colors = gradient_stops
+                      endif
+                    endif
                   -%}
                   <span
-                    class="swatch swatch--square{% if has_multiple_colors_in_name %} swatch--multi-color{% endif %}"
-                    style="--swatch--background: {{ fallback_color }};{% if has_multiple_colors_in_name %} background: linear-gradient(135deg, {{ fallback_color }} 0%, {{ fallback_color }} 50%, {{ fallback_color_2 }} 50%, {{ fallback_color_2 }} 100%);{% endif %}"
+                    class="swatch swatch--square{% if has_multiple_colors_in_name %} swatch--multi-color{% endif %}{% if has_multi_gradient %} swatch--multi-color-gradient{% endif %}"
+                    style="--swatch--background: {{ fallback_color }};{% if has_multiple_colors_in_name and gradient_colors != '' %} background: linear-gradient(135deg, {{ gradient_colors }});{% elsif has_multiple_colors_in_name %} background: linear-gradient(135deg, {{ fallback_color }} 0%, {{ fallback_color }} 50%, {{ fallback_color_2 }} 50%, {{ fallback_color_2 }} 100%);{% endif %}"
                   >
                     {%- if is_multiple_colors or has_multiple_colors_in_name -%}
                       <span class="custom-card-variant-options__multiple-colors-indicator" aria-hidden="true">+</span>
