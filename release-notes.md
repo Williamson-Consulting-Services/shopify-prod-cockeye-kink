@@ -1,3 +1,5 @@
+Dawn 15.4.1 introduces improvements for performance monitoring.
+
 Dawn 15.4.0 introduces support for nested cart lines, accessibility improvements, performance enhancements, and bug fixes.
 
 ### Added
