@@ -268,10 +268,8 @@ class CustomCardVariantOptions {
         this.variants = this.product.variants || [];
         this.updateAvailability();
         this.setupImageHover();
-        // Update add to cart button if selections already made
-        if (this.selectedColor && this.selectedSize) {
-          this.updateAddToCartButton();
-        }
+        // Always update button to check if all variants are unavailable
+        this.updateAddToCartButton();
         // Update image if color is already selected
         if (this.selectedColor) {
           this.updateCardImage(this.selectedColor, false);
@@ -462,6 +460,18 @@ class CustomCardVariantOptions {
     });
   }
 
+  checkIfAllVariantsUnavailable() {
+    if (!this.variants.length) return false;
+
+    // Check if all variants are unavailable
+    return this.variants.every((variant) => {
+      if (variant.inventory_management === 'shopify') {
+        return variant.inventory_quantity === 0;
+      }
+      return !variant.available;
+    });
+  }
+
   updateAddToCartButton() {
     const card = this.container.closest('.card-wrapper');
     if (!card) return;
@@ -472,6 +482,72 @@ class CustomCardVariantOptions {
     const addToCartButton = directAddButton || quickAddButton;
 
     if (!addToCartButton) return;
+
+    // Check if all variants are unavailable (no options selected)
+    if (!this.selectedColor && !this.selectedSize && this.variants.length) {
+      const allUnavailable = this.checkIfAllVariantsUnavailable();
+      if (allUnavailable) {
+        // Update button to show "Sold out"
+        let buttonText = addToCartButton.querySelector('span:first-child:not(.icon-wrap):not(.loading__spinner)');
+
+        if (!buttonText) {
+          const textNodes = Array.from(addToCartButton.childNodes).filter(
+            (node) => node.nodeType === Node.TEXT_NODE && node.textContent.trim()
+          );
+          if (textNodes.length > 0) {
+            buttonText = document.createElement('span');
+            buttonText.textContent = textNodes[0].textContent.trim();
+            textNodes[0].replaceWith(buttonText);
+          }
+        }
+
+        if (buttonText) {
+          addToCartButton.disabled = true;
+          const soldOutText = this.translations.soldOut;
+          const chooseOptionsText = this.translations.chooseOptions;
+          const addToCartText = this.translations.addToCart;
+
+          // Replace any existing button text with sold out
+          buttonText.textContent = buttonText.textContent
+            .trim()
+            .replace(
+              new RegExp(
+                `(${addToCartText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}|${chooseOptionsText.replace(
+                  /[.*+?^${}()|[\]\\]/g,
+                  '\\$&'
+                )})`,
+                'i'
+              ),
+              soldOutText
+            );
+
+          // Ensure it shows sold out
+          if (!buttonText.textContent.includes(soldOutText)) {
+            buttonText.textContent = soldOutText;
+          }
+        } else {
+          // Fallback: update button text directly
+          addToCartButton.disabled = true;
+          const soldOutText = this.translations.soldOut;
+          const chooseOptionsText = this.translations.chooseOptions;
+          const addToCartText = this.translations.addToCart;
+
+          addToCartButton.childNodes.forEach((node) => {
+            if (node.nodeType === Node.TEXT_NODE && node.textContent.trim()) {
+              const regex = new RegExp(
+                `(${chooseOptionsText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}|${addToCartText.replace(
+                  /[.*+?^${}()|[\]\\]/g,
+                  '\\$&'
+                )})`,
+                'i'
+              );
+              node.textContent = node.textContent.replace(regex, soldOutText);
+            }
+          });
+        }
+        return;
+      }
+    }
 
     // Find the matching variant
     if (this.selectedColor && this.selectedSize && this.variants.length) {
@@ -608,39 +684,86 @@ class CustomCardVariantOptions {
         }
       }
     } else {
-      // If not both selected, reset button state
+      // If not both selected, check if all variants are unavailable
       if (quickAddButton) {
         quickAddButton.removeAttribute('data-selected-variant-id');
       }
 
-      // Reset button state when selections are cleared
+      const allUnavailable = this.checkIfAllVariantsUnavailable();
       const addToCartText = this.translations.addToCart;
       const soldOutText = this.translations.soldOut;
       const chooseOptionsText = this.translations.chooseOptions;
 
-      let buttonText = addToCartButton.querySelector('span:first-child');
-      if (buttonText) {
-        if (buttonText.textContent === soldOutText || buttonText.textContent === addToCartText) {
-          addToCartButton.disabled = false;
-          if (quickAddButton && quickAddButton.hasAttribute('data-product-url')) {
-            buttonText.textContent = chooseOptionsText;
-          } else {
-            buttonText.textContent = addToCartText;
+      let buttonText = addToCartButton.querySelector('span:first-child:not(.icon-wrap):not(.loading__spinner)');
+      if (!buttonText) {
+        const textNodes = Array.from(addToCartButton.childNodes).filter(
+          (node) => node.nodeType === Node.TEXT_NODE && node.textContent.trim()
+        );
+        if (textNodes.length > 0) {
+          buttonText = document.createElement('span');
+          buttonText.textContent = textNodes[0].textContent.trim();
+          textNodes[0].replaceWith(buttonText);
+        }
+      }
+
+      if (allUnavailable) {
+        // All variants unavailable - show "Sold out"
+        addToCartButton.disabled = true;
+        if (buttonText) {
+          buttonText.textContent = buttonText.textContent
+            .trim()
+            .replace(
+              new RegExp(
+                `(${addToCartText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}|${chooseOptionsText.replace(
+                  /[.*+?^${}()|[\]\\]/g,
+                  '\\$&'
+                )})`,
+                'i'
+              ),
+              soldOutText
+            );
+          if (!buttonText.textContent.includes(soldOutText)) {
+            buttonText.textContent = soldOutText;
           }
+        } else {
+          // Fallback
+          addToCartButton.childNodes.forEach((node) => {
+            if (node.nodeType === Node.TEXT_NODE && node.textContent.trim()) {
+              const regex = new RegExp(
+                `(${chooseOptionsText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}|${addToCartText.replace(
+                  /[.*+?^${}()|[\]\\]/g,
+                  '\\$&'
+                )})`,
+                'i'
+              );
+              node.textContent = node.textContent.replace(regex, soldOutText);
+            }
+          });
         }
       } else {
-        // Fallback: update button text directly
-        if (addToCartButton.textContent.includes(soldOutText) || addToCartButton.textContent.includes(addToCartText)) {
-          addToCartButton.disabled = false;
-          if (quickAddButton && quickAddButton.hasAttribute('data-product-url')) {
-            const regex = new RegExp(
-              `(${soldOutText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}|${addToCartText.replace(
-                /[.*+?^${}()|[\]\\]/g,
-                '\\$&'
-              )})`,
-              'i'
-            );
-            addToCartButton.textContent = addToCartButton.textContent.replace(regex, chooseOptionsText);
+        // Some variants available - show "Choose options"
+        addToCartButton.disabled = false;
+        if (buttonText) {
+          if (buttonText.textContent === soldOutText || buttonText.textContent === addToCartText) {
+            if (quickAddButton && quickAddButton.hasAttribute('data-product-url')) {
+              buttonText.textContent = chooseOptionsText;
+            } else {
+              buttonText.textContent = addToCartText;
+            }
+          }
+        } else {
+          // Fallback
+          if (addToCartButton.textContent.includes(soldOutText) || addToCartButton.textContent.includes(addToCartText)) {
+            if (quickAddButton && quickAddButton.hasAttribute('data-product-url')) {
+              const regex = new RegExp(
+                `(${soldOutText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}|${addToCartText.replace(
+                  /[.*+?^${}()|[\]\\]/g,
+                  '\\$&'
+                )})`,
+                'i'
+              );
+              addToCartButton.textContent = addToCartButton.textContent.replace(regex, chooseOptionsText);
+            }
           }
         }
       }
