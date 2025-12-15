@@ -93,30 +93,11 @@
           <div class="custom-card-variant-options__swatches">
             {%- for value in color_option.values -%}
               {%- liquid
+                # Use Shopify's built-in value.available property (same as Dawn)
                 assign value_unavailable = true
-
-                for variant in product.variants
-                  assign variant_has_color = false
-                  if color_option.position == 1 and variant.option1 == value
-                    assign variant_has_color = true
-                  elsif color_option.position == 2 and variant.option2 == value
-                    assign variant_has_color = true
-                  elsif color_option.position == 3 and variant.option3 == value
-                    assign variant_has_color = true
-                  endif
-
-                  if variant_has_color
-                    if variant.inventory_management == 'shopify'
-                      if variant.inventory_quantity > 0
-                        assign value_unavailable = false
-                        break
-                      endif
-                    else
-                      assign value_unavailable = false
-                      break
-                    endif
-                  endif
-                endfor
+                if value.available
+                  assign value_unavailable = false
+                endif
               -%}
 
               {%- liquid
@@ -407,30 +388,11 @@
           <div class="custom-card-variant-options__buttons">
             {%- for value in size_option.values -%}
               {%- liquid
+                # Use Shopify's built-in value.available property (same as Dawn)
                 assign value_unavailable = true
-
-                for variant in product.variants
-                  assign variant_has_size = false
-                  if size_option.position == 1 and variant.option1 == value
-                    assign variant_has_size = true
-                  elsif size_option.position == 2 and variant.option2 == value
-                    assign variant_has_size = true
-                  elsif size_option.position == 3 and variant.option3 == value
-                    assign variant_has_size = true
-                  endif
-
-                  if variant_has_size
-                    if variant.inventory_management == 'shopify'
-                      if variant.inventory_quantity > 0
-                        assign value_unavailable = false
-                        break
-                      endif
-                    else
-                      assign value_unavailable = false
-                      break
-                    endif
-                  endif
-                endfor
+                if value.available
+                  assign value_unavailable = false
+                endif
               -%}
 
               <div
@@ -472,30 +434,11 @@
               <div class="custom-card-variant-options__buttons">
                 {%- for value in other_option.values -%}
                   {%- liquid
+                    # Use Shopify's built-in value.available property (same as Dawn)
                     assign value_unavailable = true
-
-                    for variant in product.variants
-                      assign variant_has_value = false
-                      if other_option.position == 1 and variant.option1 == value
-                        assign variant_has_value = true
-                      elsif other_option.position == 2 and variant.option2 == value
-                        assign variant_has_value = true
-                      elsif other_option.position == 3 and variant.option3 == value
-                        assign variant_has_value = true
-                      endif
-
-                      if variant_has_value
-                        if variant.inventory_management == 'shopify'
-                          if variant.inventory_quantity > 0
-                            assign value_unavailable = false
-                            break
-                          endif
-                        else
-                          assign value_unavailable = false
-                          break
-                        endif
-                      endif
-                    endfor
+                    if value.available
+                      assign value_unavailable = false
+                    endif
                   -%}
 
                   <div

@@ -18,7 +18,16 @@ if (typeof CustomCardVariantUIUpdater === 'undefined') {
       }
 
       updateAllAvailability(selectedOptions) {
-        if (!this.variants.length) return;
+        if (!this.variants.length) {
+          console.warn('[UIUpdater] No variants available for availability check');
+          return;
+        }
+
+        // DEBUG: Log current state
+        console.group('[UIUpdater] updateAllAvailability');
+        console.log('Selected Options:', selectedOptions);
+        console.log('Variants Count:', this.variants.length);
+        console.log('Config:', this.config);
 
         // Update color availability
         if (this.config.colorPosition) {
@@ -30,6 +39,7 @@ if (typeof CustomCardVariantUIUpdater === 'undefined') {
               this.config.colorPosition,
               selectedOptions,
             );
+            console.log(`Color "${colorValue}": ${isAvailable ? 'AVAILABLE' : 'UNAVAILABLE'}`);
             this.setOptionAvailability(option, isAvailable);
           });
         }
@@ -44,6 +54,7 @@ if (typeof CustomCardVariantUIUpdater === 'undefined') {
               this.config.sizePosition,
               selectedOptions,
             );
+            console.log(`Size "${sizeValue}": ${isAvailable ? 'AVAILABLE' : 'UNAVAILABLE'}`);
             this.setOptionAvailability(option, isAvailable);
           });
         }
@@ -57,24 +68,35 @@ if (typeof CustomCardVariantUIUpdater === 'undefined') {
               .forEach((option) => {
                 const optionValue = option.getAttribute('data-option-value');
                 const isAvailable = this.checkOptionAvailability(optionName, optionValue, position, selectedOptions);
+                console.log(`${optionName} "${optionValue}": ${isAvailable ? 'AVAILABLE' : 'UNAVAILABLE'}`);
                 this.setOptionAvailability(option, isAvailable);
               });
           });
         }
+
+        console.groupEnd();
       }
 
       checkOptionAvailability(optionName, optionValue, position, selectedOptions) {
-        if (!this.variants.length) return true;
+        if (!this.variants.length) {
+          console.warn(`[UIUpdater] checkOptionAvailability: No variants for ${optionName}="${optionValue}"`);
+          return true;
+        }
 
         // Build test selections with current selections plus the option we're testing
         const testSelections = Object.assign({}, selectedOptions);
         const normalizedName = this.normalizeOptionName(optionName);
         testSelections[normalizedName] = optionValue;
 
+        // DEBUG: Log what we're checking
+        console.log(`[UIUpdater] Checking availability for ${optionName}="${optionValue}" (position ${position})`);
+        console.log('  Test Selections:', testSelections);
+        console.log('  Current Selections:', selectedOptions);
+
         // Use availability matrix if available
         if (this.availabilityMatrix && this.availabilityMatrix.matrix) {
           // Check if any variant combination exists with current selections + this option
-          return this.variants.some((variant) => {
+          const result = this.variants.some((variant) => {
             // Check if this variant matches all current selections
             let matchesCurrentSelections = true;
 
@@ -112,15 +134,28 @@ if (typeof CustomCardVariantUIUpdater === 'undefined') {
 
             // If variant matches all current selections and the test option, check availability
             if (matchesCurrentSelections && matchesTestOption) {
-              return this.isVariantAvailable(variant);
+              const isAvailable = this.isVariantAvailable(variant);
+              console.log(`  Variant ${variant.id} (${variant.sku || 'N/A'}): ${isAvailable ? 'AVAILABLE' : 'UNAVAILABLE'}`, {
+                option1: variant.option1,
+                option2: variant.option2,
+                option3: variant.option3,
+                inventory_management: variant.inventory_management,
+                inventory_quantity: variant.inventory_quantity,
+                available: variant.available
+              });
+              return isAvailable;
             }
 
             return false;
           });
+
+          console.log(`  Result: ${result ? 'AVAILABLE' : 'UNAVAILABLE'}`);
+          return result;
         }
 
         // Fallback to direct variant checking
-        return this.variants.some((variant) => {
+        console.log('  Using fallback variant checking (no matrix)');
+        const result = this.variants.some((variant) => {
           let matches = true;
 
           // Check color
@@ -152,8 +187,24 @@ if (typeof CustomCardVariantUIUpdater === 'undefined') {
             }
           }
 
-          return matches && this.isVariantAvailable(variant);
+          if (matches) {
+            const isAvailable = this.isVariantAvailable(variant);
+            console.log(`  Variant ${variant.id} (${variant.sku || 'N/A'}): ${isAvailable ? 'AVAILABLE' : 'UNAVAILABLE'}`, {
+              option1: variant.option1,
+              option2: variant.option2,
+              option3: variant.option3,
+              inventory_management: variant.inventory_management,
+              inventory_quantity: variant.inventory_quantity,
+              available: variant.available
+            });
+            return isAvailable;
+          }
+
+          return false;
         });
+
+        console.log(`  Result: ${result ? 'AVAILABLE' : 'UNAVAILABLE'}`);
+        return result;
       }
 
       getVariantOptionValue(variant, position) {
@@ -165,10 +216,8 @@ if (typeof CustomCardVariantUIUpdater === 'undefined') {
 
       isVariantAvailable(variant) {
         if (!variant) return false;
-        if (variant.inventory_management === 'shopify') {
-          return variant.inventory_quantity > 0;
-        }
-        return variant.available;
+        // Shopify already handles inventory tracking and sets variant.available accordingly
+        return variant.available === true;
       }
 
       normalizeOptionName(name) {
@@ -320,10 +369,16 @@ if (typeof CustomCardVariantUIUpdater === 'undefined') {
 
         // Fallback to variant if matrix doesn't have it
         if (quantity === null && variant) {
-          if (variant.inventory_management === 'shopify') {
-            quantity = variant.inventory_quantity || 0;
+          // Shopify already handles inventory tracking - use variant.available
+          if (variant.available) {
+            // Available - get quantity if tracked
+            if (variant.inventory_management === 'shopify' && variant.inventory_quantity !== null) {
+              quantity = variant.inventory_quantity || 0;
+            } else {
+              quantity = -1; // -1 means available but quantity unknown
+            }
           } else {
-            quantity = variant.available ? -1 : 0; // -1 means available but quantity unknown
+            quantity = 0; // Not available
           }
         }
 

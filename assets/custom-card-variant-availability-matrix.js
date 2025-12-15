@@ -17,10 +17,14 @@ if (typeof CustomCardVariantAvailabilityMatrix === 'undefined') {
 
       build() {
         if (!this.variants.length) {
+          console.warn('[AvailabilityMatrix] No variants to build matrix');
           this.matrix = {};
           this.variantMap = {};
           return;
         }
+
+        console.group('[AvailabilityMatrix] Building matrix');
+        console.log('Variants:', this.variants.length);
 
         const matrix = {};
         const variantMap = {};
@@ -50,25 +54,54 @@ if (typeof CustomCardVariantAvailabilityMatrix === 'undefined') {
           // Store variant for this combination
           variantMap[combinationKey] = variant;
 
-          // Store quantity if inventory is tracked, otherwise mark as available
-          if (variant.inventory_management === 'shopify') {
-            const quantity = variant.inventory_quantity || 0;
-            // If multiple variants have same combination (shouldn't happen, but handle it), sum quantities
-            if (matrix[combinationKey] === undefined) {
-              matrix[combinationKey] = quantity;
+          // Store availability and quantity
+          // Shopify already handles inventory tracking - variant.available reflects the actual availability
+          // We store quantity for display purposes (if inventory is tracked)
+          let quantity;
+          if (variant.available) {
+            // Variant is available - store quantity if tracked, otherwise use -1 to indicate "available but quantity unknown"
+            if (variant.inventory_management === 'shopify' && variant.inventory_quantity !== null) {
+              quantity = variant.inventory_quantity || 0;
+              // If multiple variants have same combination (shouldn't happen, but handle it), sum quantities
+              if (matrix[combinationKey] === undefined) {
+                matrix[combinationKey] = quantity;
+              } else {
+                matrix[combinationKey] += quantity;
+              }
             } else {
-              matrix[combinationKey] += quantity;
+              // Available but quantity not tracked
+              if (matrix[combinationKey] === undefined || matrix[combinationKey] < 0) {
+                matrix[combinationKey] = -1; // -1 means available but quantity unknown
+              }
+              quantity = matrix[combinationKey];
             }
           } else {
-            // Not tracked = available (use -1 to indicate "available but quantity unknown")
-            if (matrix[combinationKey] === undefined || matrix[combinationKey] < 0) {
-              matrix[combinationKey] = variant.available ? -1 : 0;
+            // Variant is not available
+            if (matrix[combinationKey] === undefined) {
+              matrix[combinationKey] = 0;
             }
+            quantity = 0;
           }
+
+          // DEBUG: Log each variant
+          console.log(`Variant ${variant.id} (SKU: ${variant.sku || 'N/A'}):`, {
+            combinationKey,
+            option1: variant.option1,
+            option2: variant.option2,
+            option3: variant.option3,
+            inventory_management: variant.inventory_management,
+            inventory_quantity: variant.inventory_quantity,
+            available: variant.available,
+            matrixQuantity: quantity
+          });
         });
 
         this.matrix = matrix;
         this.variantMap = variantMap;
+
+        console.log('Matrix built:', Object.keys(matrix).length, 'combinations');
+        console.log('Matrix contents:', matrix);
+        console.groupEnd();
       }
 
       buildCombinationKey(selections, config) {
