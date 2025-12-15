@@ -214,7 +214,11 @@ if (typeof CustomCardVariantOptions === 'undefined') {
             }
 
             this.dataLoaded = true;
+            const autoSelected = this.autoSelectSingleOptionValues();
             this.updateAllAvailability(this.selectedOptions);
+            if (autoSelected) {
+              this.updateAllAvailability(this.selectedOptions);
+            }
             this.updateAddToCartButton();
             this.updateInventoryDisplay();
 
@@ -424,6 +428,10 @@ if (typeof CustomCardVariantOptions === 'undefined') {
         // Update UI (always update, even for unavailable options)
         this.updateSelectionUI(normalizedName, value);
         this.updateAllAvailability(this.selectedOptions);
+        const autoSelected = this.autoSelectSingleOptionValues();
+        if (autoSelected) {
+          this.updateAllAvailability(this.selectedOptions);
+        }
         this.updateAddToCartButton();
         this.updateInventoryDisplay();
 
@@ -950,6 +958,91 @@ if (typeof CustomCardVariantOptions === 'undefined') {
         if (position === 2) return variant.option2 || '';
         if (position === 3) return variant.option3 || '';
         return '';
+      }
+
+      isVariantAvailable(variant) {
+        if (!variant) return false;
+        return variant.available === true;
+      }
+
+      matchesSelectionsForVariant(variant, excludeOptionName = null) {
+        const normalizedExclude = excludeOptionName ? this.normalizeOptionName(excludeOptionName) : null;
+
+        const matchesOption = (optionKey, position) => {
+          if (!position) return true;
+          if (normalizedExclude && this.normalizeOptionName(optionKey) === normalizedExclude) return true;
+          const selectedValue = this.selectedOptions[optionKey];
+          if (!selectedValue) return true;
+          const variantValue = this.getVariantOptionValue(variant, position);
+          return variantValue === selectedValue;
+        };
+
+        if (this.config.colorPosition && !matchesOption('color', this.config.colorPosition)) return false;
+        if (this.config.sizePosition && !matchesOption('size', this.config.sizePosition)) return false;
+
+        if (this.config.otherOptions) {
+          for (const optionName in this.config.otherOptions) {
+            if (!matchesOption(optionName, this.config.otherOptions[optionName])) return false;
+          }
+        }
+
+        return true;
+      }
+
+      getPossibleOptionValues(position, excludeOptionName = null) {
+        const availableValues = new Set();
+        const allValues = new Set();
+        const normalizedExclude = excludeOptionName ? this.normalizeOptionName(excludeOptionName) : null;
+
+        this.variants.forEach((variant) => {
+          if (!this.matchesSelectionsForVariant(variant, normalizedExclude)) return;
+          const value = this.getVariantOptionValue(variant, position);
+          if (!value) return;
+          allValues.add(value);
+          if (this.isVariantAvailable(variant)) {
+            availableValues.add(value);
+          }
+        });
+
+        return {
+          available: Array.from(availableValues),
+          all: Array.from(allValues),
+        };
+      }
+
+      autoSelectSingleOptionValues() {
+        if (!this.variants.length) return false;
+        let changed = false;
+
+        const maybeSelect = (optionName, position) => {
+          if (!position) return;
+          if (this.selectedOptions[optionName]) return;
+          const { available, all } = this.getPossibleOptionValues(position, optionName);
+
+          let autoValue = null;
+          if (available.length === 1) {
+            autoValue = available[0];
+          } else if (available.length === 0 && all.length === 1) {
+            // All possibilities are unavailable, but only one exists
+            autoValue = all[0];
+          }
+
+          if (autoValue) {
+            this.selectedOptions[optionName] = autoValue;
+            this.updateSelectionUI(optionName, autoValue);
+            changed = true;
+          }
+        };
+
+        maybeSelect('color', this.config.colorPosition);
+        maybeSelect('size', this.config.sizePosition);
+        if (this.config.otherOptions) {
+          Object.keys(this.config.otherOptions).forEach((optionName) => {
+            maybeSelect(optionName, this.config.otherOptions[optionName]);
+          });
+        }
+
+        return changed;
       }
 
       updateAllAvailability() {
