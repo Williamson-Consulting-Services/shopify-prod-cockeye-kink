@@ -10,22 +10,23 @@
 {%- assign button_id = 'ProductSubmitButton-' | append: section.id -%}
 
 {%- comment %} MEETS: AC1 (Display) - This is the UI for the input field. {%- endcomment %}
+{%- assign max_chars = product.metafields.custom.custom_message_max_characters.value | default: 50 -%}
 <div style="margin-bottom:15px;">
-  <!-- Label updated to reflect 1-5 char rule -->
-  <label for="{{ input_id }}">Engraving (1-5 chars, A-Z, 0-9):</label>
+  <!-- Label updated to reflect custom text with configurable max characters -->
+  <label for="{{ input_id }}">Custom Text (max {{ max_chars }} characters):</label>
 
   <input
     type="text"
     id="{{ input_id }}"
 
     {%- comment %} MEETS: AC2 (Data Submission) - This 'name' attribute is what Shopify looks for. {%- endcomment %}
-    name="properties[Engraving]"
+    name="properties[Custom Text]"
 
-    {%- comment %} MEETS: AC6 (Max Length) - HTML attribute enforces the 5-char limit. {%- endcomment %}
-    maxlength="5"
+    {%- comment %} MEETS: AC6 (Max Length) - HTML attribute enforces the max character limit from product metafield. {%- endcomment %}
+    maxlength="{{ max_chars }}"
 
-    {%- comment %} MEETS: AC7 (Pattern) - HTML attribute (regex) enforces alphanumeric. {%- endcomment %}
-    pattern="[a-zA-Z0-9]*"
+    {%- comment %} MEETS: AC7 (Pattern) - HTML attribute (regex) allows letters, numbers, symbols, and whitespace. {%- endcomment %}
+    pattern=".*"
 
     {%- comment %}
       MEETS: AC5 (Required) - Part 1
@@ -34,7 +35,7 @@
     {%- endcomment %}
     required
 
-    title="Only letters (A-Z) and numbers (0-9) are allowed."
+    title="Letters, numbers, symbols, and spaces are allowed."
     style="width: 100%; border: 1px solid #ccc; padding: 8px; border-radius: 4px; box-sizing: border-box;"
 
     {%- comment %}
@@ -47,7 +48,7 @@
 
   {%- comment %} MEETS: AC8 (Error Feedback) - Part 1: The error message element. {%- endcomment %}
   <div id="{{ error_id }}" style="color: #d9534f; display: none; margin-top: 5px; font-size: 0.9em;">
-    Please use 1-5 characters (letters and numbers only).
+    Please enter custom text (max {{ max_chars }} characters). Letters, numbers, symbols, and spaces are allowed.
   </div>
 </div>
 
@@ -74,9 +75,31 @@
 
     {% comment %} // --- This function handles AC8, AC9, and AC10 --- {% endcomment %}
     function validateInput() {
+      const maxChars = {{ max_chars }};
+      const value = customInput.value.trim();
+
+      // Check if empty (required field)
+      if (!value) {
+        errorMsg.style.display = 'block';
+        customInput.style.borderColor = '#d9534f';
+        customInput.style.boxShadow = '0 0 0 1px #d9534f';
+        submitButton.disabled = true;
+        submitButton.style.opacity = '0.5';
+        return false;
+      }
+
+      // Check length (maxlength is enforced by HTML, but we validate trimmed length)
+      if (value.length > maxChars) {
+        errorMsg.style.display = 'block';
+        customInput.style.borderColor = '#d9534f';
+        customInput.style.boxShadow = '0 0 0 1px #d9534f';
+        submitButton.disabled = true;
+        submitButton.style.opacity = '0.5';
+        return false;
+      }
+
       // checkValidity() uses the 'required', 'pattern', and 'maxlength' attributes
       if (!customInput.checkValidity()) {
-
         {%- comment %} MEETS: AC8 (Error Feedback) - Part 2: Show the error message. {%- endcomment %}
         errorMsg.style.display = 'block';
         customInput.style.borderColor = '#d9534f';
