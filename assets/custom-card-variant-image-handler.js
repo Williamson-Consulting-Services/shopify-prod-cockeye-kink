@@ -27,15 +27,25 @@ if (typeof CustomCardVariantImageHandler === 'undefined') {
       }
 
       storeDefaultImage() {
-        const cardImage = this.card.querySelector('.card__media img');
-        if (cardImage) {
+        // Store the first (main) image as default - both images typically have same initial state
+        const cardMedia = this.card.querySelector('.card__media');
+        const firstImage = cardMedia ? cardMedia.querySelector('img') : null;
+        
+        if (firstImage) {
           this.defaultImage = {
-            srcset: cardImage.getAttribute('srcset') || '',
-            src: cardImage.getAttribute('src') || '',
-            alt: cardImage.getAttribute('alt') || '',
-            width: cardImage.getAttribute('width') || '',
-            height: cardImage.getAttribute('height') || '',
+            srcset: firstImage.getAttribute('srcset') || '',
+            src: firstImage.getAttribute('src') || '',
+            alt: firstImage.getAttribute('alt') || '',
+            width: firstImage.getAttribute('width') || '',
+            height: firstImage.getAttribute('height') || '',
           };
+          
+          if (DEBUG.image) {
+            console.log('[ImageHandler] Stored default image:', {
+              src: this.defaultImage.src,
+              srcset: this.defaultImage.srcset ? 'set' : 'not set',
+            });
+          }
         }
       }
 
@@ -55,49 +65,33 @@ if (typeof CustomCardVariantImageHandler === 'undefined') {
           return;
         }
 
-        // Find card image - target the FIRST image in card__media (main image, not hover effect)
+        // Find all card images - Dawn uses two images for hover effect
+        // First image: main/featured image (no loading="lazy")
+        // Second image: hover/secondary image (has loading="lazy")
         const cardMedia = this.card.querySelector('.card__media');
-        let cardImage = null;
-
-        if (cardMedia) {
-          // Get the first img element (main image, not the hover effect one)
-          const images = cardMedia.querySelectorAll('img');
-          if (images.length > 0) {
-            cardImage = images[0]; // First image is the main one
-            if (DEBUG.image) console.log('[ImageHandler] Found main image (first in card__media)');
-          }
-        }
-
-        // Fallback selectors
-        if (!cardImage) {
-          cardImage = this.card.querySelector('.card__media .media img');
-          if (cardImage && DEBUG.image) console.log('[ImageHandler] Found image via .card__media .media img');
-        }
-        if (!cardImage) {
-          cardImage = this.card.querySelector('.media img');
-          if (cardImage && DEBUG.image) console.log('[ImageHandler] Found image via .media img');
-        }
-        if (!cardImage) {
-          cardImage = this.card.querySelector('.card__inner img');
-          if (cardImage && DEBUG.image) console.log('[ImageHandler] Found image via .card__inner img');
-        }
-        if (!cardImage) {
-          cardImage = this.card.querySelector('img');
-          if (cardImage && DEBUG.image) console.log('[ImageHandler] Found image via img (fallback)');
-        }
-
-        if (!cardImage) {
+        const images = cardMedia ? cardMedia.querySelectorAll('img') : [];
+        
+        if (images.length === 0) {
           if (DEBUG.image) {
-            console.warn('[ImageHandler] No card image found');
+            console.warn('[ImageHandler] No card images found');
             console.groupEnd();
           }
           return;
         }
 
+        // Update all images (main and hover) to use the variant image
+        // This ensures both the main display and hover effect show the correct variant
+        const imagesToUpdate = Array.from(images);
+        
         if (DEBUG.image) {
-          console.log('[ImageHandler] Image element found:', cardImage);
-          console.log('[ImageHandler] Current image src:', cardImage.getAttribute('src'));
-          console.log('[ImageHandler] Current image srcset:', cardImage.getAttribute('srcset'));
+          console.log(`[ImageHandler] Found ${imagesToUpdate.length} image(s) to update`);
+          imagesToUpdate.forEach((img, index) => {
+            console.log(`[ImageHandler] Image ${index + 1}:`, {
+              src: img.getAttribute('src'),
+              loading: img.getAttribute('loading'),
+              isMain: index === 0,
+            });
+          });
         }
 
         // Find variant with this color
@@ -172,28 +166,38 @@ if (typeof CustomCardVariantImageHandler === 'undefined') {
         const finalSrcset = imageData.srcset || (srcsetParts.length > 0 ? srcsetParts.join(', ') : null);
 
         if (DEBUG.image) {
-          console.log('[ImageHandler] Updating image:');
+          console.log('[ImageHandler] Updating images:');
           console.log('  src:', srcUrl);
           console.log('  srcset:', finalSrcset);
+          console.log('  images to update:', imagesToUpdate.length);
         }
 
-        cardImage.setAttribute('src', srcUrl);
+        // Update all images (main and hover) with the variant image
+        // This ensures both the main display and hover effect show the correct variant
+        imagesToUpdate.forEach((img, index) => {
+          img.setAttribute('src', srcUrl);
 
-        // Use existing srcset if available, otherwise use built one
-        if (imageData.srcset) {
-          cardImage.setAttribute('srcset', imageData.srcset);
-        } else if (srcsetParts.length > 0) {
-          cardImage.setAttribute('srcset', srcsetParts.join(', '));
-        }
+          // Use existing srcset if available, otherwise use built one
+          if (imageData.srcset) {
+            img.setAttribute('srcset', imageData.srcset);
+          } else if (srcsetParts.length > 0) {
+            img.setAttribute('srcset', srcsetParts.join(', '));
+          }
 
-        if (imageData.alt) {
-          cardImage.setAttribute('alt', imageData.alt);
-        }
+          if (imageData.alt) {
+            img.setAttribute('alt', imageData.alt);
+          }
+
+          if (DEBUG.image) {
+            console.log(`[ImageHandler] Updated image ${index + 1}:`, {
+              src: img.getAttribute('src'),
+              srcset: img.getAttribute('srcset') ? 'set' : 'not set',
+            });
+          }
+        });
 
         if (DEBUG.image) {
-          console.log('[ImageHandler] Image updated successfully');
-          console.log('[ImageHandler] New image src:', cardImage.getAttribute('src'));
-          console.log('[ImageHandler] New image srcset:', cardImage.getAttribute('srcset'));
+          console.log('[ImageHandler] All images updated successfully');
           console.groupEnd();
         }
       }
@@ -343,23 +347,32 @@ if (typeof CustomCardVariantImageHandler === 'undefined') {
       restoreDefaultImage() {
         if (!this.defaultImage) return;
 
-        const cardImage = this.card.querySelector('.card__media img');
-        if (!cardImage) return;
+        const cardMedia = this.card.querySelector('.card__media');
+        const images = cardMedia ? cardMedia.querySelectorAll('img') : [];
+        
+        if (images.length === 0) return;
 
-        if (this.defaultImage.srcset) {
-          cardImage.setAttribute('srcset', this.defaultImage.srcset);
-        }
-        if (this.defaultImage.src) {
-          cardImage.setAttribute('src', this.defaultImage.src);
-        }
-        if (this.defaultImage.alt) {
-          cardImage.setAttribute('alt', this.defaultImage.alt);
-        }
-        if (this.defaultImage.width) {
-          cardImage.setAttribute('width', this.defaultImage.width);
-        }
-        if (this.defaultImage.height) {
-          cardImage.setAttribute('height', this.defaultImage.height);
+        // Restore all images (main and hover) to default
+        Array.from(images).forEach((img) => {
+          if (this.defaultImage.srcset) {
+            img.setAttribute('srcset', this.defaultImage.srcset);
+          }
+          if (this.defaultImage.src) {
+            img.setAttribute('src', this.defaultImage.src);
+          }
+          if (this.defaultImage.alt) {
+            img.setAttribute('alt', this.defaultImage.alt);
+          }
+          if (this.defaultImage.width) {
+            img.setAttribute('width', this.defaultImage.width);
+          }
+          if (this.defaultImage.height) {
+            img.setAttribute('height', this.defaultImage.height);
+          }
+        });
+
+        if (DEBUG.image) {
+          console.log('[ImageHandler] Restored default image for all images');
         }
       }
 

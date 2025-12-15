@@ -223,6 +223,9 @@ if (typeof CustomCardVariantOptions === 'undefined') {
       }
 
       setupEventListeners() {
+        // Setup left-to-right hover effect for color swatches
+        this.setupColorSwatchHoverEffect();
+
         // Color swatch clicks
         this.container.querySelectorAll('[data-option-type="color"]').forEach((option) => {
           option.addEventListener('click', (e) => {
@@ -233,7 +236,7 @@ if (typeof CustomCardVariantOptions === 'undefined') {
             return false;
           });
 
-          // Hover for image preview (load data if needed)
+          // Individual swatch hover (for direct hover on specific swatch)
           option.addEventListener('mouseenter', async () => {
             const colorValue = option.getAttribute('data-option-value');
 
@@ -263,12 +266,16 @@ if (typeof CustomCardVariantOptions === 'undefined') {
           });
 
           option.addEventListener('mouseleave', () => {
-            const selectedColor = this.getSelectedColor();
-            if (this.imageHandler) {
-              if (selectedColor) {
-                this.imageHandler.updateImage(selectedColor, false);
-              } else {
-                this.imageHandler.restoreDefaultImage();
+            // Only restore if not hovering over swatch container (which handles its own hover)
+            const swatchContainer = this.container.querySelector('.custom-card-variant-options__swatches');
+            if (!swatchContainer || !swatchContainer.matches(':hover')) {
+              const selectedColor = this.getSelectedColor();
+              if (this.imageHandler) {
+                if (selectedColor) {
+                  this.imageHandler.updateImage(selectedColor, false);
+                } else {
+                  this.imageHandler.restoreDefaultImage();
+                }
               }
             }
           });
@@ -326,6 +333,202 @@ if (typeof CustomCardVariantOptions === 'undefined') {
             this.imageHandler.updateImage(value, false);
           } else {
             // Restore default image when deselected
+            this.imageHandler.restoreDefaultImage();
+          }
+        }
+      }
+
+      setupColorSwatchHoverEffect() {
+        const swatchContainer = this.container.querySelector('.custom-card-variant-options__swatches');
+        if (!swatchContainer) return;
+
+        const colorOptions = Array.from(this.container.querySelectorAll('[data-option-type="color"]'));
+        if (colorOptions.length === 0) return;
+
+        // Get all available color values
+        const colorValues = colorOptions.map((option) => option.getAttribute('data-option-value'));
+
+        // Detect if device supports hover (not touch-only)
+        const isTouchDevice = this.isTouchDevice();
+
+        if (isTouchDevice) {
+          // On mobile/touch devices, use swipe gesture instead of hover
+          this.setupColorSwatchSwipeEffect(swatchContainer, colorValues);
+        } else {
+          // On desktop, use mouse hover effect
+          this.setupColorSwatchMouseHover(swatchContainer, colorValues);
+        }
+      }
+
+      isTouchDevice() {
+        // Check if device has touch capability
+        // Note: Modern devices may have both touch and mouse, so we check for primary pointer
+        return (
+          'ontouchstart' in window ||
+          navigator.maxTouchPoints > 0 ||
+          (window.matchMedia && window.matchMedia('(pointer: coarse)').matches)
+        );
+      }
+
+      setupColorSwatchMouseHover(swatchContainer, colorValues) {
+        let hoverTimeout = null;
+
+        swatchContainer.addEventListener('mouseenter', async () => {
+          // Trigger data load if not loaded yet
+          if (!this.dataLoaded && !this.isLoading) {
+            await this.loadProductData();
+          }
+
+          // Update image handler with latest data
+          if (this.imageHandler) {
+            this.imageHandler.updateVariants(this.variants);
+            this.imageHandler.updateProduct(this.product);
+          }
+        });
+
+        swatchContainer.addEventListener('mousemove', (e) => {
+          if (!this.imageHandler || colorValues.length === 0) return;
+
+          // Clear any pending timeout
+          if (hoverTimeout) {
+            clearTimeout(hoverTimeout);
+          }
+
+          // Get mouse position relative to swatch container
+          const rect = swatchContainer.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const percentage = Math.max(0, Math.min(100, (x / rect.width) * 100));
+
+          // Map percentage to color index (0% = first color, 100% = last color)
+          const colorIndex = Math.floor((percentage / 100) * colorValues.length);
+          const clampedIndex = Math.min(colorIndex, colorValues.length - 1);
+          const colorValue = colorValues[clampedIndex];
+
+          if (DEBUG.image) {
+            console.log('[CustomCardVariantOptions] Hover position:', {
+              x,
+              percentage: percentage.toFixed(1) + '%',
+              colorIndex: clampedIndex,
+              colorValue,
+            });
+          }
+
+          // Small debounce to avoid too many updates
+          hoverTimeout = setTimeout(() => {
+            if (this.imageHandler && colorValue) {
+              this.imageHandler.updateImage(colorValue, true);
+            }
+          }, 10);
+        });
+
+        swatchContainer.addEventListener('mouseleave', () => {
+          // Clear any pending timeout
+          if (hoverTimeout) {
+            clearTimeout(hoverTimeout);
+            hoverTimeout = null;
+          }
+
+          // Restore to selected color or default
+          this.restoreImageAfterHover();
+        });
+      }
+
+      setupColorSwatchSwipeEffect(swatchContainer, colorValues) {
+        let touchStartX = null;
+        let touchStartY = null;
+        let isSwiping = false;
+        let swipeTimeout = null;
+
+        swatchContainer.addEventListener('touchstart', async (e) => {
+          const touch = e.touches[0];
+          touchStartX = touch.clientX;
+          touchStartY = touch.clientY;
+          isSwiping = false;
+
+          // Trigger data load if not loaded yet
+          if (!this.dataLoaded && !this.isLoading) {
+            await this.loadProductData();
+          }
+
+          // Update image handler with latest data
+          if (this.imageHandler) {
+            this.imageHandler.updateVariants(this.variants);
+            this.imageHandler.updateProduct(this.product);
+          }
+        }, { passive: true });
+
+        swatchContainer.addEventListener('touchmove', (e) => {
+          if (!touchStartX || !this.imageHandler || colorValues.length === 0) return;
+
+          const touch = e.touches[0];
+          const deltaX = Math.abs(touch.clientX - touchStartX);
+          const deltaY = Math.abs(touch.clientY - touchStartY);
+
+          // Only treat as swipe if horizontal movement is greater than vertical
+          if (deltaX > deltaY && deltaX > 10) {
+            isSwiping = true;
+            e.preventDefault(); // Prevent scrolling while swiping
+
+            // Get touch position relative to swatch container
+            const rect = swatchContainer.getBoundingClientRect();
+            const x = touch.clientX - rect.left;
+            const percentage = Math.max(0, Math.min(100, (x / rect.width) * 100));
+
+            // Map percentage to color index
+            const colorIndex = Math.floor((percentage / 100) * colorValues.length);
+            const clampedIndex = Math.min(colorIndex, colorValues.length - 1);
+            const colorValue = colorValues[clampedIndex];
+
+            if (DEBUG.image) {
+              console.log('[CustomCardVariantOptions] Swipe position:', {
+                x,
+                percentage: percentage.toFixed(1) + '%',
+                colorIndex: clampedIndex,
+                colorValue,
+              });
+            }
+
+            // Debounce updates during swipe
+            if (swipeTimeout) {
+              clearTimeout(swipeTimeout);
+            }
+
+            swipeTimeout = setTimeout(() => {
+              if (this.imageHandler && colorValue) {
+                this.imageHandler.updateImage(colorValue, true);
+              }
+            }, 50);
+          }
+        }, { passive: false });
+
+        swatchContainer.addEventListener('touchend', () => {
+          touchStartX = null;
+          touchStartY = null;
+
+          // Clear any pending timeout
+          if (swipeTimeout) {
+            clearTimeout(swipeTimeout);
+            swipeTimeout = null;
+          }
+
+          // Only restore if it was a swipe, not a tap
+          if (isSwiping) {
+            // Small delay to allow tap to register if it was actually a tap
+            setTimeout(() => {
+              this.restoreImageAfterHover();
+            }, 100);
+          }
+
+          isSwiping = false;
+        }, { passive: true });
+      }
+
+      restoreImageAfterHover() {
+        const selectedColor = this.getSelectedColor();
+        if (this.imageHandler) {
+          if (selectedColor) {
+            this.imageHandler.updateImage(selectedColor, false);
+          } else {
             this.imageHandler.restoreDefaultImage();
           }
         }
