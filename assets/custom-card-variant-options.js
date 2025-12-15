@@ -24,6 +24,12 @@ if (typeof CustomCardVariantOptions === 'undefined') {
         this.card = container.closest('.card-wrapper');
         if (!this.card) return;
 
+        // Prevent duplicate initialization on the same container
+        if (this.container.dataset.ccvoInitialized === 'true') {
+          return;
+        }
+        this.container.dataset.ccvoInitialized = 'true';
+
         // State
         this.product = null;
         this.variants = [];
@@ -1127,23 +1133,28 @@ if (typeof CustomCardVariantOptions === 'undefined') {
       }
     }
 
-    // Initialize on page load
-    function init() {
+    // Initialize (idempotent, re-usable after dynamic renders)
+    function initCardVariantOptions(force = false) {
       document.querySelectorAll('.custom-card-variant-options').forEach((container) => {
+        if (!force && container.dataset.ccvoInitialized === 'true') return;
         new CustomCardVariantOptions(container);
       });
     }
 
+    // Expose re-init helper for dynamic content (e.g., facets redraw)
+    window.initializeCustomCardVariantOptions = initCardVariantOptions;
+
     // Initialize when DOM is ready
     if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', init);
+      document.addEventListener('DOMContentLoaded', () => initCardVariantOptions(false));
     } else {
-      init();
+      initCardVariantOptions(false);
     }
 
-    // Re-initialize when new cards are loaded (e.g., via AJAX)
+    // Re-initialize when new cards are loaded (e.g., via AJAX/observers)
     if (typeof CustomElements !== 'undefined' && CustomElements.observe) {
       CustomElements.observe('.custom-card-variant-options', (container) => {
+        if (container.dataset.ccvoInitialized === 'true') return;
         new CustomCardVariantOptions(container);
       });
     }

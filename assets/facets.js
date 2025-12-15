@@ -84,6 +84,11 @@ class FacetFiltersForm extends HTMLElement {
       .parseFromString(html, 'text/html')
       .getElementById('ProductGridContainer').innerHTML;
 
+    // Re-init collection card variant/swatch handlers after grid redraw
+    if (typeof window.initializeCustomCardVariantOptions === 'function') {
+      window.initializeCustomCardVariantOptions(true);
+    }
+
     document
       .getElementById('ProductGridContainer')
       .querySelectorAll('.scroll-trigger')
