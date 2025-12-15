@@ -1,0 +1,18 @@
+/* Custom Cart Notification Extension Styles
+ * Swipe-to-dismiss visual feedback on mobile
+ */
+
+@media (max-width: 749px) {
+  .cart-notification.active {
+    /* Add opacity transition for visual feedback during drag */
+    transition:
+      transform var(--duration-default) ease,
+      visibility 0s,
+      opacity var(--duration-default) ease;
+  }
+
+  .cart-notification.active:active {
+    /* Provide visual feedback during drag */
+    opacity: 0.95;
+  }
+}
