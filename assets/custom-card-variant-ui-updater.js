@@ -265,10 +265,15 @@ if (typeof CustomCardVariantUIUpdater === 'undefined') {
           return;
         }
 
+        // Check if all required options are selected
+        const allRequiredSelected = this.hasAllRequiredOptionsSelected(selectedOptions);
+        console.log('[UIUpdater] All required options selected:', allRequiredSelected, 'Selected:', selectedOptions);
+
         // Find matching variant
         const variant = findMatchingVariant();
 
-        if (variant) {
+        // Only show "Add to cart" if all required options are selected AND a variant is found
+        if (variant && allRequiredSelected) {
           const isAvailable = this.isVariantAvailable(variant);
 
           // Update variant ID - check multiple possible selectors
@@ -306,8 +311,12 @@ if (typeof CustomCardVariantUIUpdater === 'undefined') {
           // Update button text
           this.updateButtonText(button, isAvailable ? 'addToCart' : 'soldOut');
         } else {
-          // No matching variant
-          console.warn('[UIUpdater] No matching variant found for selections:', selectedOptions);
+          // Not all options selected or no matching variant
+          if (variant && !allRequiredSelected) {
+            console.log('[UIUpdater] Variant found but not all options selected');
+          } else {
+            console.warn('[UIUpdater] No matching variant found for selections:', selectedOptions);
+          }
 
           if (quickAddButton) {
             quickAddButton.removeAttribute('data-selected-variant-id');
@@ -318,6 +327,35 @@ if (typeof CustomCardVariantUIUpdater === 'undefined') {
           const allUnavailable = this.checkIfAllVariantsUnavailable();
           this.updateButtonText(button, allUnavailable ? 'soldOut' : 'chooseOptions');
         }
+      }
+
+      hasAllRequiredOptionsSelected(selectedOptions) {
+        if (!this.config) return false;
+
+        // Check color option (if exists)
+        if (this.config.colorPosition) {
+          if (!selectedOptions.color) {
+            return false;
+          }
+        }
+
+        // Check size option (if exists)
+        if (this.config.sizePosition) {
+          if (!selectedOptions.size) {
+            return false;
+          }
+        }
+
+        // Check other options (if any exist)
+        if (this.config.otherOptions && Object.keys(this.config.otherOptions).length > 0) {
+          for (const optionName in this.config.otherOptions) {
+            if (!selectedOptions[optionName]) {
+              return false;
+            }
+          }
+        }
+
+        return true;
       }
 
       hasOnlyColorAndSize() {
