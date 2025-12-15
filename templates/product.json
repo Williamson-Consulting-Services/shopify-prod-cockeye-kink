@@ -122,7 +122,7 @@
       ],
       "settings": {
         "enable_sticky_info": true,
-        "color_scheme": "",
+        "color_scheme": "scheme-3",
         "media_size": "medium",
         "constrain_to_viewport": true,
         "media_fit": "contain",
@@ -144,7 +144,7 @@
         "products_to_show": 4,
         "columns_desktop": 4,
         "columns_mobile": "2",
-        "color_scheme": "scheme-1",
+        "color_scheme": "scheme-3",
         "image_ratio": "square",
         "image_shape": "default",
         "show_secondary_image": true,
@@ -167,9 +167,8 @@
           }
         }
       },
-      "block_order": [
-        "column-1"
-      ],
+      "block_order": ["column-1"],
+      "disabled": true,
       "settings": {
         "title": "",
         "heading_size": "h1",
@@ -188,9 +187,5 @@
       }
     }
   },
-  "order": [
-    "main",
-    "related-products",
-    "multicolumn"
-  ]
+  "order": ["main", "related-products", "multicolumn"]
 }

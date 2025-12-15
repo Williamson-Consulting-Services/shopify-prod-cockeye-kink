@@ -7,6 +7,12 @@
   media="print"
   onload="this.media='all'"
 >
+<link
+  rel="stylesheet"
+  href="{{ 'component-custom-cart-notification-extension.css' | asset_url }}"
+  media="print"
+  onload="this.media='all'"
+>
 
 {%- if settings.predictive_search_enabled -%}
   <link rel="stylesheet" href="{{ 'component-price.css' | asset_url }}" media="print" onload="this.media='all'">
@@ -101,6 +107,7 @@
 {%- endstyle -%}
 
 <script src="{{ 'cart-notification.js' | asset_url }}" defer="defer"></script>
+<script src="{{ 'custom-cart-notification-extension.js' | asset_url }}" defer="defer"></script>
 
 {%- liquid
   for block in section.blocks

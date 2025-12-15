@@ -38,11 +38,7 @@
           }
         }
       },
-      "block_order": [
-        "heading",
-        "text",
-        "button"
-      ],
+      "block_order": ["heading", "text", "button"],
       "custom_css": [],
       "settings": {
         "image": "shopify://shop_images/cockeye_header.jpg",
@@ -161,11 +157,7 @@
           }
         }
       },
-      "block_order": [
-        "collection-0",
-        "product",
-        "collection-1"
-      ],
+      "block_order": ["collection-0", "product", "collection-1"],
       "settings": {
         "heading": "",
         "heading_size": "h2",
@@ -236,10 +228,7 @@
           }
         }
       },
-      "block_order": [
-        "column1",
-        "column2"
-      ],
+      "block_order": ["column1", "column2"],
       "settings": {
         "title": "",
         "heading_size": "h1",

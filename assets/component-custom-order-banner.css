@@ -101,7 +101,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background-color 150ms ease, height 200ms ease;
+  transition:
+    background-color 150ms ease,
+    height 200ms ease;
 }
 
 .custom-order-banner__minimized-bar:hover,
@@ -117,7 +119,9 @@
   transform: translate(-50%, -50%);
   color: var(--custom-order-banner-color);
   opacity: 0.5;
-  transition: opacity 150ms ease, transform 200ms ease;
+  transition:
+    opacity 150ms ease,
+    transform 200ms ease;
   pointer-events: none;
 }
 
@@ -132,7 +136,6 @@
 }
 
 @keyframes minimize-pulse {
-
   0%,
   100% {
     opacity: 0.5;
@@ -153,7 +156,9 @@
 
 @media (prefers-reduced-motion: no-preference) {
   .custom-order-banner {
-    transition: transform 200ms ease, opacity 200ms ease;
+    transition:
+      transform 200ms ease,
+      opacity 200ms ease;
   }
 
   .custom-order-banner[hidden] {

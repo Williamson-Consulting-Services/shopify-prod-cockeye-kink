@@ -1,0 +1,471 @@
+{% comment %}
+  Renders variant options (color/size) for product cards
+
+  Accepts:
+  - product: {Object} Product Liquid object (required)
+
+  Usage:
+  {% render 'custom-card-variant-options', product: product %}
+{% endcomment %}
+
+{%- if product and product.has_only_default_variant == false -%}
+  {%- comment -%} Check if product has options with multiple values {%- endcomment -%}
+  {%- liquid
+    assign show_color_option = false
+    assign show_size_option = false
+    assign color_option = null
+    assign size_option = null
+    assign other_options = ''
+    assign has_options_to_show = false
+
+    for option in product.options_with_values
+      assign option_name_lower = option.name | downcase
+      if option_name_lower == 'color' or option_name_lower == 'colour' or option_name_lower == 'trim color' or option_name_lower == 'trim colour'
+        assign color_option = option
+        comment
+          Always show color options, even if there's only one value
+        endcomment
+        if option.values.size > 0
+          assign show_color_option = true
+          assign has_options_to_show = true
+        endif
+      elsif option_name_lower == 'size'
+        assign size_option = option
+        comment
+          Always show size options, even if there's only one value
+        endcomment
+        if option.values.size > 0
+          assign show_size_option = true
+          assign has_options_to_show = true
+        endif
+      elsif option.values.size > 0
+        comment
+          Store other options (not color, trim color, or size) - show all options
+        endcomment
+        if other_options == ''
+          assign other_options = option.name | append: ':' | append: option.position
+        else
+          assign other_options = other_options | append: ',' | append: option.name | append: ':' | append: option.position
+        endif
+        assign has_options_to_show = true
+      endif
+    endfor
+  -%}
+
+  {%- comment -%} Display if any options have multiple values {%- endcomment -%}
+  {%- if has_options_to_show -%}
+    {%- comment -%} Load CSS only once per page {%- endcomment -%}
+    {%- unless custom_card_variant_options_loaded -%}
+      {{ 'component-custom-card-variant-options.css' | asset_url | stylesheet_tag }}
+      <script src="{{ 'custom-card-variant-availability-matrix.js' | asset_url }}" defer="defer"></script>
+      <script src="{{ 'custom-card-variant-image-handler.js' | asset_url }}" defer="defer"></script>
+      <script src="{{ 'custom-card-variant-ui-updater.js' | asset_url }}" defer="defer"></script>
+      <script src="{{ 'custom-card-variant-options.js' | asset_url }}" defer="defer"></script>
+      {%- assign custom_card_variant_options_loaded = true -%}
+    {%- endunless -%}
+
+    <div
+      class="custom-card-variant-options"
+      data-product-id="{{ product.id }}"
+      data-translation-add-to-cart="{{ 'products.product.add_to_cart' | t }}"
+      data-translation-sold-out="{{ 'products.product.sold_out' | t }}"
+      data-translation-choose-options="{{ 'products.product.choose_options' | t }}"
+      data-translation-in-stock-template="{{ 'products.product.inventory_in_stock_show_count' | t: quantity: 'QUANTITY_PLACEHOLDER' }}"
+      data-translation-low-stock-template="{{ 'products.product.inventory_low_stock_show_count' | t: quantity: 'QUANTITY_PLACEHOLDER' }}"
+      {% if color_option %}
+        data-color-position="{{ color_option.position }}"
+      {% endif -%}
+      {% if color_option %}
+        data-color-position="{{ color_option.position }}"
+      {% endif -%}
+      {% if size_option %}
+        data-size-position="{{ size_option.position }}"
+      {% endif %}
+      {% if other_options != '' %}
+        data-other-options="{{ other_options }}"
+      {% endif %}
+    >
+      {%- comment -%} Inventory count display (hidden by default, shown when variant selected) {%- endcomment -%}
+      <div class="custom-card-variant-options__inventory" style="display: none;">
+        <span class="custom-card-variant-options__inventory-text"></span>
+      </div>
+      {%- comment -%} Display Color Option (always show, even if single value) {%- endcomment -%}
+      {%- if show_color_option and color_option -%}
+        <div
+          class="custom-card-variant-options__group"
+          data-option-name="{{ color_option.name | escape }}"
+          data-option-position="{{ color_option.position }}"
+        >
+          <span class="custom-card-variant-options__label">{{ color_option.name }}:</span>
+          <div class="custom-card-variant-options__swatches">
+            {%- for value in color_option.values -%}
+              {%- liquid
+                # Use Shopify's built-in value.available property (same as Dawn)
+                assign value_unavailable = true
+                if value.available
+                  assign value_unavailable = false
+                endif
+              -%}
+
+              {%- liquid
+                assign has_swatch_image = false
+                assign has_swatch_color = false
+                assign swatch_display_value = value
+
+                if value.swatch.image
+                  assign has_swatch_image = true
+                elsif value.swatch.color
+                  assign has_swatch_color = true
+                endif
+
+                assign value_name_lower = value | downcase
+                assign is_multiple_colors = false
+                if value_name_lower contains 'other' or value_name_lower contains 'multiple' or value_name_lower contains 'various'
+                  assign is_multiple_colors = true
+                endif
+              -%}
+
+              <div
+                class="custom-card-variant-options__option custom-card-variant-options__option--swatch{% if value_unavailable %} custom-card-variant-options__option--unavailable{% endif %}{% if is_multiple_colors %} custom-card-variant-options__option--multiple-colors{% endif %}"
+                title="{{ value | escape }}"
+                aria-label="{{ value | escape }}{% if value_unavailable %} - {{ 'products.product.sold_out' | t }}{% endif %}"
+                data-option-type="color"
+                data-option-value="{{ value | escape }}"
+              >
+                {%- if has_swatch_image or has_swatch_color -%}
+                  {% render 'swatch', swatch: value.swatch, shape: 'square' %}
+                {%- else -%}
+                  {%- comment -%} Fallback: Create a color swatch from color name or use default {%- endcomment -%}
+                  {%- liquid
+                    assign fallback_color = '#cccccc'
+                    assign fallback_color_2 = '#000000'
+                    assign value_name_clean = value | downcase | strip
+                    assign primary_color = value_name_clean
+                    assign secondary_color = 'black'
+                    assign has_multiple_colors_in_name = false
+                    assign extracted_colors = ''
+
+                    comment
+                      Handle special cases first: "Black with Chain", "Distressed Brown"
+                    endcomment
+                    if value_name_clean contains 'black' and value_name_clean contains 'chain'
+                      assign primary_color = 'black'
+                      assign secondary_color = 'grey'
+                      assign has_multiple_colors_in_name = true
+                    elsif value_name_clean contains 'distressed' and value_name_clean contains 'brown'
+                      assign primary_color = 'brown'
+                    elsif value_name_clean contains 'distressed'
+                      comment
+                        Handle other distressed colors
+                      endcomment
+                      if value_name_clean contains 'brown'
+                        assign primary_color = 'brown'
+                      endif
+                    else
+                      comment
+                        Extract all color names from the value (e.g., "Red Camo Yellow Camo" -> "red,yellow,green,blue")
+                      endcomment
+                      assign color_keywords = 'red,blue,green,yellow,orange,purple,pink,black,white,grey,gray,brown,navy,tan,beige,olive' | split: ','
+                      assign found_colors = ''
+
+                      for keyword in color_keywords
+                        if value_name_clean contains keyword
+                          if found_colors == ''
+                            assign found_colors = keyword
+                          else
+                            assign found_colors = found_colors | append: ',' | append: keyword
+                          endif
+                        endif
+                      endfor
+
+                      comment
+                        Handle multi-color values like "Red / Black" - extract both colors
+                      endcomment
+                      if value_name_clean contains ' / '
+                        assign color_parts = value_name_clean | split: ' / '
+                        assign primary_color = color_parts[0] | strip
+                        if color_parts[1]
+                          assign secondary_color = color_parts[1] | strip
+                        endif
+                        assign has_multiple_colors_in_name = true
+                      elsif value_name_clean contains '/'
+                        assign color_parts = value_name_clean | split: '/'
+                        assign primary_color = color_parts[0] | strip
+                        if color_parts[1]
+                          assign secondary_color = color_parts[1] | strip
+                        endif
+                        assign has_multiple_colors_in_name = true
+                      elsif found_colors != ''
+                        comment
+                          Multiple colors found in name (e.g., "Red Camo Yellow Camo Green Camo Blue Camo")
+                        endcomment
+                        assign color_array = found_colors | split: ','
+                        if color_array.size > 1
+                          assign primary_color = color_array[0]
+                          assign secondary_color = color_array[1]
+                          assign has_multiple_colors_in_name = true
+                          assign extracted_colors = found_colors
+                        else
+                          assign primary_color = color_array[0]
+                        endif
+                      endif
+                    endif
+
+                    comment
+                      Map color names to hex values
+                      Handle special cases like "distressed brown", "black with chain"
+                    endcomment
+                    if value_name_clean contains 'distressed' and value_name_clean contains 'brown'
+                      assign fallback_color = '#8b4513'
+                    elsif value_name_clean contains 'chain' and value_name_clean contains 'black'
+                      assign fallback_color = '#000000'
+                      if secondary_color != 'grey'
+                        assign secondary_color = 'grey'
+                        assign has_multiple_colors_in_name = true
+                      endif
+                    else
+                      case primary_color
+                        when 'red'
+                          assign fallback_color = '#ff0000'
+                        when 'blue'
+                          assign fallback_color = '#0000ff'
+                        when 'green'
+                          assign fallback_color = '#008000'
+                        when 'yellow'
+                          assign fallback_color = '#ffff00'
+                        when 'orange'
+                          assign fallback_color = '#ffa500'
+                        when 'purple'
+                          assign fallback_color = '#800080'
+                        when 'pink'
+                          assign fallback_color = '#ffc0cb'
+                        when 'black'
+                          assign fallback_color = '#000000'
+                        when 'white'
+                          assign fallback_color = '#ffffff'
+                        when 'grey', 'gray'
+                          assign fallback_color = '#808080'
+                        when 'brown'
+                          assign fallback_color = '#a52a2a'
+                        when 'navy'
+                          assign fallback_color = '#000080'
+                        when 'tan', 'beige'
+                          assign fallback_color = '#f5f5dc'
+                        when 'olive'
+                          assign fallback_color = '#808000'
+                        else
+                          comment
+                            Fallback for unrecognized colors - try to extract from value_name_clean
+                          endcomment
+                          if value_name_clean contains 'brown'
+                            assign fallback_color = '#a52a2a'
+                          elsif value_name_clean contains 'black'
+                            assign fallback_color = '#000000'
+                          else
+                            assign fallback_color = '#cccccc'
+                          endif
+                      endcase
+                    endif
+
+                    comment
+                      Map secondary color
+                    endcomment
+                    if secondary_color == 'grey' or secondary_color == 'gray'
+                      assign fallback_color_2 = '#808080'
+                    else
+                      case secondary_color
+                        when 'red'
+                          assign fallback_color_2 = '#ff0000'
+                        when 'blue'
+                          assign fallback_color_2 = '#0000ff'
+                        when 'green'
+                          assign fallback_color_2 = '#008000'
+                        when 'yellow'
+                          assign fallback_color_2 = '#ffff00'
+                        when 'orange'
+                          assign fallback_color_2 = '#ffa500'
+                        when 'purple'
+                          assign fallback_color_2 = '#800080'
+                        when 'pink'
+                          assign fallback_color_2 = '#ffc0cb'
+                        when 'black'
+                          assign fallback_color_2 = '#000000'
+                        when 'white'
+                          assign fallback_color_2 = '#ffffff'
+                        when 'grey', 'gray'
+                          assign fallback_color_2 = '#808080'
+                        when 'brown'
+                          assign fallback_color_2 = '#a52a2a'
+                        when 'navy'
+                          assign fallback_color_2 = '#000080'
+                        when 'tan', 'beige'
+                          assign fallback_color_2 = '#f5f5dc'
+                        when 'olive'
+                          assign fallback_color_2 = '#808000'
+                      endcase
+                    endif
+
+                    if is_multiple_colors
+                      assign fallback_color = '#cccccc'
+                      assign fallback_color_2 = '#cccccc'
+                    endif
+
+                    comment
+                      Build gradient for multiple colors (more than 2)
+                    endcomment
+                    assign gradient_colors = ''
+                    assign has_multi_gradient = false
+                    if extracted_colors != '' and has_multiple_colors_in_name
+                      assign color_list = extracted_colors | split: ','
+                      if color_list.size > 2
+                        assign has_multi_gradient = true
+                        assign gradient_stops = ''
+                        assign total_colors = color_list.size
+                        assign segment_size = 100.0 | divided_by: total_colors
+
+                        for color_item in color_list
+                          assign color_name = color_item | strip
+                          assign color_hex = '#cccccc'
+                          case color_name
+                            when 'red'
+                              assign color_hex = '#ff0000'
+                            when 'blue'
+                              assign color_hex = '#0000ff'
+                            when 'green'
+                              assign color_hex = '#008000'
+                            when 'yellow'
+                              assign color_hex = '#ffff00'
+                            when 'orange'
+                              assign color_hex = '#ffa500'
+                            when 'purple'
+                              assign color_hex = '#800080'
+                            when 'pink'
+                              assign color_hex = '#ffc0cb'
+                            when 'black'
+                              assign color_hex = '#000000'
+                            when 'white'
+                              assign color_hex = '#ffffff'
+                            when 'grey', 'gray'
+                              assign color_hex = '#808080'
+                            when 'brown'
+                              assign color_hex = '#a52a2a'
+                            when 'navy'
+                              assign color_hex = '#000080'
+                            when 'tan', 'beige'
+                              assign color_hex = '#f5f5dc'
+                            when 'olive'
+                              assign color_hex = '#808000'
+                          endcase
+
+                          assign start_percent = forloop.index0 | times: segment_size
+                          assign end_percent = forloop.index | times: segment_size
+
+                          if gradient_stops == ''
+                            assign gradient_stops = color_hex | append: ' ' | append: start_percent | append: '%, ' | append: color_hex | append: ' ' | append: end_percent | append: '%'
+                          else
+                            assign gradient_stops = gradient_stops | append: ', ' | append: color_hex | append: ' ' | append: start_percent | append: '%, ' | append: color_hex | append: ' ' | append: end_percent | append: '%'
+                          endif
+                        endfor
+                        assign gradient_colors = gradient_stops
+                      endif
+                    endif
+                  -%}
+                  <span
+                    class="swatch swatch--square{% if has_multiple_colors_in_name %} swatch--multi-color{% endif %}{% if has_multi_gradient %} swatch--multi-color-gradient{% endif %}"
+                    style="--swatch--background: {{ fallback_color }};{% if has_multiple_colors_in_name and gradient_colors != '' %} background: linear-gradient(135deg, {{ gradient_colors }});{% elsif has_multiple_colors_in_name %} background: linear-gradient(135deg, {{ fallback_color }} 0%, {{ fallback_color }} 50%, {{ fallback_color_2 }} 50%, {{ fallback_color_2 }} 100%);{% endif %}"
+                  >
+                    {%- if is_multiple_colors or has_multiple_colors_in_name -%}
+                      <span class="custom-card-variant-options__multiple-colors-indicator" aria-hidden="true">+</span>
+                    {%- endif -%}
+                  </span>
+                {%- endif -%}
+              </div>
+            {%- endfor -%}
+          </div>
+        </div>
+      {%- endif -%}
+
+      {%- comment -%} Display Size Option (always show, even if single value) {%- endcomment -%}
+      {%- if show_size_option and size_option -%}
+        <div
+          class="custom-card-variant-options__group"
+          data-option-name="{{ size_option.name | escape }}"
+          data-option-position="{{ size_option.position }}"
+        >
+          <span class="custom-card-variant-options__label">{{ size_option.name }}:</span>
+          <div class="custom-card-variant-options__buttons">
+            {%- for value in size_option.values -%}
+              {%- liquid
+                # Use Shopify's built-in value.available property (same as Dawn)
+                assign value_unavailable = true
+                if value.available
+                  assign value_unavailable = false
+                endif
+              -%}
+
+              <div
+                class="custom-card-variant-options__option custom-card-variant-options__option--button{% if value_unavailable %} custom-card-variant-options__option--unavailable{% endif %}"
+                title="{{ value | escape }}{% if value_unavailable %} - {{ 'products.product.sold_out' | t }}{% endif %}"
+                aria-label="{{ value | escape }}{% if value_unavailable %} - {{ 'products.product.sold_out' | t }}{% endif %}"
+                data-option-type="size"
+                data-option-value="{{ value | escape }}"
+              >
+                <span class="custom-card-variant-options__button-text">{{ value | escape }}</span>
+              </div>
+            {%- endfor -%}
+          </div>
+        </div>
+      {%- endif -%}
+
+      {%- comment -%} Display Other Options (not color or size) {%- endcomment -%}
+      {%- if other_options != '' -%}
+        {%- assign other_options_array = other_options | split: ',' -%}
+        {%- for other_option_data in other_options_array -%}
+          {%- assign option_parts = other_option_data | split: ':' -%}
+          {%- assign option_name = option_parts[0] -%}
+          {%- assign option_position = option_parts[1] | plus: 0 -%}
+          {%- assign other_option = null -%}
+          {%- for option in product.options_with_values -%}
+            {%- if option.name == option_name and option.position == option_position -%}
+              {%- assign other_option = option -%}
+              {%- break -%}
+            {%- endif -%}
+          {%- endfor -%}
+
+          {%- if other_option and other_option.values.size > 0 -%}
+            <div
+              class="custom-card-variant-options__group"
+              data-option-name="{{ other_option.name | escape }}"
+              data-option-position="{{ other_option.position }}"
+            >
+              <span class="custom-card-variant-options__label">{{ other_option.name }}:</span>
+              <div class="custom-card-variant-options__buttons">
+                {%- for value in other_option.values -%}
+                  {%- liquid
+                    # Use Shopify's built-in value.available property (same as Dawn)
+                    assign value_unavailable = true
+                    if value.available
+                      assign value_unavailable = false
+                    endif
+                  -%}
+
+                  <div
+                    class="custom-card-variant-options__option custom-card-variant-options__option--button{% if value_unavailable %} custom-card-variant-options__option--unavailable{% endif %}"
+                    title="{{ value | escape }}{% if value_unavailable %} - {{ 'products.product.sold_out' | t }}{% endif %}"
+                    aria-label="{{ value | escape }}{% if value_unavailable %} - {{ 'products.product.sold_out' | t }}{% endif %}"
+                    data-option-type="other"
+                    data-option-name="{{ other_option.name | escape }}"
+                    data-option-position="{{ other_option.position }}"
+                    data-option-value="{{ value | escape }}"
+                  >
+                    <span class="custom-card-variant-options__button-text">{{ value | escape }}</span>
+                  </div>
+                {%- endfor -%}
+              </div>
+            </div>
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endif -%}
+    </div>
+  {%- endif -%}
+{%- endif -%}

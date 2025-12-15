@@ -33,9 +33,7 @@ window.CustomBannerManager = (function () {
     const localStorageKey = storageKey ? `${LOCAL_STORAGE_PREFIX}${storageKey}` : null;
 
     const state = {
-      minimized: localStorageKey
-        ? localStorage.getItem(localStorageKey) === 'true'
-        : false,
+      minimized: localStorageKey ? localStorage.getItem(localStorageKey) === 'true' : false,
     };
 
     function applyMinimizedState() {
@@ -175,4 +173,3 @@ window.CustomBannerManager = (function () {
     initBanner,
   };
 })();
-
