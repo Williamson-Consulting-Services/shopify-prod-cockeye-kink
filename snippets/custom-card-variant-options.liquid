@@ -20,7 +20,7 @@
 
     for option in product.options_with_values
       assign option_name_lower = option.name | downcase
-      if option_name_lower == 'color' or option_name_lower == 'colour'
+      if option_name_lower == 'color' or option_name_lower == 'colour' or option_name_lower == 'trim color' or option_name_lower == 'trim colour'
         assign color_option = option
         if option.values.size > 1
           assign show_color_option = true
@@ -34,7 +34,7 @@
         endif
       elsif option.values.size > 1
         comment
-          Store other options (not color or size) that have multiple values
+          Store other options (not color, trim color, or size) that have multiple values
         endcomment
         if other_options == ''
           assign other_options = option.name | append: ':' | append: option.position
