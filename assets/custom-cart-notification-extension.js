@@ -63,7 +63,7 @@
         // Disable transition during drag for smooth movement
         notification.style.transition = 'none';
       },
-      { passive: true }
+      { passive: true },
     );
 
     notification.addEventListener(
@@ -89,7 +89,7 @@
           }
         }
       },
-      { passive: false }
+      { passive: false },
     );
 
     notification.addEventListener(
@@ -125,7 +125,7 @@
         isDragging = false;
         currentTranslateY = 0;
       },
-      { passive: true }
+      { passive: true },
     );
 
     // Listen for when notification opens to ensure clean state
