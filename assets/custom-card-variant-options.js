@@ -439,88 +439,100 @@ if (typeof CustomCardVariantOptions === 'undefined') {
         let isSwiping = false;
         let swipeTimeout = null;
 
-        swatchContainer.addEventListener('touchstart', async (e) => {
-          const touch = e.touches[0];
-          touchStartX = touch.clientX;
-          touchStartY = touch.clientY;
-          isSwiping = false;
+        swatchContainer.addEventListener(
+          'touchstart',
+          async (e) => {
+            const touch = e.touches[0];
+            touchStartX = touch.clientX;
+            touchStartY = touch.clientY;
+            isSwiping = false;
 
-          // Trigger data load if not loaded yet
-          if (!this.dataLoaded && !this.isLoading) {
-            await this.loadProductData();
-          }
-
-          // Update image handler with latest data
-          if (this.imageHandler) {
-            this.imageHandler.updateVariants(this.variants);
-            this.imageHandler.updateProduct(this.product);
-          }
-        }, { passive: true });
-
-        swatchContainer.addEventListener('touchmove', (e) => {
-          if (!touchStartX || !this.imageHandler || colorValues.length === 0) return;
-
-          const touch = e.touches[0];
-          const deltaX = Math.abs(touch.clientX - touchStartX);
-          const deltaY = Math.abs(touch.clientY - touchStartY);
-
-          // Only treat as swipe if horizontal movement is greater than vertical
-          if (deltaX > deltaY && deltaX > 10) {
-            isSwiping = true;
-            e.preventDefault(); // Prevent scrolling while swiping
-
-            // Get touch position relative to swatch container
-            const rect = swatchContainer.getBoundingClientRect();
-            const x = touch.clientX - rect.left;
-            const percentage = Math.max(0, Math.min(100, (x / rect.width) * 100));
-
-            // Map percentage to color index
-            const colorIndex = Math.floor((percentage / 100) * colorValues.length);
-            const clampedIndex = Math.min(colorIndex, colorValues.length - 1);
-            const colorValue = colorValues[clampedIndex];
-
-            if (DEBUG.image) {
-              console.log('[CustomCardVariantOptions] Swipe position:', {
-                x,
-                percentage: percentage.toFixed(1) + '%',
-                colorIndex: clampedIndex,
-                colorValue,
-              });
+            // Trigger data load if not loaded yet
+            if (!this.dataLoaded && !this.isLoading) {
+              await this.loadProductData();
             }
 
-            // Debounce updates during swipe
+            // Update image handler with latest data
+            if (this.imageHandler) {
+              this.imageHandler.updateVariants(this.variants);
+              this.imageHandler.updateProduct(this.product);
+            }
+          },
+          { passive: true },
+        );
+
+        swatchContainer.addEventListener(
+          'touchmove',
+          (e) => {
+            if (!touchStartX || !this.imageHandler || colorValues.length === 0) return;
+
+            const touch = e.touches[0];
+            const deltaX = Math.abs(touch.clientX - touchStartX);
+            const deltaY = Math.abs(touch.clientY - touchStartY);
+
+            // Only treat as swipe if horizontal movement is greater than vertical
+            if (deltaX > deltaY && deltaX > 10) {
+              isSwiping = true;
+              e.preventDefault(); // Prevent scrolling while swiping
+
+              // Get touch position relative to swatch container
+              const rect = swatchContainer.getBoundingClientRect();
+              const x = touch.clientX - rect.left;
+              const percentage = Math.max(0, Math.min(100, (x / rect.width) * 100));
+
+              // Map percentage to color index
+              const colorIndex = Math.floor((percentage / 100) * colorValues.length);
+              const clampedIndex = Math.min(colorIndex, colorValues.length - 1);
+              const colorValue = colorValues[clampedIndex];
+
+              if (DEBUG.image) {
+                console.log('[CustomCardVariantOptions] Swipe position:', {
+                  x,
+                  percentage: percentage.toFixed(1) + '%',
+                  colorIndex: clampedIndex,
+                  colorValue,
+                });
+              }
+
+              // Debounce updates during swipe
+              if (swipeTimeout) {
+                clearTimeout(swipeTimeout);
+              }
+
+              swipeTimeout = setTimeout(() => {
+                if (this.imageHandler && colorValue) {
+                  this.imageHandler.updateImage(colorValue, true);
+                }
+              }, 50);
+            }
+          },
+          { passive: false },
+        );
+
+        swatchContainer.addEventListener(
+          'touchend',
+          () => {
+            touchStartX = null;
+            touchStartY = null;
+
+            // Clear any pending timeout
             if (swipeTimeout) {
               clearTimeout(swipeTimeout);
+              swipeTimeout = null;
             }
 
-            swipeTimeout = setTimeout(() => {
-              if (this.imageHandler && colorValue) {
-                this.imageHandler.updateImage(colorValue, true);
-              }
-            }, 50);
-          }
-        }, { passive: false });
+            // Only restore if it was a swipe, not a tap
+            if (isSwiping) {
+              // Small delay to allow tap to register if it was actually a tap
+              setTimeout(() => {
+                this.restoreImageAfterHover();
+              }, 100);
+            }
 
-        swatchContainer.addEventListener('touchend', () => {
-          touchStartX = null;
-          touchStartY = null;
-
-          // Clear any pending timeout
-          if (swipeTimeout) {
-            clearTimeout(swipeTimeout);
-            swipeTimeout = null;
-          }
-
-          // Only restore if it was a swipe, not a tap
-          if (isSwiping) {
-            // Small delay to allow tap to register if it was actually a tap
-            setTimeout(() => {
-              this.restoreImageAfterHover();
-            }, 100);
-          }
-
-          isSwiping = false;
-        }, { passive: true });
+            isSwiping = false;
+          },
+          { passive: true },
+        );
       }
 
       restoreImageAfterHover() {

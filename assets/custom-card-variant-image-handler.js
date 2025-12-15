@@ -30,7 +30,7 @@ if (typeof CustomCardVariantImageHandler === 'undefined') {
         // Store the first (main) image as default - both images typically have same initial state
         const cardMedia = this.card.querySelector('.card__media');
         const firstImage = cardMedia ? cardMedia.querySelector('img') : null;
-        
+
         if (firstImage) {
           this.defaultImage = {
             srcset: firstImage.getAttribute('srcset') || '',
@@ -39,7 +39,7 @@ if (typeof CustomCardVariantImageHandler === 'undefined') {
             width: firstImage.getAttribute('width') || '',
             height: firstImage.getAttribute('height') || '',
           };
-          
+
           if (DEBUG.image) {
             console.log('[ImageHandler] Stored default image:', {
               src: this.defaultImage.src,
@@ -70,7 +70,7 @@ if (typeof CustomCardVariantImageHandler === 'undefined') {
         // Second image: hover/secondary image (has loading="lazy")
         const cardMedia = this.card.querySelector('.card__media');
         const images = cardMedia ? cardMedia.querySelectorAll('img') : [];
-        
+
         if (images.length === 0) {
           if (DEBUG.image) {
             console.warn('[ImageHandler] No card images found');
@@ -82,7 +82,7 @@ if (typeof CustomCardVariantImageHandler === 'undefined') {
         // Update all images (main and hover) to use the variant image
         // This ensures both the main display and hover effect show the correct variant
         const imagesToUpdate = Array.from(images);
-        
+
         if (DEBUG.image) {
           console.log(`[ImageHandler] Found ${imagesToUpdate.length} image(s) to update`);
           imagesToUpdate.forEach((img, index) => {
@@ -349,7 +349,7 @@ if (typeof CustomCardVariantImageHandler === 'undefined') {
 
         const cardMedia = this.card.querySelector('.card__media');
         const images = cardMedia ? cardMedia.querySelectorAll('img') : [];
-        
+
         if (images.length === 0) return;
 
         // Restore all images (main and hover) to default
