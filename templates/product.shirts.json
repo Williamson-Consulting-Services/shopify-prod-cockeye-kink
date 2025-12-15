@@ -174,7 +174,9 @@
           }
         }
       },
-      "block_order": ["column-1"],
+      "block_order": [
+        "column-1"
+      ],
       "settings": {
         "title": "",
         "heading_size": "h1",
@@ -193,5 +195,9 @@
       }
     }
   },
-  "order": ["main", "related-products", "multicolumn"]
+  "order": [
+    "main",
+    "related-products",
+    "multicolumn"
+  ]
 }
