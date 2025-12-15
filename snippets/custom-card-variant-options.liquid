@@ -51,6 +51,9 @@
     {%- comment -%} Load CSS only once per page {%- endcomment -%}
     {%- unless custom_card_variant_options_loaded -%}
       {{ 'component-custom-card-variant-options.css' | asset_url | stylesheet_tag }}
+      <script src="{{ 'custom-card-variant-availability-matrix.js' | asset_url }}" defer="defer"></script>
+      <script src="{{ 'custom-card-variant-image-handler.js' | asset_url }}" defer="defer"></script>
+      <script src="{{ 'custom-card-variant-ui-updater.js' | asset_url }}" defer="defer"></script>
       <script src="{{ 'custom-card-variant-options.js' | asset_url }}" defer="defer"></script>
       {%- assign custom_card_variant_options_loaded = true -%}
     {%- endunless -%}
