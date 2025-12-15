@@ -31,13 +31,16 @@
         endif
       elsif option_name_lower == 'size'
         assign size_option = option
-        if option.values.size > 1
+        comment
+          Always show size options, even if there's only one value
+        endcomment
+        if option.values.size > 0
           assign show_size_option = true
           assign has_options_to_show = true
         endif
-      elsif option.values.size > 1
+      elsif option.values.size > 0
         comment
-          Store other options (not color, trim color, or size) that have multiple values
+          Store other options (not color, trim color, or size) - show all options
         endcomment
         if other_options == ''
           assign other_options = option.name | append: ':' | append: option.position
@@ -93,6 +96,7 @@
           data-option-name="{{ color_option.name | escape }}"
           data-option-position="{{ color_option.position }}"
         >
+          <span class="custom-card-variant-options__label">{{ color_option.name }}:</span>
           <div class="custom-card-variant-options__swatches">
             {%- for value in color_option.values -%}
               {%- liquid
@@ -381,13 +385,14 @@
         </div>
       {%- endif -%}
 
-      {%- comment -%} Display Size Option (only if multiple values) {%- endcomment -%}
+      {%- comment -%} Display Size Option (always show, even if single value) {%- endcomment -%}
       {%- if show_size_option and size_option -%}
         <div
           class="custom-card-variant-options__group"
           data-option-name="{{ size_option.name | escape }}"
           data-option-position="{{ size_option.position }}"
         >
+          <span class="custom-card-variant-options__label">{{ size_option.name }}:</span>
           <div class="custom-card-variant-options__buttons">
             {%- for value in size_option.values -%}
               {%- liquid
@@ -427,7 +432,7 @@
             {%- endif -%}
           {%- endfor -%}
 
-          {%- if other_option and other_option.values.size > 1 -%}
+          {%- if other_option and other_option.values.size > 0 -%}
             <div
               class="custom-card-variant-options__group"
               data-option-name="{{ other_option.name | escape }}"
