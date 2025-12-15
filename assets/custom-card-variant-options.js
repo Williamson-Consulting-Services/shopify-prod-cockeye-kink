@@ -321,8 +321,7 @@ class CustomCardVariantOptions {
         e.stopPropagation();
         e.stopImmediatePropagation();
         this.selectColor(option);
-        // Update image on click
-        this.updateCardImage(option.getAttribute('data-option-value') || option.getAttribute('title'));
+        // Image update is now handled inside selectColor() to ensure proper timing
         return false;
       };
 
@@ -389,7 +388,8 @@ class CustomCardVariantOptions {
 
     // Add selection to clicked option
     option.classList.add('custom-card-variant-options__option--selected');
-    this.selectedColor = option.getAttribute('data-option-value') || option.getAttribute('title');
+    const colorValue = option.getAttribute('data-option-value') || option.getAttribute('title');
+    this.selectedColor = colorValue;
 
     // Update availability for all options based on current selections
     this.updateAllOptionsAvailability();
@@ -429,8 +429,27 @@ class CustomCardVariantOptions {
     }
 
     this.updateAddToCartButton();
-    // Update image on selection
-    this.updateCardImage(this.selectedColor, false);
+
+    // Update image on selection - ensure product data is loaded first
+    if (this.variants.length > 0 && this.product) {
+      // Product data already loaded, update immediately
+      this.updateCardImage(colorValue, false);
+    } else {
+      // Product data not loaded yet, load it first then update image
+      const card = this.container.closest('.card-wrapper');
+      if (card) {
+        const productLink = card.querySelector('a[href*="/products/"]');
+        if (productLink) {
+          const urlMatch = productLink.href.match(/\/products\/([^\/\?]+)/);
+          if (urlMatch) {
+            this.loadProductData(urlMatch[1]).then(() => {
+              // After product data loads, update the image
+              this.updateCardImage(colorValue, false);
+            });
+          }
+        }
+      }
+    }
   }
 
   selectSize(option) {
@@ -1101,83 +1120,161 @@ class CustomCardVariantOptions {
   getVariantImage(variant) {
     if (!variant) return null;
 
-    // Shopify product JSON API returns variant.featured_image as a URL string
+    // Method 1: Check variant.featured_media (this is how the product page does it)
+    // The JSON API includes featured_media with an id that matches product.media items
+    if (variant.featured_media && variant.featured_media.id) {
+      const featuredMediaId = variant.featured_media.id;
+
+      // Find the media item with matching id in product.media array
+      if (this.product && this.product.media && Array.isArray(this.product.media)) {
+        const featuredMedia = this.product.media.find((media) => media.id === featuredMediaId);
+
+        if (featuredMedia && featuredMedia.preview_image) {
+          const previewImage = featuredMedia.preview_image;
+          let imageSrc = '';
+
+          if (typeof previewImage === 'string') {
+            imageSrc = previewImage;
+          } else if (previewImage.src) {
+            imageSrc = previewImage.src;
+          } else if (previewImage.url) {
+            imageSrc = previewImage.url;
+          }
+
+          if (imageSrc) {
+            return {
+              src: imageSrc,
+              srcset: previewImage.srcset || null,
+              width: previewImage.width || null,
+              height: previewImage.height || null,
+              alt: featuredMedia.alt || variant.title || '',
+            };
+          }
+        }
+      }
+    }
+
+    // Method 2: Check if variant has a featured_image property (legacy/fallback)
     if (variant.featured_image) {
-      // featured_image is a URL string, not an object
       const imageUrl = typeof variant.featured_image === 'string'
         ? variant.featured_image
         : variant.featured_image.src || variant.featured_image;
 
-      return {
-        src: imageUrl,
-        width: variant.featured_image_width || null,
-        height: variant.featured_image_height || null,
-        alt: variant.title || '',
-      };
+      if (imageUrl) {
+        return {
+          src: imageUrl,
+          width: variant.featured_image_width || null,
+          height: variant.featured_image_height || null,
+          alt: variant.title || '',
+        };
+      }
     }
 
-    // Check product media for variant-specific images
-    // Variants can be associated with media via variant IDs
+    // Method 3: Check product media for variant-specific images
+    // This is a fallback if featured_media is not available
     if (this.product && this.product.media && Array.isArray(this.product.media)) {
-      // Find first image media (not video/model) associated with this variant
-      const imageMedia = this.product.media.find((media) => {
+      // Find image media associated with this variant
+      // Shopify associates media with variants in several ways:
+      // 1. media.alt text may contain variant info
+      // 2. Media may be linked to variants via variant IDs
+      // 3. We can match by color option value
+
+      const colorPosition = parseInt(this.container.getAttribute('data-color-position')) || 1;
+      let variantColorValue = '';
+      if (colorPosition === 1) variantColorValue = (variant.option1 || '').toLowerCase().trim();
+      else if (colorPosition === 2) variantColorValue = (variant.option2 || '').toLowerCase().trim();
+      else if (colorPosition === 3) variantColorValue = (variant.option3 || '').toLowerCase().trim();
+
+      // Try to find variant-specific image
+      let imageMedia = this.product.media.find((media) => {
         if (media.media_type !== 'image') return false;
 
-        // Check if media is associated with this variant via variants array
-        if (media.variants && Array.isArray(media.variants)) {
-          return media.variants.some((v) => {
-            // Handle both object with id property and direct id
-            const variantId = typeof v === 'object' ? v.id : v;
-            return variantId === variant.id;
-          });
-        }
-
-        // Check if media has variant_ids property (Shopify sometimes uses this)
+        // Method 1: Check if media has variant_ids array
         if (media.variant_ids && Array.isArray(media.variant_ids)) {
           return media.variant_ids.includes(variant.id);
         }
 
-        // Fallback: check if alt text contains variant info
-        if (media.alt && variant.title) {
-          const altLower = media.alt.toLowerCase();
-          const variantTitleLower = variant.title.toLowerCase();
-          // Check if alt contains variant title or color option
-          if (altLower.includes(variantTitleLower)) return true;
+        // Method 2: Check if media.variants array contains this variant
+        if (media.variants && Array.isArray(media.variants)) {
+          return media.variants.some((v) => {
+            const variantId = typeof v === 'object' ? (v.id || v) : v;
+            return variantId === variant.id;
+          });
+        }
 
-          // Check if alt contains the color option value
-          const colorPosition = parseInt(this.container.getAttribute('data-color-position')) || 1;
-          let colorValue = '';
-          if (colorPosition === 1) colorValue = variant.option1 || '';
-          else if (colorPosition === 2) colorValue = variant.option2 || '';
-          else if (colorPosition === 3) colorValue = variant.option3 || '';
-          if (colorValue && altLower.includes(colorValue.toLowerCase())) return true;
+        // Method 3: Check alt text for color value match
+        if (media.alt && variantColorValue) {
+          const altLower = media.alt.toLowerCase();
+          if (altLower.includes(variantColorValue)) {
+            return true;
+          }
+        }
+
+        // Method 4: Check if this is the variant's featured_media
+        if (variant.featured_media && media.id === variant.featured_media.id) {
+          return true;
         }
 
         return false;
       });
 
-      if (imageMedia && imageMedia.preview_image) {
-        const previewImage = imageMedia.preview_image;
-        return {
-          src: typeof previewImage === 'string' ? previewImage : (previewImage.src || previewImage),
-          srcset: previewImage.srcset || null,
-          width: previewImage.width || null,
-          height: previewImage.height || null,
-          alt: imageMedia.alt || variant.title || '',
-        };
+      // If no variant-specific image found, try to find first image that matches the color
+      if (!imageMedia && variantColorValue) {
+        imageMedia = this.product.media.find((media) => {
+          if (media.media_type !== 'image') return false;
+          if (media.alt) {
+            return media.alt.toLowerCase().includes(variantColorValue);
+          }
+          return false;
+        });
       }
 
-      // If no variant-specific image found, use first product image as fallback
+      // If we found a matching image, return it
+      if (imageMedia && imageMedia.preview_image) {
+        const previewImage = imageMedia.preview_image;
+        // Handle both string URLs and image objects
+        let imageSrc = '';
+        if (typeof previewImage === 'string') {
+          imageSrc = previewImage;
+        } else if (previewImage.src) {
+          imageSrc = previewImage.src;
+        } else if (previewImage.url) {
+          imageSrc = previewImage.url;
+        }
+
+        if (imageSrc) {
+          return {
+            src: imageSrc,
+            srcset: previewImage.srcset || null,
+            width: previewImage.width || null,
+            height: previewImage.height || null,
+            alt: imageMedia.alt || variant.title || '',
+          };
+        }
+      }
+
+      // Fallback: use first product image if no variant-specific image found
       const firstImage = this.product.media.find((media) => media.media_type === 'image');
       if (firstImage && firstImage.preview_image) {
         const previewImage = firstImage.preview_image;
-        return {
-          src: typeof previewImage === 'string' ? previewImage : (previewImage.src || previewImage),
-          srcset: previewImage.srcset || null,
-          width: previewImage.width || null,
-          height: previewImage.height || null,
-          alt: firstImage.alt || variant.title || '',
-        };
+        let imageSrc = '';
+        if (typeof previewImage === 'string') {
+          imageSrc = previewImage;
+        } else if (previewImage.src) {
+          imageSrc = previewImage.src;
+        } else if (previewImage.url) {
+          imageSrc = previewImage.url;
+        }
+
+        if (imageSrc) {
+          return {
+            src: imageSrc,
+            srcset: previewImage.srcset || null,
+            width: previewImage.width || null,
+            height: previewImage.height || null,
+            alt: firstImage.alt || variant.title || '',
+          };
+        }
       }
     }
 
@@ -1240,12 +1337,15 @@ class CustomCardVariantOptions {
     }
 
     // Find variant matching the color (and size if selected)
-    const variant = this.findVariantByColor(colorValue, this.selectedSize);
+    let variant = this.findVariantByColor(colorValue, this.selectedSize);
 
-    // If no variant found, try with just color
-    const colorVariant = variant || this.findVariantByColor(colorValue);
+    // If no variant found, try with just color (ignore size)
+    if (!variant) {
+      variant = this.findVariantByColor(colorValue);
+    }
 
-    if (!colorVariant) {
+    if (!variant) {
+      // No variant found for this color - restore default image if not hovering
       if (!isHover) {
         this.restoreDefaultImage();
       }
@@ -1253,30 +1353,32 @@ class CustomCardVariantOptions {
     }
 
     // Get variant image
-    const variantImage = this.getVariantImage(colorVariant);
+    const variantImage = this.getVariantImage(variant);
 
     if (variantImage && variantImage.src) {
-      // Update image srcset
-      if (variantImage.srcset) {
-        cardImage.setAttribute('srcset', variantImage.srcset);
+      // Build proper Shopify image URL with width parameter
+      let imageSrc = variantImage.src;
+
+      // Remove existing query parameters
+      const urlParts = imageSrc.split('?');
+      const baseUrl = urlParts[0];
+
+      // Build srcset if not provided
+      let srcset = variantImage.srcset;
+      if (!srcset && variantImage.src) {
+        srcset = this.buildImageSrcset(baseUrl, variantImage.width);
+      }
+
+      // Update srcset
+      if (srcset) {
+        cardImage.setAttribute('srcset', srcset);
       } else {
-        const srcset = this.buildImageSrcset(variantImage.src, variantImage.width);
-        if (srcset) {
-          cardImage.setAttribute('srcset', srcset);
-        }
+        cardImage.removeAttribute('srcset');
       }
 
       // Update src - use a medium size (533px) for immediate display
-      if (variantImage.src) {
-        // Construct proper Shopify image URL
-        let srcUrl = variantImage.src;
-        // Remove existing query parameters and add width
-        const urlParts = srcUrl.split('?');
-        const baseUrl = urlParts[0];
-        // Build new URL with width parameter
-        srcUrl = `${baseUrl}?width=533`;
-        cardImage.setAttribute('src', srcUrl);
-      }
+      const srcUrl = `${baseUrl}?width=533`;
+      cardImage.setAttribute('src', srcUrl);
 
       // Update alt text if available
       if (variantImage.alt) {
@@ -1286,13 +1388,19 @@ class CustomCardVariantOptions {
       // Update width and height if available
       if (variantImage.width) {
         cardImage.setAttribute('width', variantImage.width);
+      } else {
+        cardImage.removeAttribute('width');
       }
       if (variantImage.height) {
         cardImage.setAttribute('height', variantImage.height);
+      } else {
+        cardImage.removeAttribute('height');
       }
-    } else if (!isHover) {
-      // If no variant image and not hovering, restore default
-      this.restoreDefaultImage();
+    } else {
+      // No variant image found - restore default if not hovering
+      if (!isHover) {
+        this.restoreDefaultImage();
+      }
     }
   }
 
