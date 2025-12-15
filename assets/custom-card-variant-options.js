@@ -224,9 +224,14 @@ if (typeof CustomCardVariantOptions === 'undefined') {
               await this.loadProductData();
             }
 
-            // Update image after data is loaded
-            if (this.imageHandler && this.variants.length > 0) {
-              this.imageHandler.updateImage(colorValue, true);
+            // Wait a bit for data to be fully processed
+            if (this.imageHandler) {
+              // Small delay to ensure variants are loaded
+              setTimeout(() => {
+                if (this.variants.length > 0 || this.product) {
+                  this.imageHandler.updateImage(colorValue, true);
+                }
+              }, 50);
             }
           });
 
@@ -271,22 +276,31 @@ if (typeof CustomCardVariantOptions === 'undefined') {
         // Normalize option name
         const normalizedName = this.normalizeOptionName(optionName);
 
-        // Update selection
-        if (value) {
-          this.selectedOptions[normalizedName] = value;
-        } else {
+        // Toggle selection - if already selected, deselect
+        const currentValue = this.selectedOptions[normalizedName];
+        if (currentValue === value) {
+          // Deselect
           delete this.selectedOptions[normalizedName];
+          value = null;
+        } else {
+          // Select new value
+          this.selectedOptions[normalizedName] = value;
         }
 
-        // Update UI
+        // Update UI (always update, even for unavailable options)
         this.updateSelectionUI(normalizedName, value);
         this.updateAllAvailability();
         this.updateAddToCartButton();
         this.updateInventoryDisplay();
 
-        // Update image if color selected
-        if (normalizedName === 'color' && value && this.imageHandler) {
-          this.imageHandler.updateImage(value, false);
+        // Update image if color selected or deselected
+        if (normalizedName === 'color' && this.imageHandler) {
+          if (value) {
+            this.imageHandler.updateImage(value, false);
+          } else {
+            // Restore default image when deselected
+            this.imageHandler.restoreDefaultImage();
+          }
         }
       }
 
@@ -302,15 +316,13 @@ if (typeof CustomCardVariantOptions === 'undefined') {
       }
 
       updateSelectionUI(optionName, value) {
-        // Remove previous selection for this option
-        const previousSelected = this.container.querySelector(
-          `[data-option-type="${optionName === 'color' ? 'color' : optionName === 'size' ? 'size' : 'other'}"].custom-card-variant-options__option--selected`,
-        );
-        if (previousSelected) {
-          previousSelected.classList.remove('custom-card-variant-options__option--selected');
-        }
+        // Remove previous selection for this option (all options of this type)
+        const optionType = optionName === 'color' ? 'color' : optionName === 'size' ? 'size' : 'other';
+        this.container.querySelectorAll(`[data-option-type="${optionType}"].custom-card-variant-options__option--selected`).forEach((option) => {
+          option.classList.remove('custom-card-variant-options__option--selected');
+        });
 
-        // Add selection to clicked option
+        // Add selection to clicked option (even if unavailable)
         if (value) {
           const selector =
             optionName === 'color'
@@ -322,7 +334,12 @@ if (typeof CustomCardVariantOptions === 'undefined') {
           const selectedOption = this.container.querySelector(selector);
           if (selectedOption) {
             selectedOption.classList.add('custom-card-variant-options__option--selected');
+            console.log('[CustomCardVariantOptions] Selected option:', optionName, value);
+          } else {
+            console.warn('[CustomCardVariantOptions] Could not find option to select:', selector);
           }
+        } else {
+          console.log('[CustomCardVariantOptions] Deselected option:', optionName);
         }
       }
 

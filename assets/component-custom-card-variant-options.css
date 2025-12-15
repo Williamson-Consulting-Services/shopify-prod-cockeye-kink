@@ -80,8 +80,8 @@
 
 .custom-card-variant-options__option--swatch.custom-card-variant-options__option--selected .swatch {
   border-color: rgba(var(--color-foreground), 0.6);
-  border-width: 0.2rem;
-  box-shadow: 0 0 0 0.1rem rgba(var(--color-foreground), 0.1);
+  /* Use box-shadow for outline instead of changing border-width to avoid size change */
+  box-shadow: 0 0 0 0.2rem rgba(var(--color-foreground), 0.2);
 }
 
 /* Button Styles (Size Options) */
@@ -121,7 +121,8 @@
 
 .custom-card-variant-options__option--button.custom-card-variant-options__option--selected {
   border-color: rgba(var(--color-foreground), 0.6);
-  border-width: 0.15rem;
+  /* Use box-shadow for outline instead of changing border-width to avoid size change */
+  box-shadow: 0 0 0 0.15rem rgba(var(--color-foreground), 0.2);
   background-color: rgba(var(--color-foreground), 0.1);
 }
 

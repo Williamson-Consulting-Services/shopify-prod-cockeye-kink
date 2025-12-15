@@ -36,10 +36,13 @@ if (typeof CustomCardVariantImageHandler === 'undefined') {
           return;
         }
 
-        // Find card image - try multiple selectors
+        // Find card image - try multiple selectors (same as product card structure)
         let cardImage = this.card.querySelector('.card__media img');
         if (!cardImage) {
           cardImage = this.card.querySelector('.media img');
+        }
+        if (!cardImage) {
+          cardImage = this.card.querySelector('.card__inner img');
         }
         if (!cardImage) {
           cardImage = this.card.querySelector('img');
@@ -58,7 +61,7 @@ if (typeof CustomCardVariantImageHandler === 'undefined') {
           return;
         }
 
-        // Get variant image
+        // Get variant image (same approach as product page)
         const imageData = this.getVariantImage(variant);
         if (!imageData || !imageData.src) {
           console.warn('[ImageHandler] No image data for variant:', variant.id);
@@ -66,18 +69,27 @@ if (typeof CustomCardVariantImageHandler === 'undefined') {
           return;
         }
 
-        // Update image
+        // Update image with proper srcset (matching product card format)
         const baseUrl = imageData.src.split('?')[0];
+
+        // Build srcset matching card-product.liquid format
+        const widths = [165, 360, 533, 720, 940, 1066];
+        const srcsetParts = [];
+        widths.forEach((width) => {
+          if (!imageData.width || imageData.width >= width) {
+            srcsetParts.push(`${baseUrl}?width=${width} ${width}w`);
+          }
+        });
+
+        // Set primary src (533w for cards) - use full srcset if available, otherwise build it
         const srcUrl = `${baseUrl}?width=533`;
         cardImage.setAttribute('src', srcUrl);
 
+        // Use existing srcset if available, otherwise use built one
         if (imageData.srcset) {
           cardImage.setAttribute('srcset', imageData.srcset);
-        } else {
-          const srcset = this.buildImageSrcset(baseUrl, imageData.width);
-          if (srcset) {
-            cardImage.setAttribute('srcset', srcset);
-          }
+        } else if (srcsetParts.length > 0) {
+          cardImage.setAttribute('srcset', srcsetParts.join(', '));
         }
 
         if (imageData.alt) {
