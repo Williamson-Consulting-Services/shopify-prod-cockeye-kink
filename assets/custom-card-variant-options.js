@@ -43,6 +43,10 @@ if (typeof CustomCardVariantOptions === 'undefined') {
         // Lazy loading observer
         this.observer = null;
 
+        // Cart update state
+        this.cartUpdateUnsubscriber = null;
+        this.isCartUpdating = false;
+
         // Initialize
         this.init();
       }
@@ -222,7 +226,49 @@ if (typeof CustomCardVariantOptions === 'undefined') {
         }
       }
 
+      setupCartUpdateListener() {
+        // Subscribe to cart update events to disable image handler during cart operations
+        if (typeof subscribe === 'function') {
+          const PUB_SUB_EVENTS = window.PUB_SUB_EVENTS || { cartUpdate: 'cart-update' };
+          this.cartUpdateUnsubscriber = subscribe(PUB_SUB_EVENTS.cartUpdate, () => {
+            // Mark cart as updating - image handler will check this
+            this.isCartUpdating = true;
+
+            // Clear any pending image update timeouts
+            this.clearAllImageUpdateTimeouts();
+
+            // Reset flag after a short delay (cart operations typically complete quickly)
+            setTimeout(() => {
+              this.isCartUpdating = false;
+            }, 1000);
+          });
+        }
+      }
+
+      clearAllImageUpdateTimeouts() {
+        // Clear any pending image update timeouts
+        // Note: Individual handlers manage their own timeouts, but guards prevent execution
+        // This method can be extended if we need to track timeouts globally
+      }
+
+      destroy() {
+        // Cleanup: Unsubscribe from cart updates
+        if (this.cartUpdateUnsubscriber) {
+          this.cartUpdateUnsubscriber();
+          this.cartUpdateUnsubscriber = null;
+        }
+
+        // Cleanup: Disconnect observer
+        if (this.observer) {
+          this.observer.disconnect();
+          this.observer = null;
+        }
+      }
+
       setupEventListeners() {
+        // Subscribe to cart updates to disable image handler during cart operations
+        this.setupCartUpdateListener();
+
         // Setup left-to-right hover effect for color swatches
         this.setupColorSwatchHoverEffect();
 
@@ -243,6 +289,12 @@ if (typeof CustomCardVariantOptions === 'undefined') {
               return;
             }
 
+            // Guard: Check if cart is updating (prevents image flashing during cart operations)
+            const cartItems = document.getElementById('main-cart-items') || document.getElementById('CartDrawer-CartItems');
+            if (cartItems && cartItems.classList.contains('cart__items--disabled')) {
+              return;
+            }
+
             const colorValue = option.getAttribute('data-option-value');
 
             // Trigger data load if not loaded yet
@@ -252,6 +304,12 @@ if (typeof CustomCardVariantOptions === 'undefined') {
 
             // Guard: Check again after async operation
             if (!this.card || !document.body.contains(this.card)) {
+              return;
+            }
+
+            // Guard: Check cart state again after async operation
+            const cartItemsAfter = document.getElementById('main-cart-items') || document.getElementById('CartDrawer-CartItems');
+            if (cartItemsAfter && cartItemsAfter.classList.contains('cart__items--disabled')) {
               return;
             }
 
@@ -267,6 +325,13 @@ if (typeof CustomCardVariantOptions === 'undefined') {
                 if (!this.card || !document.body.contains(this.card)) {
                   return;
                 }
+
+                // Guard: Check if cart is updating (prevents image flashing during cart operations)
+                const cartItemsTimeout = document.getElementById('main-cart-items') || document.getElementById('CartDrawer-CartItems');
+                if (cartItemsTimeout && cartItemsTimeout.classList.contains('cart__items--disabled')) {
+                  return;
+                }
+
                 if (DEBUG.image) {
                   console.log('[CustomCardVariantOptions] Hover - updating image for color:', colorValue);
                   console.log('[CustomCardVariantOptions] Variants available:', this.variants.length);
@@ -282,6 +347,12 @@ if (typeof CustomCardVariantOptions === 'undefined') {
           option.addEventListener('mouseleave', () => {
             // Guard: Check if card is still in DOM (prevents errors during cart updates)
             if (!this.card || !document.body.contains(this.card)) {
+              return;
+            }
+
+            // Guard: Check if cart is updating (prevents image flashing during cart operations)
+            const cartItems = document.getElementById('main-cart-items') || document.getElementById('CartDrawer-CartItems');
+            if (cartItems && cartItems.classList.contains('cart__items--disabled')) {
               return;
             }
 
@@ -391,10 +462,17 @@ if (typeof CustomCardVariantOptions === 'undefined') {
 
       setupColorSwatchMouseHover(swatchContainer, colorValues) {
         let hoverTimeout = null;
+        const self = this; // Store reference for timeout cleanup
 
         swatchContainer.addEventListener('mouseenter', async () => {
           // Guard: Check if card is still in DOM (prevents errors during cart updates)
           if (!this.card || !document.body.contains(this.card)) {
+            return;
+          }
+
+          // Guard: Check if cart is updating (prevents image flashing during cart operations)
+          const cartItems = document.getElementById('main-cart-items') || document.getElementById('CartDrawer-CartItems');
+          if (cartItems && cartItems.classList.contains('cart__items--disabled')) {
             return;
           }
 
@@ -408,6 +486,12 @@ if (typeof CustomCardVariantOptions === 'undefined') {
             return;
           }
 
+          // Guard: Check cart state again after async operation
+          const cartItemsAfter = document.getElementById('main-cart-items') || document.getElementById('CartDrawer-CartItems');
+          if (cartItemsAfter && cartItemsAfter.classList.contains('cart__items--disabled')) {
+            return;
+          }
+
           // Update image handler with latest data
           if (this.imageHandler) {
             this.imageHandler.updateVariants(this.variants);
@@ -418,6 +502,12 @@ if (typeof CustomCardVariantOptions === 'undefined') {
         swatchContainer.addEventListener('mousemove', (e) => {
           // Guard: Check if card is still in DOM (prevents errors during cart updates)
           if (!this.card || !document.body.contains(this.card)) {
+            return;
+          }
+
+          // Guard: Check if cart is updating (prevents image flashing during cart operations)
+          const cartItems = document.getElementById('main-cart-items') || document.getElementById('CartDrawer-CartItems');
+          if (cartItems && cartItems.classList.contains('cart__items--disabled')) {
             return;
           }
 
@@ -453,6 +543,13 @@ if (typeof CustomCardVariantOptions === 'undefined') {
             if (!this.card || !document.body.contains(this.card)) {
               return;
             }
+
+            // Guard: Check if cart is updating (prevents image flashing during cart operations)
+            const cartItemsTimeout = document.getElementById('main-cart-items') || document.getElementById('CartDrawer-CartItems');
+            if (cartItemsTimeout && cartItemsTimeout.classList.contains('cart__items--disabled')) {
+              return;
+            }
+
             if (this.imageHandler && colorValue) {
               this.imageHandler.updateImage(colorValue, true);
             }
@@ -462,6 +559,12 @@ if (typeof CustomCardVariantOptions === 'undefined') {
         swatchContainer.addEventListener('mouseleave', () => {
           // Guard: Check if card is still in DOM (prevents errors during cart updates)
           if (!this.card || !document.body.contains(this.card)) {
+            return;
+          }
+
+          // Guard: Check if cart is updating (prevents image flashing during cart operations)
+          const cartItems = document.getElementById('main-cart-items') || document.getElementById('CartDrawer-CartItems');
+          if (cartItems && cartItems.classList.contains('cart__items--disabled')) {
             return;
           }
 
@@ -481,10 +584,22 @@ if (typeof CustomCardVariantOptions === 'undefined') {
         let touchStartY = null;
         let isSwiping = false;
         let swipeTimeout = null;
+        const self = this; // Store reference for timeout cleanup
 
         swatchContainer.addEventListener(
           'touchstart',
           async (e) => {
+            // Guard: Check if card is still in DOM (prevents errors during cart updates)
+            if (!this.card || !document.body.contains(this.card)) {
+              return;
+            }
+
+            // Guard: Check if cart is updating (prevents image flashing during cart operations)
+            const cartItems = document.getElementById('main-cart-items') || document.getElementById('CartDrawer-CartItems');
+            if (cartItems && cartItems.classList.contains('cart__items--disabled')) {
+              return;
+            }
+
             const touch = e.touches[0];
             touchStartX = touch.clientX;
             touchStartY = touch.clientY;
@@ -493,6 +608,17 @@ if (typeof CustomCardVariantOptions === 'undefined') {
             // Trigger data load if not loaded yet
             if (!this.dataLoaded && !this.isLoading) {
               await this.loadProductData();
+            }
+
+            // Guard: Check again after async operation
+            if (!this.card || !document.body.contains(this.card)) {
+              return;
+            }
+
+            // Guard: Check cart state again after async operation
+            const cartItemsAfter = document.getElementById('main-cart-items') || document.getElementById('CartDrawer-CartItems');
+            if (cartItemsAfter && cartItemsAfter.classList.contains('cart__items--disabled')) {
+              return;
             }
 
             // Update image handler with latest data
@@ -507,6 +633,17 @@ if (typeof CustomCardVariantOptions === 'undefined') {
         swatchContainer.addEventListener(
           'touchmove',
           (e) => {
+            // Guard: Check if card is still in DOM (prevents errors during cart updates)
+            if (!this.card || !document.body.contains(this.card)) {
+              return;
+            }
+
+            // Guard: Check if cart is updating (prevents image flashing during cart operations)
+            const cartItems = document.getElementById('main-cart-items') || document.getElementById('CartDrawer-CartItems');
+            if (cartItems && cartItems.classList.contains('cart__items--disabled')) {
+              return;
+            }
+
             if (!touchStartX || !this.imageHandler || colorValues.length === 0) return;
 
             const touch = e.touches[0];
@@ -543,6 +680,17 @@ if (typeof CustomCardVariantOptions === 'undefined') {
               }
 
               swipeTimeout = setTimeout(() => {
+                // Guard: Check again before updating (cart updates might have removed card)
+                if (!this.card || !document.body.contains(this.card)) {
+                  return;
+                }
+
+                // Guard: Check if cart is updating (prevents image flashing during cart operations)
+                const cartItemsTimeout = document.getElementById('main-cart-items') || document.getElementById('CartDrawer-CartItems');
+                if (cartItemsTimeout && cartItemsTimeout.classList.contains('cart__items--disabled')) {
+                  return;
+                }
+
                 if (this.imageHandler && colorValue) {
                   this.imageHandler.updateImage(colorValue, true);
                 }
@@ -568,6 +716,17 @@ if (typeof CustomCardVariantOptions === 'undefined') {
             if (isSwiping) {
               // Small delay to allow tap to register if it was actually a tap
               setTimeout(() => {
+                // Guard: Check again before restoring
+                if (!this.card || !document.body.contains(this.card)) {
+                  return;
+                }
+
+                // Guard: Check cart state again
+                const cartItemsAfter = document.getElementById('main-cart-items') || document.getElementById('CartDrawer-CartItems');
+                if (cartItemsAfter && cartItemsAfter.classList.contains('cart__items--disabled')) {
+                  return;
+                }
+
                 this.restoreImageAfterHover();
               }, 100);
             }
@@ -581,6 +740,12 @@ if (typeof CustomCardVariantOptions === 'undefined') {
       restoreImageAfterHover() {
         // Guard: Check if card is still in DOM (prevents errors during cart updates)
         if (!this.card || !document.body.contains(this.card)) {
+          return;
+        }
+
+        // Guard: Check if cart is updating (prevents image flashing during cart operations)
+        const cartItems = document.getElementById('main-cart-items') || document.getElementById('CartDrawer-CartItems');
+        if (cartItems && cartItems.classList.contains('cart__items--disabled')) {
           return;
         }
 

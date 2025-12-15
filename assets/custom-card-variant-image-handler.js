@@ -58,6 +58,33 @@ if (typeof CustomCardVariantImageHandler === 'undefined') {
           return;
         }
 
+        // Guard: Check if cart is updating (prevents image flashing during cart operations)
+        const cartItems = document.getElementById('main-cart-items') || document.getElementById('CartDrawer-CartItems');
+        if (cartItems && cartItems.classList.contains('cart__items--disabled')) {
+          if (DEBUG.image) {
+            console.warn('[ImageHandler] Cart is updating, skipping image update');
+          }
+          return;
+        }
+
+        // Guard: Check if any cart loading spinners are visible (more reliable check)
+        const cartLoadingSpinners = document.querySelectorAll('#main-cart-items .loading__spinner:not(.hidden), #CartDrawer-CartItems .loading__spinner:not(.hidden), .cart-item .loading__spinner:not(.hidden)');
+        if (cartLoadingSpinners.length > 0) {
+          if (DEBUG.image) {
+            console.warn('[ImageHandler] Cart loading in progress, skipping image update');
+          }
+          return;
+        }
+
+        // Guard: Check if cart drawer is open (prevents conflicts on mobile)
+        const cartDrawer = document.querySelector('cart-drawer');
+        if (cartDrawer && cartDrawer.hasAttribute('open')) {
+          if (DEBUG.image) {
+            console.warn('[ImageHandler] Cart drawer is open, skipping image update');
+          }
+          return;
+        }
+
         if (DEBUG.image) {
           console.group('[ImageHandler] updateImage');
           console.log('Color Value:', colorValue);
@@ -114,7 +141,7 @@ if (typeof CustomCardVariantImageHandler === 'undefined') {
                 option1: v.option1,
                 option2: v.option2,
                 option3: v.option3,
-              })),
+              }))
             );
             console.groupEnd();
           }
@@ -357,6 +384,33 @@ if (typeof CustomCardVariantImageHandler === 'undefined') {
         if (!this.card || !document.body.contains(this.card)) {
           if (DEBUG.image) {
             console.warn('[ImageHandler] Card no longer in DOM, skipping restore');
+          }
+          return;
+        }
+
+        // Guard: Check if cart is updating (prevents image flashing during cart operations)
+        const cartItems = document.getElementById('main-cart-items') || document.getElementById('CartDrawer-CartItems');
+        if (cartItems && cartItems.classList.contains('cart__items--disabled')) {
+          if (DEBUG.image) {
+            console.warn('[ImageHandler] Cart is updating, skipping restore');
+          }
+          return;
+        }
+
+        // Guard: Check if any cart loading spinners are visible (more reliable check)
+        const cartLoadingSpinners = document.querySelectorAll('#main-cart-items .loading__spinner:not(.hidden), #CartDrawer-CartItems .loading__spinner:not(.hidden), .cart-item .loading__spinner:not(.hidden)');
+        if (cartLoadingSpinners.length > 0) {
+          if (DEBUG.image) {
+            console.warn('[ImageHandler] Cart loading in progress, skipping restore');
+          }
+          return;
+        }
+
+        // Guard: Check if cart drawer is open (prevents conflicts on mobile)
+        const cartDrawer = document.querySelector('cart-drawer');
+        if (cartDrawer && cartDrawer.hasAttribute('open')) {
+          if (DEBUG.image) {
+            console.warn('[ImageHandler] Cart drawer is open, skipping restore');
           }
           return;
         }
