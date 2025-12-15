@@ -106,7 +106,7 @@ if (typeof CustomCardVariantOptions === 'undefined') {
             this.config,
             this.translations,
             null,
-            [],
+            []
           );
         }
 
@@ -133,7 +133,7 @@ if (typeof CustomCardVariantOptions === 'undefined') {
             {
               rootMargin: '200px', // Start loading 200px before card enters viewport
               threshold: 0.01,
-            },
+            }
           );
 
           this.observer.observe(this.card);
@@ -186,7 +186,7 @@ if (typeof CustomCardVariantOptions === 'undefined') {
                     inventory_management: v.inventory_management,
                     inventory_quantity: v.inventory_quantity,
                     inventory_policy: v.inventory_policy,
-                  })),
+                  }))
                 );
               }
             }
@@ -455,8 +455,10 @@ if (typeof CustomCardVariantOptions === 'undefined') {
           // On mobile/touch devices, use swipe gesture instead of hover
           this.setupColorSwatchSwipeEffect(swatchContainer, colorValues);
         } else {
-          // On desktop, use mouse hover effect
-          this.setupColorSwatchMouseHover(swatchContainer, colorValues);
+          // On desktop, do not use horizontal hover mapping.
+          // Per-swatch hover and selection already update images, and the
+          // horizontal sweep interaction causes incorrect matches when swatches
+          // wrap into multiple rows.
         }
       }
 
@@ -644,7 +646,7 @@ if (typeof CustomCardVariantOptions === 'undefined') {
               this.imageHandler.updateProduct(this.product);
             }
           },
-          { passive: true },
+          { passive: true }
         );
 
         swatchContainer.addEventListener(
@@ -716,7 +718,7 @@ if (typeof CustomCardVariantOptions === 'undefined') {
               }, 50);
             }
           },
-          { passive: false },
+          { passive: false }
         );
 
         swatchContainer.addEventListener(
@@ -753,7 +755,7 @@ if (typeof CustomCardVariantOptions === 'undefined') {
 
             isSwiping = false;
           },
-          { passive: true },
+          { passive: true }
         );
       }
 
@@ -805,10 +807,10 @@ if (typeof CustomCardVariantOptions === 'undefined') {
             optionName === 'color'
               ? `[data-option-type="color"][data-option-value="${this.escapeSelector(value)}"]`
               : optionName === 'size'
-                ? `[data-option-type="size"][data-option-value="${this.escapeSelector(value)}"]`
-                : `[data-option-type="other"][data-option-name="${this.escapeSelector(
-                    optionName,
-                  )}"][data-option-value="${this.escapeSelector(value)}"]`;
+              ? `[data-option-type="size"][data-option-value="${this.escapeSelector(value)}"]`
+              : `[data-option-type="other"][data-option-name="${this.escapeSelector(
+                  optionName
+                )}"][data-option-value="${this.escapeSelector(value)}"]`;
 
           const selectedOption = this.container.querySelector(selector);
           if (selectedOption) {
@@ -970,7 +972,7 @@ if (typeof CustomCardVariantOptions === 'undefined') {
           this.uiUpdater.updateInventoryDisplay(
             this.selectedOptions,
             () => this.findMatchingVariant(),
-            this.availabilityMatrix,
+            this.availabilityMatrix
           );
         }
       }
@@ -997,7 +999,7 @@ if (typeof CustomCardVariantOptions === 'undefined') {
             }
             // If not all options selected, allow modal to open (default Dawn behavior)
           },
-          true,
+          true
         ); // Capture phase
 
         // Listen for modal to pre-select variant
