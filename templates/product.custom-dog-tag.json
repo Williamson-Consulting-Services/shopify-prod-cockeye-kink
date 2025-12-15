@@ -37,7 +37,14 @@
         "text_ja8hgM": {
           "type": "text",
           "settings": {
-            "text": "<strong>Character Limit:</strong> Our machines have physical limits, so please keep your text within the allowed count.<strong>Content Warning:</strong> We share the love, not the hate. We reserve the right to decline any orders with offensive or controversial text.",
+            "text": "<strong>Character Limit:</strong> Our machines have physical limits, so please keep your text within the allowed count.",
+            "text_style": "body"
+          }
+        },
+        "text_H8XPWM": {
+          "type": "text",
+          "settings": {
+            "text": "<strong>Content Warning:</strong> We share the love, not the hate. We reserve the right to decline any orders with offensive or controversial text.",
             "text_style": "body"
           }
         },
@@ -100,6 +107,7 @@
         "caption",
         "price",
         "text_ja8hgM",
+        "text_H8XPWM",
         "custom_liquid_MbVxag",
         "quantity_selector",
         "buy_buttons",
