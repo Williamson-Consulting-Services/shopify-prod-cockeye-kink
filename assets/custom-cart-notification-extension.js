@@ -63,7 +63,7 @@
         // Disable transition during drag for smooth movement
         notification.style.transition = 'none';
       },
-      { passive: true },
+      { passive: true }
     );
 
     notification.addEventListener(
@@ -89,7 +89,7 @@
           }
         }
       },
-      { passive: false },
+      { passive: false }
     );
 
     notification.addEventListener(
@@ -115,8 +115,8 @@
             cartNotification.close();
           }
         } else {
-          // Snap back to original position
-          notification.style.transform = 'translateY(0)';
+          // Snap back to original position - clear inline style to let CSS handle it
+          notification.style.transform = '';
         }
 
         // Reset state
@@ -125,7 +125,35 @@
         isDragging = false;
         currentTranslateY = 0;
       },
-      { passive: true },
+      { passive: true }
     );
+
+    // Listen for when notification opens to ensure clean state
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+          const isActive = notification.classList.contains('active');
+          const isAnimate = notification.classList.contains('animate');
+
+          // When opening (adding active class), ensure no inline transform interferes
+          if (isActive && isAnimate && !isDragging) {
+            // Clear any inline transform to let CSS animation work
+            notification.style.transform = '';
+            notification.style.transition = '';
+          }
+
+          // When closing (removing active class), clean up
+          if (!isActive && !isDragging) {
+            notification.style.transform = '';
+            notification.style.transition = '';
+          }
+        }
+      });
+    });
+
+    observer.observe(notification, {
+      attributes: true,
+      attributeFilter: ['class'],
+    });
   }
 })();
