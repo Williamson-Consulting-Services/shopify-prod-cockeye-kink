@@ -571,8 +571,13 @@ class CustomCardVariantOptions {
     });
   }
 
-  isVariantAvailable(color, size, otherSelections = {}) {
+  isVariantAvailable(color, size, otherSelections) {
     if (!this.variants.length) return true;
+
+    // Handle default parameter for compatibility
+    if (otherSelections === undefined) {
+      otherSelections = {};
+    }
 
     // Get option positions from container
     const colorPosition = parseInt(this.container.getAttribute('data-color-position')) || 1;
@@ -985,8 +990,13 @@ class CustomCardVariantOptions {
     }
   }
 
-  findMatchingVariant(color, size, otherSelections = {}) {
+  findMatchingVariant(color, size, otherSelections) {
     if (!this.variants.length) return null;
+
+    // Handle default parameter for compatibility
+    if (otherSelections === undefined) {
+      otherSelections = {};
+    }
 
     const colorPosition = parseInt(this.container.getAttribute('data-color-position')) || 1;
     const sizePosition = parseInt(this.container.getAttribute('data-size-position')) || 2;
