@@ -129,6 +129,14 @@
   color: rgb(var(--color-foreground));
 }
 
+/* Label for option groups */
+.custom-card-variant-options__label {
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: rgb(var(--color-foreground));
+  margin-right: 0.4rem;
+}
+
 /* Text Styles (Other Options) */
 .custom-card-variant-options__text {
   display: flex;

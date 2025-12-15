@@ -9,12 +9,14 @@
 {% endcomment %}
 
 {%- if product and product.has_only_default_variant == false -%}
-  {%- comment -%} Check if product has color and size options with multiple values {%- endcomment -%}
+  {%- comment -%} Check if product has options with multiple values {%- endcomment -%}
   {%- liquid
     assign show_color_option = false
     assign show_size_option = false
     assign color_option = null
     assign size_option = null
+    assign other_options = ''
+    assign has_options_to_show = false
 
     for option in product.options_with_values
       assign option_name_lower = option.name | downcase
@@ -22,18 +24,30 @@
         assign color_option = option
         if option.values.size > 1
           assign show_color_option = true
+          assign has_options_to_show = true
         endif
       elsif option_name_lower == 'size'
         assign size_option = option
         if option.values.size > 1
           assign show_size_option = true
+          assign has_options_to_show = true
         endif
+      elsif option.values.size > 1
+        comment
+          Store other options (not color or size) that have multiple values
+        endcomment
+        if other_options == ''
+          assign other_options = option.name | append: ':' | append: option.position
+        else
+          assign other_options = other_options | append: ',' | append: option.name | append: ':' | append: option.position
+        endif
+        assign has_options_to_show = true
       endif
     endfor
   -%}
 
-  {%- comment -%} Display if color or size options have multiple values {%- endcomment -%}
-  {%- if show_color_option or show_size_option -%}
+  {%- comment -%} Display if any options have multiple values {%- endcomment -%}
+  {%- if has_options_to_show -%}
     {%- comment -%} Load CSS only once per page {%- endcomment -%}
     {%- unless custom_card_variant_options_loaded -%}
       {{ 'component-custom-card-variant-options.css' | asset_url | stylesheet_tag }}
@@ -52,8 +66,14 @@
       {% if color_option %}
         data-color-position="{{ color_option.position }}"
       {% endif -%}
+      {% if color_option %}
+        data-color-position="{{ color_option.position }}"
+      {% endif -%}
       {% if size_option %}
         data-size-position="{{ size_option.position }}"
+      {% endif %}
+      {% if other_options != '' %}
+        data-other-options="{{ other_options }}"
       {% endif %}
     >
       {%- comment -%} Inventory count display (hidden by default, shown when variant selected) {%- endcomment -%}
@@ -422,6 +442,75 @@
             {%- endfor -%}
           </div>
         </div>
+      {%- endif -%}
+
+      {%- comment -%} Display Other Options (not color or size) {%- endcomment -%}
+      {%- if other_options != '' -%}
+        {%- assign other_options_array = other_options | split: ',' -%}
+        {%- for other_option_data in other_options_array -%}
+          {%- assign option_parts = other_option_data | split: ':' -%}
+          {%- assign option_name = option_parts[0] -%}
+          {%- assign option_position = option_parts[1] | plus: 0 -%}
+          {%- assign other_option = null -%}
+          {%- for option in product.options_with_values -%}
+            {%- if option.name == option_name and option.position == option_position -%}
+              {%- assign other_option = option -%}
+              {%- break -%}
+            {%- endif -%}
+          {%- endfor -%}
+
+          {%- if other_option and other_option.values.size > 1 -%}
+            <div
+              class="custom-card-variant-options__group"
+              data-option-name="{{ other_option.name | escape }}"
+              data-option-position="{{ other_option.position }}"
+            >
+              <span class="custom-card-variant-options__label">{{ other_option.name }}:</span>
+              <div class="custom-card-variant-options__buttons">
+                {%- for value in other_option.values -%}
+                  {%- liquid
+                    assign value_unavailable = true
+
+                    for variant in product.variants
+                      assign variant_has_value = false
+                      if other_option.position == 1 and variant.option1 == value
+                        assign variant_has_value = true
+                      elsif other_option.position == 2 and variant.option2 == value
+                        assign variant_has_value = true
+                      elsif other_option.position == 3 and variant.option3 == value
+                        assign variant_has_value = true
+                      endif
+
+                      if variant_has_value
+                        if variant.inventory_management == 'shopify'
+                          if variant.inventory_quantity > 0
+                            assign value_unavailable = false
+                            break
+                          endif
+                        else
+                          assign value_unavailable = false
+                          break
+                        endif
+                      endif
+                    endfor
+                  -%}
+
+                  <div
+                    class="custom-card-variant-options__option custom-card-variant-options__option--button{% if value_unavailable %} custom-card-variant-options__option--unavailable{% endif %}"
+                    title="{{ value | escape }}{% if value_unavailable %} - {{ 'products.product.sold_out' | t }}{% endif %}"
+                    aria-label="{{ value | escape }}{% if value_unavailable %} - {{ 'products.product.sold_out' | t }}{% endif %}"
+                    data-option-type="other"
+                    data-option-name="{{ other_option.name | escape }}"
+                    data-option-position="{{ other_option.position }}"
+                    data-option-value="{{ value | escape }}"
+                  >
+                    <span class="custom-card-variant-options__button-text">{{ value | escape }}</span>
+                  </div>
+                {%- endfor -%}
+              </div>
+            </div>
+          {%- endif -%}
+        {%- endfor -%}
       {%- endif -%}
     </div>
   {%- endif -%}

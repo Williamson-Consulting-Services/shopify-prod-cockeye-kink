@@ -9,6 +9,7 @@ class CustomCardVariantOptions {
     this.product = null;
     this.selectedColor = null;
     this.selectedSize = null;
+    this.selectedOptions = {}; // Store all selected options: { optionName: value }
     this.variants = [];
     this.defaultImage = null; // Store default product image
     this.hoverTimeout = null; // For hover debouncing
@@ -23,6 +24,24 @@ class CustomCardVariantOptions {
       lowStockTemplate:
         this.container.getAttribute('data-translation-low-stock-template') || 'Low stock: QUANTITY_PLACEHOLDER left',
     };
+
+    // Parse other options from data attribute
+    const otherOptionsData = this.container.getAttribute('data-other-options');
+    if (otherOptionsData) {
+      const optionsArray = otherOptionsData.split(',');
+      optionsArray.forEach((optionData) => {
+        const parts = optionData.split(':');
+        if (parts.length === 2) {
+          const optionName = parts[0];
+          const optionPosition = parseInt(parts[1]);
+          // Store option position mapping
+          if (!this.optionPositions) {
+            this.optionPositions = {};
+          }
+          this.optionPositions[optionName] = optionPosition;
+        }
+      });
+    }
 
     this.init();
   }
@@ -80,7 +99,7 @@ class CustomCardVariantOptions {
         (e) => {
           // If both color and size are selected, check if we should add directly to cart
           if (this.selectedColor && this.selectedSize && this.variants.length) {
-            const variant = this.findMatchingVariant(this.selectedColor, this.selectedSize);
+            const variant = this.findMatchingVariant(this.selectedColor, this.selectedSize, this.selectedOptions);
             if (variant) {
               // Check if product has only color and size options (no other options)
               const hasOnlyColorAndSize = this.checkIfOnlyColorAndSize();
@@ -119,15 +138,20 @@ class CustomCardVariantOptions {
     if (!this.product || !this.product.options) {
       // Fallback: check if we have both color and size selected and variants loaded
       if (this.selectedColor && this.selectedSize && this.variants.length > 0) {
-        // If we can find a matching variant, assume it's only color and size
-        const variant = this.findMatchingVariant(this.selectedColor, this.selectedSize);
-        return variant !== null;
+        // If we can find a matching variant and no other options are selected, assume it's only color and size
+        const hasOtherOptions = Object.keys(this.selectedOptions).length > 0;
+        if (!hasOtherOptions) {
+          const variant = this.findMatchingVariant(this.selectedColor, this.selectedSize, this.selectedOptions);
+          return variant !== null;
+        }
       }
       return false;
     }
 
     const options = this.product.options;
-    return options.length === 2;
+    // Check if there are only 2 options and no other options are selected
+    const hasOtherOptions = Object.keys(this.selectedOptions).length > 0;
+    return options.length === 2 && !hasOtherOptions;
   }
 
   async addToCartDirectly(variant, card) {
@@ -318,13 +342,27 @@ class CustomCardVariantOptions {
     });
 
     // Size selection
-    const sizeOptions = this.container.querySelectorAll('.custom-card-variant-options__option--button');
+    const sizeOptions = this.container.querySelectorAll('.custom-card-variant-options__option--button[data-option-type="size"]');
     sizeOptions.forEach((option) => {
       const clickHandler = (e) => {
         e.preventDefault();
         e.stopPropagation();
         e.stopImmediatePropagation();
         this.selectSize(option);
+        return false;
+      };
+
+      option.addEventListener('click', clickHandler, true); // Use capture phase to intercept early
+    });
+
+    // Other options selection (style, material, etc.)
+    const otherOptions = this.container.querySelectorAll('.custom-card-variant-options__option--button[data-option-type="other"]');
+    otherOptions.forEach((option) => {
+      const clickHandler = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        this.selectOtherOption(option);
         return false;
       };
 
@@ -350,13 +388,13 @@ class CustomCardVariantOptions {
     option.classList.add('custom-card-variant-options__option--selected');
     this.selectedColor = option.getAttribute('data-option-value') || option.getAttribute('title');
 
-    // Update size availability based on selected color (this will update unavailable states correctly)
-    this.updateSizeAvailability();
+    // Update availability for all options based on current selections
+    this.updateAllOptionsAvailability();
 
     // Update color availability to ensure selected color shows correct state
     // Check if the selected color is available with any size (or selected size if size is selected)
     if (this.selectedSize) {
-      const isAvailable = this.isVariantAvailable(this.selectedColor, this.selectedSize);
+      const isAvailable = this.isVariantAvailable(this.selectedColor, this.selectedSize, this.selectedOptions);
       if (isAvailable) {
         option.classList.remove('custom-card-variant-options__option--unavailable');
       } else {
@@ -407,13 +445,13 @@ class CustomCardVariantOptions {
       option.getAttribute('data-option-value') ||
       option.querySelector('.custom-card-variant-options__button-text')?.textContent.trim();
 
-    // Update color availability based on selected size (this will update unavailable states correctly)
-    this.updateColorAvailability();
+    // Update availability for all options based on current selections
+    this.updateAllOptionsAvailability();
 
     // Update size availability to ensure selected size shows correct state
     // Check if the selected size is available with selected color (or any color if no color selected)
     if (this.selectedColor) {
-      const isAvailable = this.isVariantAvailable(this.selectedColor, this.selectedSize);
+      const isAvailable = this.isVariantAvailable(this.selectedColor, this.selectedSize, this.selectedOptions);
       if (isAvailable) {
         option.classList.remove('custom-card-variant-options__option--unavailable');
       } else {
@@ -447,19 +485,43 @@ class CustomCardVariantOptions {
     this.updateAddToCartButton();
   }
 
+  selectOtherOption(option) {
+    const optionName = option.getAttribute('data-option-name');
+    const optionPosition = parseInt(option.getAttribute('data-option-position'));
+    const optionValue =
+      option.getAttribute('data-option-value') ||
+      option.querySelector('.custom-card-variant-options__button-text')?.textContent.trim();
+
+    // Remove previous selection for this option
+    const previousSelected = this.container.querySelector(
+      `.custom-card-variant-options__option--button[data-option-type="other"][data-option-name="${optionName}"].custom-card-variant-options__option--selected`
+    );
+    if (previousSelected) {
+      previousSelected.classList.remove('custom-card-variant-options__option--selected');
+    }
+
+    // Add selection to clicked option
+    option.classList.add('custom-card-variant-options__option--selected');
+    this.selectedOptions[optionName] = optionValue;
+
+    // Update availability for all other options based on current selections
+    this.updateAllOptionsAvailability();
+    this.updateAddToCartButton();
+  }
+
   updateSizeAvailability() {
     if (!this.selectedColor || !this.variants.length) {
       // If no color selected, restore initial availability state from Liquid
       return;
     }
 
-    const sizeOptions = this.container.querySelectorAll('.custom-card-variant-options__option--button');
+    const sizeOptions = this.container.querySelectorAll('.custom-card-variant-options__option--button[data-option-type="size"]');
 
     sizeOptions.forEach((sizeOption) => {
       const sizeValue =
         sizeOption.getAttribute('data-option-value') ||
         sizeOption.querySelector('.custom-card-variant-options__button-text')?.textContent.trim();
-      const isAvailable = this.isVariantAvailable(this.selectedColor, sizeValue);
+      const isAvailable = this.isVariantAvailable(this.selectedColor, sizeValue, this.selectedOptions);
 
       // Always update based on current selection - remove unavailable if available, add if not
       if (isAvailable) {
@@ -477,7 +539,7 @@ class CustomCardVariantOptions {
 
     colorOptions.forEach((colorOption) => {
       const colorValue = colorOption.getAttribute('data-option-value') || colorOption.getAttribute('title');
-      const isAvailable = this.isVariantAvailable(colorValue, this.selectedSize);
+      const isAvailable = this.isVariantAvailable(colorValue, this.selectedSize, this.selectedOptions);
 
       if (isAvailable) {
         colorOption.classList.remove('custom-card-variant-options__option--unavailable');
@@ -487,7 +549,7 @@ class CustomCardVariantOptions {
     });
   }
 
-  isVariantAvailable(color, size) {
+  isVariantAvailable(color, size, otherSelections = {}) {
     if (!this.variants.length) return true;
 
     // Get option positions from container
@@ -515,8 +577,24 @@ class CustomCardVariantOptions {
         hasSize = true; // No size filter
       }
 
-      // Both must match if both are specified
-      if (hasColor && hasSize) {
+      // Check if variant matches all other selected options
+      let hasAllOtherOptions = true;
+      for (const [optionName, optionValue] of Object.entries(otherSelections)) {
+        const optionPosition = this.optionPositions?.[optionName];
+        if (optionPosition) {
+          let optionMatch = false;
+          if (optionPosition === 1) optionMatch = variant.option1 === optionValue;
+          else if (optionPosition === 2) optionMatch = variant.option2 === optionValue;
+          else if (optionPosition === 3) optionMatch = variant.option3 === optionValue;
+          if (!optionMatch) {
+            hasAllOtherOptions = false;
+            break;
+          }
+        }
+      }
+
+      // All must match if specified
+      if (hasColor && hasSize && hasAllOtherOptions) {
         // Check inventory
         if (variant.inventory_management === 'shopify') {
           return variant.inventory_quantity > 0;
@@ -525,6 +603,39 @@ class CustomCardVariantOptions {
       }
 
       return false;
+    });
+  }
+
+  updateAllOptionsAvailability() {
+    if (!this.variants.length) return;
+
+    // Update size availability
+    if (this.selectedColor) {
+      this.updateSizeAvailability();
+    }
+
+    // Update color availability
+    if (this.selectedSize) {
+      this.updateColorAvailability();
+    }
+
+    // Update other options availability
+    const otherOptions = this.container.querySelectorAll('.custom-card-variant-options__option--button[data-option-type="other"]');
+    otherOptions.forEach((option) => {
+      const optionName = option.getAttribute('data-option-name');
+      const optionValue = option.getAttribute('data-option-value') || option.querySelector('.custom-card-variant-options__button-text')?.textContent.trim();
+
+      // Create selections object with current selections
+      const currentSelections = { ...this.selectedOptions };
+      currentSelections[optionName] = optionValue;
+
+      const isAvailable = this.isVariantAvailable(this.selectedColor, this.selectedSize, currentSelections);
+
+      if (isAvailable) {
+        option.classList.remove('custom-card-variant-options__option--unavailable');
+      } else {
+        option.classList.add('custom-card-variant-options__option--unavailable');
+      }
     });
   }
 
@@ -618,8 +729,14 @@ class CustomCardVariantOptions {
     }
 
     // Find the matching variant
-    if (this.selectedColor && this.selectedSize && this.variants.length) {
-      const matchingVariant = this.findMatchingVariant(this.selectedColor, this.selectedSize);
+    if (this.variants.length) {
+      // Check if we have enough selections to find a unique variant
+      const hasColor = !!this.selectedColor;
+      const hasSize = !!this.selectedSize;
+      const hasOtherOptions = Object.keys(this.selectedOptions).length > 0;
+
+      if (hasColor && hasSize) {
+        const matchingVariant = this.findMatchingVariant(this.selectedColor, this.selectedSize, this.selectedOptions);
 
       if (matchingVariant) {
         // Check inventory availability
@@ -846,7 +963,7 @@ class CustomCardVariantOptions {
     }
   }
 
-  findMatchingVariant(color, size) {
+  findMatchingVariant(color, size, otherSelections = {}) {
     if (!this.variants.length) return null;
 
     const colorPosition = parseInt(this.container.getAttribute('data-color-position')) || 1;
@@ -854,18 +971,38 @@ class CustomCardVariantOptions {
 
     return this.variants.find((variant) => {
       // Check color at correct position
-      let colorMatch = false;
-      if (colorPosition === 1) colorMatch = variant.option1 === color;
-      else if (colorPosition === 2) colorMatch = variant.option2 === color;
-      else if (colorPosition === 3) colorMatch = variant.option3 === color;
+      let colorMatch = !color; // If no color specified, match any
+      if (color) {
+        if (colorPosition === 1) colorMatch = variant.option1 === color;
+        else if (colorPosition === 2) colorMatch = variant.option2 === color;
+        else if (colorPosition === 3) colorMatch = variant.option3 === color;
+      }
 
       // Check size at correct position
-      let sizeMatch = false;
-      if (sizePosition === 1) sizeMatch = variant.option1 === size;
-      else if (sizePosition === 2) sizeMatch = variant.option2 === size;
-      else if (sizePosition === 3) sizeMatch = variant.option3 === size;
+      let sizeMatch = !size; // If no size specified, match any
+      if (size) {
+        if (sizePosition === 1) sizeMatch = variant.option1 === size;
+        else if (sizePosition === 2) sizeMatch = variant.option2 === size;
+        else if (sizePosition === 3) sizeMatch = variant.option3 === size;
+      }
 
-      return colorMatch && sizeMatch;
+      // Check all other selected options
+      let allOtherOptionsMatch = true;
+      for (const [optionName, optionValue] of Object.entries(otherSelections)) {
+        const optionPosition = this.optionPositions?.[optionName];
+        if (optionPosition) {
+          let optionMatch = false;
+          if (optionPosition === 1) optionMatch = variant.option1 === optionValue;
+          else if (optionPosition === 2) optionMatch = variant.option2 === optionValue;
+          else if (optionPosition === 3) optionMatch = variant.option3 === optionValue;
+          if (!optionMatch) {
+            allOtherOptionsMatch = false;
+            break;
+          }
+        }
+      }
+
+      return colorMatch && sizeMatch && allOtherOptionsMatch;
     });
   }
 
@@ -952,10 +1089,15 @@ class CustomCardVariantOptions {
   getVariantImage(variant) {
     if (!variant) return null;
 
-    // Shopify product JSON API returns variant.featured_image as an object with src, width, height
+    // Shopify product JSON API returns variant.featured_image as a URL string
     if (variant.featured_image) {
+      // featured_image is a URL string, not an object
+      const imageUrl = typeof variant.featured_image === 'string'
+        ? variant.featured_image
+        : variant.featured_image.src || variant.featured_image;
+
       return {
-        src: variant.featured_image,
+        src: imageUrl,
         width: variant.featured_image_width || null,
         height: variant.featured_image_height || null,
         alt: variant.title || '',
@@ -1019,7 +1161,13 @@ class CustomCardVariantOptions {
   }
 
   updateCardImage(colorValue, isHover = false) {
-    if (!colorValue || !this.variants.length) {
+    // Wait for product data to load if not available yet
+    if (!this.variants.length && this.product === null) {
+      // Product data not loaded yet, can't update image
+      return;
+    }
+
+    if (!colorValue) {
       if (!isHover) {
         this.restoreDefaultImage();
       }
@@ -1061,11 +1209,13 @@ class CustomCardVariantOptions {
 
       // Update src - use a medium size (533px) for immediate display
       if (variantImage.src) {
-        // If src already has width parameter, use it; otherwise add one
+        // Construct proper Shopify image URL
         let srcUrl = variantImage.src;
-        if (!srcUrl.includes('width=')) {
-          srcUrl = `${srcUrl.split('?')[0]}?width=533`;
-        }
+        // Remove existing query parameters and add width
+        const urlParts = srcUrl.split('?');
+        const baseUrl = urlParts[0];
+        // Build new URL with width parameter
+        srcUrl = `${baseUrl}?width=533`;
         cardImage.setAttribute('src', srcUrl);
       }
 
