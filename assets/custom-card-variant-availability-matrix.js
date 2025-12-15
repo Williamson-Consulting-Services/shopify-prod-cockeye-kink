@@ -7,6 +7,15 @@ if (typeof CustomCardVariantAvailabilityMatrix === 'undefined') {
   window.CustomCardVariantAvailabilityMatrix = (function () {
     'use strict';
 
+    // Debug configuration - enable/disable specific feature logging
+    const DEBUG = {
+      image: false, // Image handler updates
+      availability: false, // Availability matrix and option availability
+      variant: false, // Variant matching and selection
+      cart: false, // Add to cart functionality
+      general: false, // General operations
+    };
+
     class AvailabilityMatrix {
       constructor(variants) {
         this.variants = variants || [];
@@ -17,14 +26,16 @@ if (typeof CustomCardVariantAvailabilityMatrix === 'undefined') {
 
       build() {
         if (!this.variants.length) {
-          console.warn('[AvailabilityMatrix] No variants to build matrix');
+          if (DEBUG.availability) console.warn('[AvailabilityMatrix] No variants to build matrix');
           this.matrix = {};
           this.variantMap = {};
           return;
         }
 
-        console.group('[AvailabilityMatrix] Building matrix');
-        console.log('Variants:', this.variants.length);
+        if (DEBUG.availability) {
+          console.group('[AvailabilityMatrix] Building matrix');
+          console.log('Variants:', this.variants.length);
+        }
 
         const matrix = {};
         const variantMap = {};
@@ -84,24 +95,28 @@ if (typeof CustomCardVariantAvailabilityMatrix === 'undefined') {
           }
 
           // DEBUG: Log each variant
-          console.log(`Variant ${variant.id} (SKU: ${variant.sku || 'N/A'}):`, {
-            combinationKey,
-            option1: variant.option1,
-            option2: variant.option2,
-            option3: variant.option3,
-            inventory_management: variant.inventory_management,
-            inventory_quantity: variant.inventory_quantity,
-            available: variant.available,
-            matrixQuantity: quantity,
-          });
+          if (DEBUG.availability) {
+            console.log(`Variant ${variant.id} (SKU: ${variant.sku || 'N/A'}):`, {
+              combinationKey,
+              option1: variant.option1,
+              option2: variant.option2,
+              option3: variant.option3,
+              inventory_management: variant.inventory_management,
+              inventory_quantity: variant.inventory_quantity,
+              available: variant.available,
+              matrixQuantity: quantity,
+            });
+          }
         });
 
         this.matrix = matrix;
         this.variantMap = variantMap;
 
-        console.log('Matrix built:', Object.keys(matrix).length, 'combinations');
-        console.log('Matrix contents:', matrix);
-        console.groupEnd();
+        if (DEBUG.availability) {
+          console.log('Matrix built:', Object.keys(matrix).length, 'combinations');
+          console.log('Matrix contents:', matrix);
+          console.groupEnd();
+        }
       }
 
       buildCombinationKey(selections, config) {

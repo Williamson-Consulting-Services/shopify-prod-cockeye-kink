@@ -9,6 +9,15 @@ if (typeof CustomCardVariantOptions === 'undefined') {
   window.CustomCardVariantOptions = (function () {
     'use strict';
 
+    // Debug configuration - enable/disable specific feature logging
+    const DEBUG = {
+      image: false, // Image handler updates
+      availability: false, // Availability matrix and option availability
+      variant: false, // Variant matching and selection
+      cart: false, // Add to cart functionality
+      general: false, // General operations
+    };
+
     class CustomCardVariantOptions {
       constructor(container) {
         this.container = container;
@@ -141,40 +150,46 @@ if (typeof CustomCardVariantOptions === 'undefined') {
             this.variants = this.product.variants || [];
 
             // DEBUG: Log product and variant data
-            console.group(`[CustomCardVariantOptions] Product Loaded: ${this.product.title || urlMatch[1]}`);
-            console.log('Product ID:', this.product.id);
-            console.log('Product Handle:', urlMatch[1]);
-            console.log('Total Variants:', this.variants.length);
-            console.log('Config:', {
-              colorPosition: this.config.colorPosition,
-              sizePosition: this.config.sizePosition,
-              otherOptions: this.config.otherOptions,
-            });
+            if (DEBUG.variant || DEBUG.general) {
+              console.group(`[CustomCardVariantOptions] Product Loaded: ${this.product.title || urlMatch[1]}`);
+              console.log('Product ID:', this.product.id);
+              console.log('Product Handle:', urlMatch[1]);
+              console.log('Total Variants:', this.variants.length);
+              console.log('Config:', {
+                colorPosition: this.config.colorPosition,
+                sizePosition: this.config.sizePosition,
+                otherOptions: this.config.otherOptions,
+              });
 
-            // DEBUG: Log all variants with details
-            console.log(
-              'Variants:',
-              this.variants.map((v) => ({
-                id: v.id,
-                sku: v.sku || 'N/A',
-                title: v.title,
-                option1: v.option1,
-                option2: v.option2,
-                option3: v.option3,
-                available: v.available,
-                inventory_management: v.inventory_management,
-                inventory_quantity: v.inventory_quantity,
-                inventory_policy: v.inventory_policy,
-              })),
-            );
+              // DEBUG: Log all variants with details
+              if (DEBUG.variant) {
+                console.log(
+                  'Variants:',
+                  this.variants.map((v) => ({
+                    id: v.id,
+                    sku: v.sku || 'N/A',
+                    title: v.title,
+                    option1: v.option1,
+                    option2: v.option2,
+                    option3: v.option3,
+                    available: v.available,
+                    inventory_management: v.inventory_management,
+                    inventory_quantity: v.inventory_quantity,
+                    inventory_policy: v.inventory_policy,
+                  })),
+                );
+              }
+            }
 
             // Build availability matrix
             if (window.CustomCardVariantAvailabilityMatrix) {
               this.availabilityMatrix = new window.CustomCardVariantAvailabilityMatrix(this.variants);
 
               // DEBUG: Log availability matrix
-              console.log('Availability Matrix:', this.availabilityMatrix.matrix);
-              console.log('Variant Map Keys:', Object.keys(this.availabilityMatrix.variantMap || {}));
+              if (DEBUG.availability) {
+                console.log('Availability Matrix:', this.availabilityMatrix.matrix);
+                console.log('Variant Map Keys:', Object.keys(this.availabilityMatrix.variantMap || {}));
+              }
             }
 
             // Update modules
@@ -198,10 +213,10 @@ if (typeof CustomCardVariantOptions === 'undefined') {
               this.imageHandler.updateImage(this.getSelectedColor(), false);
             }
 
-            console.groupEnd();
+            if (DEBUG.variant || DEBUG.general) console.groupEnd();
           }
         } catch (error) {
-          console.warn('Could not load product data:', error);
+          if (DEBUG.general) console.warn('Could not load product data:', error);
         } finally {
           this.isLoading = false;
         }
@@ -227,14 +242,23 @@ if (typeof CustomCardVariantOptions === 'undefined') {
               await this.loadProductData();
             }
 
-            // Wait a bit for data to be fully processed
+            // Update image handler with latest data
             if (this.imageHandler) {
-              // Small delay to ensure variants are loaded
+              // Update handler with latest variants and product
+              this.imageHandler.updateVariants(this.variants);
+              this.imageHandler.updateProduct(this.product);
+
+              // Small delay to ensure data is processed
               setTimeout(() => {
-                if (this.variants.length > 0 || this.product) {
-                  this.imageHandler.updateImage(colorValue, true);
+                if (DEBUG.image) {
+                  console.log('[CustomCardVariantOptions] Hover - updating image for color:', colorValue);
+                  console.log('[CustomCardVariantOptions] Variants available:', this.variants.length);
+                  console.log('[CustomCardVariantOptions] Product loaded:', !!this.product);
                 }
+                this.imageHandler.updateImage(colorValue, true);
               }, 50);
+            } else {
+              if (DEBUG.image) console.warn('[CustomCardVariantOptions] Image handler not available');
             }
           });
 
@@ -339,12 +363,12 @@ if (typeof CustomCardVariantOptions === 'undefined') {
           const selectedOption = this.container.querySelector(selector);
           if (selectedOption) {
             selectedOption.classList.add('custom-card-variant-options__option--selected');
-            console.log('[CustomCardVariantOptions] Selected option:', optionName, value);
+            if (DEBUG.variant) console.log('[CustomCardVariantOptions] Selected option:', optionName, value);
           } else {
-            console.warn('[CustomCardVariantOptions] Could not find option to select:', selector);
+            if (DEBUG.variant) console.warn('[CustomCardVariantOptions] Could not find option to select:', selector);
           }
         } else {
-          console.log('[CustomCardVariantOptions] Deselected option:', optionName);
+          if (DEBUG.variant) console.log('[CustomCardVariantOptions] Deselected option:', optionName);
         }
       }
 
@@ -362,13 +386,15 @@ if (typeof CustomCardVariantOptions === 'undefined') {
 
       findMatchingVariant() {
         if (!this.variants.length) {
-          console.warn('[CustomCardVariantOptions] findMatchingVariant: No variants available');
+          if (DEBUG.variant) console.warn('[CustomCardVariantOptions] findMatchingVariant: No variants available');
           return null;
         }
 
-        console.group('[CustomCardVariantOptions] findMatchingVariant');
-        console.log('Selected Options:', this.selectedOptions);
-        console.log('Config:', this.config);
+        if (DEBUG.variant) {
+          console.group('[CustomCardVariantOptions] findMatchingVariant');
+          console.log('Selected Options:', this.selectedOptions);
+          console.log('Config:', this.config);
+        }
 
         // Use variant map if available (faster lookup)
         if (this.availabilityMatrix && this.availabilityMatrix.variantMap) {
@@ -392,22 +418,24 @@ if (typeof CustomCardVariantOptions === 'undefined') {
             }
           });
 
-          console.log('Looking up variant with selections:', selections);
+          if (DEBUG.variant) console.log('Looking up variant with selections:', selections);
           const variant = this.availabilityMatrix.getVariant(selections, this.config);
           if (variant) {
-            console.log('Found variant via matrix:', {
-              id: variant.id,
-              sku: variant.sku || 'N/A',
-              option1: variant.option1,
-              option2: variant.option2,
-              option3: variant.option3,
-              inventory_quantity: variant.inventory_quantity,
-              available: variant.available,
-            });
-            console.groupEnd();
+            if (DEBUG.variant) {
+              console.log('Found variant via matrix:', {
+                id: variant.id,
+                sku: variant.sku || 'N/A',
+                option1: variant.option1,
+                option2: variant.option2,
+                option3: variant.option3,
+                inventory_quantity: variant.inventory_quantity,
+                available: variant.available,
+              });
+              console.groupEnd();
+            }
             return variant;
           }
-          console.log('No variant found via matrix, trying fallback');
+          if (DEBUG.variant) console.log('No variant found via matrix, trying fallback');
         }
 
         // Fallback to searching variants
@@ -422,7 +450,7 @@ if (typeof CustomCardVariantOptions === 'undefined') {
           }
         });
 
-        console.log('Fallback search:', { color, size, otherSelections });
+        if (DEBUG.variant) console.log('Fallback search:', { color, size, otherSelections });
         const variant = this.variants.find((variant) => {
           // Check color
           if (color && this.config.colorPosition) {
@@ -473,11 +501,11 @@ if (typeof CustomCardVariantOptions === 'undefined') {
       }
 
       updateAllAvailability() {
-        console.log('[CustomCardVariantOptions] updateAllAvailability called');
+        if (DEBUG.availability) console.log('[CustomCardVariantOptions] updateAllAvailability called');
         if (this.uiUpdater) {
           this.uiUpdater.updateAllAvailability(this.selectedOptions);
         } else {
-          console.warn('[CustomCardVariantOptions] UI Updater not initialized');
+          if (DEBUG.availability) console.warn('[CustomCardVariantOptions] UI Updater not initialized');
         }
       }
 
@@ -534,7 +562,7 @@ if (typeof CustomCardVariantOptions === 'undefined') {
           return;
         }
 
-        console.log('[CustomCardVariantOptions] Adding to cart directly, variant ID:', variantId);
+        if (DEBUG.cart) console.log('[CustomCardVariantOptions] Adding to cart directly, variant ID:', variantId);
         button.disabled = true;
         button.classList.add('loading');
 
@@ -559,7 +587,7 @@ if (typeof CustomCardVariantOptions === 'undefined') {
             cart.setActiveElement(document.activeElement);
           }
 
-          console.log('[CustomCardVariantOptions] Sending request to:', cartAddUrl);
+          if (DEBUG.cart) console.log('[CustomCardVariantOptions] Sending request to:', cartAddUrl);
 
           // Use fetchConfig if available (same as product-form.js)
           let config = { method: 'POST', body: formData };
@@ -583,7 +611,7 @@ if (typeof CustomCardVariantOptions === 'undefined') {
 
           if (response.ok) {
             const data = await response.json();
-            console.log('[CustomCardVariantOptions] Add to cart successful:', data);
+            if (DEBUG.cart) console.log('[CustomCardVariantOptions] Add to cart successful:', data);
 
             // Check for errors
             if (data.status) {

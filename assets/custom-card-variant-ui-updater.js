@@ -7,6 +7,15 @@ if (typeof CustomCardVariantUIUpdater === 'undefined') {
   window.CustomCardVariantUIUpdater = (function () {
     'use strict';
 
+    // Debug configuration - enable/disable specific feature logging
+    const DEBUG = {
+      image: false, // Image handler updates
+      availability: true, // Availability matrix and option availability
+      variant: false, // Variant matching and selection
+      cart: false, // Add to cart functionality
+      general: false, // General operations
+    };
+
     class UIUpdater {
       constructor(container, card, config, translations, availabilityMatrix, variants) {
         this.container = container;
@@ -19,15 +28,17 @@ if (typeof CustomCardVariantUIUpdater === 'undefined') {
 
       updateAllAvailability(selectedOptions) {
         if (!this.variants.length) {
-          console.warn('[UIUpdater] No variants available for availability check');
+          if (DEBUG.availability) console.warn('[UIUpdater] No variants available for availability check');
           return;
         }
 
         // DEBUG: Log current state
-        console.group('[UIUpdater] updateAllAvailability');
-        console.log('Selected Options:', selectedOptions);
-        console.log('Variants Count:', this.variants.length);
-        console.log('Config:', this.config);
+        if (DEBUG.availability) {
+          console.group('[UIUpdater] updateAllAvailability');
+          console.log('Selected Options:', selectedOptions);
+          console.log('Variants Count:', this.variants.length);
+          console.log('Config:', this.config);
+        }
 
         // Update color availability - check with current selections (excluding color itself)
         if (this.config.colorPosition) {
@@ -41,7 +52,7 @@ if (typeof CustomCardVariantUIUpdater === 'undefined') {
               this.config.colorPosition,
               testSelections,
             );
-            console.log(`Color "${colorValue}": ${isAvailable ? 'AVAILABLE' : 'UNAVAILABLE'}`);
+            if (DEBUG.availability) console.log(`Color "${colorValue}": ${isAvailable ? 'AVAILABLE' : 'UNAVAILABLE'}`);
             this.setOptionAvailability(option, isAvailable);
           });
         }
@@ -58,7 +69,7 @@ if (typeof CustomCardVariantUIUpdater === 'undefined') {
               this.config.sizePosition,
               testSelections,
             );
-            console.log(`Size "${sizeValue}": ${isAvailable ? 'AVAILABLE' : 'UNAVAILABLE'}`);
+            if (DEBUG.availability) console.log(`Size "${sizeValue}": ${isAvailable ? 'AVAILABLE' : 'UNAVAILABLE'}`);
             this.setOptionAvailability(option, isAvailable);
           });
         }
@@ -74,13 +85,14 @@ if (typeof CustomCardVariantUIUpdater === 'undefined') {
                 // Check availability with current selections but not this option
                 const testSelections = this.buildTestSelections(selectedOptions, optionName);
                 const isAvailable = this.checkOptionAvailability(optionName, optionValue, position, testSelections);
-                console.log(`${optionName} "${optionValue}": ${isAvailable ? 'AVAILABLE' : 'UNAVAILABLE'}`);
+                if (DEBUG.availability)
+                  console.log(`${optionName} "${optionValue}": ${isAvailable ? 'AVAILABLE' : 'UNAVAILABLE'}`);
                 this.setOptionAvailability(option, isAvailable);
               });
           });
         }
 
-        console.groupEnd();
+        if (DEBUG.availability) console.groupEnd();
       }
 
       buildTestSelections(selectedOptions, excludeOptionName) {
@@ -93,7 +105,8 @@ if (typeof CustomCardVariantUIUpdater === 'undefined') {
 
       checkOptionAvailability(optionName, optionValue, position, selectedOptions) {
         if (!this.variants.length) {
-          console.warn(`[UIUpdater] checkOptionAvailability: No variants for ${optionName}="${optionValue}"`);
+          if (DEBUG.availability)
+            console.warn(`[UIUpdater] checkOptionAvailability: No variants for ${optionName}="${optionValue}"`);
           return true;
         }
 
@@ -103,9 +116,11 @@ if (typeof CustomCardVariantUIUpdater === 'undefined') {
         testSelections[normalizedName] = optionValue;
 
         // DEBUG: Log what we're checking
-        console.log(`[UIUpdater] Checking availability for ${optionName}="${optionValue}" (position ${position})`);
-        console.log('  Test Selections:', testSelections);
-        console.log('  Current Selections:', selectedOptions);
+        if (DEBUG.availability) {
+          console.log(`[UIUpdater] Checking availability for ${optionName}="${optionValue}" (position ${position})`);
+          console.log('  Test Selections:', testSelections);
+          console.log('  Current Selections:', selectedOptions);
+        }
 
         // Use availability matrix if available
         if (this.availabilityMatrix && this.availabilityMatrix.matrix) {
@@ -149,29 +164,31 @@ if (typeof CustomCardVariantUIUpdater === 'undefined') {
             // If variant matches all current selections and the test option, check availability
             if (matchesCurrentSelections && matchesTestOption) {
               const isAvailable = this.isVariantAvailable(variant);
-              console.log(
-                `  Variant ${variant.id} (${variant.sku || 'N/A'}): ${isAvailable ? 'AVAILABLE' : 'UNAVAILABLE'}`,
-                {
-                  option1: variant.option1,
-                  option2: variant.option2,
-                  option3: variant.option3,
-                  inventory_management: variant.inventory_management,
-                  inventory_quantity: variant.inventory_quantity,
-                  available: variant.available,
-                },
-              );
+              if (DEBUG.availability) {
+                console.log(
+                  `  Variant ${variant.id} (${variant.sku || 'N/A'}): ${isAvailable ? 'AVAILABLE' : 'UNAVAILABLE'}`,
+                  {
+                    option1: variant.option1,
+                    option2: variant.option2,
+                    option3: variant.option3,
+                    inventory_management: variant.inventory_management,
+                    inventory_quantity: variant.inventory_quantity,
+                    available: variant.available,
+                  },
+                );
+              }
               return isAvailable;
             }
 
             return false;
           });
 
-          console.log(`  Result: ${result ? 'AVAILABLE' : 'UNAVAILABLE'}`);
+          if (DEBUG.availability) console.log(`  Result: ${result ? 'AVAILABLE' : 'UNAVAILABLE'}`);
           return result;
         }
 
         // Fallback to direct variant checking
-        console.log('  Using fallback variant checking (no matrix)');
+        if (DEBUG.availability) console.log('  Using fallback variant checking (no matrix)');
         const result = this.variants.some((variant) => {
           let matches = true;
 
@@ -206,24 +223,26 @@ if (typeof CustomCardVariantUIUpdater === 'undefined') {
 
           if (matches) {
             const isAvailable = this.isVariantAvailable(variant);
-            console.log(
-              `  Variant ${variant.id} (${variant.sku || 'N/A'}): ${isAvailable ? 'AVAILABLE' : 'UNAVAILABLE'}`,
-              {
-                option1: variant.option1,
-                option2: variant.option2,
-                option3: variant.option3,
-                inventory_management: variant.inventory_management,
-                inventory_quantity: variant.inventory_quantity,
-                available: variant.available,
-              },
-            );
+            if (DEBUG.availability) {
+              console.log(
+                `  Variant ${variant.id} (${variant.sku || 'N/A'}): ${isAvailable ? 'AVAILABLE' : 'UNAVAILABLE'}`,
+                {
+                  option1: variant.option1,
+                  option2: variant.option2,
+                  option3: variant.option3,
+                  inventory_management: variant.inventory_management,
+                  inventory_quantity: variant.inventory_quantity,
+                  available: variant.available,
+                },
+              );
+            }
             return isAvailable;
           }
 
           return false;
         });
 
-        console.log(`  Result: ${result ? 'AVAILABLE' : 'UNAVAILABLE'}`);
+        if (DEBUG.availability) console.log(`  Result: ${result ? 'AVAILABLE' : 'UNAVAILABLE'}`);
         return result;
       }
 
@@ -268,13 +287,14 @@ if (typeof CustomCardVariantUIUpdater === 'undefined') {
         const quickAddButton = this.card.querySelector('.quick-add__submit');
         const button = addToCartButton || quickAddButton;
         if (!button) {
-          console.warn('[UIUpdater] No add to cart button found');
+          if (DEBUG.cart) console.warn('[UIUpdater] No add to cart button found');
           return;
         }
 
         // Check if all required options are selected
         const allRequiredSelected = this.hasAllRequiredOptionsSelected(selectedOptions);
-        console.log('[UIUpdater] All required options selected:', allRequiredSelected, 'Selected:', selectedOptions);
+        if (DEBUG.cart)
+          console.log('[UIUpdater] All required options selected:', allRequiredSelected, 'Selected:', selectedOptions);
 
         // Find matching variant
         const variant = findMatchingVariant();
@@ -295,23 +315,23 @@ if (typeof CustomCardVariantUIUpdater === 'undefined') {
           if (variantIdInput) {
             variantIdInput.value = variant.id;
             variantIdInput.disabled = !isAvailable;
-            console.log('[UIUpdater] Updated variant ID input:', variant.id);
+            if (DEBUG.cart) console.log('[UIUpdater] Updated variant ID input:', variant.id);
           } else {
-            console.warn('[UIUpdater] No variant ID input found');
+            if (DEBUG.cart) console.warn('[UIUpdater] No variant ID input found');
           }
 
           if (quickAddButton) {
             quickAddButton.setAttribute('data-selected-variant-id', variant.id);
-            console.log('[UIUpdater] Set data-selected-variant-id:', variant.id);
+            if (DEBUG.cart) console.log('[UIUpdater] Set data-selected-variant-id:', variant.id);
 
             // Check if we can add directly (only color and size)
             const hasOnlyColorAndSize = this.hasOnlyColorAndSize();
             if (hasOnlyColorAndSize && selectedOptions.color && selectedOptions.size) {
               quickAddButton.setAttribute('data-direct-add', 'true');
-              console.log('[UIUpdater] Enabled direct add to cart');
+              if (DEBUG.cart) console.log('[UIUpdater] Enabled direct add to cart');
             } else {
               quickAddButton.removeAttribute('data-direct-add');
-              console.log('[UIUpdater] Disabled direct add (requires modal)');
+              if (DEBUG.cart) console.log('[UIUpdater] Disabled direct add (requires modal)');
             }
           }
 
@@ -319,10 +339,12 @@ if (typeof CustomCardVariantUIUpdater === 'undefined') {
           this.updateButtonText(button, isAvailable ? 'addToCart' : 'soldOut');
         } else {
           // Not all options selected or no matching variant
-          if (variant && !allRequiredSelected) {
-            console.log('[UIUpdater] Variant found but not all options selected');
-          } else {
-            console.warn('[UIUpdater] No matching variant found for selections:', selectedOptions);
+          if (DEBUG.cart) {
+            if (variant && !allRequiredSelected) {
+              console.log('[UIUpdater] Variant found but not all options selected');
+            } else {
+              console.warn('[UIUpdater] No matching variant found for selections:', selectedOptions);
+            }
           }
 
           if (quickAddButton) {

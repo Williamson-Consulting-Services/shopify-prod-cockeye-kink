@@ -7,6 +7,15 @@ if (typeof CustomCardVariantImageHandler === 'undefined') {
   window.CustomCardVariantImageHandler = (function () {
     'use strict';
 
+    // Debug configuration - enable/disable specific feature logging
+    const DEBUG = {
+      image: true, // Image handler updates (enabled for debugging)
+      availability: false, // Availability matrix and option availability
+      variant: false, // Variant matching and selection
+      cart: false, // Add to cart functionality
+      general: false, // General operations
+    };
+
     class ImageHandler {
       constructor(card, variants, product, config) {
         this.card = card;
@@ -31,46 +40,123 @@ if (typeof CustomCardVariantImageHandler === 'undefined') {
       }
 
       updateImage(colorValue, isHover) {
+        if (DEBUG.image) {
+          console.group('[ImageHandler] updateImage');
+          console.log('Color Value:', colorValue);
+          console.log('Is Hover:', isHover);
+          console.log('Card:', this.card);
+          console.log('Variants Count:', this.variants ? this.variants.length : 0);
+          console.log('Product:', this.product ? 'Loaded' : 'Not loaded');
+        }
+
         if (!colorValue) {
           if (!isHover) this.restoreDefaultImage();
+          if (DEBUG.image) console.groupEnd();
           return;
         }
 
-        // Find card image - try multiple selectors (same as product card structure)
-        let cardImage = this.card.querySelector('.card__media img');
+        // Find card image - target the FIRST image in card__media (main image, not hover effect)
+        const cardMedia = this.card.querySelector('.card__media');
+        let cardImage = null;
+
+        if (cardMedia) {
+          // Get the first img element (main image, not the hover effect one)
+          const images = cardMedia.querySelectorAll('img');
+          if (images.length > 0) {
+            cardImage = images[0]; // First image is the main one
+            if (DEBUG.image) console.log('[ImageHandler] Found main image (first in card__media)');
+          }
+        }
+
+        // Fallback selectors
+        if (!cardImage) {
+          cardImage = this.card.querySelector('.card__media .media img');
+          if (cardImage && DEBUG.image) console.log('[ImageHandler] Found image via .card__media .media img');
+        }
         if (!cardImage) {
           cardImage = this.card.querySelector('.media img');
+          if (cardImage && DEBUG.image) console.log('[ImageHandler] Found image via .media img');
         }
         if (!cardImage) {
           cardImage = this.card.querySelector('.card__inner img');
+          if (cardImage && DEBUG.image) console.log('[ImageHandler] Found image via .card__inner img');
         }
         if (!cardImage) {
           cardImage = this.card.querySelector('img');
+          if (cardImage && DEBUG.image) console.log('[ImageHandler] Found image via img (fallback)');
         }
 
         if (!cardImage) {
-          console.warn('[ImageHandler] No card image found');
+          if (DEBUG.image) {
+            console.warn('[ImageHandler] No card image found');
+            console.groupEnd();
+          }
           return;
+        }
+
+        if (DEBUG.image) {
+          console.log('[ImageHandler] Image element found:', cardImage);
+          console.log('[ImageHandler] Current image src:', cardImage.getAttribute('src'));
+          console.log('[ImageHandler] Current image srcset:', cardImage.getAttribute('srcset'));
         }
 
         // Find variant with this color
         const variant = this.findVariantByColor(colorValue);
         if (!variant) {
-          console.warn('[ImageHandler] No variant found for color:', colorValue);
+          if (DEBUG.image) {
+            console.warn('[ImageHandler] No variant found for color:', colorValue);
+            console.log(
+              '[ImageHandler] Available variants:',
+              this.variants.map((v) => ({
+                id: v.id,
+                option1: v.option1,
+                option2: v.option2,
+                option3: v.option3,
+              })),
+            );
+            console.groupEnd();
+          }
           if (!isHover) this.restoreDefaultImage();
           return;
+        }
+
+        if (DEBUG.image) {
+          console.log('[ImageHandler] Found variant:', {
+            id: variant.id,
+            sku: variant.sku || 'N/A',
+            option1: variant.option1,
+            option2: variant.option2,
+            option3: variant.option3,
+            featured_media: variant.featured_media ? { id: variant.featured_media.id } : null,
+            featured_image: variant.featured_image ? 'exists' : null,
+          });
         }
 
         // Get variant image (same approach as product page)
         const imageData = this.getVariantImage(variant);
         if (!imageData || !imageData.src) {
-          console.warn('[ImageHandler] No image data for variant:', variant.id);
+          if (DEBUG.image) {
+            console.warn('[ImageHandler] No image data for variant:', variant.id);
+            console.log('[ImageHandler] Image data result:', imageData);
+            console.groupEnd();
+          }
           if (!isHover) this.restoreDefaultImage();
           return;
         }
 
+        if (DEBUG.image) {
+          console.log('[ImageHandler] Image data retrieved:', {
+            src: imageData.src,
+            srcset: imageData.srcset ? 'exists' : 'null',
+            width: imageData.width,
+            height: imageData.height,
+            alt: imageData.alt,
+          });
+        }
+
         // Update image with proper srcset (matching product card format)
         const baseUrl = imageData.src.split('?')[0];
+        if (DEBUG.image) console.log('[ImageHandler] Base URL:', baseUrl);
 
         // Build srcset matching card-product.liquid format
         const widths = [165, 360, 533, 720, 940, 1066];
@@ -83,6 +169,14 @@ if (typeof CustomCardVariantImageHandler === 'undefined') {
 
         // Set primary src (533w for cards) - use full srcset if available, otherwise build it
         const srcUrl = `${baseUrl}?width=533`;
+        const finalSrcset = imageData.srcset || (srcsetParts.length > 0 ? srcsetParts.join(', ') : null);
+
+        if (DEBUG.image) {
+          console.log('[ImageHandler] Updating image:');
+          console.log('  src:', srcUrl);
+          console.log('  srcset:', finalSrcset);
+        }
+
         cardImage.setAttribute('src', srcUrl);
 
         // Use existing srcset if available, otherwise use built one
@@ -96,7 +190,12 @@ if (typeof CustomCardVariantImageHandler === 'undefined') {
           cardImage.setAttribute('alt', imageData.alt);
         }
 
-        console.log('[ImageHandler] Updated image for color:', colorValue, 'URL:', srcUrl);
+        if (DEBUG.image) {
+          console.log('[ImageHandler] Image updated successfully');
+          console.log('[ImageHandler] New image src:', cardImage.getAttribute('src'));
+          console.log('[ImageHandler] New image srcset:', cardImage.getAttribute('srcset'));
+          console.groupEnd();
+        }
       }
 
       findVariantByColor(colorValue) {
