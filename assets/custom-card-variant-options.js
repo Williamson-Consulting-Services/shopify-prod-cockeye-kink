@@ -302,9 +302,12 @@ class CustomCardVariantOptions {
         if (this.selectedColor) {
           this.updateCardImage(this.selectedColor, false);
         }
+        return true; // Return success
       }
+      return false;
     } catch (error) {
       console.warn('Could not load product data for variant selection:', error);
+      return false;
     }
   }
 
@@ -1066,19 +1069,28 @@ class CustomCardVariantOptions {
     const colorPosition = parseInt(this.container.getAttribute('data-color-position')) || 1;
     const sizePosition = parseInt(this.container.getAttribute('data-size-position')) || 2;
 
+    // Normalize color value for comparison (case-insensitive, trim whitespace)
+    const normalizedColor = String(color).trim().toLowerCase();
+
     return this.variants.find((variant) => {
-      // Check color at correct position
+      // Check color at correct position (case-insensitive)
       let colorMatch = false;
-      if (colorPosition === 1) colorMatch = variant.option1 === color;
-      else if (colorPosition === 2) colorMatch = variant.option2 === color;
-      else if (colorPosition === 3) colorMatch = variant.option3 === color;
+      let variantColorValue = '';
+      if (colorPosition === 1) variantColorValue = String(variant.option1 || '').trim().toLowerCase();
+      else if (colorPosition === 2) variantColorValue = String(variant.option2 || '').trim().toLowerCase();
+      else if (colorPosition === 3) variantColorValue = String(variant.option3 || '').trim().toLowerCase();
+
+      colorMatch = variantColorValue === normalizedColor;
 
       // If size is specified, check size too
       if (size) {
         let sizeMatch = false;
-        if (sizePosition === 1) sizeMatch = variant.option1 === size;
-        else if (sizePosition === 2) sizeMatch = variant.option2 === size;
-        else if (sizePosition === 3) sizeMatch = variant.option3 === size;
+        const normalizedSize = String(size).trim().toLowerCase();
+        let variantSizeValue = '';
+        if (sizePosition === 1) variantSizeValue = String(variant.option1 || '').trim().toLowerCase();
+        else if (sizePosition === 2) variantSizeValue = String(variant.option2 || '').trim().toLowerCase();
+        else if (sizePosition === 3) variantSizeValue = String(variant.option3 || '').trim().toLowerCase();
+        sizeMatch = variantSizeValue === normalizedSize;
         return colorMatch && sizeMatch;
       }
 
@@ -1106,29 +1118,65 @@ class CustomCardVariantOptions {
 
     // Check product media for variant-specific images
     // Variants can be associated with media via variant IDs
-    if (this.product && this.product.media) {
-      // Find first image media (not video/model)
+    if (this.product && this.product.media && Array.isArray(this.product.media)) {
+      // Find first image media (not video/model) associated with this variant
       const imageMedia = this.product.media.find((media) => {
         if (media.media_type !== 'image') return false;
-        // Check if media is associated with this variant
-        // Shopify associates media with variants via variant IDs in media.alt or media.variants
+
+        // Check if media is associated with this variant via variants array
         if (media.variants && Array.isArray(media.variants)) {
-          return media.variants.some((v) => v.id === variant.id);
+          return media.variants.some((v) => {
+            // Handle both object with id property and direct id
+            const variantId = typeof v === 'object' ? v.id : v;
+            return variantId === variant.id;
+          });
         }
+
+        // Check if media has variant_ids property (Shopify sometimes uses this)
+        if (media.variant_ids && Array.isArray(media.variant_ids)) {
+          return media.variant_ids.includes(variant.id);
+        }
+
         // Fallback: check if alt text contains variant info
         if (media.alt && variant.title) {
-          return media.alt.toLowerCase().includes(variant.title.toLowerCase());
+          const altLower = media.alt.toLowerCase();
+          const variantTitleLower = variant.title.toLowerCase();
+          // Check if alt contains variant title or color option
+          if (altLower.includes(variantTitleLower)) return true;
+
+          // Check if alt contains the color option value
+          const colorPosition = parseInt(this.container.getAttribute('data-color-position')) || 1;
+          let colorValue = '';
+          if (colorPosition === 1) colorValue = variant.option1 || '';
+          else if (colorPosition === 2) colorValue = variant.option2 || '';
+          else if (colorPosition === 3) colorValue = variant.option3 || '';
+          if (colorValue && altLower.includes(colorValue.toLowerCase())) return true;
         }
+
         return false;
       });
 
       if (imageMedia && imageMedia.preview_image) {
+        const previewImage = imageMedia.preview_image;
         return {
-          src: imageMedia.preview_image.src || imageMedia.preview_image,
-          srcset: imageMedia.preview_image.srcset || null,
-          width: imageMedia.preview_image.width || null,
-          height: imageMedia.preview_image.height || null,
+          src: typeof previewImage === 'string' ? previewImage : (previewImage.src || previewImage),
+          srcset: previewImage.srcset || null,
+          width: previewImage.width || null,
+          height: previewImage.height || null,
           alt: imageMedia.alt || variant.title || '',
+        };
+      }
+
+      // If no variant-specific image found, use first product image as fallback
+      const firstImage = this.product.media.find((media) => media.media_type === 'image');
+      if (firstImage && firstImage.preview_image) {
+        const previewImage = firstImage.preview_image;
+        return {
+          src: typeof previewImage === 'string' ? previewImage : (previewImage.src || previewImage),
+          srcset: previewImage.srcset || null,
+          width: previewImage.width || null,
+          height: previewImage.height || null,
+          alt: firstImage.alt || variant.title || '',
         };
       }
     }
@@ -1161,12 +1209,6 @@ class CustomCardVariantOptions {
   }
 
   updateCardImage(colorValue, isHover = false) {
-    // Wait for product data to load if not available yet
-    if (!this.variants.length && this.product === null) {
-      // Product data not loaded yet, can't update image
-      return;
-    }
-
     if (!colorValue) {
       if (!isHover) {
         this.restoreDefaultImage();
@@ -1179,6 +1221,23 @@ class CustomCardVariantOptions {
 
     const cardImage = card.querySelector('.card__media img');
     if (!cardImage) return;
+
+    // If product data not loaded yet, try to load it
+    if (!this.variants.length && this.product === null) {
+      // Try to load product data if we have a handle
+      const productLink = card.querySelector('a[href*="/products/"]');
+      if (productLink) {
+        const urlMatch = productLink.href.match(/\/products\/([^\/\?]+)/);
+        if (urlMatch) {
+          // Load product data and then update image
+          this.loadProductData(urlMatch[1]).then(() => {
+            // Retry after data loads
+            this.updateCardImage(colorValue, isHover);
+          });
+        }
+      }
+      return;
+    }
 
     // Find variant matching the color (and size if selected)
     const variant = this.findVariantByColor(colorValue, this.selectedSize);
