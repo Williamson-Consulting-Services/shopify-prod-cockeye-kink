@@ -22,7 +22,10 @@
       assign option_name_lower = option.name | downcase
       if option_name_lower == 'color' or option_name_lower == 'colour' or option_name_lower == 'trim color' or option_name_lower == 'trim colour'
         assign color_option = option
-        if option.values.size > 1
+        comment
+          Always show color options, even if there's only one value
+        endcomment
+        if option.values.size > 0
           assign show_color_option = true
           assign has_options_to_show = true
         endif
@@ -83,7 +86,7 @@
       <div class="custom-card-variant-options__inventory" style="display: none;">
         <span class="custom-card-variant-options__inventory-text"></span>
       </div>
-      {%- comment -%} Display Color Option (only if multiple values) {%- endcomment -%}
+      {%- comment -%} Display Color Option (always show, even if single value) {%- endcomment -%}
       {%- if show_color_option and color_option -%}
         <div
           class="custom-card-variant-options__group"

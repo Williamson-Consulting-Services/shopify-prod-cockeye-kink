@@ -519,7 +519,7 @@ if (typeof CustomCardVariantOptions === 'undefined') {
         try {
           // Get cart notification or drawer
           const cart = document.querySelector('cart-notification') || document.querySelector('cart-drawer');
-          
+
           const routes = window.Shopify && window.Shopify.routes ? window.Shopify.routes : {};
           const cartAddUrl = routes.cart_add_url || '/cart/add.js';
 

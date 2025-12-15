@@ -42,7 +42,7 @@ if (typeof CustomCardVariantUIUpdater === 'undefined') {
               'color',
               colorValue,
               this.config.colorPosition,
-              {}, // Check without current selections - just if option exists
+              {} // Check without current selections - just if option exists
             );
             console.log(`Color "${colorValue}": ${isAvailable ? 'AVAILABLE' : 'UNAVAILABLE'}`);
             this.setOptionAvailability(option, isAvailable);
@@ -58,7 +58,7 @@ if (typeof CustomCardVariantUIUpdater === 'undefined') {
               'size',
               sizeValue,
               this.config.sizePosition,
-              {}, // Check without current selections - just if option exists
+              {} // Check without current selections - just if option exists
             );
             console.log(`Size "${sizeValue}": ${isAvailable ? 'AVAILABLE' : 'UNAVAILABLE'}`);
             this.setOptionAvailability(option, isAvailable);
@@ -142,14 +142,17 @@ if (typeof CustomCardVariantUIUpdater === 'undefined') {
             // If variant matches all current selections and the test option, check availability
             if (matchesCurrentSelections && matchesTestOption) {
               const isAvailable = this.isVariantAvailable(variant);
-              console.log(`  Variant ${variant.id} (${variant.sku || 'N/A'}): ${isAvailable ? 'AVAILABLE' : 'UNAVAILABLE'}`, {
-                option1: variant.option1,
-                option2: variant.option2,
-                option3: variant.option3,
-                inventory_management: variant.inventory_management,
-                inventory_quantity: variant.inventory_quantity,
-                available: variant.available
-              });
+              console.log(
+                `  Variant ${variant.id} (${variant.sku || 'N/A'}): ${isAvailable ? 'AVAILABLE' : 'UNAVAILABLE'}`,
+                {
+                  option1: variant.option1,
+                  option2: variant.option2,
+                  option3: variant.option3,
+                  inventory_management: variant.inventory_management,
+                  inventory_quantity: variant.inventory_quantity,
+                  available: variant.available,
+                }
+              );
               return isAvailable;
             }
 
@@ -196,14 +199,17 @@ if (typeof CustomCardVariantUIUpdater === 'undefined') {
 
           if (matches) {
             const isAvailable = this.isVariantAvailable(variant);
-            console.log(`  Variant ${variant.id} (${variant.sku || 'N/A'}): ${isAvailable ? 'AVAILABLE' : 'UNAVAILABLE'}`, {
-              option1: variant.option1,
-              option2: variant.option2,
-              option3: variant.option3,
-              inventory_management: variant.inventory_management,
-              inventory_quantity: variant.inventory_quantity,
-              available: variant.available
-            });
+            console.log(
+              `  Variant ${variant.id} (${variant.sku || 'N/A'}): ${isAvailable ? 'AVAILABLE' : 'UNAVAILABLE'}`,
+              {
+                option1: variant.option1,
+                option2: variant.option2,
+                option3: variant.option3,
+                inventory_management: variant.inventory_management,
+                inventory_quantity: variant.inventory_quantity,
+                available: variant.available,
+              }
+            );
             return isAvailable;
           }
 
@@ -330,15 +336,15 @@ if (typeof CustomCardVariantUIUpdater === 'undefined') {
           state === 'addToCart'
             ? this.translations.addToCart
             : state === 'soldOut'
-              ? this.translations.soldOut
-              : this.translations.chooseOptions;
+            ? this.translations.soldOut
+            : this.translations.chooseOptions;
 
         // Find text element
         let textElement = button.querySelector('span:first-child:not(.icon-wrap):not(.loading__spinner)');
 
         if (!textElement) {
           const textNodes = Array.from(button.childNodes).filter(
-            (node) => node.nodeType === Node.TEXT_NODE && node.textContent.trim(),
+            (node) => node.nodeType === Node.TEXT_NODE && node.textContent.trim()
           );
           if (textNodes.length > 0) {
             textElement = document.createElement('span');
