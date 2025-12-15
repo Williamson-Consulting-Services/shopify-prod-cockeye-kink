@@ -12,14 +12,6 @@
     "main": {
       "type": "main-product",
       "blocks": {
-        "inventory_ayrMzk": {
-          "type": "inventory",
-          "settings": {
-            "text_style": "body",
-            "inventory_threshold": 10,
-            "show_inventory_quantity": true
-          }
-        },
         "vendor": {
           "type": "text",
           "settings": {
@@ -47,6 +39,14 @@
           "settings": {
             "picker_type": "button",
             "swatch_shape": "circle"
+          }
+        },
+        "inventory_ayrMzk": {
+          "type": "inventory",
+          "settings": {
+            "text_style": "body",
+            "inventory_threshold": 10,
+            "show_inventory_quantity": true
           }
         },
         "quantity_selector": {
@@ -113,12 +113,12 @@
         }
       },
       "block_order": [
-        "inventory_ayrMzk",
         "vendor",
         "title",
         "caption",
         "price",
         "variant_picker",
+        "inventory_ayrMzk",
         "quantity_selector",
         "buy_buttons",
         "text_9KfHT4",
