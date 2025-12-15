@@ -957,20 +957,23 @@ if (typeof CustomCardVariantOptions === 'undefined') {
         const quickAddButton = this.card.querySelector('.quick-add__submit[data-product-url]');
         if (!quickAddButton) return;
 
-        // Intercept quick add button click for direct add
+        // Intercept quick add button click for direct add when all options are selected
         quickAddButton.addEventListener(
           'click',
           (e) => {
-            if (quickAddButton.getAttribute('data-direct-add') === 'true') {
-              const variantId = quickAddButton.getAttribute('data-selected-variant-id');
-              if (variantId) {
-                e.preventDefault();
-                e.stopPropagation();
-                e.stopImmediatePropagation();
-                this.addToCartDirectly(variantId, quickAddButton);
-                return false;
-              }
+            // Check if we should add directly (all options selected and variant available)
+            const shouldAddDirectly = quickAddButton.getAttribute('data-direct-add') === 'true';
+            const variantId = quickAddButton.getAttribute('data-selected-variant-id');
+
+            if (shouldAddDirectly && variantId) {
+              // Prevent modal from opening and add to cart directly
+              e.preventDefault();
+              e.stopPropagation();
+              e.stopImmediatePropagation();
+              this.addToCartDirectly(variantId, quickAddButton);
+              return false;
             }
+            // If not all options selected, allow modal to open (default Dawn behavior)
           },
           true,
         ); // Capture phase

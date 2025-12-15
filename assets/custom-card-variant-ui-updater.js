@@ -324,14 +324,13 @@ if (typeof CustomCardVariantUIUpdater === 'undefined') {
             quickAddButton.setAttribute('data-selected-variant-id', variant.id);
             if (DEBUG.cart) console.log('[UIUpdater] Set data-selected-variant-id:', variant.id);
 
-            // Check if we can add directly (only color and size)
-            const hasOnlyColorAndSize = this.hasOnlyColorAndSize();
-            if (hasOnlyColorAndSize && selectedOptions.color && selectedOptions.size) {
+            // Enable direct add when all required options are selected and variant is available
+            if (allRequiredSelected && isAvailable) {
               quickAddButton.setAttribute('data-direct-add', 'true');
-              if (DEBUG.cart) console.log('[UIUpdater] Enabled direct add to cart');
+              if (DEBUG.cart) console.log('[UIUpdater] Enabled direct add to cart - all options selected');
             } else {
               quickAddButton.removeAttribute('data-direct-add');
-              if (DEBUG.cart) console.log('[UIUpdater] Disabled direct add (requires modal)');
+              if (DEBUG.cart) console.log('[UIUpdater] Disabled direct add - options not complete or variant unavailable');
             }
           }
 
