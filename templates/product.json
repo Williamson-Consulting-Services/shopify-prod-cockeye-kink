@@ -129,6 +129,9 @@
         "collapsible-row-1",
         "share"
       ],
+      "custom_css": [
+        "span.badge.price__badge-sale.color-scheme-3 {background-color: red}"
+      ],
       "settings": {
         "enable_sticky_info": true,
         "color_scheme": "scheme-3",
