@@ -68,7 +68,9 @@ if (typeof CustomCardVariantImageHandler === 'undefined') {
         }
 
         // Guard: Check if any cart loading spinners are visible (more reliable check)
-        const cartLoadingSpinners = document.querySelectorAll('#main-cart-items .loading__spinner:not(.hidden), #CartDrawer-CartItems .loading__spinner:not(.hidden), .cart-item .loading__spinner:not(.hidden)');
+        const cartLoadingSpinners = document.querySelectorAll(
+          '#main-cart-items .loading__spinner:not(.hidden), #CartDrawer-CartItems .loading__spinner:not(.hidden), .cart-item .loading__spinner:not(.hidden)'
+        );
         if (cartLoadingSpinners.length > 0) {
           if (DEBUG.image) {
             console.warn('[ImageHandler] Cart loading in progress, skipping image update');
@@ -398,7 +400,9 @@ if (typeof CustomCardVariantImageHandler === 'undefined') {
         }
 
         // Guard: Check if any cart loading spinners are visible (more reliable check)
-        const cartLoadingSpinners = document.querySelectorAll('#main-cart-items .loading__spinner:not(.hidden), #CartDrawer-CartItems .loading__spinner:not(.hidden), .cart-item .loading__spinner:not(.hidden)');
+        const cartLoadingSpinners = document.querySelectorAll(
+          '#main-cart-items .loading__spinner:not(.hidden), #CartDrawer-CartItems .loading__spinner:not(.hidden), .cart-item .loading__spinner:not(.hidden)'
+        );
         if (cartLoadingSpinners.length > 0) {
           if (DEBUG.image) {
             console.warn('[ImageHandler] Cart loading in progress, skipping restore');

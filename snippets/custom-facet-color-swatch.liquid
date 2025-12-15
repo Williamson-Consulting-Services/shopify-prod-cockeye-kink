@@ -36,66 +36,59 @@
 -%}
 
 {%- if is_color_filter -%}
-  {%- comment -%} Render as swatch for color filters {%- endcomment -%}
-  <div class="{{ label_class }}">
-    <div class="swatch-input-wrapper">
-      {%- if value.swatch -%}
-        {% render 'swatch-input',
-          id: input_id,
-          type: 'checkbox',
-          name: value.param_name,
-          value: value.value,
-          product_form_id: product_form_id,
-          swatch: value.swatch,
-          checked: value.active,
-          disabled: is_disabled
-        %}
-      {%- else -%}
-        {%- comment -%} Fallback: Generate swatch from value name {%- endcomment -%}
-        <input
-          type="checkbox"
-          id="{{ input_id }}"
-          name="{{ value.param_name }}"
-          value="{{ value.value }}"
-          form="{{ product_form_id }}"
-          class="swatch-input__input{% if is_disabled %} visually-disabled{% endif %}"
-          {% if value.active %}
-            checked
-          {% endif %}
-          {% if is_disabled %}
-            disabled
-          {% endif %}
-        >
-        <label
-          for="{{ input_id }}"
-          title="{{ value.label | escape }}"
-          class="swatch-input__label swatch-input__label--square"
-        >
-          {% render 'facet-swatch', swatch: value.swatch, value: value.label, shape: 'square' %}
-        </label>
-      {%- endif -%}
-    </div>
-
-    {{ text_value }}
+  {%- comment -%} Render as swatch for color filters (matching product page style) {%- endcomment -%}
+  <div class="custom-facet-color-swatch">
+    {%- if value.swatch -%}
+      {% render 'swatch-input',
+        id: input_id,
+        type: 'checkbox',
+        name: value.param_name,
+        value: value.value,
+        product_form_id: product_form_id,
+        swatch: value.swatch,
+        checked: value.active,
+        disabled: is_disabled
+      %}
+    {%- else -%}
+      {%- comment -%} Fallback: Generate swatch from value name {%- endcomment -%}
+      <input
+        type="checkbox"
+        id="{{ input_id }}"
+        name="{{ value.param_name }}"
+        value="{{ value.value }}"
+        form="{{ product_form_id }}"
+        class="swatch-input__input{% if is_disabled %} visually-disabled{% endif %}"
+        {% if value.active %}
+          checked
+        {% endif %}
+        {% if is_disabled %}
+          disabled
+        {% endif %}
+      >
+      <label
+        for="{{ input_id }}"
+        title="{{ value.label | escape }}{% if value.count %} ({{ value.count }}){% endif %}"
+        class="swatch-input__label swatch-input__label--square custom-facet-color-swatch__label"
+        aria-label="{{ value.label | escape }}{% if value.count %} ({{ value.count }} {% if value.count == 1 %}{{ 'products.facets.product_count_simple.one' | t: count: value.count }}{% else %}{{ 'products.facets.product_count_simple.other' | t: count: value.count }}{% endif %}){% endif %}"
+      >
+        {% render 'facet-swatch', swatch: value.swatch, value: value.label, shape: 'square' %}
+      </label>
+    {%- endif -%}
   </div>
 {%- else -%}
   {%- comment -%} Fall back to default rendering for non-color filters {%- endcomment -%}
   {%- if filter.presentation == 'swatch' -%}
-    <div class="{{ label_class }}">
-      <div class="swatch-input-wrapper">
-        {% render 'swatch-input',
-          id: input_id,
-          type: 'checkbox',
-          name: value.param_name,
-          value: value.value,
-          product_form_id: product_form_id,
-          swatch: value.swatch,
-          checked: value.active,
-          disabled: is_disabled
-        %}
-      </div>
-
-      {{ text_value }}
+    <div class="custom-facet-color-swatch">
+      {% render 'swatch-input',
+        id: input_id,
+        type: 'checkbox',
+        name: value.param_name,
+        value: value.value,
+        product_form_id: product_form_id,
+        swatch: value.swatch,
+        checked: value.active,
+        disabled: is_disabled
+      %}
     </div>
   {%- else -%}
     <label for="{{ input_id }}" class="{{ label_class }}">
