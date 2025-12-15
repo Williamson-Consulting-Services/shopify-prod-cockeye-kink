@@ -148,22 +148,25 @@ if (typeof CustomCardVariantOptions === 'undefined') {
             console.log('Config:', {
               colorPosition: this.config.colorPosition,
               sizePosition: this.config.sizePosition,
-              otherOptions: this.config.otherOptions
+              otherOptions: this.config.otherOptions,
             });
 
             // DEBUG: Log all variants with details
-            console.log('Variants:', this.variants.map((v) => ({
-              id: v.id,
-              sku: v.sku || 'N/A',
-              title: v.title,
-              option1: v.option1,
-              option2: v.option2,
-              option3: v.option3,
-              available: v.available,
-              inventory_management: v.inventory_management,
-              inventory_quantity: v.inventory_quantity,
-              inventory_policy: v.inventory_policy
-            })));
+            console.log(
+              'Variants:',
+              this.variants.map((v) => ({
+                id: v.id,
+                sku: v.sku || 'N/A',
+                title: v.title,
+                option1: v.option1,
+                option2: v.option2,
+                option3: v.option3,
+                available: v.available,
+                inventory_management: v.inventory_management,
+                inventory_quantity: v.inventory_quantity,
+                inventory_policy: v.inventory_policy,
+              })),
+            );
 
             // Build availability matrix
             if (window.CustomCardVariantAvailabilityMatrix) {
@@ -318,9 +321,11 @@ if (typeof CustomCardVariantOptions === 'undefined') {
       updateSelectionUI(optionName, value) {
         // Remove previous selection for this option (all options of this type)
         const optionType = optionName === 'color' ? 'color' : optionName === 'size' ? 'size' : 'other';
-        this.container.querySelectorAll(`[data-option-type="${optionType}"].custom-card-variant-options__option--selected`).forEach((option) => {
-          option.classList.remove('custom-card-variant-options__option--selected');
-        });
+        this.container
+          .querySelectorAll(`[data-option-type="${optionType}"].custom-card-variant-options__option--selected`)
+          .forEach((option) => {
+            option.classList.remove('custom-card-variant-options__option--selected');
+          });
 
         // Add selection to clicked option (even if unavailable)
         if (value) {
@@ -397,7 +402,7 @@ if (typeof CustomCardVariantOptions === 'undefined') {
               option2: variant.option2,
               option3: variant.option3,
               inventory_quantity: variant.inventory_quantity,
-              available: variant.available
+              available: variant.available,
             });
             console.groupEnd();
             return variant;
@@ -451,7 +456,7 @@ if (typeof CustomCardVariantOptions === 'undefined') {
             option2: variant.option2,
             option3: variant.option3,
             inventory_quantity: variant.inventory_quantity,
-            available: variant.available
+            available: variant.available,
           });
         } else {
           console.warn('No matching variant found');

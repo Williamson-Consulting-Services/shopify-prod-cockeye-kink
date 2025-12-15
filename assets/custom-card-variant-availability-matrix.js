@@ -92,7 +92,7 @@ if (typeof CustomCardVariantAvailabilityMatrix === 'undefined') {
             inventory_management: variant.inventory_management,
             inventory_quantity: variant.inventory_quantity,
             available: variant.available,
-            matrixQuantity: quantity
+            matrixQuantity: quantity,
           });
         });
 
