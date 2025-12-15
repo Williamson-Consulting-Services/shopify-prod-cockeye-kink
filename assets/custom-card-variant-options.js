@@ -120,7 +120,7 @@ class CustomCardVariantOptions {
             }
           }
         },
-        true
+        true,
       ); // Use capture phase to intercept before modal opener
     }
 
@@ -258,7 +258,7 @@ class CustomCardVariantOptions {
       // Pre-select color option
       if (preselectColor) {
         const colorInputs = modalContent.querySelectorAll(
-          'input[type="radio"][name*="olor" i], input[type="radio"][name*="Color"]'
+          'input[type="radio"][name*="olor" i], input[type="radio"][name*="Color"]',
         );
         colorInputs.forEach((input) => {
           if (input.value === preselectColor) {
@@ -271,7 +271,7 @@ class CustomCardVariantOptions {
       // Pre-select size option
       if (preselectSize) {
         const sizeInputs = modalContent.querySelectorAll(
-          'input[type="radio"][name*="ize" i], input[type="radio"][name*="Size"]'
+          'input[type="radio"][name*="ize" i], input[type="radio"][name*="Size"]',
         );
         sizeInputs.forEach((input) => {
           if (input.value === preselectSize) {
@@ -344,7 +344,9 @@ class CustomCardVariantOptions {
     });
 
     // Size selection
-    const sizeOptions = this.container.querySelectorAll('.custom-card-variant-options__option--button[data-option-type="size"]');
+    const sizeOptions = this.container.querySelectorAll(
+      '.custom-card-variant-options__option--button[data-option-type="size"]',
+    );
     sizeOptions.forEach((option) => {
       const clickHandler = (e) => {
         e.preventDefault();
@@ -358,7 +360,9 @@ class CustomCardVariantOptions {
     });
 
     // Other options selection (style, material, etc.)
-    const otherOptions = this.container.querySelectorAll('.custom-card-variant-options__option--button[data-option-type="other"]');
+    const otherOptions = this.container.querySelectorAll(
+      '.custom-card-variant-options__option--button[data-option-type="other"]',
+    );
     otherOptions.forEach((option) => {
       const clickHandler = (e) => {
         e.preventDefault();
@@ -380,7 +384,7 @@ class CustomCardVariantOptions {
   selectColor(option) {
     // Remove previous selection
     const previousSelected = this.container.querySelector(
-      '.custom-card-variant-options__option--swatch.custom-card-variant-options__option--selected'
+      '.custom-card-variant-options__option--swatch.custom-card-variant-options__option--selected',
     );
     if (previousSelected) {
       previousSelected.classList.remove('custom-card-variant-options__option--selected');
@@ -455,7 +459,7 @@ class CustomCardVariantOptions {
   selectSize(option) {
     // Remove previous selection
     const previousSelected = this.container.querySelector(
-      '.custom-card-variant-options__option--button.custom-card-variant-options__option--selected'
+      '.custom-card-variant-options__option--button.custom-card-variant-options__option--selected',
     );
     if (previousSelected) {
       previousSelected.classList.remove('custom-card-variant-options__option--selected');
@@ -516,7 +520,7 @@ class CustomCardVariantOptions {
 
     // Remove previous selection for this option
     const previousSelected = this.container.querySelector(
-      `.custom-card-variant-options__option--button[data-option-type="other"][data-option-name="${optionName}"].custom-card-variant-options__option--selected`
+      `.custom-card-variant-options__option--button[data-option-type="other"][data-option-name="${optionName}"].custom-card-variant-options__option--selected`,
     );
     if (previousSelected) {
       previousSelected.classList.remove('custom-card-variant-options__option--selected');
@@ -537,7 +541,9 @@ class CustomCardVariantOptions {
       return;
     }
 
-    const sizeOptions = this.container.querySelectorAll('.custom-card-variant-options__option--button[data-option-type="size"]');
+    const sizeOptions = this.container.querySelectorAll(
+      '.custom-card-variant-options__option--button[data-option-type="size"]',
+    );
 
     sizeOptions.forEach((sizeOption) => {
       const sizeValue =
@@ -647,10 +653,14 @@ class CustomCardVariantOptions {
     }
 
     // Update other options availability
-    const otherOptions = this.container.querySelectorAll('.custom-card-variant-options__option--button[data-option-type="other"]');
+    const otherOptions = this.container.querySelectorAll(
+      '.custom-card-variant-options__option--button[data-option-type="other"]',
+    );
     otherOptions.forEach((option) => {
       const optionName = option.getAttribute('data-option-name');
-      const optionValue = option.getAttribute('data-option-value') || option.querySelector('.custom-card-variant-options__button-text')?.textContent.trim();
+      const optionValue =
+        option.getAttribute('data-option-value') ||
+        option.querySelector('.custom-card-variant-options__button-text')?.textContent.trim();
 
       // Create selections object with current selections
       const currentSelections = { ...this.selectedOptions };
@@ -698,7 +708,7 @@ class CustomCardVariantOptions {
 
         if (!buttonText) {
           const textNodes = Array.from(addToCartButton.childNodes).filter(
-            (node) => node.nodeType === Node.TEXT_NODE && node.textContent.trim()
+            (node) => node.nodeType === Node.TEXT_NODE && node.textContent.trim(),
           );
           if (textNodes.length > 0) {
             buttonText = document.createElement('span');
@@ -720,11 +730,11 @@ class CustomCardVariantOptions {
               new RegExp(
                 `(${addToCartText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}|${chooseOptionsText.replace(
                   /[.*+?^${}()|[\]\\]/g,
-                  '\\$&'
+                  '\\$&',
                 )})`,
-                'i'
+                'i',
               ),
-              soldOutText
+              soldOutText,
             );
 
           // Ensure it shows sold out
@@ -743,9 +753,9 @@ class CustomCardVariantOptions {
               const regex = new RegExp(
                 `(${chooseOptionsText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}|${addToCartText.replace(
                   /[.*+?^${}()|[\]\\]/g,
-                  '\\$&'
+                  '\\$&',
                 )})`,
-                'i'
+                'i',
               );
               node.textContent = node.textContent.replace(regex, soldOutText);
             }
@@ -765,136 +775,137 @@ class CustomCardVariantOptions {
       if (hasColor && hasSize) {
         const matchingVariant = this.findMatchingVariant(this.selectedColor, this.selectedSize, this.selectedOptions);
 
-      if (matchingVariant) {
-        // Check inventory availability
-        const isAvailable =
-          matchingVariant.inventory_management === 'shopify'
-            ? matchingVariant.inventory_quantity > 0
-            : matchingVariant.available;
+        if (matchingVariant) {
+          // Check inventory availability
+          const isAvailable =
+            matchingVariant.inventory_management === 'shopify'
+              ? matchingVariant.inventory_quantity > 0
+              : matchingVariant.available;
 
-        // Update the variant ID in the form (for direct add to cart)
-        const variantIdInput = card.querySelector('.product-variant-id');
-        if (variantIdInput) {
-          variantIdInput.value = matchingVariant.id;
-          variantIdInput.disabled = !isAvailable;
-        }
-
-        // Update inventory count display
-        this.updateInventoryDisplay(matchingVariant);
-
-        // Update button state
-        // Find text element - could be in a span or directly in button
-        let buttonText = addToCartButton.querySelector('span:first-child:not(.icon-wrap):not(.loading__spinner)');
-
-        if (!buttonText) {
-          // Check if text is directly in button (not wrapped in span)
-          const textNodes = Array.from(addToCartButton.childNodes).filter(
-            (node) => node.nodeType === Node.TEXT_NODE && node.textContent.trim()
-          );
-          if (textNodes.length > 0) {
-            // Wrap first text node in span for easier manipulation
-            buttonText = document.createElement('span');
-            buttonText.textContent = textNodes[0].textContent.trim();
-            textNodes[0].replaceWith(buttonText);
+          // Update the variant ID in the form (for direct add to cart)
+          const variantIdInput = card.querySelector('.product-variant-id');
+          if (variantIdInput) {
+            variantIdInput.value = matchingVariant.id;
+            variantIdInput.disabled = !isAvailable;
           }
-        }
 
-        if (buttonText) {
-          if (isAvailable) {
-            addToCartButton.disabled = false;
-            // Update button text using translation
+          // Update inventory count display
+          this.updateInventoryDisplay(matchingVariant);
+
+          // Update button state
+          // Find text element - could be in a span or directly in button
+          let buttonText = addToCartButton.querySelector('span:first-child:not(.icon-wrap):not(.loading__spinner)');
+
+          if (!buttonText) {
+            // Check if text is directly in button (not wrapped in span)
+            const textNodes = Array.from(addToCartButton.childNodes).filter(
+              (node) => node.nodeType === Node.TEXT_NODE && node.textContent.trim(),
+            );
+            if (textNodes.length > 0) {
+              // Wrap first text node in span for easier manipulation
+              buttonText = document.createElement('span');
+              buttonText.textContent = textNodes[0].textContent.trim();
+              textNodes[0].replaceWith(buttonText);
+            }
+          }
+
+          if (buttonText) {
+            if (isAvailable) {
+              addToCartButton.disabled = false;
+              // Update button text using translation
+              const chooseOptionsText = this.translations.chooseOptions;
+              const addToCartText = this.translations.addToCart;
+              const soldOutText = this.translations.soldOut;
+
+              // Replace sold out text if it exists
+              if (buttonText.textContent.includes(soldOutText)) {
+                buttonText.textContent = buttonText.textContent.replace(
+                  new RegExp(soldOutText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'),
+                  addToCartText,
+                );
+              }
+
+              // Replace choose options text
+              buttonText.textContent = buttonText.textContent
+                .trim()
+                .replace(new RegExp(chooseOptionsText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i'), addToCartText);
+
+              // Ensure it shows add to cart if neither text is present
+              if (!buttonText.textContent.includes(addToCartText) && !buttonText.textContent.includes(soldOutText)) {
+                buttonText.textContent = addToCartText;
+              }
+            } else {
+              addToCartButton.disabled = true;
+              const soldOutText = this.translations.soldOut;
+              const addToCartText = this.translations.addToCart;
+              const chooseOptionsText = this.translations.chooseOptions;
+
+              // Replace any existing button text with sold out
+              buttonText.textContent = buttonText.textContent
+                .trim()
+                .replace(
+                  new RegExp(
+                    `(${addToCartText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}|${chooseOptionsText.replace(
+                      /[.*+?^${}()|[\]\\]/g,
+                      '\\$&',
+                    )})`,
+                    'i',
+                  ),
+                  soldOutText,
+                );
+
+              // Ensure it shows sold out
+              if (!buttonText.textContent.includes(soldOutText)) {
+                buttonText.textContent = soldOutText;
+              }
+            }
+          } else {
+            // Fallback: update button text directly (preserve other elements)
             const chooseOptionsText = this.translations.chooseOptions;
             const addToCartText = this.translations.addToCart;
             const soldOutText = this.translations.soldOut;
 
-            // Replace sold out text if it exists
-            if (buttonText.textContent.includes(soldOutText)) {
-              buttonText.textContent = buttonText.textContent.replace(
-                new RegExp(soldOutText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'),
-                addToCartText
-              );
-            }
-
-            // Replace choose options text
-            buttonText.textContent = buttonText.textContent
-              .trim()
-              .replace(new RegExp(chooseOptionsText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i'), addToCartText);
-
-            // Ensure it shows add to cart if neither text is present
-            if (!buttonText.textContent.includes(addToCartText) && !buttonText.textContent.includes(soldOutText)) {
-              buttonText.textContent = addToCartText;
-            }
-          } else {
-            addToCartButton.disabled = true;
-            const soldOutText = this.translations.soldOut;
-            const addToCartText = this.translations.addToCart;
-            const chooseOptionsText = this.translations.chooseOptions;
-
-            // Replace any existing button text with sold out
-            buttonText.textContent = buttonText.textContent
-              .trim()
-              .replace(
-                new RegExp(
-                  `(${addToCartText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}|${chooseOptionsText.replace(
-                    /[.*+?^${}()|[\]\\]/g,
-                    '\\$&'
-                  )})`,
-                  'i'
-                ),
-                soldOutText
-              );
-
-            // Ensure it shows sold out
-            if (!buttonText.textContent.includes(soldOutText)) {
-              buttonText.textContent = soldOutText;
+            if (isAvailable) {
+              addToCartButton.disabled = false;
+              // Replace text while preserving spinner and other elements
+              addToCartButton.childNodes.forEach((node) => {
+                if (node.nodeType === Node.TEXT_NODE && node.textContent.trim()) {
+                  node.textContent = node.textContent.replace(
+                    new RegExp(chooseOptionsText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i'),
+                    addToCartText,
+                  );
+                }
+              });
+            } else {
+              addToCartButton.disabled = true;
+              addToCartButton.childNodes.forEach((node) => {
+                if (node.nodeType === Node.TEXT_NODE && node.textContent.trim()) {
+                  const regex = new RegExp(
+                    `(${chooseOptionsText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}|${addToCartText.replace(
+                      /[.*+?^${}()|[\]\\]/g,
+                      '\\$&',
+                    )})`,
+                    'i',
+                  );
+                  node.textContent = node.textContent.replace(regex, soldOutText);
+                }
+              });
             }
           }
-        } else {
-          // Fallback: update button text directly (preserve other elements)
-          const chooseOptionsText = this.translations.chooseOptions;
-          const addToCartText = this.translations.addToCart;
-          const soldOutText = this.translations.soldOut;
 
-          if (isAvailable) {
-            addToCartButton.disabled = false;
-            // Replace text while preserving spinner and other elements
-            addToCartButton.childNodes.forEach((node) => {
-              if (node.nodeType === Node.TEXT_NODE && node.textContent.trim()) {
-                node.textContent = node.textContent.replace(
-                  new RegExp(chooseOptionsText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i'),
-                  addToCartText
-                );
-              }
-            });
-          } else {
-            addToCartButton.disabled = true;
-            addToCartButton.childNodes.forEach((node) => {
-              if (node.nodeType === Node.TEXT_NODE && node.textContent.trim()) {
-                const regex = new RegExp(
-                  `(${chooseOptionsText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}|${addToCartText.replace(
-                    /[.*+?^${}()|[\]\\]/g,
-                    '\\$&'
-                  )})`,
-                  'i'
-                );
-                node.textContent = node.textContent.replace(regex, soldOutText);
-              }
-            });
-          }
-        }
+          // Store selected variant ID for quick add modal or direct add
+          if (quickAddButton) {
+            quickAddButton.setAttribute('data-selected-variant-id', matchingVariant.id);
 
-        // Store selected variant ID for quick add modal or direct add
-        if (quickAddButton) {
-          quickAddButton.setAttribute('data-selected-variant-id', matchingVariant.id);
-
-          // Check if we should convert to direct add to cart
-          // If product has only color and size options, we can add directly
-          const hasOnlyColorAndSize = this.checkIfOnlyColorAndSize();
-          if (hasOnlyColorAndSize) {
-            // Mark button for direct add to cart
-            quickAddButton.setAttribute('data-direct-add', 'true');
-          } else {
-            quickAddButton.removeAttribute('data-direct-add');
+            // Check if we should convert to direct add to cart
+            // If product has only color and size options, we can add directly
+            const hasOnlyColorAndSize = this.checkIfOnlyColorAndSize();
+            if (hasOnlyColorAndSize) {
+              // Mark button for direct add to cart
+              quickAddButton.setAttribute('data-direct-add', 'true');
+            } else {
+              quickAddButton.removeAttribute('data-direct-add');
+            }
           }
         }
       }
@@ -912,7 +923,7 @@ class CustomCardVariantOptions {
       let buttonText = addToCartButton.querySelector('span:first-child:not(.icon-wrap):not(.loading__spinner)');
       if (!buttonText) {
         const textNodes = Array.from(addToCartButton.childNodes).filter(
-          (node) => node.nodeType === Node.TEXT_NODE && node.textContent.trim()
+          (node) => node.nodeType === Node.TEXT_NODE && node.textContent.trim(),
         );
         if (textNodes.length > 0) {
           buttonText = document.createElement('span');
@@ -931,11 +942,11 @@ class CustomCardVariantOptions {
               new RegExp(
                 `(${addToCartText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}|${chooseOptionsText.replace(
                   /[.*+?^${}()|[\]\\]/g,
-                  '\\$&'
+                  '\\$&',
                 )})`,
-                'i'
+                'i',
               ),
-              soldOutText
+              soldOutText,
             );
           if (!buttonText.textContent.includes(soldOutText)) {
             buttonText.textContent = soldOutText;
@@ -947,9 +958,9 @@ class CustomCardVariantOptions {
               const regex = new RegExp(
                 `(${chooseOptionsText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}|${addToCartText.replace(
                   /[.*+?^${}()|[\]\\]/g,
-                  '\\$&'
+                  '\\$&',
                 )})`,
-                'i'
+                'i',
               );
               node.textContent = node.textContent.replace(regex, soldOutText);
             }
@@ -978,9 +989,9 @@ class CustomCardVariantOptions {
               const regex = new RegExp(
                 `(${soldOutText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}|${addToCartText.replace(
                   /[.*+?^${}()|[\]\\]/g,
-                  '\\$&'
+                  '\\$&',
                 )})`,
-                'i'
+                'i',
               );
               addToCartButton.textContent = addToCartButton.textContent.replace(regex, chooseOptionsText);
             }
@@ -1105,9 +1116,18 @@ class CustomCardVariantOptions {
       // Check color at correct position (case-insensitive)
       let colorMatch = false;
       let variantColorValue = '';
-      if (colorPosition === 1) variantColorValue = String(variant.option1 || '').trim().toLowerCase();
-      else if (colorPosition === 2) variantColorValue = String(variant.option2 || '').trim().toLowerCase();
-      else if (colorPosition === 3) variantColorValue = String(variant.option3 || '').trim().toLowerCase();
+      if (colorPosition === 1)
+        variantColorValue = String(variant.option1 || '')
+          .trim()
+          .toLowerCase();
+      else if (colorPosition === 2)
+        variantColorValue = String(variant.option2 || '')
+          .trim()
+          .toLowerCase();
+      else if (colorPosition === 3)
+        variantColorValue = String(variant.option3 || '')
+          .trim()
+          .toLowerCase();
 
       colorMatch = variantColorValue === normalizedColor;
 
@@ -1116,9 +1136,18 @@ class CustomCardVariantOptions {
         let sizeMatch = false;
         const normalizedSize = String(size).trim().toLowerCase();
         let variantSizeValue = '';
-        if (sizePosition === 1) variantSizeValue = String(variant.option1 || '').trim().toLowerCase();
-        else if (sizePosition === 2) variantSizeValue = String(variant.option2 || '').trim().toLowerCase();
-        else if (sizePosition === 3) variantSizeValue = String(variant.option3 || '').trim().toLowerCase();
+        if (sizePosition === 1)
+          variantSizeValue = String(variant.option1 || '')
+            .trim()
+            .toLowerCase();
+        else if (sizePosition === 2)
+          variantSizeValue = String(variant.option2 || '')
+            .trim()
+            .toLowerCase();
+        else if (sizePosition === 3)
+          variantSizeValue = String(variant.option3 || '')
+            .trim()
+            .toLowerCase();
         sizeMatch = variantSizeValue === normalizedSize;
         return colorMatch && sizeMatch;
       }
@@ -1166,9 +1195,10 @@ class CustomCardVariantOptions {
 
     // Method 2: Check if variant has a featured_image property (legacy/fallback)
     if (variant.featured_image) {
-      const imageUrl = typeof variant.featured_image === 'string'
-        ? variant.featured_image
-        : variant.featured_image.src || variant.featured_image;
+      const imageUrl =
+        typeof variant.featured_image === 'string'
+          ? variant.featured_image
+          : variant.featured_image.src || variant.featured_image;
 
       if (imageUrl) {
         return {
@@ -1207,7 +1237,7 @@ class CustomCardVariantOptions {
         // Method 2: Check if media.variants array contains this variant
         if (media.variants && Array.isArray(media.variants)) {
           return media.variants.some((v) => {
-            const variantId = typeof v === 'object' ? (v.id || v) : v;
+            const variantId = typeof v === 'object' ? v.id || v : v;
             return variantId === variant.id;
           });
         }
