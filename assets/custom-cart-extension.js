@@ -5,6 +5,9 @@ class CartExtension {
 
   connectedCallback() {
     this.cartUpdateUnsubscriber = subscribe(PUB_SUB_EVENTS.cartUpdate, (event) => {
+      if (event.source === 'cart-extension') {
+        return;
+      }
       if (event.source === 'cart-items') {
         fetch(`${routes.cart_url}.js`)
           .then((response) => response.json())
