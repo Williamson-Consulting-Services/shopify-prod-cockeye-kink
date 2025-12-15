@@ -17,8 +17,8 @@
         "announcement_ANbpdc": {
           "type": "announcement",
           "settings": {
-            "text": "Welcome to our store",
-            "link": ""
+            "text": "End of Year Sale! Up to $75 off and free shipping. While supplies last...",
+            "link": "shopify://collections/sale"
           }
         }
       },
