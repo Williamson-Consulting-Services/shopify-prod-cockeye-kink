@@ -602,7 +602,7 @@ class CustomCardVariantOptions {
       // Check if variant matches all other selected options
       let hasAllOtherOptions = true;
       for (const [optionName, optionValue] of Object.entries(otherSelections)) {
-        const optionPosition = this.optionPositions?.[optionName];
+        const optionPosition = this.optionPositions && this.optionPositions[optionName];
         if (optionPosition) {
           let optionMatch = false;
           if (optionPosition === 1) optionMatch = variant.option1 === optionValue;
@@ -1011,7 +1011,7 @@ class CustomCardVariantOptions {
       // Check all other selected options
       let allOtherOptionsMatch = true;
       for (const [optionName, optionValue] of Object.entries(otherSelections)) {
-        const optionPosition = this.optionPositions?.[optionName];
+        const optionPosition = this.optionPositions && this.optionPositions[optionName];
         if (optionPosition) {
           let optionMatch = false;
           if (optionPosition === 1) optionMatch = variant.option1 === optionValue;
