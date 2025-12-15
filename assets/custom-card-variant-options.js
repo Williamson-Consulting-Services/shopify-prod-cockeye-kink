@@ -957,16 +957,10 @@ if (typeof CustomCardVariantOptions === 'undefined') {
         const quickAddButton = this.card.querySelector('.quick-add__submit[data-product-url]');
         if (!quickAddButton) return;
 
-        // Intercept quick add button click for direct add or to prevent modal when options not selected
+        // Intercept quick add button click for direct add
         quickAddButton.addEventListener(
           'click',
           (e) => {
-            // Check if all required options are selected
-            const allRequiredSelected = this.uiUpdater
-              ? this.uiUpdater.hasAllRequiredOptionsSelected(this.selectedOptions)
-              : false;
-
-            // If direct add is enabled and we have a variant ID, add directly
             if (quickAddButton.getAttribute('data-direct-add') === 'true') {
               const variantId = quickAddButton.getAttribute('data-selected-variant-id');
               if (variantId) {
@@ -976,28 +970,6 @@ if (typeof CustomCardVariantOptions === 'undefined') {
                 this.addToCartDirectly(variantId, quickAddButton);
                 return false;
               }
-            }
-
-            // If not all required options are selected, prevent opening the modal
-            // Also check button text/disabled state as a fallback
-            const buttonText = quickAddButton.textContent.trim().toLowerCase();
-            const isChooseOptionsButton = buttonText.includes('choose') || buttonText.includes('options');
-            const isButtonDisabled = quickAddButton.disabled;
-
-            if (!allRequiredSelected || isChooseOptionsButton || isButtonDisabled) {
-              e.preventDefault();
-              e.stopPropagation();
-              e.stopImmediatePropagation();
-              if (DEBUG.cart) {
-                console.log('[CustomCardVariantOptions] Prevented modal open:', {
-                  allRequiredSelected,
-                  isChooseOptionsButton,
-                  isButtonDisabled,
-                  selectedOptions: this.selectedOptions,
-                  buttonText: quickAddButton.textContent.trim(),
-                });
-              }
-              return false;
             }
           },
           true,

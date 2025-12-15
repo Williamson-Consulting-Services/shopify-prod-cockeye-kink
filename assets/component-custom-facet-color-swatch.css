@@ -10,6 +10,8 @@
   gap: 0.4rem;
   align-items: center;
   flex-direction: row;
+  padding: 0.5rem 0; /* Add padding to prevent outline overlap */
+  margin-top: 0.5rem; /* Add margin to separate from outline */
 }
 
 /* Individual swatch wrapper */
@@ -50,6 +52,11 @@
   align-items: center;
   justify-content: center;
   position: relative;
+  /* Ensure background images display correctly */
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  background-origin: border-box;
 }
 
 /* Hover state */
@@ -129,6 +136,31 @@
   margin: 0;
   padding: 0;
   width: auto;
+}
+
+/* Fix outline overlap - ensure disclosure border doesn't cross swatches */
+.facets__disclosure:has(.facets__list:has(.custom-facet-color-swatch)) .facets__summary {
+  margin-bottom: 0.5rem; /* Reduce margin to prevent overlap */
+}
+
+.facets__disclosure:has(.facets__list:has(.custom-facet-color-swatch)) .facets__display,
+.facets__disclosure:has(.facets__list:has(.custom-facet-color-swatch)) .facets__display-vertical {
+  padding-top: 0; /* Remove top padding to prevent outline overlap */
+}
+
+/* Ensure swatch background images display correctly */
+.custom-facet-color-swatch .swatch-input__label .swatch,
+.custom-facet-color-swatch__label .swatch {
+  background-image: var(--swatch--background, none);
+  background-repeat: no-repeat;
+  background-position: var(--swatch-focal-point, center);
+  background-size: cover;
+  background-origin: border-box;
+}
+
+/* Override any conflicting background styles */
+.custom-facet-color-swatch .swatch-input__label .swatch[style*='--swatch--background'] {
+  background-image: var(--swatch--background) !important;
 }
 
 /* Mobile adjustments */

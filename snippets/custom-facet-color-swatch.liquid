@@ -35,7 +35,7 @@
   endif
 -%}
 
-{%- if is_color_filter -%}
+  {%- if is_color_filter -%}
   {%- comment -%} Render as swatch for color filters (matching product page style) {%- endcomment -%}
   <div class="custom-facet-color-swatch">
     {%- if value.swatch -%}
@@ -47,7 +47,8 @@
         product_form_id: product_form_id,
         swatch: value.swatch,
         checked: value.active,
-        disabled: is_disabled
+        disabled: is_disabled,
+        shape: 'square'
       %}
     {%- else -%}
       {%- comment -%} Fallback: Generate swatch from value name {%- endcomment -%}
@@ -87,7 +88,8 @@
         product_form_id: product_form_id,
         swatch: value.swatch,
         checked: value.active,
-        disabled: is_disabled
+        disabled: is_disabled,
+        shape: 'square'
       %}
     </div>
   {%- else -%}
