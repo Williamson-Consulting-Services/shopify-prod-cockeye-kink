@@ -189,7 +189,7 @@ if (typeof CustomCardVariantOptions === 'undefined') {
             }
 
             this.dataLoaded = true;
-            this.updateAllAvailability();
+            this.updateAllAvailability(this.selectedOptions);
             this.updateAddToCartButton();
             this.updateInventoryDisplay();
 
@@ -292,7 +292,7 @@ if (typeof CustomCardVariantOptions === 'undefined') {
 
         // Update UI (always update, even for unavailable options)
         this.updateSelectionUI(normalizedName, value);
-        this.updateAllAvailability();
+        this.updateAllAvailability(this.selectedOptions);
         this.updateAddToCartButton();
         this.updateInventoryDisplay();
 

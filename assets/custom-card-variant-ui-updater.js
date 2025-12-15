@@ -29,43 +29,41 @@ if (typeof CustomCardVariantUIUpdater === 'undefined') {
         console.log('Variants Count:', this.variants.length);
         console.log('Config:', this.config);
 
-        // Only mark options as unavailable if they're truly unavailable (no variants exist)
-        // Don't grey out options based on current selections - just highlight selected ones
-        // The initial availability is set in Liquid, we only update if variants change
-
-        // Update color availability - check if option has any available variants
+        // Update color availability - check with current selections (excluding color itself)
         if (this.config.colorPosition) {
           this.container.querySelectorAll('[data-option-type="color"]').forEach((option) => {
             const colorValue = option.getAttribute('data-option-value');
-            // Only check if this option has any available variants at all (not based on current selections)
+            // Check availability with current selections (size, other options) but not this color
+            const testSelections = this.buildTestSelections(selectedOptions, 'color');
             const isAvailable = this.checkOptionAvailability(
               'color',
               colorValue,
               this.config.colorPosition,
-              {}, // Check without current selections - just if option exists
+              testSelections,
             );
             console.log(`Color "${colorValue}": ${isAvailable ? 'AVAILABLE' : 'UNAVAILABLE'}`);
             this.setOptionAvailability(option, isAvailable);
           });
         }
 
-        // Update size availability - check if option has any available variants
+        // Update size availability - check with current selections (excluding size itself)
         if (this.config.sizePosition) {
           this.container.querySelectorAll('[data-option-type="size"]').forEach((option) => {
             const sizeValue = option.getAttribute('data-option-value');
-            // Only check if this option has any available variants at all (not based on current selections)
+            // Check availability with current selections (color, other options) but not this size
+            const testSelections = this.buildTestSelections(selectedOptions, 'size');
             const isAvailable = this.checkOptionAvailability(
               'size',
               sizeValue,
               this.config.sizePosition,
-              {}, // Check without current selections - just if option exists
+              testSelections,
             );
             console.log(`Size "${sizeValue}": ${isAvailable ? 'AVAILABLE' : 'UNAVAILABLE'}`);
             this.setOptionAvailability(option, isAvailable);
           });
         }
 
-        // Update other options availability - check if option has any available variants
+        // Update other options availability - check with current selections (excluding this option)
         if (this.config.otherOptions) {
           Object.keys(this.config.otherOptions).forEach((optionName) => {
             const position = this.config.otherOptions[optionName];
@@ -73,8 +71,9 @@ if (typeof CustomCardVariantUIUpdater === 'undefined') {
               .querySelectorAll(`[data-option-type="other"][data-option-name="${this.escapeSelector(optionName)}"]`)
               .forEach((option) => {
                 const optionValue = option.getAttribute('data-option-value');
-                // Only check if this option has any available variants at all (not based on current selections)
-                const isAvailable = this.checkOptionAvailability(optionName, optionValue, position, {});
+                // Check availability with current selections but not this option
+                const testSelections = this.buildTestSelections(selectedOptions, optionName);
+                const isAvailable = this.checkOptionAvailability(optionName, optionValue, position, testSelections);
                 console.log(`${optionName} "${optionValue}": ${isAvailable ? 'AVAILABLE' : 'UNAVAILABLE'}`);
                 this.setOptionAvailability(option, isAvailable);
               });
@@ -82,6 +81,14 @@ if (typeof CustomCardVariantUIUpdater === 'undefined') {
         }
 
         console.groupEnd();
+      }
+
+      buildTestSelections(selectedOptions, excludeOptionName) {
+        // Build test selections with current selections, excluding the option we're testing
+        const testSelections = Object.assign({}, selectedOptions);
+        const normalizedExclude = this.normalizeOptionName(excludeOptionName);
+        delete testSelections[normalizedExclude];
+        return testSelections;
       }
 
       checkOptionAvailability(optionName, optionValue, position, selectedOptions) {
