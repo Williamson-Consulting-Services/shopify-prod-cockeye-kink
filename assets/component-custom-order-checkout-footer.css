@@ -160,15 +160,19 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background-color 150ms ease, height 200ms ease;
+  transition:
+    background-color 150ms ease,
+    height 200ms ease;
 }
 
 .checkout-footer__minimized-bar:hover,
 .checkout-footer__minimized-bar:focus-within {
   height: 12px;
-  background-color: color-mix(in srgb,
-      rgb(var(--color-background, 18, 18, 18)) 95%,
-      rgb(var(--color-foreground, 255, 255, 255)));
+  background-color: color-mix(
+    in srgb,
+    rgb(var(--color-background, 18, 18, 18)) 95%,
+    rgb(var(--color-foreground, 255, 255, 255))
+  );
 }
 
 .checkout-footer__minimized-icon {
@@ -178,7 +182,9 @@
   transform: translate(-50%, -50%) rotate(180deg);
   color: rgb(var(--color-foreground, 255, 255, 255));
   opacity: 0.5;
-  transition: opacity 150ms ease, transform 200ms ease;
+  transition:
+    opacity 150ms ease,
+    transform 200ms ease;
   pointer-events: none;
 }
 
@@ -193,7 +199,6 @@
 }
 
 @keyframes minimize-pulse {
-
   0%,
   100% {
     opacity: 0.5;
