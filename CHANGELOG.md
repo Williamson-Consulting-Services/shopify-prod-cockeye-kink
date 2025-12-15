@@ -37,6 +37,12 @@ See [Version Tracking Workflow](../.cursor/version-tracking-workflow.mdc) for de
 
 - (Items will be listed here)
 
+## [15.4.1.3] - 2025-12-15
+
+### Updated
+
+Custom text template for tags now accepts variable input based on product metaobject field custom.custom_message_max_characters.
+
 ## [15.4.1.2] - 2025-12-14
 
 ### Added
