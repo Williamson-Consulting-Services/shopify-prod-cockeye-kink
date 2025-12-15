@@ -167,9 +167,7 @@
           }
         }
       },
-      "block_order": [
-        "column-1"
-      ],
+      "block_order": ["column-1"],
       "disabled": true,
       "settings": {
         "title": "",
@@ -189,9 +187,5 @@
       }
     }
   },
-  "order": [
-    "main",
-    "related-products",
-    "multicolumn"
-  ]
+  "order": ["main", "related-products", "multicolumn"]
 }

@@ -29,10 +29,7 @@
           "settings": {}
         }
       },
-      "block_order": [
-        "subtotal",
-        "buttons"
-      ],
+      "block_order": ["subtotal", "buttons"],
       "settings": {
         "color_scheme": "scheme-3",
         "padding_top": 40,
@@ -68,9 +65,5 @@
       }
     }
   },
-  "order": [
-    "cart-items",
-    "cart-footer",
-    "featured-collection"
-  ]
+  "order": ["cart-items", "cart-footer", "featured-collection"]
 }

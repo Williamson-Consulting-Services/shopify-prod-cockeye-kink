@@ -50,7 +50,7 @@ if (typeof CustomCardVariantUIUpdater === 'undefined') {
               'color',
               colorValue,
               this.config.colorPosition,
-              testSelections
+              testSelections,
             );
             if (DEBUG.availability) console.log(`Color "${colorValue}": ${isAvailable ? 'AVAILABLE' : 'UNAVAILABLE'}`);
             this.setOptionAvailability(option, isAvailable);
@@ -67,7 +67,7 @@ if (typeof CustomCardVariantUIUpdater === 'undefined') {
               'size',
               sizeValue,
               this.config.sizePosition,
-              testSelections
+              testSelections,
             );
             if (DEBUG.availability) console.log(`Size "${sizeValue}": ${isAvailable ? 'AVAILABLE' : 'UNAVAILABLE'}`);
             this.setOptionAvailability(option, isAvailable);
@@ -174,7 +174,7 @@ if (typeof CustomCardVariantUIUpdater === 'undefined') {
                     inventory_management: variant.inventory_management,
                     inventory_quantity: variant.inventory_quantity,
                     available: variant.available,
-                  }
+                  },
                 );
               }
               return isAvailable;
@@ -233,7 +233,7 @@ if (typeof CustomCardVariantUIUpdater === 'undefined') {
                   inventory_management: variant.inventory_management,
                   inventory_quantity: variant.inventory_quantity,
                   available: variant.available,
-                }
+                },
               );
             }
             return isAvailable;
@@ -330,7 +330,8 @@ if (typeof CustomCardVariantUIUpdater === 'undefined') {
               if (DEBUG.cart) console.log('[UIUpdater] Enabled direct add to cart - all options selected');
             } else {
               quickAddButton.removeAttribute('data-direct-add');
-              if (DEBUG.cart) console.log('[UIUpdater] Disabled direct add - options not complete or variant unavailable');
+              if (DEBUG.cart)
+                console.log('[UIUpdater] Disabled direct add - options not complete or variant unavailable');
             }
           }
 
@@ -402,15 +403,15 @@ if (typeof CustomCardVariantUIUpdater === 'undefined') {
           state === 'addToCart'
             ? this.translations.addToCart
             : state === 'soldOut'
-            ? this.translations.soldOut
-            : this.translations.chooseOptions;
+              ? this.translations.soldOut
+              : this.translations.chooseOptions;
 
         // Find text element
         let textElement = button.querySelector('span:first-child:not(.icon-wrap):not(.loading__spinner)');
 
         if (!textElement) {
           const textNodes = Array.from(button.childNodes).filter(
-            (node) => node.nodeType === Node.TEXT_NODE && node.textContent.trim()
+            (node) => node.nodeType === Node.TEXT_NODE && node.textContent.trim(),
           );
           if (textNodes.length > 0) {
             textElement = document.createElement('span');
