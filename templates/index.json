@@ -22,7 +22,7 @@
         "text": {
           "type": "text",
           "settings": {
-            "text": "Bringing cutting-edge technology to the forefront of fetish",
+            "text": "<strong>Bringing cutting-edge technology to the forefront of fetish</strong>",
             "text_style": "subtitle"
           }
         },
@@ -38,13 +38,17 @@
           }
         }
       },
-      "block_order": ["heading", "text", "button"],
+      "block_order": [
+        "heading",
+        "text",
+        "button"
+      ],
       "custom_css": [],
       "settings": {
         "image": "shopify://shop_images/cockeye_header.jpg",
-        "image_overlay_opacity": 30,
+        "image_overlay_opacity": 60,
         "image_height": "medium",
-        "image_behavior": "none",
+        "image_behavior": "zoom-in",
         "desktop_content_position": "middle-center",
         "desktop_content_alignment": "center",
         "show_text_box": false,
@@ -157,7 +161,11 @@
           }
         }
       },
-      "block_order": ["collection-0", "product", "collection-1"],
+      "block_order": [
+        "collection-0",
+        "product",
+        "collection-1"
+      ],
       "settings": {
         "heading": "",
         "heading_size": "h2",
@@ -228,7 +236,10 @@
           }
         }
       },
-      "block_order": ["column1", "column2"],
+      "block_order": [
+        "column1",
+        "column2"
+      ],
       "settings": {
         "title": "",
         "heading_size": "h1",
