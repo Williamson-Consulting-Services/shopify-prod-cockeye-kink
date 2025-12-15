@@ -63,6 +63,13 @@
           "type": "description",
           "settings": {}
         },
+        "text_93jaBm": {
+          "type": "text",
+          "settings": {
+            "text": "If your size or color options is not available you would like to customize your order, contact us at <a href=\"mailto:info@cockeyekink.com\">info@cockeyekink.com</a> to schedule a video consultation. Please note, custom orders may take some time.",
+            "text_style": "body"
+          }
+        },
         "collapsible_tab_CdzfPc": {
           "type": "collapsible_tab",
           "settings": {
@@ -107,6 +114,7 @@
         "buy_buttons",
         "text_9KfHT4",
         "description",
+        "text_93jaBm",
         "collapsible_tab_CdzfPc",
         "collapsible-row-0",
         "collapsible-row-1",
