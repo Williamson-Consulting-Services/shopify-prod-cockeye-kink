@@ -29,37 +29,43 @@ if (typeof CustomCardVariantUIUpdater === 'undefined') {
         console.log('Variants Count:', this.variants.length);
         console.log('Config:', this.config);
 
-        // Update color availability
+        // Only mark options as unavailable if they're truly unavailable (no variants exist)
+        // Don't grey out options based on current selections - just highlight selected ones
+        // The initial availability is set in Liquid, we only update if variants change
+
+        // Update color availability - check if option has any available variants
         if (this.config.colorPosition) {
           this.container.querySelectorAll('[data-option-type="color"]').forEach((option) => {
             const colorValue = option.getAttribute('data-option-value');
+            // Only check if this option has any available variants at all (not based on current selections)
             const isAvailable = this.checkOptionAvailability(
               'color',
               colorValue,
               this.config.colorPosition,
-              selectedOptions,
+              {}, // Check without current selections - just if option exists
             );
             console.log(`Color "${colorValue}": ${isAvailable ? 'AVAILABLE' : 'UNAVAILABLE'}`);
             this.setOptionAvailability(option, isAvailable);
           });
         }
 
-        // Update size availability
+        // Update size availability - check if option has any available variants
         if (this.config.sizePosition) {
           this.container.querySelectorAll('[data-option-type="size"]').forEach((option) => {
             const sizeValue = option.getAttribute('data-option-value');
+            // Only check if this option has any available variants at all (not based on current selections)
             const isAvailable = this.checkOptionAvailability(
               'size',
               sizeValue,
               this.config.sizePosition,
-              selectedOptions,
+              {}, // Check without current selections - just if option exists
             );
             console.log(`Size "${sizeValue}": ${isAvailable ? 'AVAILABLE' : 'UNAVAILABLE'}`);
             this.setOptionAvailability(option, isAvailable);
           });
         }
 
-        // Update other options availability
+        // Update other options availability - check if option has any available variants
         if (this.config.otherOptions) {
           Object.keys(this.config.otherOptions).forEach((optionName) => {
             const position = this.config.otherOptions[optionName];
@@ -67,7 +73,8 @@ if (typeof CustomCardVariantUIUpdater === 'undefined') {
               .querySelectorAll(`[data-option-type="other"][data-option-name="${this.escapeSelector(optionName)}"]`)
               .forEach((option) => {
                 const optionValue = option.getAttribute('data-option-value');
-                const isAvailable = this.checkOptionAvailability(optionName, optionValue, position, selectedOptions);
+                // Only check if this option has any available variants at all (not based on current selections)
+                const isAvailable = this.checkOptionAvailability(optionName, optionValue, position, {});
                 console.log(`${optionName} "${optionValue}": ${isAvailable ? 'AVAILABLE' : 'UNAVAILABLE'}`);
                 this.setOptionAvailability(option, isAvailable);
               });
@@ -247,7 +254,10 @@ if (typeof CustomCardVariantUIUpdater === 'undefined') {
         const addToCartButton = this.card.querySelector('[data-type="add-to-cart-form"] button[type="submit"]');
         const quickAddButton = this.card.querySelector('.quick-add__submit');
         const button = addToCartButton || quickAddButton;
-        if (!button) return;
+        if (!button) {
+          console.warn('[UIUpdater] No add to cart button found');
+          return;
+        }
 
         // Find matching variant
         const variant = findMatchingVariant();
@@ -255,22 +265,35 @@ if (typeof CustomCardVariantUIUpdater === 'undefined') {
         if (variant) {
           const isAvailable = this.isVariantAvailable(variant);
 
-          // Update variant ID
-          const variantIdInput = this.card.querySelector('.product-variant-id');
+          // Update variant ID - check multiple possible selectors
+          let variantIdInput = this.card.querySelector('.product-variant-id');
+          if (!variantIdInput) {
+            variantIdInput = this.card.querySelector('input[name="id"]');
+          }
+          if (!variantIdInput) {
+            variantIdInput = this.card.querySelector('input[type="hidden"][name="id"]');
+          }
+
           if (variantIdInput) {
             variantIdInput.value = variant.id;
             variantIdInput.disabled = !isAvailable;
+            console.log('[UIUpdater] Updated variant ID input:', variant.id);
+          } else {
+            console.warn('[UIUpdater] No variant ID input found');
           }
 
           if (quickAddButton) {
             quickAddButton.setAttribute('data-selected-variant-id', variant.id);
+            console.log('[UIUpdater] Set data-selected-variant-id:', variant.id);
 
             // Check if we can add directly (only color and size)
             const hasOnlyColorAndSize = this.hasOnlyColorAndSize();
             if (hasOnlyColorAndSize && selectedOptions.color && selectedOptions.size) {
               quickAddButton.setAttribute('data-direct-add', 'true');
+              console.log('[UIUpdater] Enabled direct add to cart');
             } else {
               quickAddButton.removeAttribute('data-direct-add');
+              console.log('[UIUpdater] Disabled direct add (requires modal)');
             }
           }
 
@@ -278,6 +301,8 @@ if (typeof CustomCardVariantUIUpdater === 'undefined') {
           this.updateButtonText(button, isAvailable ? 'addToCart' : 'soldOut');
         } else {
           // No matching variant
+          console.warn('[UIUpdater] No matching variant found for selections:', selectedOptions);
+
           if (quickAddButton) {
             quickAddButton.removeAttribute('data-selected-variant-id');
             quickAddButton.removeAttribute('data-direct-add');

@@ -216,13 +216,16 @@ if (typeof CustomCardVariantOptions === 'undefined') {
           });
 
           // Hover for image preview (load data if needed)
-          option.addEventListener('mouseenter', () => {
+          option.addEventListener('mouseenter', async () => {
+            const colorValue = option.getAttribute('data-option-value');
+
             // Trigger data load if not loaded yet
             if (!this.dataLoaded && !this.isLoading) {
-              this.loadProductData();
+              await this.loadProductData();
             }
-            const colorValue = option.getAttribute('data-option-value');
-            if (this.imageHandler) {
+
+            // Update image after data is loaded
+            if (this.imageHandler && this.variants.length > 0) {
               this.imageHandler.updateImage(colorValue, true);
             }
           });
@@ -504,12 +507,19 @@ if (typeof CustomCardVariantOptions === 'undefined') {
       }
 
       async addToCartDirectly(variantId, button) {
-        if (!variantId) return;
+        if (!variantId) {
+          console.error('[CustomCardVariantOptions] No variant ID provided for direct add');
+          return;
+        }
 
+        console.log('[CustomCardVariantOptions] Adding to cart directly, variant ID:', variantId);
         button.disabled = true;
         button.classList.add('loading');
 
         try {
+          // Get cart notification or drawer
+          const cart = document.querySelector('cart-notification') || document.querySelector('cart-drawer');
+          
           const routes = window.Shopify && window.Shopify.routes ? window.Shopify.routes : {};
           const cartAddUrl = routes.cart_add_url || '/cart/add.js';
 
@@ -517,24 +527,68 @@ if (typeof CustomCardVariantOptions === 'undefined') {
           formData.append('id', variantId);
           formData.append('quantity', 1);
 
-          const response = await fetch(cartAddUrl, {
-            method: 'POST',
-            body: formData,
-          });
+          // Request sections for cart notification (same as product-form.js)
+          if (cart && cart.getSectionsToRender) {
+            const sections = cart.getSectionsToRender().map((section) => section.id);
+            if (sections.length > 0) {
+              formData.append('sections', sections.join(','));
+              formData.append('sections_url', window.location.pathname);
+            }
+            cart.setActiveElement(document.activeElement);
+          }
+
+          console.log('[CustomCardVariantOptions] Sending request to:', cartAddUrl);
+
+          // Use fetchConfig if available (same as product-form.js)
+          let config = { method: 'POST', body: formData };
+          if (typeof fetchConfig === 'function') {
+            config = fetchConfig('javascript');
+            config.headers['X-Requested-With'] = 'XMLHttpRequest';
+            delete config.headers['Content-Type'];
+            config.body = formData;
+          } else {
+            // Fallback if fetchConfig not available
+            config = {
+              method: 'POST',
+              headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+              },
+              body: formData,
+            };
+          }
+
+          const response = await fetch(cartAddUrl, config);
 
           if (response.ok) {
             const data = await response.json();
+            console.log('[CustomCardVariantOptions] Add to cart successful:', data);
+
+            // Check for errors
+            if (data.status) {
+              console.error('[CustomCardVariantOptions] Add to cart error:', data.description || data.message);
+              return;
+            }
+
+            // Publish cart update event
+            const PUB_SUB_EVENTS = window.PUB_SUB_EVENTS || { cartUpdate: 'cart-update' };
             if (typeof publish === 'function') {
-              publish('cartUpdate', {
-                cartState: data,
-                itemCount: data.item_count,
-                customOrderItemAdded: true,
+              publish(PUB_SUB_EVENTS.cartUpdate, {
                 source: 'product-card',
+                productVariantId: variantId,
+                cartData: data,
               });
             }
+
+            // Render cart notification (same as product-form.js)
+            if (cart && cart.renderContents) {
+              cart.renderContents(data);
+            }
+          } else {
+            const errorData = await response.json().catch(() => ({}));
+            console.error('[CustomCardVariantOptions] Add to cart failed:', response.status, errorData);
           }
         } catch (error) {
-          console.error('Error adding to cart:', error);
+          console.error('[CustomCardVariantOptions] Error adding to cart:', error);
         } finally {
           button.disabled = false;
           button.classList.remove('loading');

@@ -36,12 +36,24 @@ if (typeof CustomCardVariantImageHandler === 'undefined') {
           return;
         }
 
-        const cardImage = this.card.querySelector('.card__media img');
-        if (!cardImage) return;
+        // Find card image - try multiple selectors
+        let cardImage = this.card.querySelector('.card__media img');
+        if (!cardImage) {
+          cardImage = this.card.querySelector('.media img');
+        }
+        if (!cardImage) {
+          cardImage = this.card.querySelector('img');
+        }
+
+        if (!cardImage) {
+          console.warn('[ImageHandler] No card image found');
+          return;
+        }
 
         // Find variant with this color
         const variant = this.findVariantByColor(colorValue);
         if (!variant) {
+          console.warn('[ImageHandler] No variant found for color:', colorValue);
           if (!isHover) this.restoreDefaultImage();
           return;
         }
@@ -49,6 +61,7 @@ if (typeof CustomCardVariantImageHandler === 'undefined') {
         // Get variant image
         const imageData = this.getVariantImage(variant);
         if (!imageData || !imageData.src) {
+          console.warn('[ImageHandler] No image data for variant:', variant.id);
           if (!isHover) this.restoreDefaultImage();
           return;
         }
@@ -70,6 +83,8 @@ if (typeof CustomCardVariantImageHandler === 'undefined') {
         if (imageData.alt) {
           cardImage.setAttribute('alt', imageData.alt);
         }
+
+        console.log('[ImageHandler] Updated image for color:', colorValue, 'URL:', srcUrl);
       }
 
       findVariantByColor(colorValue) {
