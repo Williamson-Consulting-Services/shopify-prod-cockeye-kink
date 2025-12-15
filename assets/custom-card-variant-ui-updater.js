@@ -427,8 +427,8 @@ if (typeof CustomCardVariantUIUpdater === 'undefined') {
           button.textContent = text;
         }
 
-        // Update disabled state
-        button.disabled = state === 'soldOut';
+        // Update disabled state - disable when sold out OR when showing "Choose options"
+        button.disabled = state === 'soldOut' || state === 'chooseOptions';
       }
 
       updateInventoryDisplay(selectedOptions, findMatchingVariant, availabilityMatrix) {
