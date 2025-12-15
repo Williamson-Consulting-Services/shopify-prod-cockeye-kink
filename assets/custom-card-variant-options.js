@@ -350,11 +350,43 @@ class CustomCardVariantOptions {
     option.classList.add('custom-card-variant-options__option--selected');
     this.selectedColor = option.getAttribute('data-option-value') || option.getAttribute('title');
 
-    // Remove unavailable class from selected color (it might have been marked unavailable initially)
-    option.classList.remove('custom-card-variant-options__option--unavailable');
-
-    // Update size availability based on selected color
+    // Update size availability based on selected color (this will update unavailable states correctly)
     this.updateSizeAvailability();
+
+    // Update color availability to ensure selected color shows correct state
+    // Check if the selected color is available with any size (or selected size if size is selected)
+    if (this.selectedSize) {
+      const isAvailable = this.isVariantAvailable(this.selectedColor, this.selectedSize);
+      if (isAvailable) {
+        option.classList.remove('custom-card-variant-options__option--unavailable');
+      } else {
+        option.classList.add('custom-card-variant-options__option--unavailable');
+      }
+    } else {
+      // If no size selected, check if color is available with any size
+      const hasAvailableVariant = this.variants.some((variant) => {
+        const colorPosition = parseInt(this.container.getAttribute('data-color-position')) || 1;
+        let colorMatch = false;
+        if (colorPosition === 1) colorMatch = variant.option1 === this.selectedColor;
+        else if (colorPosition === 2) colorMatch = variant.option2 === this.selectedColor;
+        else if (colorPosition === 3) colorMatch = variant.option3 === this.selectedColor;
+
+        if (colorMatch) {
+          if (variant.inventory_management === 'shopify') {
+            return variant.inventory_quantity > 0;
+          }
+          return variant.available;
+        }
+        return false;
+      });
+
+      if (hasAvailableVariant) {
+        option.classList.remove('custom-card-variant-options__option--unavailable');
+      } else {
+        option.classList.add('custom-card-variant-options__option--unavailable');
+      }
+    }
+
     this.updateAddToCartButton();
     // Update image on selection
     this.updateCardImage(this.selectedColor, false);
@@ -375,11 +407,43 @@ class CustomCardVariantOptions {
       option.getAttribute('data-option-value') ||
       option.querySelector('.custom-card-variant-options__button-text')?.textContent.trim();
 
-    // Remove unavailable class from selected size (it might have been marked unavailable initially)
-    option.classList.remove('custom-card-variant-options__option--unavailable');
-
-    // Update color availability based on selected size
+    // Update color availability based on selected size (this will update unavailable states correctly)
     this.updateColorAvailability();
+
+    // Update size availability to ensure selected size shows correct state
+    // Check if the selected size is available with selected color (or any color if no color selected)
+    if (this.selectedColor) {
+      const isAvailable = this.isVariantAvailable(this.selectedColor, this.selectedSize);
+      if (isAvailable) {
+        option.classList.remove('custom-card-variant-options__option--unavailable');
+      } else {
+        option.classList.add('custom-card-variant-options__option--unavailable');
+      }
+    } else {
+      // If no color selected, check if size is available with any color
+      const hasAvailableVariant = this.variants.some((variant) => {
+        const sizePosition = parseInt(this.container.getAttribute('data-size-position')) || 2;
+        let sizeMatch = false;
+        if (sizePosition === 1) sizeMatch = variant.option1 === this.selectedSize;
+        else if (sizePosition === 2) sizeMatch = variant.option2 === this.selectedSize;
+        else if (sizePosition === 3) sizeMatch = variant.option3 === this.selectedSize;
+
+        if (sizeMatch) {
+          if (variant.inventory_management === 'shopify') {
+            return variant.inventory_quantity > 0;
+          }
+          return variant.available;
+        }
+        return false;
+      });
+
+      if (hasAvailableVariant) {
+        option.classList.remove('custom-card-variant-options__option--unavailable');
+      } else {
+        option.classList.add('custom-card-variant-options__option--unavailable');
+      }
+    }
+
     this.updateAddToCartButton();
   }
 
