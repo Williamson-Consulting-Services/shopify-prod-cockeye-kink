@@ -50,6 +50,14 @@ if (typeof CustomCardVariantImageHandler === 'undefined') {
       }
 
       updateImage(colorValue, isHover) {
+        // Guard: Check if card is still in DOM (prevents errors during cart updates)
+        if (!this.card || !document.body.contains(this.card)) {
+          if (DEBUG.image) {
+            console.warn('[ImageHandler] Card no longer in DOM, skipping image update');
+          }
+          return;
+        }
+
         if (DEBUG.image) {
           console.group('[ImageHandler] updateImage');
           console.log('Color Value:', colorValue);
@@ -345,6 +353,14 @@ if (typeof CustomCardVariantImageHandler === 'undefined') {
       }
 
       restoreDefaultImage() {
+        // Guard: Check if card is still in DOM (prevents errors during cart updates)
+        if (!this.card || !document.body.contains(this.card)) {
+          if (DEBUG.image) {
+            console.warn('[ImageHandler] Card no longer in DOM, skipping restore');
+          }
+          return;
+        }
+
         if (!this.defaultImage) return;
 
         const cardMedia = this.card.querySelector('.card__media');

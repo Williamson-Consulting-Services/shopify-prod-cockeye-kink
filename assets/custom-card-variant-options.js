@@ -238,11 +238,21 @@ if (typeof CustomCardVariantOptions === 'undefined') {
 
           // Individual swatch hover (for direct hover on specific swatch)
           option.addEventListener('mouseenter', async () => {
+            // Guard: Check if card is still in DOM (prevents errors during cart updates)
+            if (!this.card || !document.body.contains(this.card)) {
+              return;
+            }
+
             const colorValue = option.getAttribute('data-option-value');
 
             // Trigger data load if not loaded yet
             if (!this.dataLoaded && !this.isLoading) {
               await this.loadProductData();
+            }
+
+            // Guard: Check again after async operation
+            if (!this.card || !document.body.contains(this.card)) {
+              return;
             }
 
             // Update image handler with latest data
@@ -253,6 +263,10 @@ if (typeof CustomCardVariantOptions === 'undefined') {
 
               // Small delay to ensure data is processed
               setTimeout(() => {
+                // Guard: Check again before updating (cart updates might have removed card)
+                if (!this.card || !document.body.contains(this.card)) {
+                  return;
+                }
                 if (DEBUG.image) {
                   console.log('[CustomCardVariantOptions] Hover - updating image for color:', colorValue);
                   console.log('[CustomCardVariantOptions] Variants available:', this.variants.length);
@@ -266,6 +280,11 @@ if (typeof CustomCardVariantOptions === 'undefined') {
           });
 
           option.addEventListener('mouseleave', () => {
+            // Guard: Check if card is still in DOM (prevents errors during cart updates)
+            if (!this.card || !document.body.contains(this.card)) {
+              return;
+            }
+
             // Only restore if not hovering over swatch container (which handles its own hover)
             const swatchContainer = this.container.querySelector('.custom-card-variant-options__swatches');
             if (!swatchContainer || !swatchContainer.matches(':hover')) {
@@ -374,9 +393,19 @@ if (typeof CustomCardVariantOptions === 'undefined') {
         let hoverTimeout = null;
 
         swatchContainer.addEventListener('mouseenter', async () => {
+          // Guard: Check if card is still in DOM (prevents errors during cart updates)
+          if (!this.card || !document.body.contains(this.card)) {
+            return;
+          }
+
           // Trigger data load if not loaded yet
           if (!this.dataLoaded && !this.isLoading) {
             await this.loadProductData();
+          }
+
+          // Guard: Check again after async operation
+          if (!this.card || !document.body.contains(this.card)) {
+            return;
           }
 
           // Update image handler with latest data
@@ -387,6 +416,11 @@ if (typeof CustomCardVariantOptions === 'undefined') {
         });
 
         swatchContainer.addEventListener('mousemove', (e) => {
+          // Guard: Check if card is still in DOM (prevents errors during cart updates)
+          if (!this.card || !document.body.contains(this.card)) {
+            return;
+          }
+
           if (!this.imageHandler || colorValues.length === 0) return;
 
           // Clear any pending timeout
@@ -415,6 +449,10 @@ if (typeof CustomCardVariantOptions === 'undefined') {
 
           // Small debounce to avoid too many updates
           hoverTimeout = setTimeout(() => {
+            // Guard: Check again before updating (cart updates might have removed card)
+            if (!this.card || !document.body.contains(this.card)) {
+              return;
+            }
             if (this.imageHandler && colorValue) {
               this.imageHandler.updateImage(colorValue, true);
             }
@@ -422,6 +460,11 @@ if (typeof CustomCardVariantOptions === 'undefined') {
         });
 
         swatchContainer.addEventListener('mouseleave', () => {
+          // Guard: Check if card is still in DOM (prevents errors during cart updates)
+          if (!this.card || !document.body.contains(this.card)) {
+            return;
+          }
+
           // Clear any pending timeout
           if (hoverTimeout) {
             clearTimeout(hoverTimeout);
@@ -536,6 +579,11 @@ if (typeof CustomCardVariantOptions === 'undefined') {
       }
 
       restoreImageAfterHover() {
+        // Guard: Check if card is still in DOM (prevents errors during cart updates)
+        if (!this.card || !document.body.contains(this.card)) {
+          return;
+        }
+
         const selectedColor = this.getSelectedColor();
         if (this.imageHandler) {
           if (selectedColor) {

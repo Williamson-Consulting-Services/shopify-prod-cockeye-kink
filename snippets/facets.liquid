@@ -220,23 +220,27 @@
                             {%- endcapture -%}
 
                             <li class="list-menu__item facets__item{% if forloop.index > show_more_number and filter_type == 'vertical' %} show-more-item hidden{% endif %}">
-                              {%- if presentation == 'swatch' -%}
-                                <div class="{{ label_class }}">
-                                  <div class="swatch-input-wrapper">
-                                    {% render 'swatch-input',
-                                      id: input_id,
-                                      type: 'checkbox',
-                                      name: value.param_name,
-                                      value: value.value,
-                                      product_form_id: 'FacetFiltersForm',
-                                      swatch: value.swatch,
-                                      checked: value.active,
-                                      disabled: is_disabled
-                                    %}
-                                  </div>
+                              {%- liquid
+                                # Check if this is a color filter (custom extension)
+                                assign filter_param_lower = filter.param_name | downcase
+                                assign filter_label_lower = filter.label | downcase
+                                assign is_color_filter = false
 
-                                  {{ text_value }}
-                                </div>
+                                if filter_param_lower contains 'color' or filter_param_lower contains 'option.color' or filter_label_lower == 'color' or filter_label_lower == 'colour'
+                                  assign is_color_filter = true
+                                endif
+                              -%}
+                              {%- if is_color_filter or presentation == 'swatch' -%}
+                                {%- comment -%} Use custom extension for color filters or default swatch presentation {%- endcomment -%}
+                                {% render 'custom-facet-color-swatch',
+                                  filter: filter,
+                                  value: value,
+                                  input_id: input_id,
+                                  label_class: label_class,
+                                  text_value: text_value,
+                                  is_disabled: is_disabled,
+                                  product_form_id: 'FacetFiltersForm'
+                                %}
                               {%- else -%}
                                 <label for="{{ input_id }}" class="{{ label_class }}">
                                   <input
@@ -508,15 +512,16 @@
               class="mobile-facets__main has-submenu gradient"
             >
               {%- if enable_filtering -%}
-                {%- for filter in results.filters -%}
-                  {% liquid
-                    assign presentation = filter.presentation | default: default_presentation
-                    if presentation == 'image'
-                      assign visual_layout_class = 'facets-layout facets-layout-grid facets-layout-grid--' | append: presentation
-                    else
-                      assign visual_layout_class = 'facets-layout facets-layout-list facets-layout-list--' | append: presentation
-                    endif
-                  %}
+            {%- for filter in results.filters -%}
+              {% liquid
+                assign presentation = filter.presentation | default: default_presentation
+
+                if presentation == 'image'
+                  assign visual_layout_class = 'facets-layout facets-layout-grid facets-layout-grid--' | append: presentation
+                else
+                  assign visual_layout_class = 'facets-layout facets-layout-list facets-layout-list--' | append: presentation
+                endif
+              %}
 
                   {% case filter.type %}
                     {% when 'boolean', 'list' %}
@@ -589,23 +594,27 @@
                               {%- endcapture -%}
 
                               <li class="mobile-facets__item list-menu__item">
-                                {% if presentation == 'swatch' %}
-                                  <div class="{{ label_class }}">
-                                    <div class="swatch-input-wrapper">
-                                      {% render 'swatch-input',
-                                        id: input_id,
-                                        type: 'checkbox',
-                                        name: value.param_name,
-                                        value: value.value,
-                                        product_form_id: 'FacetFiltersFormMobile',
-                                        swatch: value.swatch,
-                                        checked: value.active,
-                                        disabled: is_disabled
-                                      %}
-                                    </div>
+                                {%- liquid
+                                  # Check if this is a color filter (custom extension)
+                                  assign filter_param_lower = filter.param_name | downcase
+                                  assign filter_label_lower = filter.label | downcase
+                                  assign is_color_filter = false
 
-                                    {{ text_value }}
-                                  </div>
+                                  if filter_param_lower contains 'color' or filter_param_lower contains 'option.color' or filter_label_lower == 'color' or filter_label_lower == 'colour'
+                                    assign is_color_filter = true
+                                  endif
+                                -%}
+                                {% if is_color_filter or presentation == 'swatch' %}
+                                  {%- comment -%} Use custom extension for color filters or default swatch presentation {%- endcomment -%}
+                                  {% render 'custom-facet-color-swatch',
+                                    filter: filter,
+                                    value: value,
+                                    input_id: input_id,
+                                    label_class: label_class,
+                                    text_value: text_value,
+                                    is_disabled: is_disabled,
+                                    product_form_id: 'FacetFiltersFormMobile'
+                                  %}
                                 {% else %}
                                   <label for="{{ input_id }}" class="{{ label_class }}">
                                     <input

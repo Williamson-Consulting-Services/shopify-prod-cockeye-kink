@@ -1,0 +1,136 @@
+{% comment %}
+  Custom extension for color filter swatches
+  Renders color filters with swatches instead of text checkboxes
+  Extends Dawn's facets without modifying base theme
+
+  Accepts:
+  - filter: {Object} Filter object
+  - value: {Object} Filter value object
+  - input_id: {String} Input ID
+  - label_class: {String} Label CSS class
+  - text_value: {String} Text value HTML
+  - is_disabled: {Boolean} Whether option is disabled
+  - product_form_id: {String} Form ID
+
+  Usage:
+  {% render 'custom-facet-color-swatch',
+    filter: filter,
+    value: value,
+    input_id: input_id,
+    label_class: label_class,
+    text_value: text_value,
+    is_disabled: is_disabled,
+    product_form_id: product_form_id
+  %}
+{% endcomment %}
+
+{%- liquid
+  # Check if this is a color filter
+  assign filter_param_lower = filter.param_name | downcase
+  assign filter_label_lower = filter.label | downcase
+  assign is_color_filter = false
+
+  if filter_param_lower contains 'color' or filter_param_lower contains 'option.color' or filter_label_lower == 'color' or filter_label_lower == 'colour'
+    assign is_color_filter = true
+  endif
+-%}
+
+{%- if is_color_filter -%}
+  {%- comment -%} Render as swatch for color filters {%- endcomment -%}
+  <div class="{{ label_class }}">
+    <div class="swatch-input-wrapper">
+      {%- if value.swatch -%}
+        {% render 'swatch-input',
+          id: input_id,
+          type: 'checkbox',
+          name: value.param_name,
+          value: value.value,
+          product_form_id: product_form_id,
+          swatch: value.swatch,
+          checked: value.active,
+          disabled: is_disabled
+        %}
+      {%- else -%}
+        {%- comment -%} Fallback: Generate swatch from value name {%- endcomment -%}
+        <input
+          type="checkbox"
+          id="{{ input_id }}"
+          name="{{ value.param_name }}"
+          value="{{ value.value }}"
+          form="{{ product_form_id }}"
+          class="swatch-input__input{% if is_disabled %} visually-disabled{% endif %}"
+          {% if value.active %}
+            checked
+          {% endif %}
+          {% if is_disabled %}
+            disabled
+          {% endif %}
+        >
+        <label
+          for="{{ input_id }}"
+          title="{{ value.label | escape }}"
+          class="swatch-input__label swatch-input__label--square"
+        >
+          {% render 'facet-swatch', swatch: value.swatch, value: value.label, shape: 'square' %}
+        </label>
+      {%- endif -%}
+    </div>
+
+    {{ text_value }}
+  </div>
+{%- else -%}
+  {%- comment -%} Fall back to default rendering for non-color filters {%- endcomment -%}
+  {%- if filter.presentation == 'swatch' -%}
+    <div class="{{ label_class }}">
+      <div class="swatch-input-wrapper">
+        {% render 'swatch-input',
+          id: input_id,
+          type: 'checkbox',
+          name: value.param_name,
+          value: value.value,
+          product_form_id: product_form_id,
+          swatch: value.swatch,
+          checked: value.active,
+          disabled: is_disabled
+        %}
+      </div>
+
+      {{ text_value }}
+    </div>
+  {%- else -%}
+    <label for="{{ input_id }}" class="{{ label_class }}">
+      <input
+        type="checkbox"
+        name="{{ value.param_name }}"
+        value="{{ value.value }}"
+        id="{{ input_id }}"
+        {% if value.active %}
+          checked
+        {% endif %}
+        {% if is_disabled %}
+          disabled
+        {% endif %}
+      >
+
+      {%- if filter.presentation == 'image' -%}
+        <div class="facets__image-wrapper">
+          {%- if value.image -%}
+            {{
+              value.image
+                | image_url: width: 300
+                | image_tag: class: 'facets__image', alt: value.alt
+            }}
+          {%- endif -%}
+        </div>
+      {%- else -%}
+        {{- 'square.svg' | inline_asset_content -}}
+
+        <div class="svg-wrapper">
+          {{- 'icon-checkmark.svg' | inline_asset_content -}}
+        </div>
+      {%- endif -%}
+
+      {{ text_value }}
+    </label>
+  {%- endif -%}
+{%- endif -%}
