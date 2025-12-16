@@ -65,9 +65,9 @@
         "span.price-item.price-item--sale.price-item--last {color: red;}"
       ],
       "settings": {
-        "collection": "sale",
+        "collection": "accessories",
         "products_to_show": 11,
-        "title": "End of Year Sale",
+        "title": "Featured",
         "heading_size": "h1",
         "description": "",
         "show_description": false,
