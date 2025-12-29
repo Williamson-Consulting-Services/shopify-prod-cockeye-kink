@@ -1,36 +1,40 @@
-const isCustomOrder = (formData, productTitle) => {
-  if (!formData) return false;
+// Prevent multiple executions if script is loaded multiple times
+if (!window._customProductFormExtensionInitialized) {
+  window._customProductFormExtensionInitialized = true;
 
-  // Use utility function if available
-  if (window.CustomOrderUtils && window.CustomOrderUtils.isCustomOrderFromFormData) {
-    return window.CustomOrderUtils.isCustomOrderFromFormData(formData, productTitle);
-  }
+  const isCustomOrder = (formData, productTitle) => {
+    if (!formData) return false;
 
-  // Fallback: Check product title
-  if (productTitle && window.CustomOrderUtils) {
-    const customOrderTitle = window.CustomOrderUtils.getCustomOrderProductTitle();
-    if (String(productTitle).trim().toLowerCase() === customOrderTitle.toLowerCase()) {
-      return true;
+    // Use utility function if available
+    if (window.CustomOrderUtils && window.CustomOrderUtils.isCustomOrderFromFormData) {
+      return window.CustomOrderUtils.isCustomOrderFromFormData(formData, productTitle);
     }
-  }
 
-  // Backward compatibility: Check properties (for migration period)
-  const customFlag = formData.get('properties[_custom]');
-  const orderTypeFlag = formData.get('properties[Order Type]');
+    // Fallback: Check product title
+    if (productTitle && window.CustomOrderUtils) {
+      const customOrderTitle = window.CustomOrderUtils.getCustomOrderProductTitle();
+      if (String(productTitle).trim().toLowerCase() === customOrderTitle.toLowerCase()) {
+        return true;
+      }
+    }
 
-  return (
-    (typeof customFlag === 'string' && customFlag.toLowerCase() === 'custom') ||
-    (typeof orderTypeFlag === 'string' && orderTypeFlag.toLowerCase() === 'custom')
-  );
-};
+    // Backward compatibility: Check properties (for migration period)
+    const customFlag = formData.get('properties[_custom]');
+    const orderTypeFlag = formData.get('properties[Order Type]');
 
-class ProductFormExtension {
-  constructor() {
-    this.productFormData = new Map();
-    this.cartUpdateUnsubscriber = undefined;
-    this.setupFetchInterceptor();
-    this.setupEventListeners();
-  }
+    return (
+      (typeof customFlag === 'string' && customFlag.toLowerCase() === 'custom') ||
+      (typeof orderTypeFlag === 'string' && orderTypeFlag.toLowerCase() === 'custom')
+    );
+  };
+
+  class ProductFormExtension {
+    constructor() {
+      this.productFormData = new Map();
+      this.cartUpdateUnsubscriber = undefined;
+      this.setupFetchInterceptor();
+      this.setupEventListeners();
+    }
 
   getProductTitle() {
     // Try to get from product title element
@@ -219,4 +223,5 @@ class ProductFormExtension {
   }
 }
 
-const productFormExtension = new ProductFormExtension();
+  const productFormExtension = new ProductFormExtension();
+}
