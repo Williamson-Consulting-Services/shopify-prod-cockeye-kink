@@ -67,9 +67,9 @@
       "settings": {
         "collection": "featured-products",
         "products_to_show": 11,
-        "title": "Featured",
+        "title": "{{ section.settings.collection.title }}",
         "heading_size": "h1",
-        "description": "",
+        "description": "{{ section.settings.collection.description }}",
         "show_description": false,
         "description_style": "body",
         "columns_desktop": 4,
