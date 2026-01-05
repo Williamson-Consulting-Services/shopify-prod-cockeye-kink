@@ -65,7 +65,7 @@
         "span.price-item.price-item--sale.price-item--last {color: red;}"
       ],
       "settings": {
-        "collection": "accessories",
+        "collection": "featured-products",
         "products_to_show": 11,
         "title": "Featured",
         "heading_size": "h1",
