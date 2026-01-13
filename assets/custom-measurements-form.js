@@ -484,13 +484,24 @@
       const button = this.resolveButton();
       if (!button) return;
 
-      if (!isValid) {
+      // Check if button is already disabled by Dawn (variant sold out)
+      // Dawn manages this via product-form.toggleSubmitButton() when variants change
+      const isDisabledByDawn = button.hasAttribute('disabled') || button.getAttribute('aria-disabled') === 'true';
+
+      // Combine our validation with Dawn's button state
+      // If Dawn disabled it (sold out), keep it disabled regardless of validation
+      // If Dawn enabled it, we can disable it if validation fails
+      if (!isValid || isDisabledByDawn) {
         button.disabled = true;
         button.style.opacity = '0.5';
         button.setAttribute('disabled', 'disabled');
         button.setAttribute('aria-disabled', 'true');
-        button.title = 'Please select a category and fill all required measurements';
+        if (!isValid) {
+          button.title = 'Please select a category and fill all required measurements';
+        }
+        // Don't override Dawn's button text if it's disabled due to sold out
       } else {
+        // Only enable if both validation passes AND Dawn hasn't disabled it
         button.disabled = false;
         button.style.opacity = '1';
         button.removeAttribute('disabled');
@@ -1600,6 +1611,21 @@
           }
         });
       });
+
+      // Listen to variant changes to update button state
+      if (
+        typeof subscribe === 'function' &&
+        typeof PUB_SUB_EVENTS !== 'undefined' &&
+        PUB_SUB_EVENTS.optionValueSelectionChange
+      ) {
+        // Listen to variantChange (Dawn publishes this after updating button state)
+        // This ensures we sync our validation state with Dawn's button state
+        subscribe(PUB_SUB_EVENTS.variantChange, () => {
+          // Variant changed, Dawn has already updated button state
+          // Now update our validation state to combine with Dawn's state
+          this.updateAddToCartButton();
+        });
+      }
 
       // Initialize collapsible sections using utility class
       const collapsibleToggles = document.querySelectorAll('.collapsible-toggle');
