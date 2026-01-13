@@ -37,6 +37,41 @@ See [Version Tracking Workflow](../.cursor/version-tracking-workflow.mdc) for de
 
 - (Items will be listed here)
 
+## [15.4.1.4] - 2026-01-13
+
+### Added
+
+- Product type-aware custom measurements form template (`product.custom-by-type.json`)
+- Product type-aware form snippet (`custom-measurements-form-by-type.liquid`) that automatically detects product type and shows only relevant measurement fields
+- Cart item properties grouped display snippet (`cart-item-properties-grouped.liquid`) that groups measurement pairs (inches/cm) into table format
+- Product type mapping configuration in theme settings (`custom_measurements_product_type_map`)
+- Auto-selection of measurement category based on product type
+- Enhanced cart item editing functionality with improved custom order detection
+
+### Changed
+
+- Enhanced custom measurements form validation with pub/sub integration for real-time feedback
+- Improved button state management in custom measurements form
+- Refactored custom measurements configuration for improved readability and logging
+- Enhanced cart item properties rendering with grouped measurement display
+- Improved checkout footer behavior with custom items
+- Better organization of measurement data in cart items
+
+### Fixed
+
+- Cart extension now prevents processing its own update events to avoid infinite loops
+- Improved custom order detection from cart items
+- Better filtering of empty, zero, and internal properties in cart display
+
+### Notes
+
+- Base: Dawn 15.4.0
+- New template requires explicit assignment to products (backward compatible)
+- Product type mapping must be configured in theme settings for auto-detection to work
+- No breaking changes - all existing templates and functionality remain unchanged
+
+---
+
 ## [15.4.1.3] - 2025-12-15
 
 ### Updated
