@@ -44,7 +44,10 @@
   align-items: center;
   justify-content: center;
   position: relative;
-  background-color: var(--swatch--background, #cccccc);
+  background: var(--swatch--background, #cccccc);
+  background-position: var(--swatch-focal-point, initial);
+  background-size: cover;
+  background-origin: border-box;
 }
 
 /* Multi-color swatch styling - diagonal split */
@@ -187,8 +190,7 @@
   background-color: rgba(var(--color-foreground), 0.05);
 }
 
-.custom-card-variant-options__option--button.custom-card-variant-options__option--unavailable
-  .custom-card-variant-options__button-text {
+.custom-card-variant-options__option--button.custom-card-variant-options__option--unavailable .custom-card-variant-options__button-text {
   color: rgba(var(--color-foreground), 0.5);
   text-decoration: line-through;
   text-decoration-thickness: 0.1rem;
