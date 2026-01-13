@@ -153,10 +153,53 @@
       this.utils = utils;
     }
 
-    validateRequiredFields(selectedCategory, harnessSection, shouldScroll = false) {
-      if (!selectedCategory || !this.config.measurements) return false;
+    publishValidationState(isValid, selectedCategory, shouldScroll = false) {
+      if (
+        typeof publish === 'function' &&
+        typeof PUB_SUB_EVENTS !== 'undefined' &&
+        PUB_SUB_EVENTS.customMeasurementsValidationChange
+      ) {
+        const eventData = {
+          isValid,
+          selectedCategory,
+          shouldScroll,
+          timestamp: Date.now(),
+        };
+        console.log('[ValidationService] Publishing validation state:', eventData);
+        publish(PUB_SUB_EVENTS.customMeasurementsValidationChange, eventData);
+      } else {
+        console.warn('[ValidationService] Cannot publish - pub/sub not available', {
+          hasPublish: typeof publish === 'function',
+          hasEvents: typeof PUB_SUB_EVENTS !== 'undefined',
+          eventName: PUB_SUB_EVENTS?.customMeasurementsValidationChange,
+        });
+      }
+    }
+
+    validateRequiredFields(selectedCategory, shouldScroll = false) {
+      // Check if we're in product-type mode (customer-facing form)
+      const isProductTypeMode =
+        this.config?.autoSelectedCategory !== undefined && this.config?.autoSelectedCategory !== null;
+
+      console.log('[ValidationService] validateRequiredFields called', {
+        selectedCategory,
+        hasConfig: !!this.config,
+        hasMeasurements: !!this.config?.measurements,
+        isProductTypeMode,
+        autoSelectedCategory: this.config?.autoSelectedCategory,
+      });
+
+      if (!selectedCategory || !this.config.measurements) {
+        console.log('[ValidationService] Validation failed: missing category or config');
+        this.publishValidationState(false, selectedCategory, shouldScroll);
+        return false;
+      }
+
+      // Query for harness section if needed (only for staff-facing forms)
+      const harnessSection = document.getElementById('harness-details');
 
       const activeFields = document.querySelectorAll('.measurement-field.active');
+      console.log('[ValidationService] Active measurement fields:', activeFields.length);
       // Skip measurement validation when "Other" category is selected
       if (selectedCategory !== 'Other') {
         for (const field of activeFields) {
@@ -170,7 +213,13 @@
           const inInput = field.querySelector('.measurement-in');
           const cmInput = field.querySelector('.measurement-cm');
           const hasValue = this.utils.hasValidNumber(inInput) || this.utils.hasValidNumber(cmInput);
+          console.log('[ValidationService] Checking measurement:', measName, {
+            hasValue,
+            inValue: inInput?.value,
+            cmValue: cmInput?.value,
+          });
           if (!hasValue) {
+            console.log('[ValidationService] Validation failed: missing required measurement:', measName);
             // Add error class and scroll to field (only on submit)
             field.classList.add('measurement-field--error');
             if (inInput) inInput.classList.add('measurement-input--error');
@@ -178,6 +227,7 @@
             if (shouldScroll) {
               field.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
+            this.publishValidationState(false, selectedCategory, shouldScroll);
             return false;
           } else {
             // Remove error class on valid fields
@@ -197,6 +247,7 @@
           if (shouldScroll) {
             associateSelect.scrollIntoView({ behavior: 'smooth', block: 'center' });
           }
+          this.publishValidationState(false, selectedCategory, harnessSection, shouldScroll);
           return false;
         }
         if (selectedValue === 'Other') {
@@ -206,6 +257,7 @@
             if (shouldScroll) {
               associateText.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
+            this.publishValidationState(false, selectedCategory, shouldScroll);
             return false;
           }
         }
@@ -213,7 +265,8 @@
       }
 
       // Validate leather color (required for all categories except Tag)
-      if (selectedCategory !== 'Tag') {
+      // In product-type mode (customer-facing), leather color is handled by variants, not required
+      if (selectedCategory !== 'Tag' && !isProductTypeMode) {
         const leatherColorRadios = document.querySelectorAll('.leather-color-radio');
         let hasLeatherColor = false;
         let isLeatherColorOther = false;
@@ -242,6 +295,7 @@
           if (isLeatherColorOther && leatherColorText) {
             leatherColorText.classList.add('measurement-input--error');
           }
+          this.publishValidationState(false, selectedCategory, harnessSection, shouldScroll);
           return false;
         }
         if (leatherColorText) leatherColorText.classList.remove('measurement-input--error');
@@ -275,32 +329,39 @@
         }
 
         // Check if empty (required field)
+        console.log('[ValidationService] Checking custom text input:', { value, valueLength: value.length, maxLength });
         if (!value) {
+          console.log('[ValidationService] Validation failed: custom text input is empty');
           if (shouldScroll) {
             customTextInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
           }
           customTextInput.classList.add('measurement-input--error');
+          this.publishValidationState(false, selectedCategory, harnessSection, shouldScroll);
           return false;
         }
 
-        // Check length
+        // Check length (validate trimmed length, not raw length)
         if (maxLength > 0 && value.length > maxLength) {
           if (shouldScroll) {
             customTextInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
           }
           customTextInput.classList.add('measurement-input--error');
+          this.publishValidationState(false, selectedCategory, harnessSection, shouldScroll);
           return false;
         }
 
-        // Check HTML5 validity
+        // Check HTML5 validity (this checks required, pattern, maxlength attributes)
+        // Note: checkValidity() uses the raw value, not trimmed, so we check it after our trimmed checks
         if (!customTextInput.checkValidity()) {
           if (shouldScroll) {
             customTextInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
           }
           customTextInput.classList.add('measurement-input--error');
+          this.publishValidationState(false, selectedCategory, harnessSection, shouldScroll);
           return false;
         }
 
+        // All validations passed - clear error state
         customTextInput.classList.remove('measurement-input--error');
       }
 
@@ -322,6 +383,7 @@
               harnessTypeSelector.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
           }
+          this.publishValidationState(false, selectedCategory, harnessSection, shouldScroll);
           return false;
         }
       }
@@ -342,6 +404,7 @@
           if (shouldScroll && tagTypeSelector) {
             tagTypeSelector.scrollIntoView({ behavior: 'smooth', block: 'center' });
           }
+          this.publishValidationState(false, selectedCategory, harnessSection, shouldScroll);
           return false;
         }
       }
@@ -375,6 +438,7 @@
             if (shouldScroll && select.closest('.select-wrapper')) {
               select.closest('.select-wrapper').scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
+            this.publishValidationState(false, selectedCategory, shouldScroll);
             return false;
           } else {
             select.classList.remove('measurement-input--error');
@@ -382,6 +446,9 @@
         }
       }
 
+      // All validations passed
+      console.log('[ValidationService] All validations passed!');
+      this.publishValidationState(true, selectedCategory, shouldScroll);
       return true;
     }
   }
@@ -394,6 +461,39 @@
       this.button = null;
       this.warningLogged = false;
       this.listenerAttached = false;
+      this.initialButtonText = null; // Store initial button text to detect Dawn's sold out state
+      this.validationUnsubscriber = null;
+      this.setupValidationSubscription();
+    }
+
+    setupValidationSubscription() {
+      // Subscribe to validation state changes via pub/sub
+      if (
+        typeof subscribe === 'function' &&
+        typeof PUB_SUB_EVENTS !== 'undefined' &&
+        PUB_SUB_EVENTS.customMeasurementsValidationChange
+      ) {
+        console.log('[ButtonStateManager] Subscribing to validation events');
+        this.validationUnsubscriber = subscribe(PUB_SUB_EVENTS.customMeasurementsValidationChange, (event) => {
+          console.log('[ButtonStateManager] Received validation event:', event);
+          // Update button state based on validation event
+          this.update(event.isValid);
+        });
+      } else {
+        console.warn('[ButtonStateManager] Cannot subscribe - pub/sub not available', {
+          hasSubscribe: typeof subscribe === 'function',
+          hasEvents: typeof PUB_SUB_EVENTS !== 'undefined',
+          eventName: PUB_SUB_EVENTS?.customMeasurementsValidationChange,
+        });
+      }
+    }
+
+    destroy() {
+      // Clean up subscription
+      if (this.validationUnsubscriber) {
+        this.validationUnsubscriber();
+        this.validationUnsubscriber = null;
+      }
     }
 
     resolveButton() {
@@ -414,6 +514,11 @@
         const candidate = document.querySelector(selector);
         if (candidate) {
           this.button = candidate;
+          // Store initial button text to detect if Dawn set it to "Sold out" or "Unavailable"
+          if (this.initialButtonText === null) {
+            const buttonTextSpan = this.button.querySelector('span');
+            this.initialButtonText = buttonTextSpan ? buttonTextSpan.textContent.trim() : '';
+          }
           if (!this.listenerAttached) {
             // Attach handlers directly to the button using mousedown/pointerdown
             // These events fire even on disabled buttons, unlike click events
@@ -430,7 +535,6 @@
                 if (window.customMeasurementsForm && window.customMeasurementsForm.validationService) {
                   window.customMeasurementsForm.validationService.validateRequiredFields(
                     window.customMeasurementsForm.selectedCategory,
-                    window.customMeasurementsForm.harnessSection,
                     true // Enable scrolling when clicking disabled button
                   );
                 }
@@ -454,7 +558,6 @@
                 if (window.customMeasurementsForm && window.customMeasurementsForm.validationService) {
                   window.customMeasurementsForm.validationService.validateRequiredFields(
                     window.customMeasurementsForm.selectedCategory,
-                    window.customMeasurementsForm.harnessSection,
                     true
                   );
                 }
@@ -484,29 +587,40 @@
       const button = this.resolveButton();
       if (!button) return;
 
-      // Check if button is already disabled by Dawn (variant sold out)
-      // Dawn manages this via product-form.toggleSubmitButton() when variants change
-      const isDisabledByDawn = button.hasAttribute('disabled') || button.getAttribute('aria-disabled') === 'true';
+      // Check if Dawn disabled the button (variant sold out)
+      // Dawn sets button text to "Sold out" or "Unavailable" when variant is unavailable
+      const buttonTextSpan = button.querySelector('span');
+      const currentButtonText = buttonTextSpan ? buttonTextSpan.textContent.trim() : '';
+      const isSoldOut = currentButtonText === 'Sold out' || currentButtonText === 'Unavailable';
 
-      // Combine our validation with Dawn's button state
-      // If Dawn disabled it (sold out), keep it disabled regardless of validation
-      // If Dawn enabled it, we can disable it if validation fails
-      if (!isValid || isDisabledByDawn) {
+      // Also check variant ID input - if it's disabled, variant is sold out
+      const variantIdInput = document.querySelector('.product-variant-id');
+      const isVariantSoldOut = variantIdInput && variantIdInput.hasAttribute('disabled');
+
+      // If Dawn marked it as sold out, respect that and don't enable
+      if (isSoldOut || isVariantSoldOut) {
+        // Keep it disabled, but don't override Dawn's text or state
+        return;
+      }
+
+      // Otherwise, manage button state based on our validation
+      if (!isValid) {
         button.disabled = true;
         button.style.opacity = '0.5';
         button.setAttribute('disabled', 'disabled');
         button.setAttribute('aria-disabled', 'true');
-        if (!isValid) {
-          button.title = 'Please select a category and fill all required measurements';
-        }
-        // Don't override Dawn's button text if it's disabled due to sold out
+        button.title = 'Please select a category and fill all required measurements';
       } else {
-        // Only enable if both validation passes AND Dawn hasn't disabled it
+        // Validation passed and variant is available - enable the button
         button.disabled = false;
         button.style.opacity = '1';
         button.removeAttribute('disabled');
         button.removeAttribute('aria-disabled');
         button.removeAttribute('title');
+        // Restore "Add to cart" text if it was changed
+        if (buttonTextSpan && currentButtonText !== 'Add to cart') {
+          buttonTextSpan.textContent = 'Add to cart';
+        }
       }
     }
 
@@ -983,8 +1097,9 @@
     }
 
     updateAddToCartButton() {
-      const isValid = this.validationService.validateRequiredFields(this.selectedCategory, this.harnessSection);
-      this.buttonManager.update(isValid);
+      // Trigger validation which will publish validation state via pub/sub
+      // ButtonStateManager subscribes to the validation events
+      this.validationService.validateRequiredFields(this.selectedCategory);
     }
 
     initialize() {
@@ -1144,11 +1259,7 @@
         this.categoryManager.updateMeasurementGroupVisibility();
       }
 
-      const button = this.buttonManager.resolveButton();
-      if (button) {
-        button.disabled = true;
-        button.style.opacity = '0.5';
-      }
+      // Trigger validation which will publish events and update button state via pub/sub
       this.updateAddToCartButton();
 
       // Pre-fill form from URL parameters if present (for edit functionality)
@@ -1477,16 +1588,25 @@
       });
 
       // Custom text input (from validated-text-input component)
+      // Note: validated-text-input.liquid has its own validation script that also manages the button
+      // We coordinate by using a small delay on blur to let the input value settle
       const customTextInput = document.querySelector('input[name="properties[Custom Text]"]');
       if (customTextInput) {
         customTextInput.addEventListener('input', () => {
           this.flagFormInteraction();
           // Clear error state when user starts typing
           customTextInput.classList.remove('measurement-input--error');
-          this.updateAddToCartButton();
+          // Use setTimeout to let the input value update fully
+          setTimeout(() => {
+            this.updateAddToCartButton();
+          }, 0);
         });
         customTextInput.addEventListener('blur', () => {
-          this.updateAddToCartButton();
+          // Use setTimeout to let the input value and any other handlers settle
+          // This ensures we validate with the final value after all handlers run
+          setTimeout(() => {
+            this.updateAddToCartButton();
+          }, 0);
         });
       }
 
@@ -1645,7 +1765,7 @@
       // Form submission
       if (this.productForm) {
         this.productForm.addEventListener('submit', (event) => {
-          if (!this.validationService.validateRequiredFields(this.selectedCategory, this.harnessSection, false)) {
+          if (!this.validationService.validateRequiredFields(this.selectedCategory, false)) {
             event.preventDefault();
             alert('Please select a category and fill all required measurements.');
             this.resetAfterAddToCartPending = false;
