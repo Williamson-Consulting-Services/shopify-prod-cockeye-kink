@@ -35,6 +35,7 @@ cart-items .title-wrapper-with-link {
 .cart-item__nested-line .cart-item__image-container {
   min-width: calc(10rem / var(--font-body-scale));
   justify-content: right;
+
   img {
     width: 60%;
   }
@@ -123,6 +124,37 @@ cart-items .title-wrapper-with-link {
   line-height: calc(1 + 0.5 / var(--font-body-scale));
 }
 
+.cart-item__edit-link-wrapper {
+  margin-top: 1rem;
+  margin-bottom: 0.6rem;
+}
+
+.cart-item__edit-link {
+  font-size: 1.4rem;
+  text-decoration: underline;
+  text-underline-offset: 0.3rem;
+  text-decoration-thickness: 0.1rem;
+  color: rgb(var(--color-foreground));
+  cursor: pointer;
+  display: inline-block;
+  min-height: 4.4rem;
+  line-height: 4.4rem;
+  padding: 0 0.5rem;
+  margin: -0.5rem;
+  transition: opacity 0.2s ease;
+}
+
+.cart-item__edit-link:hover {
+  opacity: 0.7;
+  text-decoration-thickness: 0.2rem;
+}
+
+.cart-item__edit-link:focus {
+  outline: 0.2rem solid rgb(var(--color-foreground));
+  outline-offset: 0.3rem;
+  border-radius: 0.2rem;
+}
+
 .cart-item cart-remove-button {
   display: flex;
   margin-left: 1rem;
@@ -198,11 +230,6 @@ cart-edit-button .button:not([disabled]):hover {
   }
 }
 
-cart-edit-button .icon-edit {
-  height: 1.5rem;
-  width: 1.5rem;
-}
-
 .cart-item .loading__spinner {
   top: 0;
   left: auto;
@@ -255,8 +282,12 @@ cart-edit-button .icon-edit {
 }
 
 .product-option * {
-  display: inline;
   margin: 0;
+}
+
+.product-option dd,
+.product-option dt {
+  display: inline;
 }
 
 .cart-items thead th {
@@ -264,24 +295,30 @@ cart-edit-button .icon-edit {
 }
 
 @media screen and (max-width: 749px) {
+  /* Reduce page-width padding for cart items on mobile */
+  cart-items .page-width {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
   .cart-items,
-  .cart-items thead,
-  .cart-items tbody {
+  .cart-items > thead,
+  .cart-items > tbody {
     display: block;
     width: 100%;
   }
 
-  .cart-items thead tr {
+  .cart-items > thead > tr {
     display: flex;
     justify-content: space-between;
     border-bottom: 0.1rem solid rgba(var(--color-foreground), 0.2);
     margin-bottom: 4rem;
   }
 
+  /* Vertical stacked layout for mobile */
   .cart-item {
-    display: grid;
-    grid-template: repeat(2, auto) / repeat(4, 1fr);
-    gap: 1.5rem;
+    display: flex;
+    flex-direction: column;
     margin-bottom: 3.5rem;
   }
 
@@ -293,26 +330,41 @@ cart-edit-button .icon-edit {
     margin-bottom: 0;
   }
 
+  /* Stack media (image) at top */
   .cart-item__media {
-    grid-row: 1 / 3;
+    display: block;
+    margin-bottom: 1.5rem;
+    text-align: center;
   }
 
+  .cart-item__image-container {
+    justify-content: center;
+  }
+
+  /* Stack details (title, properties, measurements) full width */
   .cart-item__details {
-    grid-column: 2 / 4;
+    display: block;
+    width: 100%;
+    margin-bottom: 1.5rem;
   }
 
+  /* Remove max-width constraint on mobile for full-width properties/measurements */
+  .cart-item__details > * {
+    max-width: none;
+  }
+
+  /* Quantity and total controls */
   .cart-item__quantity {
-    grid-column: 2 / 5;
+    margin-bottom: 1.5rem;
   }
 
   .cart-item__quantity-wrapper {
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
   }
 
-  .cart-item__totals {
-    display: flex;
-    align-items: flex-start;
-    justify-content: flex-end;
+  .cart-item__totals.medium-hide.large-up-hide {
+    margin-bottom: 1.5rem;
+    text-align: right;
   }
 }
 
@@ -403,5 +455,164 @@ cart-edit-button .icon-edit {
 @media screen and (max-width: 989px) {
   .cart-items .quantity-popover__info-button {
     padding-left: 0;
+  }
+}
+
+/* Measurements Table Styles */
+.measurements-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.4rem;
+  font-size: inherit;
+  display: table;
+  table-layout: fixed;
+}
+
+.measurements-table thead {
+  display: table-header-group;
+}
+
+.measurements-table tbody {
+  display: table-row-group;
+}
+
+.measurements-table tr {
+  display: table-row;
+}
+
+.measurements-table th,
+.measurements-table td {
+  display: table-cell;
+  box-sizing: border-box;
+}
+
+/* Set explicit column widths only on thead (first row) for table-layout: fixed */
+.measurements-table thead th:first-child {
+  width: 60%;
+}
+
+.measurements-table thead th:not(:first-child):not(:last-child) {
+  width: 20%;
+}
+
+.measurements-table thead th:last-child {
+  width: 20%;
+}
+
+/* Adjust column widths for tablet - give more space to measurement values */
+@media screen and (min-width: 750px) and (max-width: 989px) {
+  .measurements-table thead th:first-child {
+    width: 50%;
+  }
+
+  .measurements-table thead th:not(:first-child):not(:last-child) {
+    width: 25%;
+  }
+
+  .measurements-table thead th:last-child {
+    width: 25%;
+  }
+}
+
+.measurements-table th {
+  text-align: left;
+  padding: 0.8rem 0;
+  font-weight: 500;
+  font-size: 0.9em;
+  border-bottom: 0.2rem solid rgba(var(--color-foreground), 0.4);
+}
+
+.measurements-table th:first-child {
+  text-align: left;
+  padding-left: 0;
+  padding-right: 1.2rem;
+}
+
+.measurements-table th:not(:first-child) {
+  text-align: right;
+  padding-left: 0.8rem;
+  padding-right: 0.8rem;
+}
+
+.measurements-table th:last-child {
+  padding-right: 0;
+  padding-left: 0.8rem;
+}
+
+.measurements-table td {
+  padding: 0.8rem 0;
+  vertical-align: top;
+  border-bottom: 0.1rem solid rgba(var(--color-foreground), 0.15);
+}
+
+.measurements-table td:first-child {
+  padding-left: 0;
+  padding-right: 1.2rem;
+}
+
+.measurements-table td:not(:first-child) {
+  text-align: right;
+  padding-left: 0.8rem;
+  padding-right: 0.8rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.measurements-table td:last-child {
+  padding-right: 0;
+  padding-left: 0.8rem;
+}
+
+.measurements-table__empty-value {
+  opacity: 0.4;
+}
+
+/* Container styles for measurements table */
+.product-option--measurements {
+  display: block;
+  width: 100%;
+  min-width: 0;
+}
+
+.product-option--measurements dd {
+  margin: 0;
+  padding: 0;
+  display: block;
+  min-width: 0;
+}
+
+.measurements-table-wrapper {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+}
+
+/* Mobile-specific measurements table fixes */
+@media screen and (max-width: 749px) {
+  .measurements-table {
+    width: 100%;
+    table-layout: fixed;
+    display: table;
+  }
+
+  .measurements-table-wrapper {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .product-option--measurements {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .product-option--measurements dd {
+    width: 100%;
+    min-width: 0;
+  }
+
+  /* Ensure table takes full available width */
+  .cart-item-properties {
+    width: 100%;
+    min-width: 0;
   }
 }

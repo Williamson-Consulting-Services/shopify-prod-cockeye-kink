@@ -12,49 +12,41 @@
   If cart-drawer.liquid is overwritten, replace property display blocks with this snippet.
 {%- endcomment -%}
 
-{%- for property in item.properties -%}
-  {%- assign property_first_char = property.first | slice: 0 -%}
-  {%- assign property_value = property.last | append: '' | strip -%}
+{%- liquid
+  # Detect if this is a customer-facing product (custom-by-type)
+  # For customer-facing products, "Selected Option" is redundant since there's only one product type
+  assign is_customer_facing = false
+  assign custom_order_title = settings.custom_order_product_title | default: 'Custom Order'
 
-  {%- comment -%} Skip if empty or internal property {%- endcomment -%}
-  {%- if property.last == blank or property_first_char == '_' -%}
-    {%- continue -%}
-  {%- endif -%}
+  if item.properties
+    assign order_type = item.properties['Order Type'] | default: ''
+    assign order_type_lower = order_type | downcase
 
-  {%- comment -%} Check if value is an "empty default" zero (has decimal precision, indicating form default) {%- endcomment -%}
-  {%- assign num_value = property_value | plus: 0 -%}
-  {%- assign is_empty_default_zero = false -%}
-  {%- if num_value == 0 -%}
-    {%- comment -%} Only filter zeros with decimal precision (0.0, 0.00, etc.) - these are form defaults {%- endcomment -%}
-    {%- comment -%} Keep integer "0" as potentially valid value {%- endcomment -%}
-    {%- if property_value contains '.' -%}
-      {%- comment -%} Check if it's a zero with trailing zeros (form default pattern) {%- endcomment -%}
-      {%- assign zero_patterns = '0.0,0.00,0.000,0.0000' | split: ',' -%}
-      {%- if zero_patterns contains property_value -%}
-        {%- assign is_empty_default_zero = true -%}
-      {%- endif -%}
-    {%- endif -%}
-  {%- endif -%}
+    # Check if Order Type contains "custom-by-type" or similar customer-facing indicators
+    if order_type_lower contains 'custom-by-type' or order_type_lower contains 'by-type'
+      assign is_customer_facing = true
+    endif
+  endif
 
-  {%- comment -%} Display property if not empty default zero {%- endcomment -%}
-  {%- if is_empty_default_zero == false -%}
-    <div class="product-option">
-      <dt>{{ property.first }}:</dt>
-      <dd>
-        {%- if property.last contains '/uploads/' -%}
-          <a
-            href="{{ property.last }}"
-            class="link"
-            target="_blank"
-            aria-describedby="a11y-new-window-message"
-          >
-            {{ property.last | split: '/' | last }}
-          </a>
-        {%- else -%}
-          {{ property.last }}
-        {%- endif -%}
-      </dd>
-    </div>
-  {%- endif -%}
-{%- endfor -%}
+  # Also check if product title is NOT the generic "Custom Order" (indicates customer-facing product)
+  if is_customer_facing == false and item.product and item.product.title
+    assign product_title_lower = item.product.title | downcase | strip
+    assign custom_title_lower = custom_order_title | downcase | strip
+    if product_title_lower != custom_title_lower
+      # Product has a specific title (like "Custom Arm Band"), likely customer-facing
+      # But only if it has measurement properties (to avoid false positives)
+      if item.properties
+        for property in item.properties
+          assign property_name = property.first | downcase
+          if property_name contains '(in)' or property_name contains '(cm)' or property_name contains 'unit of measure'
+            assign is_customer_facing = true
+            break
+          endif
+        endfor
+      endif
+    endif
+  endif
+-%}
+
+{%- render 'cart-item-properties-grouped', properties: item.properties, is_customer_facing: is_customer_facing, output_format: 'dl' -%}
 

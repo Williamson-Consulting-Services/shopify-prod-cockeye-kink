@@ -5,13 +5,35 @@
 {% endcomment %}
 
 {%- comment -%} Parse categories order {%- endcomment -%}
-{%- assign default_categories_order = 'Hats, Tag, Shirt, Gloves, Harness, Suspenders, Belts, Pants, Kilt, Chaps, Other' -%}
-{%- assign categories_source = settings.custom_measurements_categories_order | default: default_categories_order -%}
+{%- comment -%} Use settings directly - defaults are defined in settings_schema.json {%- endcomment -%}
+{%- assign categories_source = settings.custom_measurements_categories_order -%}
 {%- assign categories_order = categories_source | split: ',' -%}
 
+{%- comment -%} Parse product type mapping {%- endcomment -%}
+{%- assign type_map_source = settings.custom_measurements_product_type_map | default: '' -%}
+{%- assign product_type = product.type | default: '' -%}
+{%- assign auto_selected_category = '' -%}
+{%- if type_map_source != '' and product_type != '' -%}
+  {%- assign type_map_lines = type_map_source | newline_to_br | split: '<br />' -%}
+  {%- for line in type_map_lines -%}
+    {%- assign line = line | strip -%}
+    {%- if line == '' -%}{% continue %}{% endif %}
+    {%- assign parts = line | split: ':' -%}
+    {%- if parts.size >= 2 -%}
+      {%- assign type_name = parts[0] | strip -%}
+      {%- assign type_name_lower = type_name | downcase -%}
+      {%- assign product_type_lower = product_type | downcase -%}
+      {%- if type_name == product_type or type_name_lower == product_type_lower -%}
+        {%- assign auto_selected_category = parts[1] | strip -%}
+        {%- break -%}
+      {%- endif -%}
+    {%- endif -%}
+  {%- endfor -%}
+{%- endif -%}
+
 {%- comment -%} Parse measurement map {%- endcomment -%}
-{%- assign default_measurement_map = 'Head Circumference: Hats, Other*\nNeck: Harness, Tag*, Shirt, Other*\nShoulders: Harness, Shirt, Suspenders, Other*\nChest: Harness, Shirt, Suspenders, Other*\nTorso: Harness, Shirt, Other*\nSleeve Length: Shirt, Other*\nBicep: Shirt, Other*\nWrist: Shirt, Gloves, Other*\nPalm Circumference: Gloves, Other*\nHand Length: Gloves, Other*\nStomach: Shirt, Other*\nWaist: Harness, Chaps, Pants, Suspenders, Belts, Kilt, Other*\nHips: Chaps, Pants, Belts, Kilt, Other*\nUpper Thigh: Chaps, Pants, Other*\nLower Thigh: Chaps, Pants, Other*\nKnee: Chaps, Pants, Other*\nCalf: Chaps, Pants, Other*\nAnkle: Chaps, Pants, Other*\nInseam: Pants, Other*\nCrotch: Pants, Other*\nButt Rise: Pants, Other*\nLength: Kilt, Other*' -%}
-{%- assign measurement_map_source = settings.custom_measurements_map | default: default_measurement_map -%}
+{%- comment -%} Use settings directly - defaults are defined in settings_schema.json {%- endcomment -%}
+{%- assign measurement_map_source = settings.custom_measurements_map -%}
 {%- assign measurement_map_lines = measurement_map_source | newline_to_br | split: '<br />' -%}
 
 {%- comment -%} Build measurements config object {%- endcomment -%}
@@ -31,7 +53,9 @@
 
 {%- comment -%} Parse harness categories (now single "Harness" category) {%- endcomment -%}
 {%- assign default_harness_categories = 'Harness' -%}
-{%- assign harness_source_raw = settings.custom_measurements_harness_categories | default: default_harness_categories -%}
+{%- assign harness_source_raw = settings.custom_measurements_harness_categories
+  | default: default_harness_categories
+-%}
 {%- assign harness_source = harness_source_raw | replace: '|', ',' -%}
 {%- assign harness_categories = harness_source | split: ',' -%}
 
@@ -54,12 +78,16 @@
 {%- assign leather_colors = leather_source | split: ',' -%}
 
 {%- assign default_front_plate_options = 'Bear Paw, Puppy Paw, Fist Image, Pig Image, Boot Image, Biohazard Symbol, Cigar Man' -%}
-{%- assign front_plate_source_raw = settings.custom_measurements_front_plate_options | default: default_front_plate_options -%}
+{%- assign front_plate_source_raw = settings.custom_measurements_front_plate_options
+  | default: default_front_plate_options
+-%}
 {%- assign front_plate_source = front_plate_source_raw | replace: '|', ',' -%}
 {%- assign front_plate_options = front_plate_source | split: ',' -%}
 
 {%- assign default_back_plate_extra = 'Wesco Boot, Watersports, Happy Puppy' -%}
-{%- assign back_plate_extra_source_raw = settings.custom_measurements_back_plate_extra | default: default_back_plate_extra -%}
+{%- assign back_plate_extra_source_raw = settings.custom_measurements_back_plate_extra
+  | default: default_back_plate_extra
+-%}
 {%- assign back_plate_extra_source = back_plate_extra_source_raw | replace: '|', ',' -%}
 {%- assign back_plate_extra = back_plate_extra_source | split: ',' -%}
 {%- assign back_plate_options = front_plate_options | concat: back_plate_extra -%}
@@ -74,9 +102,33 @@
 {%- assign associates_source = associates_source_raw | replace: '|', ',' -%}
 {%- assign associates = associates_source | split: ',' -%}
 
+{%- comment -%} Build product type map object {%- endcomment -%}
+{%- comment -%} We'll build the JSON directly in the script tag to avoid HTML entity encoding {%- endcomment -%}
+
 {%- comment -%} Build JavaScript config object {%- endcomment -%}
 <script>
   window.customMeasurementsConfig = {
+    productTypeMap: {
+      {%- if type_map_source != '' -%}
+        {%- assign type_map_lines = type_map_source | newline_to_br | split: '<br />' -%}
+        {%- assign first_entry = true -%}
+        {%- for line in type_map_lines -%}
+          {%- assign line = line | strip -%}
+          {%- if line == '' -%}{% continue %}{% endif %}
+          {%- assign parts = line | split: ':' -%}
+          {%- if parts.size >= 2 -%}
+            {%- assign type_name = parts[0] | strip -%}
+            {%- assign category_name = parts[1] | strip -%}
+            {%- if type_name != '' and category_name != '' -%}
+              {%- unless first_entry -%},{%- endunless -%}
+              {%- assign first_entry = false -%}
+              "{{ type_name | replace: '"', '\"' }}": "{{ category_name | replace: '"', '\"' }}"
+            {%- endif -%}
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endif -%}
+    },
+    autoSelectedCategory: {% if auto_selected_category != '' %}"{{ auto_selected_category | escape }}"{% else %}null{% endif %},
     categories: [
       {%- for category in categories_order -%}
         {%- assign category_clean = category | strip -%}
@@ -94,7 +146,6 @@
               {%- assign category_name = category | strip -%}
               {%- if category_name == '' -%}{% continue %}{% endif %}
               {%- assign is_required = false -%}
-              {%- assign is_optional = false -%}
               {%- assign is_included = false -%}
               {%- for measurement_line in measurement_map_lines -%}
                 {%- assign measurement_line = measurement_line | strip -%}
@@ -113,9 +164,7 @@
                   {%- assign base_category = token_clean | remove: '*' | strip -%}
                   {%- if base_category == category_name -%}
                     {%- assign is_included = true -%}
-                    {%- if base_category != token_clean -%}
-                      {%- assign is_optional = true -%}
-                    {%- else -%}
+                    {%- if base_category == token_clean -%}
                       {%- assign is_required = true -%}
                     {%- endif -%}
                     {%- break -%}
@@ -206,9 +255,7 @@
       INCH_TO_CM: 2.54,
       CM_TO_INCH: 0.393700787
     },
-    customOrderProductTitle: {{ settings.custom_order_product_title | default: 'Custom Order' | json }}
+    customOrderProductTitle: {{ settings.custom_order_product_title | default: 'Custom Order' | json }},
+    customTextMaxLengthDefault: 50
   };
 </script>
-
-
-

@@ -58,10 +58,30 @@ class CustomOrderUtils {
     }
 
     // Backward compatibility: Check properties (for migration period)
+    // Also check for 'custom-by-type' and other custom variations
     if (item.properties) {
       const customFlag = item.properties['_custom'] || item.properties['Order Type'];
-      if (typeof customFlag === 'string' && customFlag.toLowerCase() === 'custom') {
-        return true;
+      if (typeof customFlag === 'string') {
+        const flagLower = customFlag.toLowerCase();
+        // Check for exact 'custom' match or values containing 'custom' (e.g., 'custom-by-type')
+        if (flagLower === 'custom' || flagLower.includes('custom')) {
+          return true;
+        }
+      }
+
+      // Heuristic detection: Check for measurement properties (e.g., "Bicep (in)", "Bicep (cm)")
+      // This catches items that are clearly custom orders based on their properties
+      for (const [propertyName, propertyValue] of Object.entries(item.properties)) {
+        const nameLower = String(propertyName).toLowerCase();
+        // Check if property name contains measurement indicators
+        if (
+          nameLower.includes('(in)') ||
+          nameLower.includes('(cm)') ||
+          nameLower.includes('unit of measure') ||
+          nameLower.includes('selected option')
+        ) {
+          return true;
+        }
       }
     }
 
@@ -138,9 +158,10 @@ class CustomOrderUtils {
    * Builds product page URL with query parameters for editing
    * @param {string} productHandle - Product handle
    * @param {Object} properties - Cart item properties
+   * @param {number|string} variantId - Variant ID (optional)
    * @returns {string} - Product page URL with query parameters
    */
-  static buildEditUrl(productHandle, properties) {
+  static buildEditUrl(productHandle, properties, variantId = null) {
     if (!productHandle) return '/';
 
     const baseUrl = `/products/${productHandle}`;
@@ -148,14 +169,17 @@ class CustomOrderUtils {
 
     const params = new URLSearchParams();
 
+    // Add variant ID first if provided (this ensures variant is selected on product page)
+    if (variantId) {
+      params.append('variant', String(variantId));
+    }
+
     for (const [key, value] of Object.entries(filteredProperties)) {
       // Skip internal properties
       if (key.charAt(0) === '_') continue;
 
-      // Encode property name and value
-      const encodedKey = encodeURIComponent(key);
-      const encodedValue = encodeURIComponent(String(value));
-      params.append(encodedKey, encodedValue);
+      // URLSearchParams.append() automatically encodes, so don't double-encode
+      params.append(key, String(value));
     }
 
     const queryString = params.toString();

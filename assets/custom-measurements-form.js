@@ -153,8 +153,40 @@
       this.utils = utils;
     }
 
-    validateRequiredFields(selectedCategory, harnessSection, shouldScroll = false) {
-      if (!selectedCategory || !this.config.measurements) return false;
+    publishValidationState(isValid, selectedCategory, shouldScroll = false) {
+      if (
+        typeof publish === 'function' &&
+        typeof PUB_SUB_EVENTS !== 'undefined' &&
+        PUB_SUB_EVENTS.customMeasurementsValidationChange
+      ) {
+        const eventData = {
+          isValid,
+          selectedCategory,
+          shouldScroll,
+          timestamp: Date.now(),
+        };
+        publish(PUB_SUB_EVENTS.customMeasurementsValidationChange, eventData);
+      } else {
+        console.warn('[ValidationService] Cannot publish - pub/sub not available', {
+          hasPublish: typeof publish === 'function',
+          hasEvents: typeof PUB_SUB_EVENTS !== 'undefined',
+          eventName: PUB_SUB_EVENTS?.customMeasurementsValidationChange,
+        });
+      }
+    }
+
+    validateRequiredFields(selectedCategory, shouldScroll = false) {
+      // Check if we're in product-type mode (customer-facing form)
+      const isProductTypeMode =
+        this.config?.autoSelectedCategory !== undefined && this.config?.autoSelectedCategory !== null;
+
+      if (!selectedCategory || !this.config.measurements) {
+        this.publishValidationState(false, selectedCategory, shouldScroll);
+        return false;
+      }
+
+      // Query for harness section if needed (only for staff-facing forms)
+      const harnessSection = document.getElementById('harness-details');
 
       const activeFields = document.querySelectorAll('.measurement-field.active');
       // Skip measurement validation when "Other" category is selected
@@ -178,6 +210,7 @@
             if (shouldScroll) {
               field.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
+            this.publishValidationState(false, selectedCategory, shouldScroll);
             return false;
           } else {
             // Remove error class on valid fields
@@ -197,6 +230,7 @@
           if (shouldScroll) {
             associateSelect.scrollIntoView({ behavior: 'smooth', block: 'center' });
           }
+          this.publishValidationState(false, selectedCategory, harnessSection, shouldScroll);
           return false;
         }
         if (selectedValue === 'Other') {
@@ -206,6 +240,7 @@
             if (shouldScroll) {
               associateText.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
+            this.publishValidationState(false, selectedCategory, shouldScroll);
             return false;
           }
         }
@@ -213,7 +248,8 @@
       }
 
       // Validate leather color (required for all categories except Tag)
-      if (selectedCategory !== 'Tag') {
+      // In product-type mode (customer-facing), leather color is handled by variants, not required
+      if (selectedCategory !== 'Tag' && !isProductTypeMode) {
         const leatherColorRadios = document.querySelectorAll('.leather-color-radio');
         let hasLeatherColor = false;
         let isLeatherColorOther = false;
@@ -242,9 +278,72 @@
           if (isLeatherColorOther && leatherColorText) {
             leatherColorText.classList.add('measurement-input--error');
           }
+          this.publishValidationState(false, selectedCategory, harnessSection, shouldScroll);
           return false;
         }
         if (leatherColorText) leatherColorText.classList.remove('measurement-input--error');
+      }
+
+      // Validate custom text input (if present - from validated-text-input component)
+      // Check for custom text input by looking for input with name="properties[Custom Text]"
+      const customTextInput = document.querySelector('input[name="properties[Custom Text]"]');
+      if (customTextInput) {
+        const value = customTextInput.value.trim();
+        const maxLengthAttr = customTextInput.getAttribute('maxlength');
+        let maxLength;
+
+        if (maxLengthAttr !== null && maxLengthAttr !== '') {
+          maxLength = parseInt(maxLengthAttr, 10);
+          if (isNaN(maxLength) || maxLength < 0) {
+            const errorMsg = `Custom text input has invalid maxlength attribute: "${maxLengthAttr}". Expected a positive number.`;
+            console.error(errorMsg);
+            throw new Error(errorMsg);
+          }
+        } else {
+          // No maxlength attribute - require configurable default
+          if (!this.config || !this.config.customTextMaxLengthDefault) {
+            const errorMsg =
+              'Custom text input missing maxlength attribute and config.customTextMaxLengthDefault is not defined. Please configure customTextMaxLengthDefault in custom-measurements-config.liquid.';
+            console.error(errorMsg);
+            throw new Error(errorMsg);
+          }
+          maxLength = this.config.customTextMaxLengthDefault;
+          console.warn('Custom text input missing maxlength attribute, using config default:', maxLength);
+        }
+
+        // Check if empty (required field)
+        if (!value) {
+          if (shouldScroll) {
+            customTextInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+          customTextInput.classList.add('measurement-input--error');
+          this.publishValidationState(false, selectedCategory, harnessSection, shouldScroll);
+          return false;
+        }
+
+        // Check length (validate trimmed length, not raw length)
+        if (maxLength > 0 && value.length > maxLength) {
+          if (shouldScroll) {
+            customTextInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+          customTextInput.classList.add('measurement-input--error');
+          this.publishValidationState(false, selectedCategory, harnessSection, shouldScroll);
+          return false;
+        }
+
+        // Check HTML5 validity (this checks required, pattern, maxlength attributes)
+        // Note: checkValidity() uses the raw value, not trimmed, so we check it after our trimmed checks
+        if (!customTextInput.checkValidity()) {
+          if (shouldScroll) {
+            customTextInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+          customTextInput.classList.add('measurement-input--error');
+          this.publishValidationState(false, selectedCategory, harnessSection, shouldScroll);
+          return false;
+        }
+
+        // All validations passed - clear error state
+        customTextInput.classList.remove('measurement-input--error');
       }
 
       if (harnessSection && harnessSection.classList.contains('active')) {
@@ -265,6 +364,7 @@
               harnessTypeSelector.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
           }
+          this.publishValidationState(false, selectedCategory, harnessSection, shouldScroll);
           return false;
         }
       }
@@ -285,6 +385,7 @@
           if (shouldScroll && tagTypeSelector) {
             tagTypeSelector.scrollIntoView({ behavior: 'smooth', block: 'center' });
           }
+          this.publishValidationState(false, selectedCategory, harnessSection, shouldScroll);
           return false;
         }
       }
@@ -318,6 +419,7 @@
             if (shouldScroll && select.closest('.select-wrapper')) {
               select.closest('.select-wrapper').scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
+            this.publishValidationState(false, selectedCategory, shouldScroll);
             return false;
           } else {
             select.classList.remove('measurement-input--error');
@@ -325,6 +427,8 @@
         }
       }
 
+      // All validations passed
+      this.publishValidationState(true, selectedCategory, shouldScroll);
       return true;
     }
   }
@@ -337,6 +441,37 @@
       this.button = null;
       this.warningLogged = false;
       this.listenerAttached = false;
+      this.initialButtonText = null; // Store initial button text to detect Dawn's sold out state
+      this.validationUnsubscriber = null;
+      this.setupValidationSubscription();
+    }
+
+    setupValidationSubscription() {
+      // Subscribe to validation state changes via pub/sub
+      if (
+        typeof subscribe === 'function' &&
+        typeof PUB_SUB_EVENTS !== 'undefined' &&
+        PUB_SUB_EVENTS.customMeasurementsValidationChange
+      ) {
+        this.validationUnsubscriber = subscribe(PUB_SUB_EVENTS.customMeasurementsValidationChange, (event) => {
+          // Update button state based on validation event
+          this.update(event.isValid);
+        });
+      } else {
+        console.warn('[ButtonStateManager] Cannot subscribe - pub/sub not available', {
+          hasSubscribe: typeof subscribe === 'function',
+          hasEvents: typeof PUB_SUB_EVENTS !== 'undefined',
+          eventName: PUB_SUB_EVENTS?.customMeasurementsValidationChange,
+        });
+      }
+    }
+
+    destroy() {
+      // Clean up subscription
+      if (this.validationUnsubscriber) {
+        this.validationUnsubscriber();
+        this.validationUnsubscriber = null;
+      }
     }
 
     resolveButton() {
@@ -357,6 +492,11 @@
         const candidate = document.querySelector(selector);
         if (candidate) {
           this.button = candidate;
+          // Store initial button text to detect if Dawn set it to "Sold out" or "Unavailable"
+          if (this.initialButtonText === null) {
+            const buttonTextSpan = this.button.querySelector('span');
+            this.initialButtonText = buttonTextSpan ? buttonTextSpan.textContent.trim() : '';
+          }
           if (!this.listenerAttached) {
             // Attach handlers directly to the button using mousedown/pointerdown
             // These events fire even on disabled buttons, unlike click events
@@ -373,7 +513,6 @@
                 if (window.customMeasurementsForm && window.customMeasurementsForm.validationService) {
                   window.customMeasurementsForm.validationService.validateRequiredFields(
                     window.customMeasurementsForm.selectedCategory,
-                    window.customMeasurementsForm.harnessSection,
                     true, // Enable scrolling when clicking disabled button
                   );
                 }
@@ -397,7 +536,6 @@
                 if (window.customMeasurementsForm && window.customMeasurementsForm.validationService) {
                   window.customMeasurementsForm.validationService.validateRequiredFields(
                     window.customMeasurementsForm.selectedCategory,
-                    window.customMeasurementsForm.harnessSection,
                     true,
                   );
                 }
@@ -427,6 +565,23 @@
       const button = this.resolveButton();
       if (!button) return;
 
+      // Check if Dawn disabled the button (variant sold out)
+      // Dawn sets button text to "Sold out" or "Unavailable" when variant is unavailable
+      const buttonTextSpan = button.querySelector('span');
+      const currentButtonText = buttonTextSpan ? buttonTextSpan.textContent.trim() : '';
+      const isSoldOut = currentButtonText === 'Sold out' || currentButtonText === 'Unavailable';
+
+      // Also check variant ID input - if it's disabled, variant is sold out
+      const variantIdInput = document.querySelector('.product-variant-id');
+      const isVariantSoldOut = variantIdInput && variantIdInput.hasAttribute('disabled');
+
+      // If Dawn marked it as sold out, respect that and don't enable
+      if (isSoldOut || isVariantSoldOut) {
+        // Keep it disabled, but don't override Dawn's text or state
+        return;
+      }
+
+      // Otherwise, manage button state based on our validation
       if (!isValid) {
         button.disabled = true;
         button.style.opacity = '0.5';
@@ -434,11 +589,16 @@
         button.setAttribute('aria-disabled', 'true');
         button.title = 'Please select a category and fill all required measurements';
       } else {
+        // Validation passed and variant is available - enable the button
         button.disabled = false;
         button.style.opacity = '1';
         button.removeAttribute('disabled');
         button.removeAttribute('aria-disabled');
         button.removeAttribute('title');
+        // Restore "Add to cart" text if it was changed
+        if (buttonTextSpan && currentButtonText !== 'Add to cart') {
+          buttonTextSpan.textContent = 'Add to cart';
+        }
       }
     }
 
@@ -915,8 +1075,9 @@
     }
 
     updateAddToCartButton() {
-      const isValid = this.validationService.validateRequiredFields(this.selectedCategory, this.harnessSection);
-      this.buttonManager.update(isValid);
+      // Trigger validation which will publish validation state via pub/sub
+      // ButtonStateManager subscribes to the validation events
+      this.validationService.validateRequiredFields(this.selectedCategory);
     }
 
     initialize() {
@@ -925,7 +1086,7 @@
       this.resetAfterAddToCartPending = false;
 
       if (this.unitOfMeasureInput) {
-        this.unitOfMeasureInput.value = 'Measured in Inches';
+        this.unitOfMeasureInput.value = 'Inches';
       }
 
       this.selectedCategory = null;
@@ -1023,7 +1184,34 @@
       // Leather color section visibility is managed by updateSectionVisibility
       // Don't set it as always active here - let updateSectionVisibility handle it based on category
 
-      if (this.categoryInputs.length > 0) {
+      // Check if product type mode (auto-selected category)
+      if (this.config && this.config.autoSelectedCategory) {
+        this.selectedCategory = this.config.autoSelectedCategory;
+        this.currentCategoryStore = this.measurementManager.getCategoryStore(this.selectedCategory);
+
+        // Find and check the category input if it exists (may be hidden)
+        const categoryInput = Array.from(this.categoryInputs).find(
+          (input) => input.dataset.label === this.selectedCategory,
+        );
+        if (categoryInput) {
+          categoryInput.checked = true;
+        }
+
+        this.categoryManager.updateSectionVisibility(
+          this.selectedCategory,
+          this.harnessSection,
+          this.harnessTypeSelector,
+          this.tagTypeSelector,
+          this.leatherColorSection,
+          this.notesSection,
+          this.associateSection,
+          this.otherCategoryNotice,
+        );
+        this.categoryManager.updateMeasurementsForCategory(this.selectedCategory, this.measurementFields);
+        this.measurementManager.restoreMeasurementsForCategory(this.selectedCategory, this.measurementFields);
+        this.updateMeasurementOnUnitChange();
+        this.categoryManager.updateMeasurementGroupVisibility();
+      } else if (this.categoryInputs.length > 0) {
         const firstInput = this.categoryInputs[0];
         firstInput.checked = true;
         this.selectedCategory = firstInput.dataset.label;
@@ -1044,11 +1232,7 @@
         this.categoryManager.updateMeasurementGroupVisibility();
       }
 
-      const button = this.buttonManager.resolveButton();
-      if (button) {
-        button.disabled = true;
-        button.style.opacity = '0.5';
-      }
+      // Trigger validation which will publish events and update button state via pub/sub
       this.updateAddToCartButton();
 
       // Pre-fill form from URL parameters if present (for edit functionality)
@@ -1323,7 +1507,7 @@
           this.currentUnit = input.dataset.unit;
 
           if (this.unitOfMeasureInput) {
-            const unitValue = this.currentUnit === 'in' ? 'Measured in Inches' : 'Measured in Centimeters';
+            const unitValue = this.currentUnit === 'in' ? 'Inches' : 'Centimeters';
             this.unitOfMeasureInput.value = unitValue;
             this.unitOfMeasureInput.setAttribute('value', unitValue);
           }
@@ -1375,6 +1559,29 @@
         input.addEventListener('blur', normalizeMeasurementValue);
         input.addEventListener('change', normalizeMeasurementValue);
       });
+
+      // Custom text input (from validated-text-input component)
+      // Note: validated-text-input.liquid has its own validation script that also manages the button
+      // We coordinate by using a small delay on blur to let the input value settle
+      const customTextInput = document.querySelector('input[name="properties[Custom Text]"]');
+      if (customTextInput) {
+        customTextInput.addEventListener('input', () => {
+          this.flagFormInteraction();
+          // Clear error state when user starts typing
+          customTextInput.classList.remove('measurement-input--error');
+          // Use setTimeout to let the input value update fully
+          setTimeout(() => {
+            this.updateAddToCartButton();
+          }, 0);
+        });
+        customTextInput.addEventListener('blur', () => {
+          // Use setTimeout to let the input value and any other handlers settle
+          // This ensures we validate with the final value after all handlers run
+          setTimeout(() => {
+            this.updateAddToCartButton();
+          }, 0);
+        });
+      }
 
       // Harness selects
       this.harnessSelects.forEach((select) => {
@@ -1498,6 +1705,21 @@
         });
       });
 
+      // Listen to variant changes to update button state
+      if (
+        typeof subscribe === 'function' &&
+        typeof PUB_SUB_EVENTS !== 'undefined' &&
+        PUB_SUB_EVENTS.optionValueSelectionChange
+      ) {
+        // Listen to variantChange (Dawn publishes this after updating button state)
+        // This ensures we sync our validation state with Dawn's button state
+        subscribe(PUB_SUB_EVENTS.variantChange, () => {
+          // Variant changed, Dawn has already updated button state
+          // Now update our validation state to combine with Dawn's state
+          this.updateAddToCartButton();
+        });
+      }
+
       // Initialize collapsible sections using utility class
       const collapsibleToggles = document.querySelectorAll('.collapsible-toggle');
       this.collapsibleSections = Array.from(collapsibleToggles)
@@ -1516,7 +1738,7 @@
       // Form submission
       if (this.productForm) {
         this.productForm.addEventListener('submit', (event) => {
-          if (!this.validationService.validateRequiredFields(this.selectedCategory, this.harnessSection, false)) {
+          if (!this.validationService.validateRequiredFields(this.selectedCategory, false)) {
             event.preventDefault();
             alert('Please select a category and fill all required measurements.');
             this.resetAfterAddToCartPending = false;
@@ -1525,7 +1747,7 @@
           }
 
           if (this.unitOfMeasureInput) {
-            const unitValue = this.currentUnit === 'in' ? 'Measured in Inches' : 'Measured in Centimeters';
+            const unitValue = this.currentUnit === 'in' ? 'Inches' : 'Centimeters';
             this.unitOfMeasureInput.value = unitValue;
             this.unitOfMeasureInput.setAttribute('value', unitValue);
           }
@@ -1544,6 +1766,11 @@
             }
           });
 
+          // Check if we're in product-type mode (customer-facing form)
+          // In this mode, "Selected Option" is redundant since there's only one product type
+          const isProductTypeMode =
+            this.config?.autoSelectedCategory !== undefined && this.config?.autoSelectedCategory !== null;
+
           // Filter all property inputs (measurements and other properties)
           // Remove name attribute to prevent them from being included in FormData
           // This MUST happen before product-form.js creates FormData
@@ -1559,6 +1786,14 @@
             if (!match) return;
 
             const propertyName = match[1];
+
+            // Remove "Selected Option" for customer-facing products (redundant UX)
+            if (isProductTypeMode && propertyName === 'Selected Option') {
+              input.removeAttribute('name');
+              input.setAttribute('data-removed', 'true');
+              return;
+            }
+
             let propertyValue = '';
 
             // Get value based on input type

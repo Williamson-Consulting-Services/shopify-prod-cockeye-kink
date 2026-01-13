@@ -32,11 +32,6 @@ if (typeof CustomCardVariantAvailabilityMatrix === 'undefined') {
           return;
         }
 
-        if (DEBUG.availability) {
-          console.group('[AvailabilityMatrix] Building matrix');
-          console.log('Variants:', this.variants.length);
-        }
-
         const matrix = {};
         const variantMap = {};
 
@@ -93,30 +88,10 @@ if (typeof CustomCardVariantAvailabilityMatrix === 'undefined') {
             }
             quantity = 0;
           }
-
-          // DEBUG: Log each variant
-          if (DEBUG.availability) {
-            console.log(`Variant ${variant.id} (SKU: ${variant.sku || 'N/A'}):`, {
-              combinationKey,
-              option1: variant.option1,
-              option2: variant.option2,
-              option3: variant.option3,
-              inventory_management: variant.inventory_management,
-              inventory_quantity: variant.inventory_quantity,
-              available: variant.available,
-              matrixQuantity: quantity,
-            });
-          }
         });
 
         this.matrix = matrix;
         this.variantMap = variantMap;
-
-        if (DEBUG.availability) {
-          console.log('Matrix built:', Object.keys(matrix).length, 'combinations');
-          console.log('Matrix contents:', matrix);
-          console.groupEnd();
-        }
       }
 
       buildCombinationKey(selections, config) {

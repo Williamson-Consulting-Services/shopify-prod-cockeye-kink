@@ -2,7 +2,7 @@
   {
     "name": "theme_info",
     "theme_name": "Dawn",
-    "theme_version": "15.4.1.3",
+    "theme_version": "15.4.1.4",
     "theme_author": "Shopify",
     "theme_documentation_url": "https://help.shopify.com/manual/online-store/themes",
     "theme_support_url": "https://support.shopify.com/"
@@ -1528,14 +1528,21 @@
         "id": "custom_measurements_categories_order",
         "label": "t:settings_schema.custom_order_measurements_settings.settings.categories_order.label",
         "info": "t:settings_schema.custom_order_measurements_settings.settings.categories_order.info",
-        "default": "Hats, Tag, Shirt, Gloves, Harness, Suspenders, Belts, Pants, Kilt, Chaps, Other"
+        "default": "Hats, Tag, Shirt, Gloves, Harness, Suspenders, Belts, Pants, Kilt, Chaps, Armband, Other"
+      },
+      {
+        "type": "textarea",
+        "id": "custom_measurements_product_type_map",
+        "label": "t:settings_schema.custom_order_measurements_settings.settings.product_type_map.label",
+        "info": "t:settings_schema.custom_order_measurements_settings.settings.product_type_map.info",
+        "default": "Leather Armband: Armband"
       },
       {
         "type": "textarea",
         "id": "custom_measurements_map",
         "label": "t:settings_schema.custom_order_measurements_settings.settings.measurement_map.label",
         "info": "t:settings_schema.custom_order_measurements_settings.settings.measurement_map.info",
-        "default": "Head Circumference: Hats, Other*\nNeck: Harness, Tag*, Shirt, Other*\nShoulders: Harness, Shirt, Suspenders, Other*\nChest: Harness, Shirt, Suspenders, Other*\nTorso: Harness, Shirt, Other*\nSleeve Length: Shirt, Other*\nBicep: Shirt, Other*\nWrist: Shirt, Gloves, Other*\nPalm Circumference: Gloves, Other*\nHand Length: Gloves, Other*\nStomach: Shirt, Other*\nWaist: Harness, Chaps, Pants, Suspenders, Belts, Kilt, Other*\nHips: Chaps, Pants, Belts, Kilt, Other*\nUpper Thigh: Chaps, Pants, Other*\nLower Thigh: Chaps, Pants, Other*\nKnee: Chaps, Pants, Other*\nCalf: Chaps, Pants, Other*\nAnkle: Chaps, Pants, Other*\nInseam: Pants, Other*\nCrotch: Pants, Other*\nButt Rise: Pants, Other*\nLength: Kilt, Other*"
+        "default": "Head Circumference: Hats, Other*\nNeck: Harness, Tag*, Shirt, Other*\nShoulders: Harness, Shirt, Suspenders, Other*\nChest: Harness, Shirt, Suspenders, Other*\nTorso: Harness, Shirt, Other*\nSleeve Length: Shirt, Other*\nBicep: Armband*, Shirt, Other*\nWrist: Shirt, Gloves, Other*\nPalm Circumference: Gloves, Other*\nHand Length: Gloves, Other*\nStomach: Shirt, Other*\nWaist: Harness, Chaps, Pants, Suspenders, Belts, Kilt, Other*\nHips: Chaps, Pants, Belts, Kilt, Other*\nUpper Thigh: Chaps, Pants, Other*\nLower Thigh: Chaps, Pants, Other*\nKnee: Chaps, Pants, Other*\nCalf: Chaps, Pants, Other*\nAnkle: Chaps, Pants, Other*\nInseam: Pants, Other*\nCrotch: Pants, Other*\nButt Rise: Pants, Other*\nLength: Kilt, Other*"
       },
       {
         "type": "text",

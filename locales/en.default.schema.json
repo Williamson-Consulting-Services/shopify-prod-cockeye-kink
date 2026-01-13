@@ -417,6 +417,10 @@
           "label": "Custom Item Categories",
           "info": "Enter categories separated by commas."
         },
+        "product_type_map": {
+          "label": "Product Type to Category Mapping",
+          "info": "Map Shopify product types to measurement categories. Format: Product Type: Category (one per line). Example: Leather Armband: Armband"
+        },
         "measurement_map": {
           "label": "Measurement assignments",
           "info": "Format: Measurement: Category, Category*, ... (use * to mark optional measurements for a category). One measurement per line."

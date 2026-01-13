@@ -1,14 +1,19 @@
 {%- comment -%}
   Cart Item Edit Button
-  Displays edit button for custom order items
+  Displays edit button or link for custom order items
 
   SOLID Principles:
-  - Single Responsibility: Solely responsible for custom order detection and edit button display
+  - Single Responsibility: Solely responsible for custom order detection and edit button/link display
   - Open/Closed: Extend by modifying this snippet, not cart templates
   - Dependency Inversion: Depends on theme settings abstraction, not concrete implementation
 
   Usage:
   {%- render 'cart-item-edit-button', item: item -%}
+  {%- render 'cart-item-edit-button', item: item, style: 'link' -%}
+
+  Parameters:
+  - item: Cart item object (required)
+  - style: 'button' (default) or 'link' (optional)
 
   If cart templates are overwritten, add this snippet after property display.
 {%- endcomment -%}
@@ -16,6 +21,7 @@
 {%- liquid
   assign is_custom_order = false
   assign custom_order_title = settings.custom_order_product_title | default: 'Custom Order'
+  assign button_style = style | default: 'button'
 
   # Check product title first (primary method)
   if item.product and item.product.title
@@ -27,26 +33,69 @@
   endif
 
   # Backward compatibility: Check properties (for migration period)
+  # Also check for 'custom-by-type' and other custom variations
   if is_custom_order == false and item.properties
-    if item.properties['Order Type'] == 'custom' or item.properties['_custom'] == 'custom'
+    assign order_type = item.properties['Order Type'] | default: ''
+    assign custom_flag = item.properties['_custom'] | default: ''
+
+    # Check for exact 'custom' match
+    if order_type == 'custom' or custom_flag == 'custom'
       assign is_custom_order = true
+    endif
+
+    # Check for 'custom-by-type' and other custom variations
+    if is_custom_order == false
+      assign order_type_lower = order_type | downcase
+      assign custom_flag_lower = custom_flag | downcase
+
+      if order_type_lower contains 'custom' or custom_flag_lower contains 'custom'
+        assign is_custom_order = true
+      endif
+    endif
+
+    # Heuristic detection: Check for measurement properties (e.g., "Bicep (in)", "Bicep (cm)")
+    # This catches items that are clearly custom orders based on their properties
+    if is_custom_order == false
+      for property in item.properties
+        assign property_name = property.first | downcase
+        # Check if property name contains measurement indicators
+        if property_name contains '(in)' or property_name contains '(cm)' or property_name contains 'unit of measure' or property_name contains 'selected option'
+          assign is_custom_order = true
+          break
+        endif
+      endfor
     endif
   endif
 -%}
 
 {%- if is_custom_order -%}
-  <cart-edit-button
-    id="Edit-{{ item.index | plus: 1 }}"
-    data-index="{{ item.index | plus: 1 }}"
-  >
-    <button
-      type="button"
-      class="button button--tertiary"
-      data-edit-custom-order="{{ item.index | plus: 1 }}"
-      aria-label="{{ 'customer.addresses.edit' | t }} {{ item.product.title | escape }}"
+  {%- if button_style == 'link' -%}
+    <div class="cart-item__edit-link-wrapper">
+      <a
+        href="#"
+        class="cart-item__edit-link"
+        data-edit-custom-order="{{ item.index | plus: 1 }}"
+        aria-label="{{ 'sections.cart.edit_item' | t | default: 'Edit item' }} {{ item.product.title | escape }}"
+      >
+        {{ 'sections.cart.edit_item' | t | default: 'Edit item' }}
+      </a>
+    </div>
+  {%- else -%}
+    <cart-edit-button
+      id="Edit-{{ item.index | plus: 1 }}"
+      data-index="{{ item.index | plus: 1 }}"
+      class="cart-item__edit-wrapper"
     >
-      {% render 'icon-edit' %}
-    </button>
-  </cart-edit-button>
+      <button
+        type="button"
+        class="button button--tertiary cart-item__edit-button"
+        data-edit-custom-order="{{ item.index | plus: 1 }}"
+        aria-label="{{ 'sections.cart.edit_item' | t | default: 'Edit item' }} {{ item.product.title | escape }}"
+        title="{{ 'sections.cart.edit_item' | t | default: 'Edit item' }}"
+      >
+        {{ 'sections.cart.edit_item' | t | default: 'Edit item' }}
+      </button>
+    </cart-edit-button>
+  {%- endif -%}
 {%- endif -%}
 

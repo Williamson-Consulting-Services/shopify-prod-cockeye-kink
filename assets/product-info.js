@@ -131,9 +131,7 @@ if (!customElements.get('product-info')) {
             document.querySelector(`#${targetId}`)?.focus();
           })
           .catch((error) => {
-            if (error.name === 'AbortError') {
-              console.log('Fetch aborted by user');
-            } else {
+            if (error.name !== 'AbortError') {
               console.error(error);
             }
           });

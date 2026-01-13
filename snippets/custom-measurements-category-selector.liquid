@@ -7,9 +7,13 @@
     - harness_types: Array of harness type names (Deluxe, Standard, Suspender, Asymmetric)
     - tag_options: Array of tag option names (Dog Tag, Pig Tag, Bear Tag, Puppy Bone, Puppy Paw, Other)
     - section_id: The section ID for form association
-    - preselected_category: Optional category to preselect (from product.type)
+    - preselected_category: Optional category to preselect (from product.type) - deprecated, use auto_select_category
+    - auto_select_category: Category to auto-select (when product type is known)
+    - hide_selector: Boolean to hide the entire category selector (when product type is known)
 {% endcomment %}
-<fieldset class="product-form__input product-form__input--pill" id="optionButtons">
+{%- assign auto_select = auto_select_category | default: preselected_category | default: '' -%}
+{%- assign hide_selector = hide_selector | default: false -%}
+<fieldset class="product-form__input product-form__input--pill" id="optionButtons" {% if hide_selector %}style="display: none;"{% endif %}>
   <legend class="form__label">{{ 'custom_measurements.category_legend' | t }}</legend>
   {%- for category in categories_order -%}
     {%- assign category_name = category | strip -%}
@@ -48,13 +52,15 @@
     {%- assign optional_string = optional_list | uniq | join: '|' -%}
 
     {%- assign harness_match = false -%}
-    {%- for harness in harness_categories -%}
-      {%- assign harness_clean = harness | strip -%}
-      {%- if harness_clean == category_name -%}
-        {%- assign harness_match = true -%}
-        {%- break -%}
-      {%- endif -%}
-    {%- endfor -%}
+    {%- if harness_categories and harness_categories.size > 0 -%}
+      {%- for harness in harness_categories -%}
+        {%- assign harness_clean = harness | strip -%}
+        {%- if harness_clean == category_name -%}
+          {%- assign harness_match = true -%}
+          {%- break -%}
+        {%- endif -%}
+      {%- endfor -%}
+    {%- endif -%}
 
     {%- assign tag_match = false -%}
     {%- if category_name == 'Tag' -%}
@@ -63,7 +69,13 @@
 
     {%- assign option_id = 'custom-category-' | append: section_id | append: '-' | append: forloop.index0 -%}
     {%- assign should_preselect = false -%}
-    {%- if preselected_category and preselected_category != blank -%}
+    {%- if auto_select != '' -%}
+      {%- assign auto_select_lower = auto_select | downcase -%}
+      {%- assign category_lower = category_name | downcase -%}
+      {%- if category_lower == auto_select_lower -%}
+        {%- assign should_preselect = true -%}
+      {%- endif -%}
+    {%- elsif preselected_category and preselected_category != blank -%}
       {%- assign preselected_lower = preselected_category | downcase -%}
       {%- assign category_lower = category_name | downcase -%}
       {%- if category_lower contains preselected_lower or preselected_lower contains category_lower -%}
@@ -83,7 +95,9 @@
       data-optional="{{ optional_string }}"
       data-show-harness="{% if harness_match %}true{% else %}false{% endif %}"
       data-show-tag="{% if tag_match %}true{% else %}false{% endif %}"
-      {% if should_preselect or forloop.first %}
+      {% if should_preselect %}
+        checked
+      {% elsif auto_select == '' and forloop.first %}
         checked
       {% endif %}
     >
