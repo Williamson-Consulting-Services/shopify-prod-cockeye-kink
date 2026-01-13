@@ -193,16 +193,29 @@
         <table
           class="measurements-table"
           style="width: 100%; border-collapse: collapse; margin-top: 4px; font-size: inherit; display: table !important;"
+          aria-label="{{ 'accessibility.measurements_table_caption' | t }}"
         >
+          <caption class="visually-hidden">
+            {{ 'accessibility.measurements_table_caption' | t }}
+          </caption>
           <thead style="display: table-header-group !important;">
             <tr style="display: table-row !important;">
-              <th style="text-align: left; padding: 8px 12px 8px 0; font-weight: 500; font-size: 0.9em; border-bottom: 2px solid #999; display: table-cell !important;">
+              <th
+                scope="col"
+                style="text-align: left; padding: 8px 12px 8px 0; font-weight: 500; font-size: 0.9em; border-bottom: 2px solid #999; display: table-cell !important;"
+              >
                 Measurement
               </th>
-              <th style="text-align: right; padding: 8px 8px; font-weight: 500; font-size: 0.9em; border-bottom: 2px solid #999; display: table-cell !important;">
+              <th
+                scope="col"
+                style="text-align: right; padding: 8px 8px; font-weight: 500; font-size: 0.9em; border-bottom: 2px solid #999; display: table-cell !important;"
+              >
                 In
               </th>
-              <th style="text-align: right; padding: 8px 0 8px 8px; font-weight: 500; font-size: 0.9em; border-bottom: 2px solid #999; display: table-cell !important;">
+              <th
+                scope="col"
+                style="text-align: right; padding: 8px 0 8px 8px; font-weight: 500; font-size: 0.9em; border-bottom: 2px solid #999; display: table-cell !important;"
+              >
                 Cm
               </th>
             </tr>
@@ -226,14 +239,16 @@
                         {%- if in_value != blank -%}
                           {{ in_value }}
                         {%- else -%}
-                          <span style="opacity: 0.4;">—</span>
+                          <span style="opacity: 0.4;">—</span
+                          ><span class="visually-hidden">{{ 'accessibility.measurement_not_available' | t }}</span>
                         {%- endif -%}
                       </td>
                       <td style="text-align: right; padding: 8px 0 8px 8px; vertical-align: top; font-variant-numeric: tabular-nums; border-bottom: 1px solid #e0e0e0; display: table-cell !important;">
                         {%- if cm_value != blank -%}
                           {{ cm_value }}
                         {%- else -%}
-                          <span style="opacity: 0.4;">—</span>
+                          <span style="opacity: 0.4;">—</span
+                          ><span class="visually-hidden">{{ 'accessibility.measurement_not_available' | t }}</span>
                         {%- endif -%}
                       </td>
                     </tr>
@@ -250,16 +265,29 @@
       <table
         class="measurements-table"
         style="width: 100%; border-collapse: collapse; margin-top: 4px; font-size: inherit; display: table !important;"
+        aria-label="{{ 'accessibility.measurements_table_caption' | t }}"
       >
+        <caption class="visually-hidden">
+          {{ 'accessibility.measurements_table_caption' | t }}
+        </caption>
         <thead style="display: table-header-group !important;">
           <tr style="border-bottom: 2px solid #999; display: table-row !important;">
-            <th style="text-align: left; padding: 8px 12px 8px 0; font-weight: 500; font-size: 0.9em; border-bottom: 2px solid #999; display: table-cell !important;">
+            <th
+              scope="col"
+              style="text-align: left; padding: 8px 12px 8px 0; font-weight: 500; font-size: 0.9em; border-bottom: 2px solid #999; display: table-cell !important;"
+            >
               Measurement
             </th>
-            <th style="text-align: right; padding: 8px 8px; font-weight: 500; font-size: 0.9em; border-bottom: 2px solid #999; display: table-cell !important;">
+            <th
+              scope="col"
+              style="text-align: right; padding: 8px 8px; font-weight: 500; font-size: 0.9em; border-bottom: 2px solid #999; display: table-cell !important;"
+            >
               In
             </th>
-            <th style="text-align: right; padding: 8px 0 8px 8px; font-weight: 500; font-size: 0.9em; border-bottom: 2px solid #999; display: table-cell !important;">
+            <th
+              scope="col"
+              style="text-align: right; padding: 8px 0 8px 8px; font-weight: 500; font-size: 0.9em; border-bottom: 2px solid #999; display: table-cell !important;"
+            >
               Cm
             </th>
           </tr>
@@ -283,14 +311,16 @@
                       {%- if in_value != blank -%}
                         {{ in_value }}
                       {%- else -%}
-                        <span style="opacity: 0.4;">—</span>
+                        <span style="opacity: 0.4;">—</span
+                        ><span class="visually-hidden">{{ 'accessibility.measurement_not_available' | t }}</span>
                       {%- endif -%}
                     </td>
                     <td style="text-align: right; padding: 8px 0 8px 8px; vertical-align: top; font-variant-numeric: tabular-nums; border-bottom: 1px solid #e0e0e0; display: table-cell !important;">
                       {%- if cm_value != blank -%}
                         {{ cm_value }}
                       {%- else -%}
-                        <span style="opacity: 0.4;">—</span>
+                        <span style="opacity: 0.4;">—</span
+                        ><span class="visually-hidden">{{ 'accessibility.measurement_not_available' | t }}</span>
                       {%- endif -%}
                     </td>
                   </tr>
@@ -306,16 +336,29 @@
       <table
         class="measurements-table"
         style="width: 100%; border-collapse: collapse; margin-top: 4px; font-size: inherit; display: table !important;"
+        aria-label="{{ 'accessibility.measurements_table_caption' | t }}"
       >
+        <caption class="visually-hidden">
+          {{ 'accessibility.measurements_table_caption' | t }}
+        </caption>
         <thead style="display: table-header-group !important;">
           <tr style="border-bottom: 2px solid #999; display: table-row !important;">
-            <th style="text-align: left; padding: 8px 12px 8px 0; font-weight: 500; font-size: 0.9em; border-bottom: 2px solid #999; display: table-cell !important;">
+            <th
+              scope="col"
+              style="text-align: left; padding: 8px 12px 8px 0; font-weight: 500; font-size: 0.9em; border-bottom: 2px solid #999; display: table-cell !important;"
+            >
               Measurement
             </th>
-            <th style="text-align: right; padding: 8px 8px; font-weight: 500; font-size: 0.9em; border-bottom: 2px solid #999; display: table-cell !important;">
+            <th
+              scope="col"
+              style="text-align: right; padding: 8px 8px; font-weight: 500; font-size: 0.9em; border-bottom: 2px solid #999; display: table-cell !important;"
+            >
               In
             </th>
-            <th style="text-align: right; padding: 8px 0 8px 8px; font-weight: 500; font-size: 0.9em; border-bottom: 2px solid #999; display: table-cell !important;">
+            <th
+              scope="col"
+              style="text-align: right; padding: 8px 0 8px 8px; font-weight: 500; font-size: 0.9em; border-bottom: 2px solid #999; display: table-cell !important;"
+            >
               Cm
             </th>
           </tr>
@@ -339,14 +382,16 @@
                       {%- if in_value != blank -%}
                         {{ in_value }}
                       {%- else -%}
-                        <span style="opacity: 0.4;">—</span>
+                        <span style="opacity: 0.4;">—</span
+                        ><span class="visually-hidden">{{ 'accessibility.measurement_not_available' | t }}</span>
                       {%- endif -%}
                     </td>
                     <td style="text-align: right; padding: 8px 0 8px 8px; vertical-align: top; font-variant-numeric: tabular-nums; border-bottom: 1px solid #e0e0e0; display: table-cell !important;">
                       {%- if cm_value != blank -%}
                         {{ cm_value }}
                       {%- else -%}
-                        <span style="opacity: 0.4;">—</span>
+                        <span style="opacity: 0.4;">—</span
+                        ><span class="visually-hidden">{{ 'accessibility.measurement_not_available' | t }}</span>
                       {%- endif -%}
                     </td>
                   </tr>
