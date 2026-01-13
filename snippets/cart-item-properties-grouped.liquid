@@ -188,39 +188,23 @@
   {%- endif -%}
 
   {%- if output_format == 'dl' -%}
-    <div class="product-option" style="display: block !important; width: 100%;">
-      <dd style="margin: 0; padding: 0; display: block !important;">
+    <div class="product-option product-option--measurements">
+      <dd>
         <table
           class="measurements-table"
-          style="width: 100%; border-collapse: collapse; margin-top: 4px; font-size: inherit; display: table !important;"
           aria-label="{{ 'accessibility.measurements_table_caption' | t }}"
         >
           <caption class="visually-hidden">
             {{ 'accessibility.measurements_table_caption' | t }}
           </caption>
-          <thead style="display: table-header-group !important;">
-            <tr style="display: table-row !important;">
-              <th
-                scope="col"
-                style="text-align: left; padding: 8px 12px 8px 0; font-weight: 500; font-size: 0.9em; border-bottom: 2px solid #999; display: table-cell !important;"
-              >
-                Measurement
-              </th>
-              <th
-                scope="col"
-                style="text-align: right; padding: 8px 8px; font-weight: 500; font-size: 0.9em; border-bottom: 2px solid #999; display: table-cell !important;"
-              >
-                In
-              </th>
-              <th
-                scope="col"
-                style="text-align: right; padding: 8px 0 8px 8px; font-weight: 500; font-size: 0.9em; border-bottom: 2px solid #999; display: table-cell !important;"
-              >
-                Cm
-              </th>
+          <thead>
+            <tr>
+              <th scope="col">Measurement</th>
+              <th scope="col">In</th>
+              <th scope="col">Cm</th>
             </tr>
           </thead>
-          <tbody style="display: table-row-group !important;">
+          <tbody>
             {%- assign measurement_entries = measurement_data | split: '||END||' -%}
             {%- for entry in measurement_entries -%}
               {%- if entry != blank -%}
@@ -231,24 +215,22 @@
                     {%- assign base_name = parts[0] -%}
                     {%- assign in_value = name_and_cm[0] -%}
                     {%- assign cm_value = name_and_cm[1] -%}
-                    <tr style="display: table-row !important;">
-                      <td style="padding: 8px 12px 8px 0; vertical-align: top; border-bottom: 1px solid #e0e0e0; display: table-cell !important;">
-                        {{ base_name }}
-                      </td>
-                      <td style="text-align: right; padding: 8px 8px; vertical-align: top; font-variant-numeric: tabular-nums; border-bottom: 1px solid #e0e0e0; display: table-cell !important;">
+                    <tr>
+                      <td>{{ base_name }}</td>
+                      <td>
                         {%- if in_value != blank -%}
                           {{ in_value }}
                         {%- else -%}
-                          <span style="opacity: 0.4;">—</span
-                          ><span class="visually-hidden">{{ 'accessibility.measurement_not_available' | t }}</span>
+                          <span class="measurements-table__empty-value">—</span>
+                          <span class="visually-hidden">{{ 'accessibility.measurement_not_available' | t }}</span>
                         {%- endif -%}
                       </td>
-                      <td style="text-align: right; padding: 8px 0 8px 8px; vertical-align: top; font-variant-numeric: tabular-nums; border-bottom: 1px solid #e0e0e0; display: table-cell !important;">
+                      <td>
                         {%- if cm_value != blank -%}
                           {{ cm_value }}
                         {%- else -%}
-                          <span style="opacity: 0.4;">—</span
-                          ><span class="visually-hidden">{{ 'accessibility.measurement_not_available' | t }}</span>
+                          <span class="measurements-table__empty-value">—</span>
+                          <span class="visually-hidden">{{ 'accessibility.measurement_not_available' | t }}</span>
                         {%- endif -%}
                       </td>
                     </tr>
@@ -261,38 +243,22 @@
       </dd>
     </div>
   {%- elsif output_format == 'span' -%}
-    <span style="display: block;">
+    <span class="measurements-table-wrapper">
       <table
         class="measurements-table"
-        style="width: 100%; border-collapse: collapse; margin-top: 4px; font-size: inherit; display: table !important;"
         aria-label="{{ 'accessibility.measurements_table_caption' | t }}"
       >
         <caption class="visually-hidden">
           {{ 'accessibility.measurements_table_caption' | t }}
         </caption>
-        <thead style="display: table-header-group !important;">
-          <tr style="border-bottom: 2px solid #999; display: table-row !important;">
-            <th
-              scope="col"
-              style="text-align: left; padding: 8px 12px 8px 0; font-weight: 500; font-size: 0.9em; border-bottom: 2px solid #999; display: table-cell !important;"
-            >
-              Measurement
-            </th>
-            <th
-              scope="col"
-              style="text-align: right; padding: 8px 8px; font-weight: 500; font-size: 0.9em; border-bottom: 2px solid #999; display: table-cell !important;"
-            >
-              In
-            </th>
-            <th
-              scope="col"
-              style="text-align: right; padding: 8px 0 8px 8px; font-weight: 500; font-size: 0.9em; border-bottom: 2px solid #999; display: table-cell !important;"
-            >
-              Cm
-            </th>
+        <thead>
+          <tr>
+            <th scope="col">Measurement</th>
+            <th scope="col">In</th>
+            <th scope="col">Cm</th>
           </tr>
         </thead>
-        <tbody style="display: table-row-group !important;">
+        <tbody>
           {%- assign measurement_entries = measurement_data | split: '||END||' -%}
           {%- for entry in measurement_entries -%}
             {%- if entry != blank -%}
@@ -303,24 +269,22 @@
                   {%- assign base_name = parts[0] -%}
                   {%- assign in_value = name_and_cm[0] -%}
                   {%- assign cm_value = name_and_cm[1] -%}
-                  <tr style="border-bottom: 1px solid #e0e0e0; display: table-row !important;">
-                    <td style="padding: 8px 12px 8px 0; vertical-align: top; border-bottom: 1px solid #e0e0e0; display: table-cell !important;">
-                      {{ base_name }}
-                    </td>
-                    <td style="text-align: right; padding: 8px 8px; vertical-align: top; font-variant-numeric: tabular-nums; border-bottom: 1px solid #e0e0e0; display: table-cell !important;">
+                  <tr>
+                    <td>{{ base_name }}</td>
+                    <td>
                       {%- if in_value != blank -%}
                         {{ in_value }}
                       {%- else -%}
-                        <span style="opacity: 0.4;">—</span
-                        ><span class="visually-hidden">{{ 'accessibility.measurement_not_available' | t }}</span>
+                        <span class="measurements-table__empty-value">—</span>
+                        <span class="visually-hidden">{{ 'accessibility.measurement_not_available' | t }}</span>
                       {%- endif -%}
                     </td>
-                    <td style="text-align: right; padding: 8px 0 8px 8px; vertical-align: top; font-variant-numeric: tabular-nums; border-bottom: 1px solid #e0e0e0; display: table-cell !important;">
+                    <td>
                       {%- if cm_value != blank -%}
                         {{ cm_value }}
                       {%- else -%}
-                        <span style="opacity: 0.4;">—</span
-                        ><span class="visually-hidden">{{ 'accessibility.measurement_not_available' | t }}</span>
+                        <span class="measurements-table__empty-value">—</span>
+                        <span class="visually-hidden">{{ 'accessibility.measurement_not_available' | t }}</span>
                       {%- endif -%}
                     </td>
                   </tr>
@@ -332,38 +296,22 @@
       </table>
     </span>
   {%- else -%}
-    <div>
+    <div class="measurements-table-wrapper">
       <table
         class="measurements-table"
-        style="width: 100%; border-collapse: collapse; margin-top: 4px; font-size: inherit; display: table !important;"
         aria-label="{{ 'accessibility.measurements_table_caption' | t }}"
       >
         <caption class="visually-hidden">
           {{ 'accessibility.measurements_table_caption' | t }}
         </caption>
-        <thead style="display: table-header-group !important;">
-          <tr style="border-bottom: 2px solid #999; display: table-row !important;">
-            <th
-              scope="col"
-              style="text-align: left; padding: 8px 12px 8px 0; font-weight: 500; font-size: 0.9em; border-bottom: 2px solid #999; display: table-cell !important;"
-            >
-              Measurement
-            </th>
-            <th
-              scope="col"
-              style="text-align: right; padding: 8px 8px; font-weight: 500; font-size: 0.9em; border-bottom: 2px solid #999; display: table-cell !important;"
-            >
-              In
-            </th>
-            <th
-              scope="col"
-              style="text-align: right; padding: 8px 0 8px 8px; font-weight: 500; font-size: 0.9em; border-bottom: 2px solid #999; display: table-cell !important;"
-            >
-              Cm
-            </th>
+        <thead>
+          <tr>
+            <th scope="col">Measurement</th>
+            <th scope="col">In</th>
+            <th scope="col">Cm</th>
           </tr>
         </thead>
-        <tbody style="display: table-row-group !important;">
+        <tbody>
           {%- assign measurement_entries = measurement_data | split: '||END||' -%}
           {%- for entry in measurement_entries -%}
             {%- if entry != blank -%}
@@ -374,24 +322,22 @@
                   {%- assign base_name = parts[0] -%}
                   {%- assign in_value = name_and_cm[0] -%}
                   {%- assign cm_value = name_and_cm[1] -%}
-                  <tr style="border-bottom: 1px solid #e0e0e0; display: table-row !important;">
-                    <td style="padding: 8px 12px 8px 0; vertical-align: top; border-bottom: 1px solid #e0e0e0; display: table-cell !important;">
-                      {{ base_name }}
-                    </td>
-                    <td style="text-align: right; padding: 8px 8px; vertical-align: top; font-variant-numeric: tabular-nums; border-bottom: 1px solid #e0e0e0; display: table-cell !important;">
+                  <tr>
+                    <td>{{ base_name }}</td>
+                    <td>
                       {%- if in_value != blank -%}
                         {{ in_value }}
                       {%- else -%}
-                        <span style="opacity: 0.4;">—</span
-                        ><span class="visually-hidden">{{ 'accessibility.measurement_not_available' | t }}</span>
+                        <span class="measurements-table__empty-value">—</span>
+                        <span class="visually-hidden">{{ 'accessibility.measurement_not_available' | t }}</span>
                       {%- endif -%}
                     </td>
-                    <td style="text-align: right; padding: 8px 0 8px 8px; vertical-align: top; font-variant-numeric: tabular-nums; border-bottom: 1px solid #e0e0e0; display: table-cell !important;">
+                    <td>
                       {%- if cm_value != blank -%}
                         {{ cm_value }}
                       {%- else -%}
-                        <span style="opacity: 0.4;">—</span
-                        ><span class="visually-hidden">{{ 'accessibility.measurement_not_available' | t }}</span>
+                        <span class="measurements-table__empty-value">—</span>
+                        <span class="visually-hidden">{{ 'accessibility.measurement_not_available' | t }}</span>
                       {%- endif -%}
                     </td>
                   </tr>

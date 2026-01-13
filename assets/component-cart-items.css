@@ -436,3 +436,95 @@ cart-edit-button .button:not([disabled]):hover {
     padding-left: 0;
   }
 }
+
+/* Measurements Table Styles */
+.measurements-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.4rem;
+  font-size: inherit;
+  display: table;
+}
+
+.measurements-table thead {
+  display: table-header-group;
+}
+
+.measurements-table tbody {
+  display: table-row-group;
+}
+
+.measurements-table tr {
+  display: table-row;
+}
+
+.measurements-table th,
+.measurements-table td {
+  display: table-cell;
+}
+
+.measurements-table th {
+  text-align: left;
+  padding: 0.8rem 1.2rem 0.8rem 0;
+  font-weight: 500;
+  font-size: 0.9em;
+  border-bottom: 0.2rem solid rgba(var(--color-foreground), 0.4);
+}
+
+.measurements-table th:first-child {
+  text-align: left;
+  padding-right: 1.2rem;
+  padding-left: 0;
+}
+
+.measurements-table th:not(:first-child) {
+  text-align: right;
+  padding: 0.8rem;
+}
+
+.measurements-table th:last-child {
+  padding-right: 0;
+  padding-left: 0.8rem;
+}
+
+.measurements-table td {
+  padding: 0.8rem 1.2rem 0.8rem 0;
+  vertical-align: top;
+  border-bottom: 0.1rem solid rgba(var(--color-foreground), 0.15);
+}
+
+.measurements-table td:first-child {
+  padding-right: 1.2rem;
+  padding-left: 0;
+}
+
+.measurements-table td:not(:first-child) {
+  text-align: right;
+  padding: 0.8rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.measurements-table td:last-child {
+  padding-right: 0;
+  padding-left: 0.8rem;
+}
+
+.measurements-table__empty-value {
+  opacity: 0.4;
+}
+
+/* Container styles for measurements table */
+.product-option--measurements {
+  display: block;
+  width: 100%;
+}
+
+.product-option--measurements dd {
+  margin: 0;
+  padding: 0;
+  display: block;
+}
+
+.measurements-table-wrapper {
+  display: block;
+}
