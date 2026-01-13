@@ -71,6 +71,10 @@ See [Version Tracking Workflow](../.cursor/version-tracking-workflow.mdc) for de
 - Product type mapping must be configured in theme settings for auto-detection to work
 - No breaking changes - all existing templates and functionality remain unchanged
 
+#### Custom Items and Banners
+
+Custom items and banners (such as the custom order banner and checkout footer) are currently shown for customer-facing products. This behavior may be adjusted in the future based on business requirements or user feedback.
+
 ---
 
 ## [15.4.1.3] - 2025-12-15

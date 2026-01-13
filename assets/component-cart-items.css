@@ -295,24 +295,30 @@ cart-edit-button .button:not([disabled]):hover {
 }
 
 @media screen and (max-width: 749px) {
+  /* Reduce page-width padding for cart items on mobile */
+  cart-items .page-width {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
   .cart-items,
-  .cart-items thead,
-  .cart-items tbody {
+  .cart-items > thead,
+  .cart-items > tbody {
     display: block;
     width: 100%;
   }
 
-  .cart-items thead tr {
+  .cart-items > thead > tr {
     display: flex;
     justify-content: space-between;
     border-bottom: 0.1rem solid rgba(var(--color-foreground), 0.2);
     margin-bottom: 4rem;
   }
 
+  /* Vertical stacked layout for mobile */
   .cart-item {
-    display: grid;
-    grid-template: repeat(2, auto) / repeat(4, 1fr);
-    gap: 1.5rem;
+    display: flex;
+    flex-direction: column;
     margin-bottom: 3.5rem;
   }
 
@@ -324,26 +330,41 @@ cart-edit-button .button:not([disabled]):hover {
     margin-bottom: 0;
   }
 
+  /* Stack media (image) at top */
   .cart-item__media {
-    grid-row: 1 / 3;
+    display: block;
+    margin-bottom: 1.5rem;
+    text-align: center;
   }
 
+  .cart-item__image-container {
+    justify-content: center;
+  }
+
+  /* Stack details (title, properties, measurements) full width */
   .cart-item__details {
-    grid-column: 2 / 4;
+    display: block;
+    width: 100%;
+    margin-bottom: 1.5rem;
   }
 
+  /* Remove max-width constraint on mobile for full-width properties/measurements */
+  .cart-item__details > * {
+    max-width: none;
+  }
+
+  /* Quantity and total controls */
   .cart-item__quantity {
-    grid-column: 2 / 5;
+    margin-bottom: 1.5rem;
   }
 
   .cart-item__quantity-wrapper {
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
   }
 
-  .cart-item__totals {
-    display: flex;
-    align-items: flex-start;
-    justify-content: flex-end;
+  .cart-item__totals.medium-hide.large-up-hide {
+    margin-bottom: 1.5rem;
+    text-align: right;
   }
 }
 
@@ -444,6 +465,7 @@ cart-edit-button .button:not([disabled]):hover {
   margin-top: 0.4rem;
   font-size: inherit;
   display: table;
+  table-layout: fixed;
 }
 
 .measurements-table thead {
@@ -461,11 +483,40 @@ cart-edit-button .button:not([disabled]):hover {
 .measurements-table th,
 .measurements-table td {
   display: table-cell;
+  box-sizing: border-box;
+}
+
+/* Set explicit column widths only on thead (first row) for table-layout: fixed */
+.measurements-table thead th:first-child {
+  width: 60%;
+}
+
+.measurements-table thead th:not(:first-child):not(:last-child) {
+  width: 20%;
+}
+
+.measurements-table thead th:last-child {
+  width: 20%;
+}
+
+/* Adjust column widths for tablet - give more space to measurement values */
+@media screen and (min-width: 750px) and (max-width: 989px) {
+  .measurements-table thead th:first-child {
+    width: 50%;
+  }
+
+  .measurements-table thead th:not(:first-child):not(:last-child) {
+    width: 25%;
+  }
+
+  .measurements-table thead th:last-child {
+    width: 25%;
+  }
 }
 
 .measurements-table th {
   text-align: left;
-  padding: 0.8rem 1.2rem 0.8rem 0;
+  padding: 0.8rem 0;
   font-weight: 500;
   font-size: 0.9em;
   border-bottom: 0.2rem solid rgba(var(--color-foreground), 0.4);
@@ -473,13 +524,14 @@ cart-edit-button .button:not([disabled]):hover {
 
 .measurements-table th:first-child {
   text-align: left;
-  padding-right: 1.2rem;
   padding-left: 0;
+  padding-right: 1.2rem;
 }
 
 .measurements-table th:not(:first-child) {
   text-align: right;
-  padding: 0.8rem;
+  padding-left: 0.8rem;
+  padding-right: 0.8rem;
 }
 
 .measurements-table th:last-child {
@@ -488,19 +540,20 @@ cart-edit-button .button:not([disabled]):hover {
 }
 
 .measurements-table td {
-  padding: 0.8rem 1.2rem 0.8rem 0;
+  padding: 0.8rem 0;
   vertical-align: top;
   border-bottom: 0.1rem solid rgba(var(--color-foreground), 0.15);
 }
 
 .measurements-table td:first-child {
-  padding-right: 1.2rem;
   padding-left: 0;
+  padding-right: 1.2rem;
 }
 
 .measurements-table td:not(:first-child) {
   text-align: right;
-  padding: 0.8rem;
+  padding-left: 0.8rem;
+  padding-right: 0.8rem;
   font-variant-numeric: tabular-nums;
 }
 
@@ -517,14 +570,49 @@ cart-edit-button .button:not([disabled]):hover {
 .product-option--measurements {
   display: block;
   width: 100%;
+  min-width: 0;
 }
 
 .product-option--measurements dd {
   margin: 0;
   padding: 0;
   display: block;
+  min-width: 0;
 }
 
 .measurements-table-wrapper {
   display: block;
+  width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+}
+
+/* Mobile-specific measurements table fixes */
+@media screen and (max-width: 749px) {
+  .measurements-table {
+    width: 100%;
+    table-layout: fixed;
+    display: table;
+  }
+
+  .measurements-table-wrapper {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .product-option--measurements {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .product-option--measurements dd {
+    width: 100%;
+    min-width: 0;
+  }
+
+  /* Ensure table takes full available width */
+  .cart-item-properties {
+    width: 100%;
+    min-width: 0;
+  }
 }

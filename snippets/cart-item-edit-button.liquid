@@ -75,9 +75,9 @@
         href="#"
         class="cart-item__edit-link"
         data-edit-custom-order="{{ item.index | plus: 1 }}"
-        aria-label="{{ 'sections.cart.edit_measurements' | t | default: 'Edit measurements' }} {{ item.product.title | escape }}"
+        aria-label="{{ 'sections.cart.edit_item' | t | default: 'Edit item' }} {{ item.product.title | escape }}"
       >
-        {{ 'sections.cart.edit_measurements' | t | default: 'Edit measurements' }}
+        {{ 'sections.cart.edit_item' | t | default: 'Edit item' }}
       </a>
     </div>
   {%- else -%}
@@ -90,10 +90,10 @@
         type="button"
         class="button button--tertiary cart-item__edit-button"
         data-edit-custom-order="{{ item.index | plus: 1 }}"
-        aria-label="{{ 'sections.cart.edit_measurements' | t | default: 'Edit measurements' }} {{ item.product.title | escape }}"
-        title="{{ 'sections.cart.edit_measurements' | t | default: 'Edit measurements' }}"
+        aria-label="{{ 'sections.cart.edit_item' | t | default: 'Edit item' }} {{ item.product.title | escape }}"
+        title="{{ 'sections.cart.edit_item' | t | default: 'Edit item' }}"
       >
-        {{ 'sections.cart.edit_measurements' | t | default: 'Edit measurements' }}
+        {{ 'sections.cart.edit_item' | t | default: 'Edit item' }}
       </button>
     </cart-edit-button>
   {%- endif -%}
