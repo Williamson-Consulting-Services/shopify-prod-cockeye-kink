@@ -62,6 +62,7 @@ See [Version Tracking Workflow](../.cursor/version-tracking-workflow.mdc) for de
 - Cart extension now prevents processing its own update events to avoid infinite loops
 - Improved custom order detection from cart items
 - Better filtering of empty, zero, and internal properties in cart display
+- Swatch background images now render correctly in product card variant options on featured collection items (fixed CSS property from `background-color` to `background` to support `url()` values)
 
 ### Notes
 
