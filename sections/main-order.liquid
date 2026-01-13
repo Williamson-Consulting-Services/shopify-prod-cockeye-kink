@@ -74,25 +74,11 @@
                         </span>
                       {%- endunless -%}
                       {%- if property_size != 0 -%}
-                        {%- for property in line_item.properties -%}
-                          {% assign property_first_char = property.first | slice: 0 %}
-                          {%- assign property_value = property.last | append: '' | strip -%}
-                          {%- assign num_value = property_value | plus: 0 -%}
-                          {%- assign is_zero = false -%}
-                          {%- if num_value == 0 and property_value == '0' or property_value == '0.0' or property_value == '0.00' or property_value == '0.000' or property_value == '0.0000' -%}
-                            {%- assign is_zero = true -%}
-                          {%- endif -%}
-                          {%- if property.last != blank and property_first_char != '_' and is_zero == false -%}
-                            <span>{{ property.first }}:</span>
-                            <span>
-                              {%- if property.last contains '/uploads/' -%}
-                                <a href="{{ property.last }}">{{ property.last | split: '/' | last }}</a>
-                              {%- else -%}
-                                {{ property.last }}
-                              {%- endif -%}
-                            </span>
-                          {%- endif -%}
-                        {%- endfor -%}
+                        {%- render 'cart-item-properties-grouped',
+                          properties: line_item.properties,
+                          is_customer_facing: false,
+                          output_format: 'span'
+                        -%}
                       {%- endif -%}
                     </div>
                   {%- endunless -%}
@@ -172,7 +158,11 @@
                         <span class="visually-hidden">{{ 'products.product.price.unit_price' | t }}</span>
                       </dt>
                       <dd class="unit-price">
-                        {% render 'unit-price', price: line_item.unit_price, measurement: line_item.unit_price_measurement, hide_accessibility_label: true %}
+                        {% render 'unit-price',
+                          price: line_item.unit_price,
+                          measurement: line_item.unit_price_measurement,
+                          hide_accessibility_label: true
+                        %}
                       </dd>
                     {%- endif -%}
                   </dl>

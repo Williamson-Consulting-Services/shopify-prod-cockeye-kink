@@ -158,15 +158,21 @@ class CustomOrderUtils {
    * Builds product page URL with query parameters for editing
    * @param {string} productHandle - Product handle
    * @param {Object} properties - Cart item properties
+   * @param {number|string} variantId - Variant ID (optional)
    * @returns {string} - Product page URL with query parameters
    */
-  static buildEditUrl(productHandle, properties) {
+  static buildEditUrl(productHandle, properties, variantId = null) {
     if (!productHandle) return '/';
 
     const baseUrl = `/products/${productHandle}`;
     const filteredProperties = this.filterCartItemProperties(properties);
 
     const params = new URLSearchParams();
+
+    // Add variant ID first if provided (this ensures variant is selected on product page)
+    if (variantId) {
+      params.append('variant', String(variantId));
+    }
 
     for (const [key, value] of Object.entries(filteredProperties)) {
       // Skip internal properties

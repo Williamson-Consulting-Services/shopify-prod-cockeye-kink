@@ -282,8 +282,12 @@ cart-edit-button .button:not([disabled]):hover {
 }
 
 .product-option * {
-  display: inline;
   margin: 0;
+}
+
+.product-option dd,
+.product-option dt {
+  display: inline;
 }
 
 .cart-items thead th {

@@ -1,0 +1,361 @@
+{%- comment -%}
+  Cart Item Properties Grouped
+  Groups measurement pairs (in/cm) into table format and displays all properties
+
+  Parameters:
+  - properties: The item.properties object
+  - is_customer_facing: Boolean to skip "Selected Option" for customer-facing products
+  - output_format: 'dl', 'span', or default (div)
+
+  Usage:
+  {%- render 'cart-item-properties-grouped', properties: item.properties, is_customer_facing: is_customer_facing -%}
+{%- endcomment -%}
+
+{%- liquid
+  # First pass: Collect all measurements and regular properties
+  assign measurement_data = ''
+  assign regular_properties = ''
+  assign displayed_measurement_names = ''
+  assign unit_of_measure = ''
+
+  for property in properties
+    assign first_char = property.first | slice: 0
+    assign property_value = property.last | append: '' | strip
+    assign prop_name = property.first
+    assign prop_name_lower = prop_name | downcase
+
+    # Skip if empty or internal property
+    if property.last == blank or first_char == '_'
+      continue
+    endif
+
+    # Skip "Selected Option" for customer-facing products
+    if is_customer_facing and property.first == 'Selected Option'
+      continue
+    endif
+
+    # Check if value is an "empty default" zero
+    assign num_value = property_value | plus: 0
+    assign is_empty_default_zero = false
+    if num_value == 0
+      if property_value == '0' or property_value == '0.0' or property_value == '0.00' or property_value == '0.000' or property_value == '0.0000'
+        assign is_empty_default_zero = true
+      elsif property_value contains '.'
+        assign zero_patterns = '0.0,0.00,0.000,0.0000' | split: ','
+        if zero_patterns contains property_value
+          assign is_empty_default_zero = true
+        endif
+      endif
+    endif
+
+    if is_empty_default_zero == false
+      # Check if this is "Unit of Measure" property
+      if prop_name_lower == 'unit of measure'
+        assign unit_of_measure = property_value
+        # Check if this is a measurement property
+      elsif prop_name_lower contains ' (in)'
+        assign base_name = prop_name | remove: ' (in)' | remove: ' (In)' | remove: ' (IN)'
+        assign cm_prop_name = base_name | append: ' (cm)'
+        assign in_value = property_value
+        assign cm_value = ''
+
+        # Look for the cm pair
+        for check_prop in properties
+          assign check_prop_name_lower = check_prop.first | downcase
+          assign cm_prop_name_lower = cm_prop_name | downcase
+          if check_prop_name_lower == cm_prop_name_lower
+            assign check_val = check_prop.last | append: '' | strip
+            assign check_num = check_val | plus: 0
+            assign is_zero = false
+            if check_num == 0
+              if check_val == '0' or check_val == '0.0' or check_val == '0.00' or check_val == '0.000' or check_val == '0.0000'
+                assign is_zero = true
+              elsif check_val contains '.'
+                assign zero_patterns = '0.0,0.00,0.000,0.0000' | split: ','
+                if zero_patterns contains check_val
+                  assign is_zero = true
+                endif
+              endif
+            endif
+            unless check_val == blank or is_zero
+              assign cm_value = check_val
+            endunless
+            break
+          endif
+        endfor
+
+        # Store measurement data
+        assign measurement_entry = base_name | append: '||IN||' | append: in_value | append: '||CM||' | append: cm_value | append: '||END||'
+        assign measurement_data = measurement_data | append: measurement_entry
+        assign displayed_measurement_names = displayed_measurement_names | append: base_name | append: '|'
+      elsif prop_name_lower contains ' (cm)'
+        # Only store if we haven't already processed the pair
+        assign base_name = prop_name | remove: ' (cm)' | remove: ' (Cm)' | remove: ' (CM)'
+        unless displayed_measurement_names contains base_name
+          # No in pair found, store cm alone
+          assign measurement_entry = base_name | append: '||IN||||CM||' | append: property_value | append: '||END||'
+          assign measurement_data = measurement_data | append: measurement_entry
+          assign displayed_measurement_names = displayed_measurement_names | append: base_name | append: '|'
+        endunless
+      else
+        # Regular property - store for later display (but skip Unit of Measure since we display it before table)
+        unless prop_name_lower == 'unit of measure'
+          assign prop_entry = prop_name | append: '||VALUE||' | append: property_value | append: '||END||'
+          assign regular_properties = regular_properties | append: prop_entry
+        endunless
+      endif
+    endif
+  endfor
+-%}
+
+{%- comment -%} Display regular (non-measurement) properties first {%- endcomment -%}
+{%- if regular_properties != blank -%}
+  {%- assign prop_entries = regular_properties | split: '||END||' -%}
+  {%- for prop_entry in prop_entries -%}
+    {%- if prop_entry != blank -%}
+      {%- assign prop_parts = prop_entry | split: '||VALUE||' -%}
+      {%- if prop_parts.size == 2 -%}
+        {%- assign prop_name = prop_parts[0] -%}
+        {%- for property in properties -%}
+          {%- if property.first == prop_name -%}
+            {%- if output_format == 'dl' -%}
+              <div class="product-option">
+                <dt>{{ property.first }}:</dt>
+                <dd>
+                  {%- if property.last contains '/uploads/' -%}
+                    <a
+                      href="{{ property.last }}"
+                      class="link"
+                      target="_blank"
+                      aria-describedby="a11y-new-window-message"
+                    >
+                      {{ property.last | split: '/' | last }}
+                    </a>
+                  {%- else -%}
+                    {{ property.last }}
+                  {%- endif -%}
+                </dd>
+              </div>
+            {%- elsif output_format == 'span' -%}
+              <span>{{ property.first }}:</span>
+              <span>
+                {%- if property.last contains '/uploads/' -%}
+                  <a href="{{ property.last }}">{{ property.last | split: '/' | last }}</a>
+                {%- else -%}
+                  {{ property.last }}
+                {%- endif -%}
+              </span>
+            {%- else -%}
+              <div>
+                <strong>{{ property.first }}:</strong>
+                {%- if property.last contains '/uploads/' -%}
+                  <a
+                    href="{{ property.last }}"
+                    class="link"
+                    target="_blank"
+                    aria-describedby="a11y-new-window-message"
+                  >
+                    {{ property.last | split: '/' | last }}
+                  </a>
+                {%- else -%}
+                  {{ property.last }}
+                {%- endif -%}
+              </div>
+            {%- endif -%}
+            {%- break -%}
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endif -%}
+    {%- endif -%}
+  {%- endfor -%}
+{%- endif -%}
+
+{%- comment -%} Display measurements in table format at the end {%- endcomment -%}
+{%- if measurement_data != blank -%}
+  {%- comment -%} Display Unit of Measure before table {%- endcomment -%}
+  {%- if unit_of_measure != blank -%}
+    {%- if output_format == 'dl' -%}
+      <div class="product-option">
+        <dt>Unit of Measure:</dt>
+        <dd>{{ unit_of_measure }}</dd>
+      </div>
+    {%- elsif output_format == 'span' -%}
+      <span>Unit of Measure:</span>
+      <span>{{ unit_of_measure }}</span>
+    {%- else -%}
+      <div><strong>Unit of Measure:</strong> {{ unit_of_measure }}</div>
+    {%- endif -%}
+  {%- endif -%}
+
+  {%- if output_format == 'dl' -%}
+    <div class="product-option" style="display: block !important; width: 100%;">
+      <dd style="margin: 0; padding: 0; display: block !important;">
+        <table
+          class="measurements-table"
+          style="width: 100%; border-collapse: collapse; margin-top: 4px; font-size: inherit; display: table !important;"
+        >
+          <thead style="display: table-header-group !important;">
+            <tr style="display: table-row !important;">
+              <th style="text-align: left; padding: 8px 12px 8px 0; font-weight: 500; font-size: 0.9em; border-bottom: 2px solid #999; display: table-cell !important;">
+                Measurement
+              </th>
+              <th style="text-align: right; padding: 8px 8px; font-weight: 500; font-size: 0.9em; border-bottom: 2px solid #999; display: table-cell !important;">
+                In
+              </th>
+              <th style="text-align: right; padding: 8px 0 8px 8px; font-weight: 500; font-size: 0.9em; border-bottom: 2px solid #999; display: table-cell !important;">
+                Cm
+              </th>
+            </tr>
+          </thead>
+          <tbody style="display: table-row-group !important;">
+            {%- assign measurement_entries = measurement_data | split: '||END||' -%}
+            {%- for entry in measurement_entries -%}
+              {%- if entry != blank -%}
+                {%- assign parts = entry | split: '||IN||' -%}
+                {%- if parts.size == 2 -%}
+                  {%- assign name_and_cm = parts[1] | split: '||CM||' -%}
+                  {%- if name_and_cm.size == 2 -%}
+                    {%- assign base_name = parts[0] -%}
+                    {%- assign in_value = name_and_cm[0] -%}
+                    {%- assign cm_value = name_and_cm[1] -%}
+                    <tr style="display: table-row !important;">
+                      <td style="padding: 8px 12px 8px 0; vertical-align: top; border-bottom: 1px solid #e0e0e0; display: table-cell !important;">
+                        {{ base_name }}
+                      </td>
+                      <td style="text-align: right; padding: 8px 8px; vertical-align: top; font-variant-numeric: tabular-nums; border-bottom: 1px solid #e0e0e0; display: table-cell !important;">
+                        {%- if in_value != blank -%}
+                          {{ in_value }}
+                        {%- else -%}
+                          <span style="opacity: 0.4;">—</span>
+                        {%- endif -%}
+                      </td>
+                      <td style="text-align: right; padding: 8px 0 8px 8px; vertical-align: top; font-variant-numeric: tabular-nums; border-bottom: 1px solid #e0e0e0; display: table-cell !important;">
+                        {%- if cm_value != blank -%}
+                          {{ cm_value }}
+                        {%- else -%}
+                          <span style="opacity: 0.4;">—</span>
+                        {%- endif -%}
+                      </td>
+                    </tr>
+                  {%- endif -%}
+                {%- endif -%}
+              {%- endif -%}
+            {%- endfor -%}
+          </tbody>
+        </table>
+      </dd>
+    </div>
+  {%- elsif output_format == 'span' -%}
+    <span style="display: block;">
+      <table
+        class="measurements-table"
+        style="width: 100%; border-collapse: collapse; margin-top: 4px; font-size: inherit; display: table !important;"
+      >
+        <thead style="display: table-header-group !important;">
+          <tr style="border-bottom: 2px solid #999; display: table-row !important;">
+            <th style="text-align: left; padding: 8px 12px 8px 0; font-weight: 500; font-size: 0.9em; border-bottom: 2px solid #999; display: table-cell !important;">
+              Measurement
+            </th>
+            <th style="text-align: right; padding: 8px 8px; font-weight: 500; font-size: 0.9em; border-bottom: 2px solid #999; display: table-cell !important;">
+              In
+            </th>
+            <th style="text-align: right; padding: 8px 0 8px 8px; font-weight: 500; font-size: 0.9em; border-bottom: 2px solid #999; display: table-cell !important;">
+              Cm
+            </th>
+          </tr>
+        </thead>
+        <tbody style="display: table-row-group !important;">
+          {%- assign measurement_entries = measurement_data | split: '||END||' -%}
+          {%- for entry in measurement_entries -%}
+            {%- if entry != blank -%}
+              {%- assign parts = entry | split: '||IN||' -%}
+              {%- if parts.size == 2 -%}
+                {%- assign name_and_cm = parts[1] | split: '||CM||' -%}
+                {%- if name_and_cm.size == 2 -%}
+                  {%- assign base_name = parts[0] -%}
+                  {%- assign in_value = name_and_cm[0] -%}
+                  {%- assign cm_value = name_and_cm[1] -%}
+                  <tr style="border-bottom: 1px solid #e0e0e0; display: table-row !important;">
+                    <td style="padding: 8px 12px 8px 0; vertical-align: top; border-bottom: 1px solid #e0e0e0; display: table-cell !important;">
+                      {{ base_name }}
+                    </td>
+                    <td style="text-align: right; padding: 8px 8px; vertical-align: top; font-variant-numeric: tabular-nums; border-bottom: 1px solid #e0e0e0; display: table-cell !important;">
+                      {%- if in_value != blank -%}
+                        {{ in_value }}
+                      {%- else -%}
+                        <span style="opacity: 0.4;">—</span>
+                      {%- endif -%}
+                    </td>
+                    <td style="text-align: right; padding: 8px 0 8px 8px; vertical-align: top; font-variant-numeric: tabular-nums; border-bottom: 1px solid #e0e0e0; display: table-cell !important;">
+                      {%- if cm_value != blank -%}
+                        {{ cm_value }}
+                      {%- else -%}
+                        <span style="opacity: 0.4;">—</span>
+                      {%- endif -%}
+                    </td>
+                  </tr>
+                {%- endif -%}
+              {%- endif -%}
+            {%- endif -%}
+          {%- endfor -%}
+        </tbody>
+      </table>
+    </span>
+  {%- else -%}
+    <div>
+      <table
+        class="measurements-table"
+        style="width: 100%; border-collapse: collapse; margin-top: 4px; font-size: inherit; display: table !important;"
+      >
+        <thead style="display: table-header-group !important;">
+          <tr style="border-bottom: 2px solid #999; display: table-row !important;">
+            <th style="text-align: left; padding: 8px 12px 8px 0; font-weight: 500; font-size: 0.9em; border-bottom: 2px solid #999; display: table-cell !important;">
+              Measurement
+            </th>
+            <th style="text-align: right; padding: 8px 8px; font-weight: 500; font-size: 0.9em; border-bottom: 2px solid #999; display: table-cell !important;">
+              In
+            </th>
+            <th style="text-align: right; padding: 8px 0 8px 8px; font-weight: 500; font-size: 0.9em; border-bottom: 2px solid #999; display: table-cell !important;">
+              Cm
+            </th>
+          </tr>
+        </thead>
+        <tbody style="display: table-row-group !important;">
+          {%- assign measurement_entries = measurement_data | split: '||END||' -%}
+          {%- for entry in measurement_entries -%}
+            {%- if entry != blank -%}
+              {%- assign parts = entry | split: '||IN||' -%}
+              {%- if parts.size == 2 -%}
+                {%- assign name_and_cm = parts[1] | split: '||CM||' -%}
+                {%- if name_and_cm.size == 2 -%}
+                  {%- assign base_name = parts[0] -%}
+                  {%- assign in_value = name_and_cm[0] -%}
+                  {%- assign cm_value = name_and_cm[1] -%}
+                  <tr style="border-bottom: 1px solid #e0e0e0; display: table-row !important;">
+                    <td style="padding: 8px 12px 8px 0; vertical-align: top; border-bottom: 1px solid #e0e0e0; display: table-cell !important;">
+                      {{ base_name }}
+                    </td>
+                    <td style="text-align: right; padding: 8px 8px; vertical-align: top; font-variant-numeric: tabular-nums; border-bottom: 1px solid #e0e0e0; display: table-cell !important;">
+                      {%- if in_value != blank -%}
+                        {{ in_value }}
+                      {%- else -%}
+                        <span style="opacity: 0.4;">—</span>
+                      {%- endif -%}
+                    </td>
+                    <td style="text-align: right; padding: 8px 0 8px 8px; vertical-align: top; font-variant-numeric: tabular-nums; border-bottom: 1px solid #e0e0e0; display: table-cell !important;">
+                      {%- if cm_value != blank -%}
+                        {{ cm_value }}
+                      {%- else -%}
+                        <span style="opacity: 0.4;">—</span>
+                      {%- endif -%}
+                    </td>
+                  </tr>
+                {%- endif -%}
+              {%- endif -%}
+            {%- endif -%}
+          {%- endfor -%}
+        </tbody>
+      </table>
+    </div>
+  {%- endif -%}
+{%- endif -%}

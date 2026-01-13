@@ -78,8 +78,11 @@
           return;
         }
 
-        // Build edit URL with properties
-        const editUrl = window.CustomOrderUtils.buildEditUrl(productHandle, item.properties);
+        // Get variant ID from cart item (for products with variants like color)
+        const variantId = item.variant_id || item.variant?.id || null;
+
+        // Build edit URL with properties and variant ID
+        const editUrl = window.CustomOrderUtils.buildEditUrl(productHandle, item.properties, variantId);
 
         // Remove item from cart
         await this.removeItemFromCart(itemIndex);

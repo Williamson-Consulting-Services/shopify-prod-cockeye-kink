@@ -1108,7 +1108,7 @@
       this.resetAfterAddToCartPending = false;
 
       if (this.unitOfMeasureInput) {
-        this.unitOfMeasureInput.value = 'Measured in Inches';
+        this.unitOfMeasureInput.value = 'Inches';
       }
 
       this.selectedCategory = null;
@@ -1534,7 +1534,7 @@
           this.currentUnit = input.dataset.unit;
 
           if (this.unitOfMeasureInput) {
-            const unitValue = this.currentUnit === 'in' ? 'Measured in Inches' : 'Measured in Centimeters';
+            const unitValue = this.currentUnit === 'in' ? 'Inches' : 'Centimeters';
             this.unitOfMeasureInput.value = unitValue;
             this.unitOfMeasureInput.setAttribute('value', unitValue);
           }
@@ -1774,7 +1774,7 @@
           }
 
           if (this.unitOfMeasureInput) {
-            const unitValue = this.currentUnit === 'in' ? 'Measured in Inches' : 'Measured in Centimeters';
+            const unitValue = this.currentUnit === 'in' ? 'Inches' : 'Centimeters';
             this.unitOfMeasureInput.value = unitValue;
             this.unitOfMeasureInput.setAttribute('value', unitValue);
           }
