@@ -165,7 +165,6 @@
           shouldScroll,
           timestamp: Date.now(),
         };
-        console.log('[ValidationService] Publishing validation state:', eventData);
         publish(PUB_SUB_EVENTS.customMeasurementsValidationChange, eventData);
       } else {
         console.warn('[ValidationService] Cannot publish - pub/sub not available', {
@@ -181,16 +180,7 @@
       const isProductTypeMode =
         this.config?.autoSelectedCategory !== undefined && this.config?.autoSelectedCategory !== null;
 
-      console.log('[ValidationService] validateRequiredFields called', {
-        selectedCategory,
-        hasConfig: !!this.config,
-        hasMeasurements: !!this.config?.measurements,
-        isProductTypeMode,
-        autoSelectedCategory: this.config?.autoSelectedCategory,
-      });
-
       if (!selectedCategory || !this.config.measurements) {
-        console.log('[ValidationService] Validation failed: missing category or config');
         this.publishValidationState(false, selectedCategory, shouldScroll);
         return false;
       }
@@ -199,7 +189,6 @@
       const harnessSection = document.getElementById('harness-details');
 
       const activeFields = document.querySelectorAll('.measurement-field.active');
-      console.log('[ValidationService] Active measurement fields:', activeFields.length);
       // Skip measurement validation when "Other" category is selected
       if (selectedCategory !== 'Other') {
         for (const field of activeFields) {
@@ -213,13 +202,7 @@
           const inInput = field.querySelector('.measurement-in');
           const cmInput = field.querySelector('.measurement-cm');
           const hasValue = this.utils.hasValidNumber(inInput) || this.utils.hasValidNumber(cmInput);
-          console.log('[ValidationService] Checking measurement:', measName, {
-            hasValue,
-            inValue: inInput?.value,
-            cmValue: cmInput?.value,
-          });
           if (!hasValue) {
-            console.log('[ValidationService] Validation failed: missing required measurement:', measName);
             // Add error class and scroll to field (only on submit)
             field.classList.add('measurement-field--error');
             if (inInput) inInput.classList.add('measurement-input--error');
@@ -329,9 +312,7 @@
         }
 
         // Check if empty (required field)
-        console.log('[ValidationService] Checking custom text input:', { value, valueLength: value.length, maxLength });
         if (!value) {
-          console.log('[ValidationService] Validation failed: custom text input is empty');
           if (shouldScroll) {
             customTextInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
           }
@@ -447,7 +428,6 @@
       }
 
       // All validations passed
-      console.log('[ValidationService] All validations passed!');
       this.publishValidationState(true, selectedCategory, shouldScroll);
       return true;
     }
@@ -473,9 +453,7 @@
         typeof PUB_SUB_EVENTS !== 'undefined' &&
         PUB_SUB_EVENTS.customMeasurementsValidationChange
       ) {
-        console.log('[ButtonStateManager] Subscribing to validation events');
         this.validationUnsubscriber = subscribe(PUB_SUB_EVENTS.customMeasurementsValidationChange, (event) => {
-          console.log('[ButtonStateManager] Received validation event:', event);
           // Update button state based on validation event
           this.update(event.isValid);
         });
@@ -1209,11 +1187,6 @@
       // Check if product type mode (auto-selected category)
       if (this.config && this.config.autoSelectedCategory) {
         this.selectedCategory = this.config.autoSelectedCategory;
-        console.log(
-          '[CustomMeasurementsForm] Product type mode detected. Auto-selected category:',
-          this.selectedCategory,
-        );
-        console.log('[CustomMeasurementsForm] Config measurements for Bicep:', this.config.measurements?.Bicep);
         this.currentCategoryStore = this.measurementManager.getCategoryStore(this.selectedCategory);
 
         // Find and check the category input if it exists (may be hidden)

@@ -64,22 +64,12 @@ window.CustomOrderCheckoutFooter = (function () {
     // Text needs scrolling if the wrapper's content width exceeds available space
     const needsScroll = wrapperScrollWidth > availableWidth;
 
-    console.log('[CheckoutFooter] Scroll check:', {
-      containerWidth,
-      wrapperScrollWidth,
-      wrapperOffsetWidth,
-      availableWidth,
-      needsScroll,
-      isMobile: window.innerWidth <= 749,
-    });
-
     if (needsScroll && duplicate) {
       // Duplicate message for seamless scrolling (mobile only)
       duplicate.innerHTML = messageElement.innerHTML;
       duplicate.removeAttribute('hidden'); // Remove hidden attribute to show it
       wrapper.setAttribute('data-needs-scroll', 'true');
       statusElement.setAttribute('data-needs-scroll', 'true');
-      console.log('[CheckoutFooter] Scrolling enabled, duplicate shown');
     } else {
       if (duplicate) {
         duplicate.setAttribute('hidden', '');
@@ -87,7 +77,6 @@ window.CustomOrderCheckoutFooter = (function () {
       }
       wrapper.removeAttribute('data-needs-scroll');
       statusElement.removeAttribute('data-needs-scroll');
-      console.log('[CheckoutFooter] Scrolling not needed, duplicate hidden');
     }
   }
 
