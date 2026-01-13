@@ -153,15 +153,41 @@
     validateInput();
 
     {%- comment %}
+      Pre-fill Custom Text from URL parameters (for edit functionality)
+    {%- endcomment %}
+    function prefillFromUrlParams() {
+      if (!window.CustomOrderUtils || !window.CustomOrderUtils.parseUrlParams) {
+        return;
+      }
+
+      const urlParams = window.CustomOrderUtils.parseUrlParams();
+      if (!urlParams || !urlParams['Custom Text']) {
+        return;
+      }
+
+      const customTextValue = urlParams['Custom Text'];
+      if (customTextValue && customTextValue.trim() !== '') {
+        customInput.value = customTextValue;
+        // Trigger validation to update button state
+        validateInput();
+      }
+    }
+
+    // Pre-fill on page load
+    prefillFromUrlParams();
+
+    {%- comment %}
       NEW FIX (Part 2):
       Add a 'pageshow' listener. This event fires every time
       the page is displayed, including from the back/forward cache.
-      This fixes the "back button" issue.
+      This fixes the "back button" issue and also pre-fills from URL params.
     {%- endcomment %}
     window.addEventListener('pageshow', function() {
       // Re-run the validation to set the button state
       // based on the cached form value.
       validateInput();
+      // Also pre-fill from URL params (in case they changed)
+      prefillFromUrlParams();
     });
 
   });

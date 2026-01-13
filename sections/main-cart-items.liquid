@@ -137,8 +137,35 @@
                             endif
                           endif
                           if is_custom_order == false and item.properties
-                            if item.properties['Order Type'] == 'custom' or item.properties._custom == 'custom'
+                            assign order_type = item.properties['Order Type'] | default: ''
+                            assign custom_flag = item.properties._custom | default: ''
+
+                            # Check for exact 'custom' match
+                            if order_type == 'custom' or custom_flag == 'custom'
                               assign is_custom_order = true
+                            endif
+
+                            # Check for 'custom-by-type' and other custom variations
+                            if is_custom_order == false
+                              assign order_type_lower = order_type | downcase
+                              assign custom_flag_lower = custom_flag | downcase
+
+                              if order_type_lower contains 'custom' or custom_flag_lower contains 'custom'
+                                assign is_custom_order = true
+                              endif
+                            endif
+
+                            # Heuristic detection: Check for measurement properties (e.g., "Bicep (in)", "Bicep (cm)")
+                            # This catches items that are clearly custom orders based on their properties
+                            if is_custom_order == false
+                              for property in item.properties
+                                assign property_name = property.first | downcase
+                                # Check if property name contains measurement indicators
+                                if property_name contains '(in)' or property_name contains '(cm)' or property_name contains 'unit of measure' or property_name contains 'selected option'
+                                  assign is_custom_order = true
+                                  break
+                                endif
+                              endfor
                             endif
                           endif
                         -%}
@@ -156,7 +183,6 @@
                             {{- item.product.title | escape -}}
                           </a>
                         {%- endif -%}
-                        {%- render 'cart-item-edit-button', item: item -%}
                       </div>
 
                       {%- comment %}
@@ -188,6 +214,41 @@
                         </div>
                       {%- endif -%}
 
+                      {%- liquid
+                        # Detect if this is a customer-facing product (custom-by-type)
+                        # For customer-facing products, "Selected Option" is redundant since there's only one product type
+                        assign is_customer_facing_cart = false
+                        assign custom_order_title_cart = settings.custom_order_product_title | default: 'Custom Order'
+
+                        if item.properties
+                          assign order_type_cart = item.properties['Order Type'] | default: ''
+                          assign order_type_lower_cart = order_type_cart | downcase
+
+                          # Check if Order Type contains "custom-by-type" or similar customer-facing indicators
+                          if order_type_lower_cart contains 'custom-by-type' or order_type_lower_cart contains 'by-type'
+                            assign is_customer_facing_cart = true
+                          endif
+                        endif
+
+                        # Also check if product title is NOT the generic "Custom Order" (indicates customer-facing product)
+                        if is_customer_facing_cart == false and item.product and item.product.title
+                          assign product_title_lower_cart = item.product.title | downcase | strip
+                          assign custom_title_lower_cart = custom_order_title_cart | downcase | strip
+                          if product_title_lower_cart != custom_title_lower_cart
+                            # Product has a specific title (like "Custom Arm Band"), likely customer-facing
+                            # But only if it has measurement properties (to avoid false positives)
+                            if item.properties
+                              for property in item.properties
+                                assign property_name_cart = property.first | downcase
+                                if property_name_cart contains '(in)' or property_name_cart contains '(cm)' or property_name_cart contains 'unit of measure'
+                                  assign is_customer_facing_cart = true
+                                  break
+                                endif
+                              endfor
+                            endif
+                          endif
+                        endif
+                      -%}
                       {%- if item.product.has_only_default_variant == false
                         or item.properties.size != 0
                         or item.selling_plan_allocation != null
@@ -216,25 +277,31 @@
                             -%}
                               {%- assign is_zero = true -%}
                             {%- endif -%}
+                            {%- comment -%} Skip "Selected Option" for customer-facing products (redundant UX) {%- endcomment -%}
                             {%- if property.last != blank and property_first_char != '_' and is_zero == false -%}
-                              <div class="product-option">
-                                <dt>{{ property.first }}:</dt>
-                                <dd>
-                                  {%- if property.last contains '/uploads/' -%}
-                                    <a href="{{ property.last }}" class="link" target="_blank">
-                                      {{ property.last | split: '/' | last }}
-                                    </a>
-                                  {%- else -%}
-                                    {{ property.last }}
-                                  {%- endif -%}
-                                </dd>
-                              </div>
+                              {%- if is_customer_facing_cart == false or property.first != 'Selected Option' -%}
+                                <div class="product-option">
+                                  <dt>{{ property.first }}:</dt>
+                                  <dd>
+                                    {%- if property.last contains '/uploads/' -%}
+                                      <a href="{{ property.last }}" class="link" target="_blank">
+                                        {{ property.last | split: '/' | last }}
+                                      </a>
+                                    {%- else -%}
+                                      {{ property.last }}
+                                    {%- endif -%}
+                                  </dd>
+                                </div>
+                              {%- endif -%}
                             {%- endif -%}
                           {%- endfor -%}
                         </dl>
 
                         <p class="product-option">{{ item.selling_plan_allocation.selling_plan.name }}</p>
                       {%- endif -%}
+
+                      {%- comment -%} Edit link for custom orders - placed after all measurements/properties for intuitive UX {%- endcomment -%}
+                      {%- render 'cart-item-edit-button', item: item, style: 'link' -%}
 
                       <ul class="discounts list-unstyled" role="list" aria-label="{{ 'customer.order.discount' | t }}">
                         {%- for discount in item.line_level_discount_allocations -%}
@@ -276,8 +343,6 @@
                           {% render 'unit-price', price: item.unit_price, measurement: item.unit_price_measurement %}
                         {%- endif -%}
                       </div>
-                      {%- comment -%} Mobile: Show edit button under price {%- endcomment -%}
-                      {%- render 'cart-item-edit-button', item: item -%}
                     </td>
                     {%- liquid
                       assign has_qty_rules = false

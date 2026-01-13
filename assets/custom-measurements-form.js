@@ -535,7 +535,7 @@
                 if (window.customMeasurementsForm && window.customMeasurementsForm.validationService) {
                   window.customMeasurementsForm.validationService.validateRequiredFields(
                     window.customMeasurementsForm.selectedCategory,
-                    true // Enable scrolling when clicking disabled button
+                    true, // Enable scrolling when clicking disabled button
                   );
                 }
                 return false;
@@ -558,7 +558,7 @@
                 if (window.customMeasurementsForm && window.customMeasurementsForm.validationService) {
                   window.customMeasurementsForm.validationService.validateRequiredFields(
                     window.customMeasurementsForm.selectedCategory,
-                    true
+                    true,
                   );
                 }
                 return false;
@@ -833,7 +833,7 @@
       leatherColorSection,
       notesSection,
       associateSection,
-      otherCategoryNotice
+      otherCategoryNotice,
     ) {
       // Show/hide "Other" category notice banner
       if (otherCategoryNotice) {
@@ -1211,14 +1211,14 @@
         this.selectedCategory = this.config.autoSelectedCategory;
         console.log(
           '[CustomMeasurementsForm] Product type mode detected. Auto-selected category:',
-          this.selectedCategory
+          this.selectedCategory,
         );
         console.log('[CustomMeasurementsForm] Config measurements for Bicep:', this.config.measurements?.Bicep);
         this.currentCategoryStore = this.measurementManager.getCategoryStore(this.selectedCategory);
 
         // Find and check the category input if it exists (may be hidden)
         const categoryInput = Array.from(this.categoryInputs).find(
-          (input) => input.dataset.label === this.selectedCategory
+          (input) => input.dataset.label === this.selectedCategory,
         );
         if (categoryInput) {
           categoryInput.checked = true;
@@ -1232,7 +1232,7 @@
           this.leatherColorSection,
           this.notesSection,
           this.associateSection,
-          this.otherCategoryNotice
+          this.otherCategoryNotice,
         );
         this.categoryManager.updateMeasurementsForCategory(this.selectedCategory, this.measurementFields);
         this.measurementManager.restoreMeasurementsForCategory(this.selectedCategory, this.measurementFields);
@@ -1251,7 +1251,7 @@
           this.leatherColorSection,
           this.notesSection,
           this.associateSection,
-          this.otherCategoryNotice
+          this.otherCategoryNotice,
         );
         this.categoryManager.updateMeasurementsForCategory(this.selectedCategory, this.measurementFields);
         this.measurementManager.restoreMeasurementsForCategory(this.selectedCategory, this.measurementFields);
@@ -1307,7 +1307,7 @@
             this.leatherColorSection,
             this.notesSection,
             this.associateSection,
-            this.otherCategoryNotice
+            this.otherCategoryNotice,
           );
           this.categoryManager.updateMeasurementsForCategory(this.selectedCategory, this.measurementFields);
         }
@@ -1371,7 +1371,7 @@
       if (urlParams['Leather Color']) {
         const leatherColorValue = urlParams['Leather Color'];
         const leatherColorRadio = Array.from(this.leatherColorRadios).find(
-          (radio) => radio.value === leatherColorValue
+          (radio) => radio.value === leatherColorValue,
         );
         if (leatherColorRadio) {
           leatherColorRadio.checked = true;
@@ -1513,7 +1513,7 @@
             this.leatherColorSection,
             this.notesSection,
             this.associateSection,
-            this.otherCategoryNotice
+            this.otherCategoryNotice,
           );
           this.categoryManager.updateMeasurementsForCategory(this.selectedCategory, this.measurementFields);
           this.measurementManager.restoreMeasurementsForCategory(this.selectedCategory, this.measurementFields);
@@ -1666,7 +1666,7 @@
           'associate-select',
           'associate-text-wrapper',
           'associate-text',
-          onInteraction
+          onInteraction,
         );
         // Clear error state on associate select change
         this.associateSelect.addEventListener('change', () => {
@@ -1793,11 +1793,16 @@
             }
           });
 
+          // Check if we're in product-type mode (customer-facing form)
+          // In this mode, "Selected Option" is redundant since there's only one product type
+          const isProductTypeMode =
+            this.config?.autoSelectedCategory !== undefined && this.config?.autoSelectedCategory !== null;
+
           // Filter all property inputs (measurements and other properties)
           // Remove name attribute to prevent them from being included in FormData
           // This MUST happen before product-form.js creates FormData
           const allPropertyInputs = this.productForm.querySelectorAll(
-            'input[name^="properties["], select[name^="properties["], textarea[name^="properties["]'
+            'input[name^="properties["], select[name^="properties["], textarea[name^="properties["]',
           );
           allPropertyInputs.forEach((input) => {
             const name = input.getAttribute('name');
@@ -1808,6 +1813,14 @@
             if (!match) return;
 
             const propertyName = match[1];
+
+            // Remove "Selected Option" for customer-facing products (redundant UX)
+            if (isProductTypeMode && propertyName === 'Selected Option') {
+              input.removeAttribute('name');
+              input.setAttribute('data-removed', 'true');
+              return;
+            }
+
             let propertyValue = '';
 
             // Get value based on input type

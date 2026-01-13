@@ -35,6 +35,7 @@ cart-items .title-wrapper-with-link {
 .cart-item__nested-line .cart-item__image-container {
   min-width: calc(10rem / var(--font-body-scale));
   justify-content: right;
+
   img {
     width: 60%;
   }
@@ -123,6 +124,37 @@ cart-items .title-wrapper-with-link {
   line-height: calc(1 + 0.5 / var(--font-body-scale));
 }
 
+.cart-item__edit-link-wrapper {
+  margin-top: 1rem;
+  margin-bottom: 0.6rem;
+}
+
+.cart-item__edit-link {
+  font-size: 1.4rem;
+  text-decoration: underline;
+  text-underline-offset: 0.3rem;
+  text-decoration-thickness: 0.1rem;
+  color: rgb(var(--color-foreground));
+  cursor: pointer;
+  display: inline-block;
+  min-height: 4.4rem;
+  line-height: 4.4rem;
+  padding: 0 0.5rem;
+  margin: -0.5rem;
+  transition: opacity 0.2s ease;
+}
+
+.cart-item__edit-link:hover {
+  opacity: 0.7;
+  text-decoration-thickness: 0.2rem;
+}
+
+.cart-item__edit-link:focus {
+  outline: 0.2rem solid rgb(var(--color-foreground));
+  outline-offset: 0.3rem;
+  border-radius: 0.2rem;
+}
+
 .cart-item cart-remove-button {
   display: flex;
   margin-left: 1rem;
@@ -196,11 +228,6 @@ cart-edit-button .button:not([disabled]):hover {
     min-width: 3.5rem;
     min-height: 3.5rem;
   }
-}
-
-cart-edit-button .icon-edit {
-  height: 1.5rem;
-  width: 1.5rem;
 }
 
 .cart-item .loading__spinner {

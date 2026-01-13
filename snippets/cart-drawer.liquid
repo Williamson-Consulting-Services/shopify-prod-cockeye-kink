@@ -199,6 +199,9 @@
                             <p class="product-option">{{ item.selling_plan_allocation.selling_plan.name }}</p>
                           {%- endif -%}
 
+                          {%- comment -%} Edit link for custom orders - placed after properties for intuitive UX {%- endcomment -%}
+                          {%- render 'cart-item-edit-button', item: item, style: 'link' -%}
+
                           <ul
                             class="discounts list-unstyled"
                             role="list"
@@ -327,8 +330,6 @@
                                   </button>
                                 </quantity-input>
                               </div>
-
-                              {%- render 'cart-item-edit-button', item: item -%}
 
                               <cart-remove-button
                                 id="CartDrawer-Remove-{{ item.index | plus: 1 }}"

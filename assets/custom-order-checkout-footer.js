@@ -98,7 +98,12 @@ window.CustomOrderCheckoutFooter = (function () {
       return cart.items.filter((item) => {
         if (!item.properties) return false;
         const customFlag = item.properties['_custom'] || item.properties['Order Type'];
-        return typeof customFlag === 'string' && customFlag.toLowerCase() === 'custom';
+        if (typeof customFlag === 'string') {
+          const flagLower = customFlag.toLowerCase();
+          // Check for exact 'custom' match or values containing 'custom' (e.g., 'custom-by-type')
+          return flagLower === 'custom' || flagLower.includes('custom');
+        }
+        return false;
       }).length;
     }
     return cart.items.filter((item) => window.CustomOrderUtils.isCustomOrderItem(item)).length;
