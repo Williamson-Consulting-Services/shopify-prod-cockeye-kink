@@ -1083,6 +1083,11 @@
       // Check if product type mode (auto-selected category)
       if (this.config && this.config.autoSelectedCategory) {
         this.selectedCategory = this.config.autoSelectedCategory;
+        console.log(
+          '[CustomMeasurementsForm] Product type mode detected. Auto-selected category:',
+          this.selectedCategory
+        );
+        console.log('[CustomMeasurementsForm] Config measurements for Bicep:', this.config.measurements?.Bicep);
         this.currentCategoryStore = this.measurementManager.getCategoryStore(this.selectedCategory);
 
         // Find and check the category input if it exists (may be hidden)

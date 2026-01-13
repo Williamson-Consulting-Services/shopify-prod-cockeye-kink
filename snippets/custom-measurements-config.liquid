@@ -5,8 +5,8 @@
 {% endcomment %}
 
 {%- comment -%} Parse categories order {%- endcomment -%}
-{%- assign default_categories_order = 'Hats, Tag, Shirt, Gloves, Harness, Suspenders, Belts, Pants, Kilt, Chaps, Other' -%}
-{%- assign categories_source = settings.custom_measurements_categories_order | default: default_categories_order -%}
+{%- comment -%} Use settings directly - defaults are defined in settings_schema.json {%- endcomment -%}
+{%- assign categories_source = settings.custom_measurements_categories_order -%}
 {%- assign categories_order = categories_source | split: ',' -%}
 
 {%- comment -%} Parse product type mapping {%- endcomment -%}
@@ -21,7 +21,9 @@
     {%- assign parts = line | split: ':' -%}
     {%- if parts.size >= 2 -%}
       {%- assign type_name = parts[0] | strip -%}
-      {%- if type_name == product_type -%}
+      {%- assign type_name_lower = type_name | downcase -%}
+      {%- assign product_type_lower = product_type | downcase -%}
+      {%- if type_name == product_type or type_name_lower == product_type_lower -%}
         {%- assign auto_selected_category = parts[1] | strip -%}
         {%- break -%}
       {%- endif -%}
@@ -30,8 +32,8 @@
 {%- endif -%}
 
 {%- comment -%} Parse measurement map {%- endcomment -%}
-{%- assign default_measurement_map = 'Head Circumference: Hats, Other*\nNeck: Harness, Tag*, Shirt, Other*\nShoulders: Harness, Shirt, Suspenders, Other*\nChest: Harness, Shirt, Suspenders, Other*\nTorso: Harness, Shirt, Other*\nSleeve Length: Shirt, Other*\nBicep: Armband*, Shirt, Other*\nWrist: Shirt, Gloves, Other*\nPalm Circumference: Gloves, Other*\nHand Length: Gloves, Other*\nStomach: Shirt, Other*\nWaist: Harness, Chaps, Pants, Suspenders, Belts, Kilt, Other*\nHips: Chaps, Pants, Belts, Kilt, Other*\nUpper Thigh: Chaps, Pants, Other*\nLower Thigh: Chaps, Pants, Other*\nKnee: Chaps, Pants, Other*\nCalf: Chaps, Pants, Other*\nAnkle: Chaps, Pants, Other*\nInseam: Pants, Other*\nCrotch: Pants, Other*\nButt Rise: Pants, Other*\nLength: Kilt, Other*' -%}
-{%- assign measurement_map_source = settings.custom_measurements_map | default: default_measurement_map -%}
+{%- comment -%} Use settings directly - defaults are defined in settings_schema.json {%- endcomment -%}
+{%- assign measurement_map_source = settings.custom_measurements_map -%}
 {%- assign measurement_map_lines = measurement_map_source | newline_to_br | split: '<br />' -%}
 
 {%- comment -%} Build measurements config object {%- endcomment -%}

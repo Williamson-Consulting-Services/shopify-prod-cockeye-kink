@@ -36,7 +36,9 @@
       assign parts = line | split: ':'
       if parts.size >= 2
         assign type_name = parts[0] | strip
-        if type_name == product_type
+        assign type_name_lower = type_name | downcase
+        assign product_type_lower = product_type | downcase
+        if type_name == product_type or type_name_lower == product_type_lower
           assign mapped_category = parts[1] | strip
           break
         endif
