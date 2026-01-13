@@ -247,6 +247,63 @@
         if (leatherColorText) leatherColorText.classList.remove('measurement-input--error');
       }
 
+      // Validate custom text input (if present - from validated-text-input component)
+      // Check for custom text input by looking for input with name="properties[Custom Text]"
+      const customTextInput = document.querySelector('input[name="properties[Custom Text]"]');
+      if (customTextInput) {
+        const value = customTextInput.value.trim();
+        const maxLengthAttr = customTextInput.getAttribute('maxlength');
+        let maxLength;
+
+        if (maxLengthAttr !== null && maxLengthAttr !== '') {
+          maxLength = parseInt(maxLengthAttr, 10);
+          if (isNaN(maxLength) || maxLength < 0) {
+            const errorMsg = `Custom text input has invalid maxlength attribute: "${maxLengthAttr}". Expected a positive number.`;
+            console.error(errorMsg);
+            throw new Error(errorMsg);
+          }
+        } else {
+          // No maxlength attribute - require configurable default
+          if (!this.config || !this.config.customTextMaxLengthDefault) {
+            const errorMsg =
+              'Custom text input missing maxlength attribute and config.customTextMaxLengthDefault is not defined. Please configure customTextMaxLengthDefault in custom-measurements-config.liquid.';
+            console.error(errorMsg);
+            throw new Error(errorMsg);
+          }
+          maxLength = this.config.customTextMaxLengthDefault;
+          console.warn('Custom text input missing maxlength attribute, using config default:', maxLength);
+        }
+
+        // Check if empty (required field)
+        if (!value) {
+          if (shouldScroll) {
+            customTextInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+          customTextInput.classList.add('measurement-input--error');
+          return false;
+        }
+
+        // Check length
+        if (maxLength > 0 && value.length > maxLength) {
+          if (shouldScroll) {
+            customTextInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+          customTextInput.classList.add('measurement-input--error');
+          return false;
+        }
+
+        // Check HTML5 validity
+        if (!customTextInput.checkValidity()) {
+          if (shouldScroll) {
+            customTextInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+          customTextInput.classList.add('measurement-input--error');
+          return false;
+        }
+
+        customTextInput.classList.remove('measurement-input--error');
+      }
+
       if (harnessSection && harnessSection.classList.contains('active')) {
         // Validate harness type selection
         const harnessTypeInputs = document.querySelectorAll('.harness-type-input');
@@ -374,7 +431,7 @@
                   window.customMeasurementsForm.validationService.validateRequiredFields(
                     window.customMeasurementsForm.selectedCategory,
                     window.customMeasurementsForm.harnessSection,
-                    true, // Enable scrolling when clicking disabled button
+                    true // Enable scrolling when clicking disabled button
                   );
                 }
                 return false;
@@ -398,7 +455,7 @@
                   window.customMeasurementsForm.validationService.validateRequiredFields(
                     window.customMeasurementsForm.selectedCategory,
                     window.customMeasurementsForm.harnessSection,
-                    true,
+                    true
                   );
                 }
                 return false;
@@ -651,7 +708,7 @@
       leatherColorSection,
       notesSection,
       associateSection,
-      otherCategoryNotice,
+      otherCategoryNotice
     ) {
       // Show/hide "Other" category notice banner
       if (otherCategoryNotice) {
@@ -1023,7 +1080,34 @@
       // Leather color section visibility is managed by updateSectionVisibility
       // Don't set it as always active here - let updateSectionVisibility handle it based on category
 
-      if (this.categoryInputs.length > 0) {
+      // Check if product type mode (auto-selected category)
+      if (this.config && this.config.autoSelectedCategory) {
+        this.selectedCategory = this.config.autoSelectedCategory;
+        this.currentCategoryStore = this.measurementManager.getCategoryStore(this.selectedCategory);
+
+        // Find and check the category input if it exists (may be hidden)
+        const categoryInput = Array.from(this.categoryInputs).find(
+          (input) => input.dataset.label === this.selectedCategory
+        );
+        if (categoryInput) {
+          categoryInput.checked = true;
+        }
+
+        this.categoryManager.updateSectionVisibility(
+          this.selectedCategory,
+          this.harnessSection,
+          this.harnessTypeSelector,
+          this.tagTypeSelector,
+          this.leatherColorSection,
+          this.notesSection,
+          this.associateSection,
+          this.otherCategoryNotice
+        );
+        this.categoryManager.updateMeasurementsForCategory(this.selectedCategory, this.measurementFields);
+        this.measurementManager.restoreMeasurementsForCategory(this.selectedCategory, this.measurementFields);
+        this.updateMeasurementOnUnitChange();
+        this.categoryManager.updateMeasurementGroupVisibility();
+      } else if (this.categoryInputs.length > 0) {
         const firstInput = this.categoryInputs[0];
         firstInput.checked = true;
         this.selectedCategory = firstInput.dataset.label;
@@ -1036,7 +1120,7 @@
           this.leatherColorSection,
           this.notesSection,
           this.associateSection,
-          this.otherCategoryNotice,
+          this.otherCategoryNotice
         );
         this.categoryManager.updateMeasurementsForCategory(this.selectedCategory, this.measurementFields);
         this.measurementManager.restoreMeasurementsForCategory(this.selectedCategory, this.measurementFields);
@@ -1096,7 +1180,7 @@
             this.leatherColorSection,
             this.notesSection,
             this.associateSection,
-            this.otherCategoryNotice,
+            this.otherCategoryNotice
           );
           this.categoryManager.updateMeasurementsForCategory(this.selectedCategory, this.measurementFields);
         }
@@ -1160,7 +1244,7 @@
       if (urlParams['Leather Color']) {
         const leatherColorValue = urlParams['Leather Color'];
         const leatherColorRadio = Array.from(this.leatherColorRadios).find(
-          (radio) => radio.value === leatherColorValue,
+          (radio) => radio.value === leatherColorValue
         );
         if (leatherColorRadio) {
           leatherColorRadio.checked = true;
@@ -1302,7 +1386,7 @@
             this.leatherColorSection,
             this.notesSection,
             this.associateSection,
-            this.otherCategoryNotice,
+            this.otherCategoryNotice
           );
           this.categoryManager.updateMeasurementsForCategory(this.selectedCategory, this.measurementFields);
           this.measurementManager.restoreMeasurementsForCategory(this.selectedCategory, this.measurementFields);
@@ -1376,6 +1460,20 @@
         input.addEventListener('change', normalizeMeasurementValue);
       });
 
+      // Custom text input (from validated-text-input component)
+      const customTextInput = document.querySelector('input[name="properties[Custom Text]"]');
+      if (customTextInput) {
+        customTextInput.addEventListener('input', () => {
+          this.flagFormInteraction();
+          // Clear error state when user starts typing
+          customTextInput.classList.remove('measurement-input--error');
+          this.updateAddToCartButton();
+        });
+        customTextInput.addEventListener('blur', () => {
+          this.updateAddToCartButton();
+        });
+      }
+
       // Harness selects
       this.harnessSelects.forEach((select) => {
         select.addEventListener('change', () => {
@@ -1432,7 +1530,7 @@
           'associate-select',
           'associate-text-wrapper',
           'associate-text',
-          onInteraction,
+          onInteraction
         );
         // Clear error state on associate select change
         this.associateSelect.addEventListener('change', () => {
@@ -1548,7 +1646,7 @@
           // Remove name attribute to prevent them from being included in FormData
           // This MUST happen before product-form.js creates FormData
           const allPropertyInputs = this.productForm.querySelectorAll(
-            'input[name^="properties["], select[name^="properties["], textarea[name^="properties["]',
+            'input[name^="properties["], select[name^="properties["], textarea[name^="properties["]'
           );
           allPropertyInputs.forEach((input) => {
             const name = input.getAttribute('name');
