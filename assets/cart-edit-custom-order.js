@@ -23,11 +23,16 @@
 
     setupEditButtons() {
       // Use event delegation for dynamically added cart items
+      // Handles both edit button clicks and product title clicks (for custom orders)
       document.addEventListener('click', (event) => {
         const editButton = event.target.closest('[data-edit-custom-order]');
         if (!editButton) return;
 
-        event.preventDefault();
+        // Prevent default navigation if clicking on editable title
+        if (editButton.tagName === 'A') {
+          event.preventDefault();
+        }
+
         this.handleEditClick(editButton);
       });
     }

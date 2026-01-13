@@ -125,7 +125,37 @@
                         <p class="caption-with-letter-spacing">{{ item.product.vendor }}</p>
                       {%- endif -%}
 
-                      <a href="{{ item.url }}" class="cart-item__name h4 break">{{ item.product.title | escape }}</a>
+                      <div class="cart-item__title-row">
+                        {%- liquid
+                          assign is_custom_order = false
+                          assign custom_order_title = settings.custom_order_product_title | default: 'Custom Order'
+                          if item.product and item.product.title
+                            assign product_title_lower = item.product.title | downcase | strip
+                            assign custom_title_lower = custom_order_title | downcase | strip
+                            if product_title_lower == custom_title_lower
+                              assign is_custom_order = true
+                            endif
+                          endif
+                          if is_custom_order == false and item.properties
+                            if item.properties['Order Type'] == 'custom' or item.properties['_custom'] == 'custom'
+                              assign is_custom_order = true
+                            endif
+                          endif
+                        -%}
+                        {%- if is_custom_order -%}
+                          <a
+                            href="{{ item.url }}"
+                            class="cart-item__name h4 break cart-item__name--editable"
+                            data-edit-custom-order="{{ item.index | plus: 1 }}"
+                            title="{{ 'customer.addresses.edit' | t }}"
+                          >
+                            {{ item.product.title | escape }}
+                          </a>
+                        {%- else -%}
+                          <a href="{{ item.url }}" class="cart-item__name h4 break">{{ item.product.title | escape }}</a>
+                        {%- endif -%}
+                        {%- render 'cart-item-edit-button', item: item -%}
+                      </div>
 
                       {%- comment %}
                         https://trello.com/c/xoRQnitG/15-12-dog-tag-bug-fix
@@ -244,6 +274,8 @@
                           {% render 'unit-price', price: item.unit_price, measurement: item.unit_price_measurement %}
                         {%- endif -%}
                       </div>
+                      {%- comment -%} Mobile: Show edit button under price {%- endcomment -%}
+                      {%- render 'cart-item-edit-button', item: item -%}
                     </td>
                     {%- liquid
                       assign has_qty_rules = false
@@ -328,8 +360,6 @@
                               </button>
                             </quantity-input>
                           </div>
-
-                          {%- render 'cart-item-edit-button', item: item -%}
 
                           <cart-remove-button
                             id="Remove-{{ item.index | plus: 1 }}"
