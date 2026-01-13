@@ -53,7 +53,9 @@
 
 {%- comment -%} Parse harness categories (now single "Harness" category) {%- endcomment -%}
 {%- assign default_harness_categories = 'Harness' -%}
-{%- assign harness_source_raw = settings.custom_measurements_harness_categories | default: default_harness_categories -%}
+{%- assign harness_source_raw = settings.custom_measurements_harness_categories
+  | default: default_harness_categories
+-%}
 {%- assign harness_source = harness_source_raw | replace: '|', ',' -%}
 {%- assign harness_categories = harness_source | split: ',' -%}
 
@@ -76,12 +78,16 @@
 {%- assign leather_colors = leather_source | split: ',' -%}
 
 {%- assign default_front_plate_options = 'Bear Paw, Puppy Paw, Fist Image, Pig Image, Boot Image, Biohazard Symbol, Cigar Man' -%}
-{%- assign front_plate_source_raw = settings.custom_measurements_front_plate_options | default: default_front_plate_options -%}
+{%- assign front_plate_source_raw = settings.custom_measurements_front_plate_options
+  | default: default_front_plate_options
+-%}
 {%- assign front_plate_source = front_plate_source_raw | replace: '|', ',' -%}
 {%- assign front_plate_options = front_plate_source | split: ',' -%}
 
 {%- assign default_back_plate_extra = 'Wesco Boot, Watersports, Happy Puppy' -%}
-{%- assign back_plate_extra_source_raw = settings.custom_measurements_back_plate_extra | default: default_back_plate_extra -%}
+{%- assign back_plate_extra_source_raw = settings.custom_measurements_back_plate_extra
+  | default: default_back_plate_extra
+-%}
 {%- assign back_plate_extra_source = back_plate_extra_source_raw | replace: '|', ',' -%}
 {%- assign back_plate_extra = back_plate_extra_source | split: ',' -%}
 {%- assign back_plate_options = front_plate_options | concat: back_plate_extra -%}
@@ -97,32 +103,29 @@
 {%- assign associates = associates_source | split: ',' -%}
 
 {%- comment -%} Build product type map object {%- endcomment -%}
-{%- assign product_type_map_json = '' -%}
-{%- if type_map_source != '' -%}
-  {%- assign type_map_lines = type_map_source | newline_to_br | split: '<br />' -%}
-  {%- for line in type_map_lines -%}
-    {%- assign line = line | strip -%}
-    {%- if line == '' -%}{% continue %}{% endif %}
-    {%- assign parts = line | split: ':' -%}
-    {%- if parts.size >= 2 -%}
-      {%- assign type_name = parts[0] | strip -%}
-      {%- assign category_name = parts[1] | strip -%}
-      {%- if type_name != '' and category_name != '' -%}
-        {%- if product_type_map_json != '' -%}
-          {%- assign product_type_map_json = product_type_map_json | append: ',' -%}
-        {%- endif -%}
-        {%- assign product_type_map_json = product_type_map_json | append: '"' | append: type_name | escape | append: '":"' | append: category_name | escape | append: '"' -%}
-      {%- endif -%}
-    {%- endif -%}
-  {%- endfor -%}
-{%- endif -%}
+{%- comment -%} We'll build the JSON directly in the script tag to avoid HTML entity encoding {%- endcomment -%}
 
 {%- comment -%} Build JavaScript config object {%- endcomment -%}
 <script>
   window.customMeasurementsConfig = {
     productTypeMap: {
-      {%- if product_type_map_json != '' -%}
-        {{ product_type_map_json }}
+      {%- if type_map_source != '' -%}
+        {%- assign type_map_lines = type_map_source | newline_to_br | split: '<br />' -%}
+        {%- assign first_entry = true -%}
+        {%- for line in type_map_lines -%}
+          {%- assign line = line | strip -%}
+          {%- if line == '' -%}{% continue %}{% endif %}
+          {%- assign parts = line | split: ':' -%}
+          {%- if parts.size >= 2 -%}
+            {%- assign type_name = parts[0] | strip -%}
+            {%- assign category_name = parts[1] | strip -%}
+            {%- if type_name != '' and category_name != '' -%}
+              {%- unless first_entry -%},{%- endunless -%}
+              {%- assign first_entry = false -%}
+              "{{ type_name | replace: '"', '\"' }}": "{{ category_name | replace: '"', '\"' }}"
+            {%- endif -%}
+          {%- endif -%}
+        {%- endfor -%}
       {%- endif -%}
     },
     autoSelectedCategory: {% if auto_selected_category != '' %}"{{ auto_selected_category | escape }}"{% else %}null{% endif %},
@@ -259,6 +262,3 @@
     customTextMaxLengthDefault: 50
   };
 </script>
-
-
-
