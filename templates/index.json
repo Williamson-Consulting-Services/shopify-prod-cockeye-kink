@@ -22,7 +22,7 @@
         "text": {
           "type": "text",
           "settings": {
-            "text": "Bringing cutting-edge technology to the forefront of fetish",
+            "text": "<strong>Bringing cutting-edge technology to the forefront of fetish</strong>",
             "text_style": "subtitle"
           }
         },
@@ -42,9 +42,9 @@
       "custom_css": [],
       "settings": {
         "image": "shopify://shop_images/cockeye_header.jpg",
-        "image_overlay_opacity": 30,
+        "image_overlay_opacity": 60,
         "image_height": "medium",
-        "image_behavior": "none",
+        "image_behavior": "zoom-in",
         "desktop_content_position": "middle-center",
         "desktop_content_alignment": "center",
         "show_text_box": false,
@@ -56,12 +56,16 @@
     },
     "featured_collection": {
       "type": "featured-collection",
+      "custom_css": [
+        "span.badge.badge--bottom-left.color-scheme-3 {background-color: red;}",
+        "span.price-item.price-item--sale.price-item--last {color: red;}"
+      ],
       "settings": {
-        "collection": "all",
+        "collection": "featured-products",
         "products_to_show": 11,
-        "title": "Featured products",
-        "heading_size": "h2",
-        "description": "",
+        "title": "{{ section.settings.collection.title }}",
+        "heading_size": "h1",
+        "description": "{{ section.settings.collection.description }}",
         "show_description": false,
         "description_style": "body",
         "columns_desktop": 4,
@@ -69,7 +73,7 @@
         "full_width": false,
         "show_view_all": true,
         "view_all_style": "solid",
-        "color_scheme": "scheme-4",
+        "color_scheme": "scheme-3",
         "image_ratio": "square",
         "image_shape": "default",
         "show_secondary_image": true,
@@ -164,7 +168,7 @@
         "desktop_layout": "left",
         "mobile_layout": "collage",
         "card_styles": "product-card-wrapper",
-        "color_scheme": "scheme-4",
+        "color_scheme": "scheme-3",
         "padding_top": 36,
         "padding_bottom": 36
       }
@@ -239,7 +243,7 @@
         "columns_desktop": 2,
         "column_alignment": "center",
         "background_style": "none",
-        "color_scheme": "scheme-4",
+        "color_scheme": "scheme-3",
         "columns_mobile": "1",
         "swipe_on_mobile": false,
         "padding_top": 36,

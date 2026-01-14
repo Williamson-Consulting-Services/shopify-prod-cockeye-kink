@@ -13,10 +13,20 @@
   "sections": {
     "announcement-bar": {
       "type": "announcement-bar",
+      "blocks": {
+        "announcement_ANbpdc": {
+          "type": "announcement",
+          "settings": {
+            "text": "End of Year Sale! Up to $75 off and free shipping on select items. While supplies last...",
+            "link": "shopify://collections/sale"
+          }
+        }
+      },
+      "block_order": ["announcement_ANbpdc"],
       "settings": {
         "auto_rotate": false,
         "change_slides_speed": 5,
-        "color_scheme": "",
+        "color_scheme": "scheme-5",
         "show_line_separator": true,
         "show_social": false,
         "enable_country_selector": false,
