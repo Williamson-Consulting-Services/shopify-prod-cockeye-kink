@@ -514,6 +514,19 @@ cart-edit-button .button:not([disabled]):hover {
   }
 }
 
+/* Cart drawer: Give more space to measurement values to prevent wrapping */
+.cart-drawer .measurements-table thead th:first-child {
+  width: 45%;
+}
+
+.cart-drawer .measurements-table thead th:not(:first-child):not(:last-child) {
+  width: 27.5%;
+}
+
+.cart-drawer .measurements-table thead th:last-child {
+  width: 27.5%;
+}
+
 .measurements-table th {
   text-align: left;
   padding: 0.8rem 0;

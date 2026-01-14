@@ -13,6 +13,7 @@
 {%- assign type_map_source = settings.custom_measurements_product_type_map | default: '' -%}
 {%- assign product_type = product.type | default: '' -%}
 {%- assign auto_selected_category = '' -%}
+{%- assign product_type_not_found = false -%}
 {%- if type_map_source != '' and product_type != '' -%}
   {%- assign type_map_lines = type_map_source | newline_to_br | split: '<br />' -%}
   {%- for line in type_map_lines -%}
@@ -29,6 +30,10 @@
       {%- endif -%}
     {%- endif -%}
   {%- endfor -%}
+  {%- comment -%} Check if product type exists but no match found {%- endcomment -%}
+  {%- if auto_selected_category == '' -%}
+    {%- assign product_type_not_found = true -%}
+  {%- endif -%}
 {%- endif -%}
 
 {%- comment -%} Parse measurement map {%- endcomment -%}
@@ -259,3 +264,115 @@
     customTextMaxLengthDefault: 50
   };
 </script>
+
+{%- comment -%} Display helper tool if product type not found in settings {%- endcomment -%}
+{%- if product_type_not_found -%}
+  <div class="product-form__input" style="margin-bottom: 2rem;">
+    <div style="background-color: rgb(var(--color-background)); border: 0.1rem solid rgba(var(--color-foreground), 0.08); border-radius: var(--inputs-radius, 0.4rem); padding: 2rem;">
+      <div style="margin-bottom: 1.5rem;">
+        <p style="margin: 0 0 0.5rem 0; font-size: 1.4rem; color: rgb(var(--color-foreground));">
+          Product type "<strong>{{ product_type | escape }}</strong>" needs to be mapped to a category.
+        </p>
+        <p style="margin: 0; font-size: 1.2rem; color: rgba(var(--color-foreground), 0.7);">
+          Select a category below and copy the mapping text to add to Theme Settings → Custom Order Measurements Settings → Product Type Map.
+        </p>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr auto; gap: 1rem; align-items: end; margin-bottom: 1rem;">
+        <div class="select" style="position: relative;">
+          <select id="product-type-category-select" class="select__select" required style="width: 100%;">
+            <option value="">Select category...</option>
+            {%- for category in categories_order -%}
+              {%- assign category_clean = category | strip -%}
+              {%- if category_clean != '' -%}
+                <option value="{{ category_clean | escape }}">{{ category_clean | escape }}</option>
+              {%- endif -%}
+            {%- endfor -%}
+          </select>
+        </div>
+        <button type="button" id="product-type-copy-btn" class="button" style="white-space: nowrap; min-width: 12rem;" disabled>
+          Copy Mapping
+        </button>
+      </div>
+
+      <div id="product-type-formatted-text" style="background-color: rgba(var(--color-foreground), 0.03); padding: 1rem; border-radius: var(--inputs-radius, 0.4rem); border: 0.1rem solid rgba(var(--color-foreground), 0.08); font-family: monospace; font-size: 1.3rem; color: rgb(var(--color-foreground)); min-height: 1.5rem; display: flex; align-items: center;">
+        <span style="color: rgba(var(--color-foreground), 0.5);">Select a category to generate mapping text</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      var productType = {{ product_type | json }};
+      var categorySelect = document.getElementById('product-type-category-select');
+      var copyBtn = document.getElementById('product-type-copy-btn');
+      var formattedText = document.getElementById('product-type-formatted-text');
+
+      if (!categorySelect || !copyBtn || !formattedText) return;
+
+      function updateFormattedText() {
+        var selectedCategory = categorySelect.value;
+        if (selectedCategory) {
+          var text = productType + ': ' + selectedCategory;
+          formattedText.innerHTML = '<span>' + escapeHtml(text) + '</span>';
+          copyBtn.disabled = false;
+          copyBtn.setAttribute('aria-disabled', 'false');
+        } else {
+          formattedText.innerHTML = '<span style="color: rgba(var(--color-foreground), 0.5);">Select a category to generate mapping text</span>';
+          copyBtn.disabled = true;
+          copyBtn.setAttribute('aria-disabled', 'true');
+        }
+      }
+
+      function escapeHtml(text) {
+        var div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+      }
+
+      categorySelect.addEventListener('change', updateFormattedText);
+
+      copyBtn.addEventListener('click', function() {
+        var selectedCategory = categorySelect.value;
+        if (!selectedCategory) return;
+
+        var textToCopy = productType + ': ' + selectedCategory;
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(textToCopy).then(function() {
+            var originalText = copyBtn.textContent;
+            copyBtn.textContent = 'Copied!';
+            setTimeout(function() {
+              copyBtn.textContent = originalText;
+            }, 2000);
+          }).catch(function(err) {
+            console.error('Failed to copy text:', err);
+            fallbackCopy(textToCopy);
+          });
+        } else {
+          fallbackCopy(textToCopy);
+        }
+      });
+
+      function fallbackCopy(text) {
+        var textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        try {
+          document.execCommand('copy');
+          var originalText = copyBtn.textContent;
+          copyBtn.textContent = 'Copied!';
+          setTimeout(function() {
+            copyBtn.textContent = originalText;
+          }, 2000);
+        } catch (err) {
+          console.error('Fallback copy failed:', err);
+        }
+        document.body.removeChild(textarea);
+      }
+    })();
+  </script>
+{%- endif -%}
