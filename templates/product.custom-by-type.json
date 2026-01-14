@@ -22,7 +22,10 @@
         },
         "variant_picker": {
           "type": "variant_picker",
-          "settings": {}
+          "settings": {
+            "picker_type": "button",
+            "swatch_shape": "circle"
+          }
         },
         "custom_measurements": {
           "type": "custom_liquid",
@@ -59,19 +62,27 @@
       ],
       "settings": {
         "enable_sticky_info": true,
+        "color_scheme": "scheme-3",
         "media_size": "medium",
         "constrain_to_viewport": true,
         "media_fit": "contain",
         "gallery_layout": "stacked",
+        "mobile_thumbnails": "hide",
         "media_position": "left",
         "image_zoom": "lightbox",
-        "mobile_thumbnails": "hide",
         "hide_variants": false,
         "enable_video_looping": false,
         "padding_top": 36,
         "padding_bottom": 12
       }
+    },
+    "176835691381d6a684": {
+      "type": "_blocks",
+      "settings": {}
     }
   },
-  "order": ["main"]
+  "order": [
+    "main",
+    "176835691381d6a684"
+  ]
 }
