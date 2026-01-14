@@ -22,7 +22,9 @@
           }
         }
       },
-      "block_order": ["announcement_ANbpdc"],
+      "block_order": [
+        "announcement_ANbpdc"
+      ],
       "settings": {
         "auto_rotate": false,
         "change_slides_speed": 5,
@@ -54,5 +56,8 @@
       }
     }
   },
-  "order": ["announcement-bar", "header"]
+  "order": [
+    "announcement-bar",
+    "header"
+  ]
 }
