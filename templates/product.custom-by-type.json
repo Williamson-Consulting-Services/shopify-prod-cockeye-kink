@@ -49,6 +49,17 @@
             "show_dynamic_checkout": false,
             "show_gift_card_recipient": false
           }
+        },
+        "text_pXw8k8": {
+          "type": "text",
+          "settings": {
+            "text": "<span style=\"text-decoration:underline\">Description</span>",
+            "text_style": "subtitle"
+          }
+        },
+        "description_i9TxWY": {
+          "type": "description",
+          "settings": {}
         }
       },
       "block_order": [
@@ -58,7 +69,9 @@
         "custom_measurements",
         "custom_text",
         "quantity_selector",
-        "buy_buttons"
+        "buy_buttons",
+        "text_pXw8k8",
+        "description_i9TxWY"
       ],
       "settings": {
         "enable_sticky_info": true,
