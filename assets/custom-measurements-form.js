@@ -189,6 +189,24 @@
       const harnessSection = document.getElementById('harness-details');
 
       const activeFields = document.querySelectorAll('.measurement-field.active');
+
+      // Check if there are any required measurement fields for this category
+      let hasRequiredMeasurements = false;
+      if (selectedCategory !== 'Other') {
+        for (const field of activeFields) {
+          const measName = field.dataset.measurement;
+          const measConfig = this.config.measurements[measName];
+          if (!measConfig) continue;
+
+          const categoryInfo = measConfig.categories ? measConfig.categories[selectedCategory] : null;
+          if (categoryInfo && categoryInfo.required) {
+            hasRequiredMeasurements = true;
+            break;
+          }
+        }
+      }
+
+      // Validate measurement fields only if there are required ones
       // Skip measurement validation when "Other" category is selected
       if (selectedCategory !== 'Other') {
         for (const field of activeFields) {
@@ -221,9 +239,10 @@
         }
       }
 
-      // Validate associate field
+      // Validate associate field - only required if there are required measurement fields
+      // If all measurement fields are optional, associate is also optional
       const associateSelect = document.getElementById('associate-select');
-      if (associateSelect) {
+      if (associateSelect && hasRequiredMeasurements) {
         const selectedValue = associateSelect.value;
         if (!selectedValue || selectedValue === '') {
           associateSelect.classList.add('measurement-input--error');
@@ -245,11 +264,17 @@
           }
         }
         associateSelect.classList.remove('measurement-input--error');
+      } else if (associateSelect) {
+        // Clear error state if associate is optional
+        associateSelect.classList.remove('measurement-input--error');
+        const associateText = document.getElementById('associate-text');
+        if (associateText) associateText.classList.remove('measurement-input--error');
       }
 
       // Validate leather color (required for all categories except Tag)
       // In product-type mode (customer-facing), leather color is handled by variants, not required
-      if (selectedCategory !== 'Tag' && !isProductTypeMode) {
+      // If all measurement fields are optional, leather color is also optional
+      if (selectedCategory !== 'Tag' && !isProductTypeMode && hasRequiredMeasurements) {
         const leatherColorRadios = document.querySelectorAll('.leather-color-radio');
         let hasLeatherColor = false;
         let isLeatherColorOther = false;
@@ -282,71 +307,89 @@
           return false;
         }
         if (leatherColorText) leatherColorText.classList.remove('measurement-input--error');
+      } else if (selectedCategory !== 'Tag' && !isProductTypeMode) {
+        // Clear error state if leather color is optional
+        const leatherColorText = document.getElementById('leather-color-text');
+        if (leatherColorText) leatherColorText.classList.remove('measurement-input--error');
       }
 
       // Validate custom text input (if present - from validated-text-input component)
+      // Only validate if visible and there are required measurement fields
       // Check for custom text input by looking for input with name="properties[Custom Text]"
       const customTextInput = document.querySelector('input[name="properties[Custom Text]"]');
-      if (customTextInput) {
-        const value = customTextInput.value.trim();
-        const maxLengthAttr = customTextInput.getAttribute('maxlength');
-        let maxLength;
+      if (customTextInput && hasRequiredMeasurements) {
+        // Check if input is visible (not hidden via display:none or visibility:hidden)
+        const isVisible =
+          customTextInput.offsetParent !== null &&
+          customTextInput.style.display !== 'none' &&
+          customTextInput.style.visibility !== 'hidden';
 
-        if (maxLengthAttr !== null && maxLengthAttr !== '') {
-          maxLength = parseInt(maxLengthAttr, 10);
-          if (isNaN(maxLength) || maxLength < 0) {
-            const errorMsg = `Custom text input has invalid maxlength attribute: "${maxLengthAttr}". Expected a positive number.`;
-            console.error(errorMsg);
-            throw new Error(errorMsg);
-          }
-        } else {
-          // No maxlength attribute - require configurable default
-          if (!this.config || !this.config.customTextMaxLengthDefault) {
-            const errorMsg =
-              'Custom text input missing maxlength attribute and config.customTextMaxLengthDefault is not defined. Please configure customTextMaxLengthDefault in custom-measurements-config.liquid.';
-            console.error(errorMsg);
-            throw new Error(errorMsg);
-          }
-          maxLength = this.config.customTextMaxLengthDefault;
-          console.warn('Custom text input missing maxlength attribute, using config default:', maxLength);
-        }
+        if (isVisible) {
+          const value = customTextInput.value.trim();
+          const maxLengthAttr = customTextInput.getAttribute('maxlength');
+          let maxLength;
 
-        // Check if empty (required field)
-        if (!value) {
-          if (shouldScroll) {
-            customTextInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          if (maxLengthAttr !== null && maxLengthAttr !== '') {
+            maxLength = parseInt(maxLengthAttr, 10);
+            if (isNaN(maxLength) || maxLength < 0) {
+              const errorMsg = `Custom text input has invalid maxlength attribute: "${maxLengthAttr}". Expected a positive number.`;
+              console.error(errorMsg);
+              throw new Error(errorMsg);
+            }
+          } else {
+            // No maxlength attribute - require configurable default
+            if (!this.config || !this.config.customTextMaxLengthDefault) {
+              const errorMsg =
+                'Custom text input missing maxlength attribute and config.customTextMaxLengthDefault is not defined. Please configure customTextMaxLengthDefault in custom-measurements-config.liquid.';
+              console.error(errorMsg);
+              throw new Error(errorMsg);
+            }
+            maxLength = this.config.customTextMaxLengthDefault;
+            console.warn('Custom text input missing maxlength attribute, using config default:', maxLength);
           }
-          customTextInput.classList.add('measurement-input--error');
-          this.publishValidationState(false, selectedCategory, harnessSection, shouldScroll);
-          return false;
-        }
 
-        // Check length (validate trimmed length, not raw length)
-        if (maxLength > 0 && value.length > maxLength) {
-          if (shouldScroll) {
-            customTextInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          // Check if empty (required field)
+          if (!value) {
+            if (shouldScroll) {
+              customTextInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+            customTextInput.classList.add('measurement-input--error');
+            this.publishValidationState(false, selectedCategory, harnessSection, shouldScroll);
+            return false;
           }
-          customTextInput.classList.add('measurement-input--error');
-          this.publishValidationState(false, selectedCategory, harnessSection, shouldScroll);
-          return false;
-        }
 
-        // Check HTML5 validity (this checks required, pattern, maxlength attributes)
-        // Note: checkValidity() uses the raw value, not trimmed, so we check it after our trimmed checks
-        if (!customTextInput.checkValidity()) {
-          if (shouldScroll) {
-            customTextInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          // Check length (validate trimmed length, not raw length)
+          if (maxLength > 0 && value.length > maxLength) {
+            if (shouldScroll) {
+              customTextInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+            customTextInput.classList.add('measurement-input--error');
+            this.publishValidationState(false, selectedCategory, harnessSection, shouldScroll);
+            return false;
           }
-          customTextInput.classList.add('measurement-input--error');
-          this.publishValidationState(false, selectedCategory, harnessSection, shouldScroll);
-          return false;
+
+          // Check HTML5 validity (this checks required, pattern, maxlength attributes)
+          // Note: checkValidity() uses the raw value, not trimmed, so we check it after our trimmed checks
+          if (!customTextInput.checkValidity()) {
+            if (shouldScroll) {
+              customTextInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+            customTextInput.classList.add('measurement-input--error');
+            this.publishValidationState(false, selectedCategory, harnessSection, shouldScroll);
+            return false;
+          }
         }
 
         // All validations passed - clear error state
         customTextInput.classList.remove('measurement-input--error');
+      } else if (customTextInput) {
+        // Clear error state if custom text is optional
+        customTextInput.classList.remove('measurement-input--error');
       }
 
-      if (harnessSection && harnessSection.classList.contains('active')) {
+      // Validate harness section - only if active and there are required measurement fields
+      // If all measurement fields are optional, harness fields are also optional
+      if (harnessSection && harnessSection.classList.contains('active') && hasRequiredMeasurements) {
         // Validate harness type selection
         const harnessTypeInputs = document.querySelectorAll('.harness-type-input');
         let hasHarnessType = false;
@@ -370,8 +413,10 @@
       }
 
       // Validate tag type selection (if Tag category is selected)
+      // Only required if there are required measurement fields
+      // If all measurement fields are optional, tag type is also optional
       const tagTypeSelector = document.getElementById('tag-type-selector');
-      if (tagTypeSelector && tagTypeSelector.style.display !== 'none') {
+      if (tagTypeSelector && tagTypeSelector.style.display !== 'none' && hasRequiredMeasurements) {
         const tagTypeInputs = document.querySelectorAll('.tag-type-input');
         let hasTagType = false;
         let firstTagTypeInput = null;
@@ -390,7 +435,9 @@
         }
       }
 
-      if (harnessSection && harnessSection.classList.contains('active')) {
+      // Validate harness fields - only if active and there are required measurement fields
+      // If all measurement fields are optional, harness fields are also optional
+      if (harnessSection && harnessSection.classList.contains('active') && hasRequiredMeasurements) {
         // Validate harness fields (excluding leather color which is always required)
         const harnessFields = [
           'properties[Left Front Plate]',
