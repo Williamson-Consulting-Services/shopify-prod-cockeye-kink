@@ -1,0 +1,118 @@
+{% comment %}
+  Product Type Mapping Helper Tool
+  Displays an interactive tool to help users map product types to categories
+
+  Parameters:
+    - product_type: The product type that needs mapping
+    - categories_order: Array of category names for the dropdown
+{% endcomment %}
+
+<div class="product-form__input product-type-helper">
+  <div class="product-type-helper__container">
+    <div class="product-type-helper__header">
+      <p class="product-type-helper__title">
+        Product type "<strong>{{ product_type | escape }}</strong>" needs to be mapped to a category.
+      </p>
+      <p class="product-type-helper__description">
+        Select a category below and copy the mapping text to add to Theme Settings → Custom Order Measurements Settings
+        → Product Type Map.
+      </p>
+    </div>
+
+    <div class="product-type-helper__controls">
+      <div class="select product-type-helper__select-wrapper">
+        <select id="product-type-category-select" class="select__select" required>
+          <option value="">Select category...</option>
+          {%- for category in categories_order -%}
+            {%- assign category_clean = category | strip -%}
+            {%- if category_clean != '' -%}
+              <option value="{{ category_clean | escape }}">{{ category_clean | escape }}</option>
+            {%- endif -%}
+          {%- endfor -%}
+        </select>
+      </div>
+      <button type="button" id="product-type-copy-btn" class="button product-type-helper__button" disabled>
+        Copy Mapping
+      </button>
+    </div>
+
+    <div id="product-type-formatted-text" class="product-type-helper__output">
+      <span class="product-type-helper__output-placeholder">Select a category to generate mapping text</span>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function() {
+    var productType = {{ product_type | json }};
+    var categorySelect = document.getElementById('product-type-category-select');
+    var copyBtn = document.getElementById('product-type-copy-btn');
+    var formattedText = document.getElementById('product-type-formatted-text');
+
+    if (!categorySelect || !copyBtn || !formattedText) return;
+
+    function updateFormattedText() {
+      var selectedCategory = categorySelect.value;
+      if (selectedCategory) {
+        var text = productType + ': ' + selectedCategory;
+        formattedText.innerHTML = '<span>' + escapeHtml(text) + '</span>';
+        copyBtn.disabled = false;
+        copyBtn.setAttribute('aria-disabled', 'false');
+      } else {
+        formattedText.innerHTML = '<span class="product-type-helper__output-placeholder">Select a category to generate mapping text</span>';
+        copyBtn.disabled = true;
+        copyBtn.setAttribute('aria-disabled', 'true');
+      }
+    }
+
+    function escapeHtml(text) {
+      var div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    categorySelect.addEventListener('change', updateFormattedText);
+
+    copyBtn.addEventListener('click', function() {
+      var selectedCategory = categorySelect.value;
+      if (!selectedCategory) return;
+
+      var textToCopy = productType + ': ' + selectedCategory;
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(textToCopy).then(function() {
+          var originalText = copyBtn.textContent;
+          copyBtn.textContent = 'Copied!';
+          setTimeout(function() {
+            copyBtn.textContent = originalText;
+          }, 2000);
+        }).catch(function(err) {
+          console.error('Failed to copy text:', err);
+          fallbackCopy(textToCopy);
+        });
+      } else {
+        fallbackCopy(textToCopy);
+      }
+    });
+
+    function fallbackCopy(text) {
+      var textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.select();
+      try {
+        document.execCommand('copy');
+        var originalText = copyBtn.textContent;
+        copyBtn.textContent = 'Copied!';
+        setTimeout(function() {
+          copyBtn.textContent = originalText;
+        }, 2000);
+      } catch (err) {
+        console.error('Fallback copy failed:', err);
+      }
+      document.body.removeChild(textarea);
+    }
+  })();
+</script>
