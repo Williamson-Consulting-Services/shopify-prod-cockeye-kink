@@ -23,11 +23,16 @@
 
     setupEditButtons() {
       // Use event delegation for dynamically added cart items
+      // Handles both edit button clicks and product title clicks (for custom orders)
       document.addEventListener('click', (event) => {
         const editButton = event.target.closest('[data-edit-custom-order]');
         if (!editButton) return;
 
-        event.preventDefault();
+        // Prevent default navigation if clicking on editable title
+        if (editButton.tagName === 'A') {
+          event.preventDefault();
+        }
+
         this.handleEditClick(editButton);
       });
     }
@@ -73,8 +78,11 @@
           return;
         }
 
-        // Build edit URL with properties
-        const editUrl = window.CustomOrderUtils.buildEditUrl(productHandle, item.properties);
+        // Get variant ID from cart item (for products with variants like color)
+        const variantId = item.variant_id || item.variant?.id || null;
+
+        // Build edit URL with properties and variant ID
+        const editUrl = window.CustomOrderUtils.buildEditUrl(productHandle, item.properties, variantId);
 
         // Remove item from cart
         await this.removeItemFromCart(itemIndex);

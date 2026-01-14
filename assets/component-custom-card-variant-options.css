@@ -44,7 +44,10 @@
   align-items: center;
   justify-content: center;
   position: relative;
-  background-color: var(--swatch--background, #cccccc);
+  background: var(--swatch--background, #cccccc);
+  background-position: var(--swatch-focal-point, initial);
+  background-size: cover;
+  background-origin: border-box;
 }
 
 /* Multi-color swatch styling - diagonal split */

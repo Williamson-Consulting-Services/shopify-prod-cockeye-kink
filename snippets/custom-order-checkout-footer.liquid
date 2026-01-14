@@ -24,7 +24,7 @@
     endif
 
     if is_custom
-      assign custom_item_count = custom_item_count | plus: 1
+      assign custom_item_count = custom_item_count | plus: item.quantity
     endif
   endfor
 

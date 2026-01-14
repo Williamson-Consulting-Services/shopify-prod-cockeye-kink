@@ -129,10 +129,7 @@
         "collapsible-row-1",
         "share"
       ],
-      "custom_css": [
-        "span.badge.price__badge-sale.color-scheme-3 {background-color: red;}",
-        "span.price-item.price-item--sale.price-item--last {color: red;}"
-      ],
+      "custom_css": [],
       "settings": {
         "enable_sticky_info": true,
         "color_scheme": "scheme-3",
@@ -180,9 +177,7 @@
           }
         }
       },
-      "block_order": [
-        "column-1"
-      ],
+      "block_order": ["column-1"],
       "disabled": true,
       "settings": {
         "title": "",
@@ -202,9 +197,5 @@
       }
     }
   },
-  "order": [
-    "main",
-    "related-products",
-    "multicolumn"
-  ]
+  "order": ["main", "related-products", "multicolumn"]
 }

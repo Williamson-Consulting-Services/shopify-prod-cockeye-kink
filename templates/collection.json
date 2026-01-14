@@ -19,9 +19,7 @@
     },
     "product-grid": {
       "type": "main-collection-product-grid",
-      "custom_css": [
-        "span.badge.badge--bottom-left.color-scheme-3 {background-color: red;}"
-      ],
+      "custom_css": [],
       "settings": {
         "products_per_page": 16,
         "columns_desktop": 4,
@@ -41,8 +39,5 @@
       }
     }
   },
-  "order": [
-    "banner",
-    "product-grid"
-  ]
+  "order": ["banner", "product-grid"]
 }

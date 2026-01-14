@@ -122,8 +122,9 @@
     "show_vendor": false,
     "show_cart_note": false,
     "cart_drawer_collection": "",
-    "custom_measurements_categories_order": "Hats, Tag, Shirt, Gloves, Harness, Suspenders, Belts, Pants, Kilt, Chaps, Other",
-    "custom_measurements_map": "Head Circumference: Hats, Other*\nNeck: Harness*, Tag*, Shirt, Other*\nShoulders: Harness*, Shirt, Suspenders, Other*\nChest: Harness, Shirt, Suspenders, Other*\nTorso: Harness*, Shirt, Other*\nSleeve Length: Shirt*, Other*\nBicep: Shirt*, Other*\nWrist: Shirt*, Gloves, Other*\nPalm Circumference: Gloves, Other*\nHand Length: Gloves, Other*\nStomach: Shirt, Other*\nWaist: Harness*, Chaps, Pants, Suspenders, Belts, Kilt, Other*\nHips: Chaps, Pants, Belts, Kilt, Other*\nUpper Thigh: Chaps, Pants, Other*\nLower Thigh: Chaps, Pants, Other*\nKnee: Chaps, Pants, Other*\nCalf: Chaps, Pants, Other*\nAnkle: Chaps, Pants, Other*\nInseam: Chaps, Pants, Other*\nCrotch: Pants, Other*\nButt Rise: Pants, Other*\nLength: Kilt, Other*",
+    "custom_measurements_categories_order": "Hats, Tag, Shirt, Gloves, Harness, Suspenders, Belts, Pants, Kilt, Chaps, Armband, Other",
+    "custom_measurements_product_type_map": "Leather Armband: Armband\nLeather Pants: Pants\nsnowboard: Tag",
+    "custom_measurements_map": "Head Circumference: Hats, Other*\nNeck: Harness*, Tag*, Shirt, Other*\nShoulders: Harness*, Shirt, Suspenders, Other*\nChest: Harness, Shirt, Suspenders, Other*\nTorso: Harness*, Shirt, Other*\nSleeve Length: Shirt*, Other*\nBicep: Armband, Shirt*, Other*\nWrist: Shirt*, Gloves, Other*\nPalm Circumference: Gloves, Other*\nHand Length: Gloves, Other*\nStomach: Shirt, Other*\nWaist: Harness*, Chaps, Pants, Suspenders, Belts, Kilt, Other*\nHips: Chaps, Pants, Belts, Kilt, Other*\nUpper Thigh: Chaps, Pants, Other*\nLower Thigh: Chaps, Pants, Other*\nKnee: Chaps, Pants, Other*\nCalf: Chaps, Pants, Other*\nAnkle: Chaps, Pants, Other*\nInseam: Pants, Other*\nCrotch: Pants, Other*\nButt Rise: Pants, Other*\nLength: Kilt, Other*",
     "custom_measurements_harness_categories": "Harness",
     "custom_measurements_harness_types": "Deluxe Harness, Standard Harness, Suspender Harness, Asymmetric Harness",
     "custom_measurements_tag_options": "Dog Tag, Pig Tag, Bear Tag, Puppy Bone, Puppy Paw, Other",
@@ -149,57 +150,57 @@
     "color_schemes": {
       "scheme-1": {
         "settings": {
-          "background": "#ffffff",
+          "background": "{{ shop.brand.colors.secondary[0].foreground }}",
           "background_gradient": "",
-          "text": "#121212",
-          "button": "#121212",
-          "button_label": "#ffffff",
-          "secondary_button_label": "#121212",
-          "shadow": "#121212"
+          "text": "{{ shop.brand.colors.primary[0].background }}",
+          "button": "{{ shop.brand.colors.primary[0].background }}",
+          "button_label": "{{ shop.brand.colors.secondary[0].foreground }}",
+          "secondary_button_label": "{{ shop.brand.colors.primary[0].background }}",
+          "shadow": "{{ shop.brand.colors.primary[0].background }}"
         }
       },
       "scheme-2": {
         "settings": {
-          "background": "#f3f3f3",
+          "background": "{{ shop.brand.colors.secondary[0].background }}",
           "background_gradient": "",
-          "text": "#121212",
-          "button": "#121212",
-          "button_label": "#f3f3f3",
-          "secondary_button_label": "#121212",
-          "shadow": "#121212"
+          "text": "{{ shop.brand.colors.primary[0].background }}",
+          "button": "{{ shop.brand.colors.primary[0].background }}",
+          "button_label": "{{ shop.brand.colors.secondary[0].background }}",
+          "secondary_button_label": "{{ shop.brand.colors.primary[0].background }}",
+          "shadow": "{{ shop.brand.colors.primary[0].background }}"
         }
       },
       "scheme-3": {
         "settings": {
-          "background": "#242833",
+          "background": "{{ shop.brand.colors.secondary[1].background }}",
           "background_gradient": "",
-          "text": "#ffffff",
-          "button": "#c70000",
-          "button_label": "#ffffff",
-          "secondary_button_label": "#ffffff",
-          "shadow": "#121212"
+          "text": "{{ shop.brand.colors.secondary[0].foreground }}",
+          "button": "{{ shop.brand.colors.primary[0].foreground }}",
+          "button_label": "{{ shop.brand.colors.secondary[0].foreground }}",
+          "secondary_button_label": "{{ shop.brand.colors.secondary[0].foreground }}",
+          "shadow": "{{ shop.brand.colors.secondary[1].background }}"
         }
       },
       "scheme-4": {
         "settings": {
-          "background": "#121212",
+          "background": "{{ shop.brand.colors.primary[0].background }}",
           "background_gradient": "",
-          "text": "#ffffff",
-          "button": "#c70000",
-          "button_label": "#ffffff",
-          "secondary_button_label": "#c70000",
-          "shadow": "#121212"
+          "text": "{{ shop.brand.colors.secondary[0].foreground }}",
+          "button": "{{ shop.brand.colors.primary[0].foreground }}",
+          "button_label": "{{ shop.brand.colors.secondary[0].foreground }}",
+          "secondary_button_label": "{{ shop.brand.colors.primary[0].foreground }}",
+          "shadow": "{{ shop.brand.colors.primary[0].background }}"
         }
       },
       "scheme-5": {
         "settings": {
           "background": "{{ shop.brand.colors.primary[0].foreground }}",
           "background_gradient": "",
-          "text": "#ffffff",
-          "button": "#ffffff",
+          "text": "{{ shop.brand.colors.secondary[0].foreground }}",
+          "button": "{{ shop.brand.colors.secondary[0].foreground }}",
           "button_label": "{{ shop.brand.colors.primary[0].foreground }}",
-          "secondary_button_label": "#ffffff",
-          "shadow": "#121212"
+          "secondary_button_label": "{{ shop.brand.colors.secondary[0].foreground }}",
+          "shadow": "{{ shop.brand.colors.primary[0].background }}"
         }
       }
     }
@@ -389,7 +390,7 @@
         }
       },
       "custom_measurements_categories_order": "Hats, Tag, Shirt, Gloves, Harness, Suspenders, Belts, Pants, Kilt, Chaps, Other",
-      "custom_measurements_map": "Head Circumference: Hats, Other*\nNeck: Harness, Tag*, Shirt, Other*\nShoulders: Harness, Shirt, Suspenders, Other*\nChest: Harness, Shirt, Suspenders, Other*\nTorso: Harness, Shirt, Other*\nSleeve Length: Shirt, Other*\nBicep: Shirt*, Other*\nWrist: Shirt, Gloves, Other*\nPalm Circumference: Gloves, Other*\nHand Length: Gloves, Other*\nStomach: Shirt, Other*\nWaist: Harness, Chaps, Pants, Suspenders, Belts, Kilt, Other*\nHips: Chaps, Pants, Belts, Kilt, Other*\nUpper Thigh: Chaps, Pants, Other*\nLower Thigh: Chaps, Pants, Other*\nKnee: Chaps, Pants, Other*\nCalf: Chaps, Pants, Other*\nAnkle: Chaps, Pants, Other*\nInseam: Pants, Other*\nCrotch: Pants, Other*\nButt Rise: Pants, Other*\nLength: Kilt, Other*",
+      "custom_measurements_map": "Head Circumference: Hats, Other*\nNeck: Harness, Tag*, Shirt, Other*\nShoulders: Harness, Shirt, Suspenders, Other*\nChest: Harness, Shirt, Suspenders, Other*\nTorso: Harness, Shirt, Other*\nSleeve Length: Shirt, Other*\nBicep: Armband, Shirt*, Other*\nWrist: Shirt, Gloves, Other*\nPalm Circumference: Gloves, Other*\nHand Length: Gloves, Other*\nStomach: Shirt, Other*\nWaist: Harness, Chaps, Pants, Suspenders, Belts, Kilt, Other*\nHips: Chaps, Pants, Belts, Kilt, Other*\nUpper Thigh: Chaps, Pants, Other*\nLower Thigh: Chaps, Pants, Other*\nKnee: Chaps, Pants, Other*\nCalf: Chaps, Pants, Other*\nAnkle: Chaps, Pants, Other*\nInseam: Chaps, Pants, Other*\nCrotch: Pants, Other*\nButt Rise: Pants, Other*\nLength: Kilt, Other*",
       "custom_measurements_harness_categories": "Harness",
       "custom_measurements_harness_types": "Deluxe Harness, Standard Harness, Suspender Harness, Asymmetric Harness",
       "custom_measurements_tag_options": "Dog Tag, Pig Tag, Bear Tag, Puppy Bone, Puppy Paw, Other",

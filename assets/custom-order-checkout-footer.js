@@ -22,7 +22,10 @@ window.CustomOrderCheckoutFooter = (function () {
     const duplicate = wrapper?.querySelector('.checkout-footer__message--duplicate');
 
     if (!messageElement || !statusElement || !wrapper) {
-      if (duplicate) duplicate.hidden = true;
+      if (duplicate) {
+        duplicate.hidden = true;
+        duplicate.textContent = '';
+      }
       if (wrapper) wrapper.removeAttribute('data-needs-scroll');
       if (statusElement) statusElement.removeAttribute('data-needs-scroll');
       return;
@@ -30,24 +33,48 @@ window.CustomOrderCheckoutFooter = (function () {
 
     // Hide duplicate and remove scroll attributes on desktop
     if (window.innerWidth > 749) {
-      if (duplicate) duplicate.hidden = true;
+      if (duplicate) {
+        duplicate.hidden = true;
+        duplicate.textContent = '';
+      }
       wrapper.removeAttribute('data-needs-scroll');
       statusElement.removeAttribute('data-needs-scroll');
       return;
     }
 
-    const statusWidth = statusElement.offsetWidth;
-    const messageWidth = messageElement.scrollWidth;
-    const availableWidth = statusWidth - 80; // Account for padding and button space
+    // Mobile: Check if text needs scrolling
+    // Use the text container (parent of status) for width calculation, similar to banner
+    const textContainer = statusElement?.closest('.checkout-footer__text-container');
+    const containerWidth = textContainer ? textContainer.offsetWidth : statusElement.offsetWidth;
 
-    if (messageWidth > availableWidth && duplicate) {
-      // Duplicate message for seamless scrolling
+    // Measure the actual text width
+    // The wrapper has display: inline-block and white-space: nowrap, so its scrollWidth
+    // should reflect the full content width even when constrained
+    // We compare wrapper's scrollWidth (full content) to its offsetWidth (visible width)
+    // If scrollWidth > offsetWidth, the content is overflowing and needs scrolling
+    const wrapperScrollWidth = wrapper.scrollWidth;
+    const wrapperOffsetWidth = wrapper.offsetWidth;
+
+    // Account for padding on both sides and close button width (mobile only)
+    // Left padding: 1rem (16px), Right padding: 3.5rem (56px) for close button
+    const leftPadding = 16; // 1rem
+    const rightPadding = 56; // 3.5rem for close button area
+    const availableWidth = containerWidth - leftPadding - rightPadding;
+
+    // Text needs scrolling if the wrapper's content width exceeds available space
+    const needsScroll = wrapperScrollWidth > availableWidth;
+
+    if (needsScroll && duplicate) {
+      // Duplicate message for seamless scrolling (mobile only)
       duplicate.innerHTML = messageElement.innerHTML;
-      duplicate.hidden = false;
+      duplicate.removeAttribute('hidden'); // Remove hidden attribute to show it
       wrapper.setAttribute('data-needs-scroll', 'true');
       statusElement.setAttribute('data-needs-scroll', 'true');
     } else {
-      if (duplicate) duplicate.hidden = true;
+      if (duplicate) {
+        duplicate.setAttribute('hidden', '');
+        duplicate.textContent = '';
+      }
       wrapper.removeAttribute('data-needs-scroll');
       statusElement.removeAttribute('data-needs-scroll');
     }
@@ -57,18 +84,38 @@ window.CustomOrderCheckoutFooter = (function () {
     if (!cart || !cart.items) return 0;
     if (!window.CustomOrderUtils) {
       // Fallback if utils not loaded yet
-      return cart.items.filter((item) => {
-        if (!item.properties) return false;
+      return cart.items.reduce((total, item) => {
+        if (!item.properties) return total;
         const customFlag = item.properties['_custom'] || item.properties['Order Type'];
-        return typeof customFlag === 'string' && customFlag.toLowerCase() === 'custom';
-      }).length;
+        if (typeof customFlag === 'string') {
+          const flagLower = customFlag.toLowerCase();
+          // Check for exact 'custom' match or values containing 'custom' (e.g., 'custom-by-type')
+          if (flagLower === 'custom' || flagLower.includes('custom')) {
+            return total + (item.quantity || 1);
+          }
+        }
+        return total;
+      }, 0);
     }
-    return cart.items.filter((item) => window.CustomOrderUtils.isCustomOrderItem(item)).length;
+    return cart.items.reduce((total, item) => {
+      if (window.CustomOrderUtils.isCustomOrderItem(item)) {
+        return total + (item.quantity || 1);
+      }
+      return total;
+    }, 0);
   }
 
   function updateFooter(customCount) {
+    const wrapper = footer.querySelector('[data-message-wrapper]');
+    const duplicate = wrapper?.querySelector('.checkout-footer__message--duplicate');
+
     if (suppressed) {
       footer.hidden = true;
+      // Ensure duplicate is hidden when footer is suppressed
+      if (duplicate) {
+        duplicate.hidden = true;
+        duplicate.textContent = '';
+      }
       return;
     }
 
@@ -79,9 +126,17 @@ window.CustomOrderCheckoutFooter = (function () {
       }
       footer.setAttribute('data-custom-item-count', customCount);
       // Check if text needs scrolling after update - this will handle duplicate visibility
-      setTimeout(checkTextScroll, 100);
+      // Use requestAnimationFrame to ensure DOM is updated
+      requestAnimationFrame(() => {
+        setTimeout(checkTextScroll, 50);
+      });
     } else {
       footer.hidden = true;
+      // Ensure duplicate is hidden when footer is hidden
+      if (duplicate) {
+        duplicate.hidden = true;
+        duplicate.textContent = '';
+      }
     }
   }
 
@@ -108,11 +163,25 @@ window.CustomOrderCheckoutFooter = (function () {
   }
 
   function init() {
+    // Ensure duplicate is hidden on initial load
+    const wrapper = footer.querySelector('[data-message-wrapper]');
+    const duplicate = wrapper?.querySelector('.checkout-footer__message--duplicate');
+    if (duplicate) {
+      duplicate.hidden = true;
+      duplicate.textContent = '';
+    }
+
     refreshCart(); // Initial load
 
     // Check text scroll on load and resize (always check to hide/show duplicate correctly)
-    setTimeout(checkTextScroll, 200);
-    window.addEventListener('resize', checkTextScroll);
+    requestAnimationFrame(() => {
+      setTimeout(checkTextScroll, 100);
+    });
+    window.addEventListener('resize', () => {
+      requestAnimationFrame(() => {
+        checkTextScroll();
+      });
+    });
 
     subscribe(PUB_SUB_EVENTS.cartUpdate, (event) => {
       if (event.cartState) {

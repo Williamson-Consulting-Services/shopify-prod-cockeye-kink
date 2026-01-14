@@ -121,7 +121,9 @@
     "total_reviews": "total reviews",
     "star_reviews_info": "{{ rating_value }} out of {{ rating_max }} stars",
     "collapsible_content_title": "Collapsible content",
-    "complementary_products": "Complementary products"
+    "complementary_products": "Complementary products",
+    "measurements_table_caption": "Product measurements",
+    "measurement_not_available": "not available"
   },
   "blogs": {
     "article": {
@@ -330,6 +332,7 @@
       "title": "Your cart",
       "caption": "Cart items",
       "remove_title": "Remove {{ title }}",
+      "edit_item": "Edit item",
       "estimated_total": "Estimated total",
       "new_estimated_total": "New estimated total",
       "note": "Order special instructions",

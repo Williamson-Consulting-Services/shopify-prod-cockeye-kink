@@ -38,11 +38,7 @@
           }
         }
       },
-      "block_order": [
-        "heading",
-        "text",
-        "button"
-      ],
+      "block_order": ["heading", "text", "button"],
       "custom_css": [],
       "settings": {
         "image": "shopify://shop_images/cockeye_header.jpg",
@@ -60,10 +56,6 @@
     },
     "featured_collection": {
       "type": "featured-collection",
-      "custom_css": [
-        "span.badge.badge--bottom-left.color-scheme-3 {background-color: red;}",
-        "span.price-item.price-item--sale.price-item--last {color: red;}"
-      ],
       "settings": {
         "collection": "featured-products",
         "products_to_show": 11,
@@ -165,11 +157,7 @@
           }
         }
       },
-      "block_order": [
-        "collection-0",
-        "product",
-        "collection-1"
-      ],
+      "block_order": ["collection-0", "product", "collection-1"],
       "settings": {
         "heading": "",
         "heading_size": "h2",
@@ -240,10 +228,7 @@
           }
         }
       },
-      "block_order": [
-        "column1",
-        "column2"
-      ],
+      "block_order": ["column1", "column2"],
       "settings": {
         "title": "",
         "heading_size": "h1",
