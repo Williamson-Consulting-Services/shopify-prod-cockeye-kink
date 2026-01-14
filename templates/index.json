@@ -56,10 +56,6 @@
     },
     "featured_collection": {
       "type": "featured-collection",
-      "custom_css": [
-        "span.badge.badge--bottom-left.color-scheme-3 {background-color: red;}",
-        "span.price-item.price-item--sale.price-item--last {color: red;}"
-      ],
       "settings": {
         "collection": "featured-products",
         "products_to_show": 11,
