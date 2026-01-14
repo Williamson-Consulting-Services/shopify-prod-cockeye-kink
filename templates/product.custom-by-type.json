@@ -73,7 +73,7 @@
           "settings": {
             "heading": "Size Guide",
             "icon": "ruler",
-            "content": "<p>For tops, use a chest measurement:</p><ul><li>Small: 36\" - 40\"</li><li>Medium: 40\" - 44\"</li><li>Large 44\" - 48\"</li><li>Extra Large: 48\" - 52\"</li><li>XXL: 54\" - 56\"</li><li>3XL: 56\" - 60\"</li></ul>",
+            "content": "<p>For tops, use a chest measurement:</p><ul><li>Small: 36\" - 40\"</li><li>Medium: 40\" - 44\"</li><li>Large 44\" - 48\"</li><li>Extra Large: 48\" - 52\"</li><li>XXL: 54\" - 56\"</li><li>3XL: 56\" - 60\"</li></ul><p>For bottoms, please enter your custom measurements.</p>",
             "page": ""
           }
         },
@@ -100,7 +100,7 @@
           "settings": {
             "share_label": "Share"
           }
-        }        
+        }
       },
       "block_order": [
         "title",
@@ -116,7 +116,7 @@
         "collapsible_tab_CdzfPc",
         "collapsible-row-0",
         "collapsible-row-1",
-        "share"        
+        "share"
       ],
       "settings": {
         "enable_sticky_info": true,
