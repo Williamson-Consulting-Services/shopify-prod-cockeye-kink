@@ -60,7 +60,47 @@
         "description_i9TxWY": {
           "type": "description",
           "settings": {}
-        }
+        },
+        "text_93jaBm": {
+          "type": "text",
+          "settings": {
+            "text": "If your size is not available or you would like to personalize your order, contact us at <a href=\"mailto:info@cockeyekink.com\">info@cockeyekink.com</a> to schedule a video consultation. Please note, custom orders may take additional time.",
+            "text_style": "body"
+          }
+        },
+        "collapsible_tab_CdzfPc": {
+          "type": "collapsible_tab",
+          "settings": {
+            "heading": "Size Guide",
+            "icon": "ruler",
+            "content": "<p>For tops, use a chest measurement:</p><ul><li>Small: 36\" - 40\"</li><li>Medium: 40\" - 44\"</li><li>Large 44\" - 48\"</li><li>Extra Large: 48\" - 52\"</li><li>XXL: 54\" - 56\"</li><li>3XL: 56\" - 60\"</li></ul>",
+            "page": ""
+          }
+        },
+        "collapsible-row-0": {
+          "type": "collapsible_tab",
+          "settings": {
+            "heading": "Materials",
+            "icon": "leather",
+            "content": "<p>Leather</p>",
+            "page": ""
+          }
+        },
+        "collapsible-row-1": {
+          "type": "collapsible_tab",
+          "settings": {
+            "heading": "Shipping & Returns",
+            "icon": "truck",
+            "content": "<p>7-14 Business Days depending on demand</p>",
+            "page": ""
+          }
+        },
+        "share": {
+          "type": "share",
+          "settings": {
+            "share_label": "Share"
+          }
+        }        
       },
       "block_order": [
         "title",
@@ -71,7 +111,12 @@
         "quantity_selector",
         "buy_buttons",
         "text_pXw8k8",
-        "description_i9TxWY"
+        "description_i9TxWY",
+        "text_93jaBm",
+        "collapsible_tab_CdzfPc",
+        "collapsible-row-0",
+        "collapsible-row-1",
+        "share"        
       ],
       "settings": {
         "enable_sticky_info": true,
