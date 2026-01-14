@@ -382,7 +382,7 @@ cart-edit-button .button:not([disabled]):hover {
   }
 
   .cart-items thead th:first-child {
-    width: 50%;
+    width: 40%;
   }
 
   .cart-items th + th {
@@ -434,7 +434,7 @@ cart-edit-button .button:not([disabled]):hover {
   }
 
   .cart-items thead th:first-child {
-    width: 60%;
+    width: 40%;
   }
 }
 
@@ -502,15 +502,15 @@ cart-edit-button .button:not([disabled]):hover {
 /* Adjust column widths for tablet - give more space to measurement values */
 @media screen and (min-width: 750px) and (max-width: 989px) {
   .measurements-table thead th:first-child {
-    width: 50%;
+    width: 40%;
   }
 
   .measurements-table thead th:not(:first-child):not(:last-child) {
-    width: 25%;
+    width: 30%;
   }
 
   .measurements-table thead th:last-child {
-    width: 25%;
+    width: 30%;
   }
 }
 
