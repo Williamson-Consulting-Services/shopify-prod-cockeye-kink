@@ -84,18 +84,25 @@ window.CustomOrderCheckoutFooter = (function () {
     if (!cart || !cart.items) return 0;
     if (!window.CustomOrderUtils) {
       // Fallback if utils not loaded yet
-      return cart.items.filter((item) => {
-        if (!item.properties) return false;
+      return cart.items.reduce((total, item) => {
+        if (!item.properties) return total;
         const customFlag = item.properties['_custom'] || item.properties['Order Type'];
         if (typeof customFlag === 'string') {
           const flagLower = customFlag.toLowerCase();
           // Check for exact 'custom' match or values containing 'custom' (e.g., 'custom-by-type')
-          return flagLower === 'custom' || flagLower.includes('custom');
+          if (flagLower === 'custom' || flagLower.includes('custom')) {
+            return total + (item.quantity || 1);
+          }
         }
-        return false;
-      }).length;
+        return total;
+      }, 0);
     }
-    return cart.items.filter((item) => window.CustomOrderUtils.isCustomOrderItem(item)).length;
+    return cart.items.reduce((total, item) => {
+      if (window.CustomOrderUtils.isCustomOrderItem(item)) {
+        return total + (item.quantity || 1);
+      }
+      return total;
+    }, 0);
   }
 
   function updateFooter(customCount) {
