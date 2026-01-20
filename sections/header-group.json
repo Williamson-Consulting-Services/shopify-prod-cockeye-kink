@@ -25,6 +25,7 @@
       "block_order": [
         "announcement_ANbpdc"
       ],
+      "disabled": true,
       "settings": {
         "auto_rotate": false,
         "change_slides_speed": 5,
