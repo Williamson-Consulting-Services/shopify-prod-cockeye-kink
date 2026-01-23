@@ -64,9 +64,17 @@
       {%- assign custom_card_variant_options_loaded = true -%}
     {%- endunless -%}
 
+    {%- liquid
+      assign has_custom_template = false
+      if product.template_suffix != blank and product.template_suffix contains 'custom-'
+        assign has_custom_template = true
+      endif
+    -%}
+
     <div
       class="custom-card-variant-options"
       data-product-id="{{ product.id }}"
+      data-has-custom-template="{% if has_custom_template %}true{% else %}false{% endif %}"
       data-translation-add-to-cart="{{ 'products.product.add_to_cart' | t }}"
       data-translation-sold-out="{{ 'products.product.sold_out' | t }}"
       data-translation-choose-options="{{ 'products.product.choose_options' | t }}"

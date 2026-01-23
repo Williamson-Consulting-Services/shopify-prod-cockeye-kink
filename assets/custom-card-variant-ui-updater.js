@@ -243,6 +243,19 @@ if (typeof CustomCardVariantUIUpdater === 'undefined') {
           return;
         }
 
+        // Check if product requires custom data entry (has "custom-" template)
+        const hasCustomTemplate = this.container.getAttribute('data-has-custom-template') === 'true';
+        if (hasCustomTemplate) {
+          // Always show "Choose Options" for products requiring custom data entry
+          // These products need measurements or other custom data before adding to cart
+          this.updateButtonText(button, 'chooseOptions');
+          if (quickAddButton) {
+            quickAddButton.removeAttribute('data-selected-variant-id');
+            quickAddButton.removeAttribute('data-direct-add');
+          }
+          return; // Exit early, don't process variant selection
+        }
+
         // Check if all required options are selected
         const allRequiredSelected = this.hasAllRequiredOptionsSelected(selectedOptions);
 
