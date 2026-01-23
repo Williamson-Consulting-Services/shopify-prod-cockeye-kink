@@ -16,13 +16,20 @@
           "type": "title",
           "settings": {}
         },
+        "judge_me_reviews_preview_badge_iyaYER": {
+          "type": "shopify://apps/judge-me-reviews/blocks/preview_badge/61ccd3b1-a9f2-4160-9fe9-4fec8413e5d8",
+          "settings": {}
+        },
         "price": {
           "type": "price",
           "settings": {}
         },
         "variant_picker": {
           "type": "variant_picker",
-          "settings": {}
+          "settings": {
+            "picker_type": "button",
+            "swatch_shape": "circle"
+          }
         },
         "custom_measurements": {
           "type": "custom_liquid",
@@ -46,30 +53,110 @@
             "show_dynamic_checkout": false,
             "show_gift_card_recipient": false
           }
+        },
+        "text_pXw8k8": {
+          "type": "text",
+          "settings": {
+            "text": "<span style=\"text-decoration:underline\">Description</span>",
+            "text_style": "subtitle"
+          }
+        },
+        "description_i9TxWY": {
+          "type": "description",
+          "settings": {}
+        },
+        "text_93jaBm": {
+          "type": "text",
+          "settings": {
+            "text": "If your size is not available or you would like to personalize your order, contact us at <a href=\"mailto:info@cockeyekink.com\">info@cockeyekink.com</a> to schedule a video consultation. Please note, custom orders may take additional time.",
+            "text_style": "body"
+          }
+        },
+        "collapsible_tab_CdzfPc": {
+          "type": "collapsible_tab",
+          "settings": {
+            "heading": "Size Guide",
+            "icon": "ruler",
+            "content": "<p>For tops, use a chest measurement:</p><ul><li>Small: 36\" - 40\"</li><li>Medium: 40\" - 44\"</li><li>Large 44\" - 48\"</li><li>Extra Large: 48\" - 52\"</li><li>XXL: 54\" - 56\"</li><li>3XL: 56\" - 60\"</li></ul><p>For bottoms, please enter your custom measurements.</p>",
+            "page": ""
+          }
+        },
+        "collapsible-row-0": {
+          "type": "collapsible_tab",
+          "settings": {
+            "heading": "Materials",
+            "icon": "leather",
+            "content": "<p>Leather</p>",
+            "page": ""
+          }
+        },
+        "collapsible-row-1": {
+          "type": "collapsible_tab",
+          "settings": {
+            "heading": "Shipping & Returns",
+            "icon": "truck",
+            "content": "<p>7-14 Business Days depending on demand</p>",
+            "page": ""
+          }
+        },
+        "share": {
+          "type": "share",
+          "settings": {
+            "share_label": "Share"
+          }
         }
       },
       "block_order": [
         "title",
+        "judge_me_reviews_preview_badge_iyaYER",
         "price",
         "variant_picker",
         "custom_measurements",
         "custom_text",
         "quantity_selector",
-        "buy_buttons"
+        "buy_buttons",
+        "text_pXw8k8",
+        "description_i9TxWY",
+        "text_93jaBm",
+        "collapsible_tab_CdzfPc",
+        "collapsible-row-0",
+        "collapsible-row-1",
+        "share"
       ],
       "settings": {
         "enable_sticky_info": true,
+        "color_scheme": "scheme-3",
         "media_size": "medium",
         "constrain_to_viewport": true,
         "media_fit": "contain",
-        "gallery_layout": "stacked",
+        "gallery_layout": "thumbnail_slider",
+        "mobile_thumbnails": "hide",
         "media_position": "left",
         "image_zoom": "lightbox",
-        "mobile_thumbnails": "hide",
         "hide_variants": false,
         "enable_video_looping": false,
         "padding_top": 36,
         "padding_bottom": 12
+      }
+    },
+    "1769192046e0966fe9": {
+      "type": "apps",
+      "blocks": {
+        "judge_me_reviews_review_widget_z37Wiw": {
+          "type": "shopify://apps/judge-me-reviews/blocks/review_widget/61ccd3b1-a9f2-4160-9fe9-4fec8413e5d8",
+          "settings": {
+            "review_data": "sample_data",
+            "max_width": 1200,
+            "show_shop_reviews": false,
+            "empty_state": "empty_widget"
+          }
+        }
+      },
+      "block_order": [
+        "judge_me_reviews_review_widget_z37Wiw"
+      ],
+      "settings": {
+        "include_margins": true
       }
     },
     "related-products": {
@@ -103,7 +190,9 @@
           }
         }
       },
-      "block_order": ["column-1"],
+      "block_order": [
+        "column-1"
+      ],
       "disabled": true,
       "settings": {
         "title": "",
@@ -123,5 +212,10 @@
       }
     }
   },
-  "order": ["main", "related-products", "multicolumn"]
+  "order": [
+    "main",
+    "1769192046e0966fe9",
+    "related-products",
+    "multicolumn"
+  ]
 }

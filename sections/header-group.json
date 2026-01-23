@@ -17,7 +17,7 @@
         "announcement_ANbpdc": {
           "type": "announcement",
           "settings": {
-            "text": "End of Year Sale! Up to $75 off and free shipping on select items. While supplies last...",
+            "text": "Sale ending on Jan 19! Up to $75 off and free shipping on select items. While supplies last...",
             "link": "shopify://collections/sale"
           }
         }
@@ -25,6 +25,7 @@
       "block_order": [
         "announcement_ANbpdc"
       ],
+      "disabled": true,
       "settings": {
         "auto_rotate": false,
         "change_slides_speed": 5,

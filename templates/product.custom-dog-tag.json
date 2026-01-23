@@ -34,20 +34,6 @@
           "type": "price",
           "settings": {}
         },
-        "text_ja8hgM": {
-          "type": "text",
-          "settings": {
-            "text": "<strong>Character Limit:</strong> Our machines have physical limits, so please keep your text within the allowed count.",
-            "text_style": "body"
-          }
-        },
-        "text_H8XPWM": {
-          "type": "text",
-          "settings": {
-            "text": "<strong>Content Warning:</strong> We share the love, not the hate. We reserve the right to decline any orders with offensive or controversial text.",
-            "text_style": "body"
-          }
-        },
         "custom_liquid_MbVxag": {
           "type": "custom_liquid",
           "settings": {
@@ -106,8 +92,6 @@
         "title",
         "caption",
         "price",
-        "text_ja8hgM",
-        "text_H8XPWM",
         "custom_liquid_MbVxag",
         "quantity_selector",
         "buy_buttons",
@@ -141,7 +125,7 @@
         "products_to_show": 4,
         "columns_desktop": 4,
         "columns_mobile": "2",
-        "color_scheme": "scheme-1",
+        "color_scheme": "scheme-3",
         "image_ratio": "square",
         "image_shape": "default",
         "show_secondary_image": true,
@@ -152,5 +136,8 @@
       }
     }
   },
-  "order": ["main", "related-products"]
+  "order": [
+    "main",
+    "related-products"
+  ]
 }

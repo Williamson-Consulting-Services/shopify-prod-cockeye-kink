@@ -122,13 +122,13 @@
     "show_vendor": false,
     "show_cart_note": false,
     "cart_drawer_collection": "",
-    "custom_measurements_categories_order": "Hats, Tag, Shirt, Gloves, Harness, Suspenders, Belts, Pants, Kilt, Chaps, Armband, Other",
-    "custom_measurements_product_type_map": "Leather Armband: Armband\nLeather Pants: Pants\nsnowboard: Tag",
-    "custom_measurements_map": "Head Circumference: Hats, Other*\nNeck: Harness*, Tag*, Shirt, Other*\nShoulders: Harness*, Shirt, Suspenders, Other*\nChest: Harness, Shirt, Suspenders, Other*\nTorso: Harness*, Shirt, Other*\nSleeve Length: Shirt*, Other*\nBicep: Armband, Shirt*, Other*\nWrist: Shirt*, Gloves, Other*\nPalm Circumference: Gloves, Other*\nHand Length: Gloves, Other*\nStomach: Shirt, Other*\nWaist: Harness*, Chaps, Pants, Suspenders, Belts, Kilt, Other*\nHips: Chaps, Pants, Belts, Kilt, Other*\nUpper Thigh: Chaps, Pants, Other*\nLower Thigh: Chaps, Pants, Other*\nKnee: Chaps, Pants, Other*\nCalf: Chaps, Pants, Other*\nAnkle: Chaps, Pants, Other*\nInseam: Pants, Other*\nCrotch: Pants, Other*\nButt Rise: Pants, Other*\nLength: Kilt, Other*",
-    "custom_measurements_harness_categories": "Harness",
+    "custom_measurements_categories_order": "Hats, Tag, Shirt, Gloves, Harness, Suspenders, Belts, Pants, Kilt, Chaps, Armband, Jockstraps, Other",
+    "custom_measurements_product_type_map": "Leather Armband: Armband\nLeather Pants: Pants\nsnowboard: Tag\nLeather Chaps: Chaps\nLeather Jockstraps: Jockstraps\nMuir Cap: Hats\nHarness: Harness\nDeluxe Bulldog Harness: Harness\nBulldog Harness: Harness\nHarness and Jockstrap Bundle: HarnessAndJock",
+    "custom_measurements_map": "Head Circumference: Hats, Other*\nNeck: Harness*, Tag*, Shirt, Other*\nShoulders: Harness*, Shirt, Suspenders, Other*\nChest: Harness, HarnessAndJock, Shirt, Suspenders, Other*\nTorso: Harness*, HarnessAndJock*, Shirt, Other*\nSleeve Length: Shirt*, Other*\nBicep: Armband, Shirt*, Other*\nWrist: Shirt*, Gloves, Other*\nPalm Circumference: Gloves, Other*\nHand Length: Gloves, Other*\nStomach: Shirt, Other*\nWaist: Harness*, Chaps, Pants, Suspenders, Belts, Kilt, Other*\nHips: Chaps, Pants, Belts, Kilt, Jockstraps, HarnessAndJock,  Other*\nUpper Thigh: Chaps, Pants, Jockstraps, HarnessAndJock, Other*\nLower Thigh: Chaps, Pants, Other*\nKnee: Chaps, Pants, Other*\nCalf: Chaps, Pants, Other*\nAnkle: Chaps, Pants, Other*\nInseam: Pants, Other*\nCrotch: Pants, Jockstraps, HarnessAndJock, Other*\nButt Rise: Pants, Other*\nLength: Kilt, Other*",
+    "custom_measurements_harness_categories": "Harness, HarnessAndJock",
     "custom_measurements_harness_types": "Deluxe Harness, Standard Harness, Suspender Harness, Asymmetric Harness",
     "custom_measurements_tag_options": "Dog Tag, Pig Tag, Bear Tag, Puppy Bone, Puppy Paw, Other",
-    "custom_measurements_associates": "Clair, Erik, Robert, Jack, Venn, Aspen, Other",
+    "custom_measurements_associates": "Clair, Erik, Robert, Jack, Venn, Aspen, David, Jeff, Toner, Other",
     "custom_measurements_group_upper_body": "Head Circumference,Neck,Shoulders,Chest,Sleeve Length,Bicep,Wrist,Palm Circumference,Hand Length",
     "custom_measurements_group_torso_hips": "Torso,Stomach,Waist,Hips",
     "custom_measurements_group_lower_body": "Upper Thigh,Lower Thigh,Knee,Calf,Ankle,Inseam,Crotch,Butt Rise,Length",
@@ -147,6 +147,23 @@
       }
     },
     "content_for_index": [],
+    "blocks": {
+      "7155349627714823297": {
+        "type": "shopify://apps/file-uploads-by-uploadkit/blocks/app-embed-block/d7b05810-6170-4288-808a-df45248c4d28",
+        "disabled": false,
+        "settings": {}
+      },
+      "13768625480086291342": {
+        "type": "shopify://apps/forms/blocks/forms/8744a304-fcb1-4347-b211-bb6b4759a76a",
+        "disabled": false,
+        "settings": {}
+      },
+      "14060646107696862457": {
+        "type": "shopify://apps/judge-me-reviews/blocks/judgeme_core/61ccd3b1-a9f2-4160-9fe9-4fec8413e5d8",
+        "disabled": false,
+        "settings": {}
+      }
+    },
     "color_schemes": {
       "scheme-1": {
         "settings": {

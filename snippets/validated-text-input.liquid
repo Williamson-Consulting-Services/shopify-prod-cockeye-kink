@@ -9,6 +9,16 @@
 {%- assign error_id = 'engraving-error-' | append: section.id -%}
 {%- assign button_id = 'ProductSubmitButton-' | append: section.id -%}
 
+<p class="product__text inline-richtext">
+  <strong>Character Limit:</strong> Our machines have physical limits, so please keep your text within the allowed
+  count.
+</p>
+
+<p class="product__text inline-richtext">
+  <strong>Content Warning:</strong> We share the love, not the hate. We reserve the right to decline any orders with
+  offensive or controversial text.
+</p>
+
 {%- comment %} MEETS: AC1 (Display) - This is the UI for the input field. {%- endcomment %}
 {%- assign max_chars = product.metafields.custom.custom_message_max_characters.value | default: 50 -%}
 <div style="margin-bottom:15px;">
