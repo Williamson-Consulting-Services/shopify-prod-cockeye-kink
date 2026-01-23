@@ -37,6 +37,13 @@ See [Version Tracking Workflow](../.cursor/version-tracking-workflow.mdc) for de
 
 - (Items will be listed here)
 
+## [15.4.1.5] - 2026-01-23
+
+### Fixed
+
+- Fixed product cards on collection pages to show "Choose Options" instead of "Add to Cart" for products with "custom-" templates that require data entry
+- Fixed JavaScript override issue where selecting color/size variants would incorrectly change button to "Add to Cart" for custom template products that still require measurements
+
 ## [15.4.1.4] - 2026-01-13
 
 ### Added
