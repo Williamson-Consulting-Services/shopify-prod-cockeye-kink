@@ -2,7 +2,7 @@
   {
     "name": "theme_info",
     "theme_name": "Dawn",
-    "theme_version": "15.4.1.5",
+    "theme_version": "15.4.1.6",
     "theme_author": "Shopify",
     "theme_documentation_url": "https://help.shopify.com/manual/online-store/themes",
     "theme_support_url": "https://support.shopify.com/"
@@ -1536,6 +1536,13 @@
         "label": "t:settings_schema.custom_order_measurements_settings.settings.product_type_map.label",
         "info": "t:settings_schema.custom_order_measurements_settings.settings.product_type_map.info",
         "default": "Leather Armband: Armband"
+      },
+      {
+        "type": "textarea",
+        "id": "custom_measurements_product_type_display_overrides",
+        "label": "t:settings_schema.custom_order_measurements_settings.settings.product_type_display_overrides.label",
+        "info": "t:settings_schema.custom_order_measurements_settings.settings.product_type_display_overrides.info",
+        "default": "Dog Tag: Neck"
       },
       {
         "type": "textarea",

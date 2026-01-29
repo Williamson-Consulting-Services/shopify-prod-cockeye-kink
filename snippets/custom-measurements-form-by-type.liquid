@@ -12,6 +12,10 @@
     - Looks up category for current product type
     - Auto-selects category (hides category selector)
     - Shows only measurements required for that category
+    - Display overrides: reads settings.custom_measurements_product_type_display_overrides
+      Format: ProductType: Measurement1, Measurement2 (one per line). Matching is on product_type
+      (current product's type), not category. Only product types listed get overrides; others
+      show the full form for their category.
 {% endcomment %}
 
 {%- liquid
@@ -54,6 +58,11 @@
 {%- assign categories_source = settings.custom_measurements_categories_order -%}
 {%- assign categories_order = categories_source | split: ',' -%}
 
+{%- comment -%} Harness categories for category selector (data-show-harness on category options); sub-type selectors are hidden on by-type, so harness_types/tag_options not needed {%- endcomment -%}
+{%- assign harness_source_raw = settings.custom_measurements_harness_categories | default: 'Harness' -%}
+{%- assign harness_source = harness_source_raw | replace: '|', ',' -%}
+{%- assign harness_categories = harness_source | split: ',' -%}
+
 {%- comment -%} Check if product type is mapped {%- endcomment -%}
 {%- if mapped_category == '' -%}
   {%- comment -%} Product type not found - render helper tool {%- endcomment -%}
@@ -85,21 +94,103 @@
   {%- endfor -%}
   {%- assign measurement_names = measurement_names | uniq -%}
 
+  {%- comment -%} Build list of measurements that belong to the current category (mapped_category) {%- endcomment -%}
+  {%- assign measurement_names_for_category = '' | split: '|' -%}
+  {%- assign mapped_category_clean = mapped_category | strip -%}
+  {%- for measurement_line in measurement_map_lines -%}
+    {%- assign measurement_line = measurement_line | strip -%}
+    {%- if measurement_line == '' -%}{% continue %}{% endif -%}
+    {%- assign parts = measurement_line | split: ':' -%}
+    {%- assign measurement_label = parts[0] | strip | remove: '*' | strip -%}
+    {%- if measurement_label == '' -%}{% continue %}{% endif -%}
+    {%- assign categories_part = parts[1] | default: '' | strip -%}
+    {%- assign category_tokens = categories_part | split: ',' -%}
+    {%- assign in_category = false -%}
+    {%- for token in category_tokens -%}
+      {%- assign base_category = token | strip | remove: '*' | strip -%}
+      {%- if base_category == mapped_category_clean -%}
+        {%- assign in_category = true -%}
+        {%- break -%}
+      {%- endif -%}
+    {%- endfor -%}
+    {%- if in_category -%}
+      {%- assign meas_entry = measurement_label | split: '__split__' -%}
+      {%- assign measurement_names_for_category = measurement_names_for_category | concat: meas_entry -%}
+    {%- endif -%}
+  {%- endfor -%}
+
+  {%- comment -%} Apply per-product-type display overrides from settings {%- endcomment -%}
+  {%- assign override_source = settings.custom_measurements_product_type_display_overrides | default: '' | strip -%}
+  {%- assign measurement_names_to_render = measurement_names_for_category -%}
+  {%- if override_source != '' and product_type != '' -%}
+    {%- assign override_lines = override_source | newline_to_br | split: '<br />' -%}
+    {%- assign exclusion_list = '' | split: '|' -%}
+    {%- assign product_type_lower = product_type | downcase -%}
+    {%- for override_line in override_lines -%}
+      {%- assign override_line = override_line | strip -%}
+      {%- if override_line == '' -%}{% continue %}{% endif -%}
+      {%- assign line_parts = override_line | split: ':' -%}
+      {%- if line_parts.size >= 2 -%}
+        {%- assign line_product_type = line_parts[0] | strip -%}
+        {%- assign line_rest = line_parts[1] | strip -%}
+        {%- assign line_type_lower = line_product_type | downcase -%}
+        {%- if line_type_lower == product_type_lower -%}
+          {%- assign exclusion_list = line_rest | split: ',' -%}
+          {%- break -%}
+        {%- endif -%}
+      {%- endif -%}
+    {%- endfor -%}
+    {%- if exclusion_list.size > 0 -%}
+      {%- assign measurement_names_to_render = '' | split: '|' -%}
+      {%- for meas_name in measurement_names_for_category -%}
+        {%- assign meas_label = meas_name | strip -%}
+        {%- assign should_exclude = false -%}
+        {%- for excl in exclusion_list -%}
+          {%- assign excl_stripped = excl | strip -%}
+          {%- if meas_label == excl_stripped -%}
+            {%- assign should_exclude = true -%}
+            {%- break -%}
+          {%- endif -%}
+        {%- endfor -%}
+        {%- unless should_exclude -%}
+          {%- assign meas_entry = meas_name | split: '__split__' -%}
+          {%- assign measurement_names_to_render = measurement_names_to_render | concat: meas_entry -%}
+        {%- endunless -%}
+      {%- endfor -%}
+    {%- endif -%}
+  {%- endif -%}
+
   {%- comment -%} Render category selector with mapped category and categories order {%- endcomment -%}
+  {%- comment -%} Customer product-type template: hide Tag Type and Harness Type selectors (product type is the sub-category); pass product_type for the order {%- endcomment -%}
   {%- render 'custom-measurements-category-selector',
     categories_order: categories_order,
     measurement_map_lines: measurement_map_lines,
+    harness_categories: harness_categories,
     section_id: section_obj.id,
     auto_select_category: mapped_category,
-    hide_selector: has_mapped_category
+    hide_selector: has_mapped_category,
+    hide_tag_type_selector: true,
+    tag_type_value: product_type,
+    hide_harness_type_selector: true,
+    harness_type_value: product_type
   -%}
   {%- comment -%} Ensure categories_order is recognized as used (used in render above) {%- endcomment -%}
 
   {%- render 'custom-measurements-hidden-fields', section_id: section_obj.id -%}
 
-  {%- render 'custom-measurements-unit-toggle', section_id: section_obj.id -%}
+  {%- assign has_any_measurements_to_render = false -%}
+  {%- for m in measurement_names_to_render -%}
+    {%- assign m_stripped = m | strip -%}
+    {%- if m_stripped != '' -%}
+      {%- assign has_any_measurements_to_render = true -%}
+      {%- break -%}
+    {%- endif -%}
+  {%- endfor -%}
+  {%- if has_any_measurements_to_render -%}
+    {%- render 'custom-measurements-unit-toggle', section_id: section_obj.id -%}
+  {%- endif -%}
 
-  {%- render 'custom-measurements-field-group', measurement_names: measurement_names, section_id: section_obj.id -%}
+  {%- render 'custom-measurements-field-group', measurement_names: measurement_names_to_render, section_id: section_obj.id -%}
 
   <script src="{{ 'custom-measurements-form.js' | asset_url }}" defer></script>
 {%- endif -%}

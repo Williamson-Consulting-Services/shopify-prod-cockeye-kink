@@ -10,9 +10,17 @@
     - preselected_category: Optional category to preselect (from product.type) - deprecated, use auto_select_category
     - auto_select_category: Category to auto-select (when product type is known)
     - hide_selector: Boolean to hide the entire category selector (when product type is known)
+    - hide_tag_type_selector: Boolean to hide the Tag Type sub-category selector (customer product-type template;
+      product type already is the sub-category; associate view still shows the selector)
+    - tag_type_value: When hide_tag_type_selector is true, value for hidden input properties[Tag Type] (e.g. product.type)
+    - hide_harness_type_selector: Boolean to hide the Harness Type sub-category selector (customer product-type template;
+      product type already is the sub-category; associate view still shows the selector)
+    - harness_type_value: When hide_harness_type_selector is true, value for hidden input properties[Harness Type] (e.g. product.type)
 {% endcomment %}
 {%- assign auto_select = auto_select_category | default: preselected_category | default: '' -%}
 {%- assign hide_selector = hide_selector | default: false -%}
+{%- assign hide_tag_type_selector = hide_tag_type_selector | default: false -%}
+{%- assign hide_harness_type_selector = hide_harness_type_selector | default: false -%}
 <fieldset class="product-form__input product-form__input--pill" id="optionButtons" {% if hide_selector %}style="display: none;"{% endif %}>
   <legend class="form__label">{{ 'custom_measurements.category_legend' | t }}</legend>
   {%- for category in categories_order -%}
@@ -107,7 +115,17 @@
   {%- endfor -%}
 </fieldset>
 
-{%- if harness_types -%}
+{%- if hide_harness_type_selector -%}
+  {%- comment -%} Customer product-type template: product type is the sub-category; pass it as Harness Type for the order {%- endcomment -%}
+  {%- if harness_type_value != blank -%}
+    <input
+      type="hidden"
+      name="properties[Harness Type]"
+      value="{{ harness_type_value }}"
+      form="product-form-{{ section_id }}"
+    >
+  {%- endif -%}
+{%- elsif harness_types -%}
   <fieldset
     class="product-form__input product-form__input--pill conditional-section"
     id="harness-type-selector"
@@ -134,29 +152,41 @@
   </fieldset>
 {%- endif -%}
 
-<fieldset
-  class="product-form__input product-form__input--pill conditional-section"
-  id="tag-type-selector"
-  style="display: none;"
->
-  <legend class="form__label">{{ 'custom_measurements.tag_type_legend' | t }}</legend>
-  {%- if tag_options and tag_options.size > 0 -%}
-    {%- for tag_option in tag_options -%}
-      {%- assign option_name = tag_option | strip -%}
-      {%- if option_name == '' -%}{% continue %}{% endif %}
-      {%- assign option_id = 'tag-type-' | append: section_id | append: '-' | append: forloop.index0 -%}
-      <input
-        type="radio"
-        id="{{ option_id }}"
-        class="tag-type-input"
-        name="properties[Tag Type]"
-        value="{{ option_name }}"
-        form="product-form-{{ section_id }}"
-        data-tag-type="{{ option_name }}"
-      >
-      <label for="{{ option_id }}">
-        {{ option_name }}
-      </label>
-    {%- endfor -%}
+{%- if hide_tag_type_selector -%}
+  {%- comment -%} Customer product-type template: product type is the sub-category; pass it as Tag Type for the order {%- endcomment -%}
+  {%- if tag_type_value != blank -%}
+    <input
+      type="hidden"
+      name="properties[Tag Type]"
+      value="{{ tag_type_value }}"
+      form="product-form-{{ section_id }}"
+    >
   {%- endif -%}
-</fieldset>
+{%- else -%}
+  <fieldset
+    class="product-form__input product-form__input--pill conditional-section"
+    id="tag-type-selector"
+    style="display: none;"
+  >
+    <legend class="form__label">{{ 'custom_measurements.tag_type_legend' | t }}</legend>
+    {%- if tag_options and tag_options.size > 0 -%}
+      {%- for tag_option in tag_options -%}
+        {%- assign option_name = tag_option | strip -%}
+        {%- if option_name == '' -%}{% continue %}{% endif %}
+        {%- assign option_id = 'tag-type-' | append: section_id | append: '-' | append: forloop.index0 -%}
+        <input
+          type="radio"
+          id="{{ option_id }}"
+          class="tag-type-input"
+          name="properties[Tag Type]"
+          value="{{ option_name }}"
+          form="product-form-{{ section_id }}"
+          data-tag-type="{{ option_name }}"
+        >
+        <label for="{{ option_id }}">
+          {{ option_name }}
+        </label>
+      {%- endfor -%}
+    {%- endif -%}
+  </fieldset>
+{%- endif -%}

@@ -37,6 +37,32 @@ See [Version Tracking Workflow](../.cursor/version-tracking-workflow.mdc) for de
 
 - (Items will be listed here)
 
+## [15.4.1.6] - 2026-01-29
+
+### Added
+
+- Theme setting "Measurement display overrides (product type template)" (`custom_measurements_product_type_display_overrides`) in Custom measurements, alongside Product Type to Category Mapping: per product type, hide specific measurements (format: `ProductType: Measurement1, Measurement2` per line). Only product types listed get overrides; others show the full form for their category.
+- Translation keys for the new setting in schema locales.
+
+### Changed
+
+- **Tag template consolidation:** Removed `product.custom-dog-tag.json`; use `product.custom-by-type` for tag products. Reassign any products that used the dog-tag template to custom-by-type.
+- By-type form now filters measurements by mapped category (only measurements for the current category are rendered) and applies per–product-type display overrides from settings. Product types with an override line (e.g. `snowboard: Neck`) hide those measurements; product type is matched case-insensitively.
+- Unit toggle (inches/cm) and measurement field group only render when there is at least one measurement to show; when all measurements are excluded for a product type (e.g. Tag with Neck excluded), unit toggle and measurement fields are hidden.
+- Category selector: on the customer product-type template (by-type), Tag Type selector is hidden and `product_type` is submitted as Tag Type via a hidden input. Harness Type selector is also hidden on by-type and `product_type` is submitted as Harness Type via a hidden input. Associate view (custom-measure) still shows both selectors when their category is selected.
+- By-type form passes only `harness_categories` to the category selector (from settings, with minimal default); removed parsing and passing of `harness_types` and `tag_options` on by-type to avoid duplication and long hard-coded defaults.
+
+### Fixed
+
+- Liquid concat/pipe parse error in by-type form when building filtered measurement list (assign split result to variable before concat).
+- Unit toggle and measurement fields incorrectly showing when a product type had all measurements excluded: by-type form now builds measurements for the current category only, then applies overrides, so an empty list correctly hides the unit toggle and fields.
+
+### Notes
+
+- Base: Dawn 15.4.1
+- No breaking changes for associate view; custom-measure template unchanged
+- Merchant action: reassign products that used the dog-tag template to custom-by-type; configure "Measurement display overrides" in Theme settings if needed (e.g. `snowboard: Neck`)
+
 ## [15.4.1.5] - 2026-01-23
 
 ### Fixed
