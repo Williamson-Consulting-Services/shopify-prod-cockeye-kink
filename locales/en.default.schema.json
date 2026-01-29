@@ -421,6 +421,10 @@
           "label": "Product Type to Category Mapping",
           "info": "Map Shopify product types to measurement categories. Format: Product Type: Category (one per line). Example: Leather Armband: Armband"
         },
+        "product_type_display_overrides": {
+          "label": "Measurement display overrides (product type template)",
+          "info": "Hide specific measurements per product type on the product-type template. Format: Product Type: Measurement1, Measurement2 (one per line). Only product types listed here get overrides; others show the full form for their category. Example: Dog Tag: Neck"
+        },
         "measurement_map": {
           "label": "Measurement assignments",
           "info": "Format: Measurement: Category, Category*, ... (use * to mark optional measurements for a category). One measurement per line."
