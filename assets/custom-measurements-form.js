@@ -1466,40 +1466,98 @@
         }
       }
 
-      // Pre-fill measurement fields
-      this.measurementFields.forEach((field) => {
-        const measName = field.dataset.measurement;
+      // Pre-fill all property form controls from URL using exact keys (works for controls in form or form="product-form-xxx")
+      const skipKeys = new Set([
+        'type',
+        'variant',
+        'Selected Option',
+        'Product Type',
+        'Sub type',
+        'Unit of Measure',
+        'pay_now',
+      ]);
+
+      const runPropertyPrefill = () => {
+        const namePrefix = 'properties[';
+        const allPropertyControls = Array.from(
+          document.querySelectorAll(
+            'input[name^="properties["], select[name^="properties["], textarea[name^="properties["]'
+          )
+        ).filter((el) => (el.getAttribute('name') || '').startsWith(namePrefix));
+        for (const [key, value] of Object.entries(urlParams)) {
+          if (skipKeys.has(key)) continue;
+          const strVal = value != null ? String(value).trim() : '';
+          if (strVal === '') continue;
+          const name = 'properties[' + key + ']';
+          const matches = Array.from(allPropertyControls).filter((el) => el.getAttribute('name') === name);
+          if (matches.length === 0) continue;
+          const first = matches[0];
+          if (first.tagName === 'SELECT') {
+            first.value = value;
+            continue;
+          }
+          if (first.type === 'radio') {
+            matches.forEach((el) => {
+              el.checked = el.value === value;
+            });
+            continue;
+          }
+          if (first.type === 'checkbox') {
+            matches.forEach((el) => {
+              el.checked = el.value === value;
+            });
+            continue;
+          }
+          first.value = value;
+        }
+      };
+
+      const runMeasurementSync = () => {
+        const measurementFieldsAfterPrefill = Array.from(document.querySelectorAll('.measurement-field'));
+        measurementFieldsAfterPrefill.forEach((field) => {
+        const inInput = field.querySelector('.measurement-in');
+        const cmInput = field.querySelector('.measurement-cm');
+        if (!inInput) return;
+        const inValue = inInput.value != null ? String(inInput.value).trim() : '';
+        const cmValue =
+          cmInput && cmInput.value != null ? String(cmInput.value).trim() : '';
+        if (!inValue && !cmValue) return;
+        const nameAttr = inInput.getAttribute('name');
+        const keyMatch = nameAttr && nameAttr.match(/properties\[(.+)\]/);
+        const fullKey = keyMatch ? keyMatch[1] : '';
+        const measName =
+          field.dataset.measurement ||
+          fullKey.replace(/\s*\(in\)\s*$/i, '').replace(/\*$/, '').trim() ||
+          '';
         if (!measName) return;
-
-        // Check for both (in) and (cm) versions
-        const inValue = urlParams[`${measName} (in)`];
-        const cmValue = urlParams[`${measName} (cm)`];
-
-        if (inValue || cmValue) {
-          const inInput = field.querySelector('.measurement-in');
-          const cmInput = field.querySelector('.measurement-cm');
-
-          if (inValue && inInput) {
-            inInput.value = inValue;
+        if (inValue && !cmValue && cmInput) {
+          const numValue = this.utils.parseValue(inValue);
+          if (Number.isFinite(numValue)) {
+            this.measurementManager.syncValues(measName, 'in', numValue, this.currentCategoryStore);
           }
-          if (cmValue && cmInput) {
-            cmInput.value = cmValue;
-          }
-
-          // Sync values if one is missing
-          if (inValue && !cmValue && cmInput) {
-            const numValue = this.utils.parseValue(inValue);
-            if (Number.isFinite(numValue)) {
-              this.measurementManager.syncValues(measName, 'in', numValue, this.currentCategoryStore);
-            }
-          } else if (cmValue && !inValue && inInput) {
-            const numValue = this.utils.parseValue(cmValue);
-            if (Number.isFinite(numValue)) {
-              this.measurementManager.syncValues(measName, 'cm', numValue, this.currentCategoryStore);
-            }
+        } else if (cmValue && !inValue && inInput) {
+          const numValue = this.utils.parseValue(cmValue);
+          if (Number.isFinite(numValue)) {
+            this.measurementManager.syncValues(measName, 'cm', numValue, this.currentCategoryStore);
           }
         }
       });
+      };
+
+      const hasMeasurementParams = Object.keys(urlParams).some(
+        (k) => k.endsWith(' (in)') || k.endsWith(' (cm)')
+      );
+
+      runPropertyPrefill();
+      runMeasurementSync();
+      this.updateAddToCartButton();
+      if (hasMeasurementParams) {
+        requestAnimationFrame(() => {
+          runPropertyPrefill();
+          runMeasurementSync();
+          this.updateAddToCartButton();
+        });
+      }
 
       // Pre-fill associate
       if (urlParams['Associate']) {

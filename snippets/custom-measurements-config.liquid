@@ -355,11 +355,7 @@
       {%- endif -%}
     },
     customOrderProductSku: {% if custom_order_sku != '' %}"{{ custom_order_sku | escape }}"{% else %}null{% endif %},
-    effectiveProductType: {% if product_type != '' %}"{{ product_type | escape }}"{% else %}null{% endif %},
-    chargeUpfrontDebug: {
-      skuToUrlSource: "pairwise list (see typeToSku + skuToUrl)",
-      typeToSkuRef: "see typeToSku above"
-    }
+    effectiveProductType: {% if product_type != '' %}"{{ product_type | escape }}"{% else %}null{% endif %}
   };
   (function () {
     var c = window.customMeasurementsConfig;
@@ -374,7 +370,6 @@
     var genericUrl = (c.customOrderProductSku && skuToUrl[c.customOrderProductSku]) ? skuToUrl[c.customOrderProductSku] : null;
     c.customOrderProductUrl = genericUrl && genericUrl.length > 0 ? genericUrl : '/products/custom-order';
     c.isChargeUpfrontProductPage = !!(c.effectiveProductType && c.productTypeToRedirectUrl[c.effectiveProductType]);
-    if (c.chargeUpfrontDebug) c.chargeUpfrontDebug.typeToSku = typeToSku;
   })();
 </script>
 

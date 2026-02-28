@@ -170,14 +170,13 @@ class CustomOrderUtils {
     const baseUrl = `/products/${productHandle}`;
     const filteredProperties = this.filterCartItemProperties(properties || {});
 
-    const params = new URLSearchParams();
+    // Build a single param object so we can send it via URL or sessionStorage when URL would be too long
+    const paramObj = {};
 
-    // Add variant ID first if provided (this ensures variant is selected on product page)
     if (variantId) {
-      params.append('variant', String(variantId));
+      paramObj.variant = String(variantId);
     }
 
-    // Include type, Product Type, and Sub type when effective type can be derived, or from item.product.type for by-type orders
     const effectiveType =
       this.getEffectiveTypeFromProperties(filteredProperties) ||
       (productType != null && String(productType).trim() !== '' ? String(productType).trim() : null);
@@ -186,42 +185,70 @@ class CustomOrderUtils {
         ? String(filteredProperties['Product Type']).trim()
         : effectiveType;
     if (effectiveType) {
-      params.append('type', effectiveType);
+      paramObj.type = effectiveType;
     }
     if (productTypeValue) {
-      params.append('Sub type', productTypeValue);
+      paramObj['Sub type'] = productTypeValue;
       if (!(filteredProperties['Product Type'] != null && String(filteredProperties['Product Type']).trim() !== '')) {
-        params.append('Product Type', productTypeValue);
+        paramObj['Product Type'] = productTypeValue;
       }
     }
 
     for (const [key, value] of Object.entries(filteredProperties)) {
-      // Skip internal properties
       if (key.charAt(0) === '_') continue;
-
-      // URLSearchParams.append() automatically encodes, so don't double-encode
-      params.append(key, String(value));
+      paramObj[key] = String(value);
     }
 
+    const params = new URLSearchParams(paramObj);
     const queryString = params.toString();
-    return queryString ? `${baseUrl}?${queryString}` : baseUrl;
+    const fullUrl = queryString ? `${baseUrl}?${queryString}` : baseUrl;
+
+    // Avoid URL length limits (~2048 in many browsers); store full state in sessionStorage and use short ref
+    const maxUrlLength = 2000;
+    if (fullUrl.length > maxUrlLength) {
+      const editRef = Date.now().toString(36) + Math.random().toString(36).slice(2, 9);
+      const storageKey = 'customOrderEdit_' + editRef;
+      try {
+        sessionStorage.setItem(storageKey, JSON.stringify(paramObj));
+        const shortQuery = new URLSearchParams({ edit_ref: editRef });
+        if (variantId) shortQuery.set('variant', String(variantId));
+        return `${baseUrl}?${shortQuery.toString()}`;
+      } catch (e) {
+        return fullUrl;
+      }
+    }
+
+    return fullUrl;
   }
 
   /**
-   * Parses URL query parameters for form pre-filling
+   * Parses URL query parameters for form pre-filling.
+   * If edit_ref is present, reads full state from sessionStorage (used when edit URL would exceed length limits).
    * @returns {Object} - Parsed property values
    */
   static parseUrlParams() {
     const params = new URLSearchParams(window.location.search);
-    const properties = {};
+    const editRef = params.get('edit_ref');
+    if (editRef) {
+      try {
+        const storageKey = 'customOrderEdit_' + editRef;
+        const stored = sessionStorage.getItem(storageKey);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          sessionStorage.removeItem(storageKey);
+          return parsed;
+        }
+      } catch (e) {
+        // Fall through to URL parsing
+      }
+    }
 
+    const properties = {};
     for (const [key, value] of params.entries()) {
-      // Decode property name and value
       const decodedKey = decodeURIComponent(key);
       const decodedValue = decodeURIComponent(value);
       properties[decodedKey] = decodedValue;
     }
-
     return properties;
   }
 
