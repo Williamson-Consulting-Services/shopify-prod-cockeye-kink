@@ -16,8 +16,11 @@
     - hide_harness_type_selector: Boolean to hide the Harness Type sub-category selector (customer product-type template;
       product type already is the sub-category; associate view still shows the selector)
     - harness_type_value: When hide_harness_type_selector is true, value for hidden input properties[Harness Type] (e.g. product.type)
+    - auto_select_harness_type: Harness type to preselect (when product type is known)
+    - preselected_harness_type: Same as auto_select_harness_type (deprecated name)
 {% endcomment %}
 {%- assign auto_select = auto_select_category | default: preselected_category | default: '' -%}
+{%- assign auto_select_harness = auto_select_harness_type | default: preselected_harness_type | default: '' -%}
 {%- assign hide_selector = hide_selector | default: false -%}
 {%- assign hide_tag_type_selector = hide_tag_type_selector | default: false -%}
 {%- assign hide_harness_type_selector = hide_harness_type_selector | default: false -%}
@@ -136,6 +139,14 @@
       {%- assign type_name = harness_type | strip -%}
       {%- if type_name == '' -%}{% continue %}{% endif %}
       {%- assign type_id = 'harness-type-' | append: section_id | append: '-' | append: forloop.index0 -%}
+      {%- assign should_preselect_harness = false -%}
+      {%- if auto_select_harness != '' -%}
+        {%- assign auto_select_harness_lower = auto_select_harness | downcase -%}
+        {%- assign type_name_lower = type_name | downcase -%}
+        {%- if type_name_lower == auto_select_harness_lower -%}
+          {%- assign should_preselect_harness = true -%}
+        {%- endif -%}
+      {%- endif -%}
       <input
         type="radio"
         id="{{ type_id }}"
@@ -144,6 +155,7 @@
         value="{{ type_name }}"
         form="product-form-{{ section_id }}"
         data-harness-type="{{ type_name }}"
+        {% if should_preselect_harness %}checked{% endif %}
       >
       <label for="{{ type_id }}">
         {{ type_name }}

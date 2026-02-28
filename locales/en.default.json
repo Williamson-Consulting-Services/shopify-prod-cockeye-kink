@@ -13,6 +13,12 @@
       "editing": "Unsaved Draft: You are currently configuring this item. You must click 'Add to Cart' below to save these measurements.",
       "cart": "Custom order is in cart"
     },
+    "payment_toggle": {
+      "legend": "Payment",
+      "invoice_later": "Invoice later",
+      "pay_now": "Pay now",
+      "pay_now_disabled_hint": "Pay now is not available for this product type."
+    },
     "checkout_footer": {
       "status_prefix": "Order in Progress:",
       "item_count": "You have {{ count }} custom item(s) saved in the cart.",

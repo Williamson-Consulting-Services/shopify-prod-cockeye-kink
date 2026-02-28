@@ -31,6 +31,28 @@
   {%- endfor -%}
 {%- endif -%}
 
+{%- comment -%} Parse product type → harness type (for preselection) {%- endcomment -%}
+{%- assign type_to_harness_source = settings.custom_measurements_product_type_to_harness_type | default: '' -%}
+{%- assign auto_selected_harness_type = '' -%}
+{%- if type_to_harness_source != '' and product_type != '' -%}
+  {%- assign type_to_harness_lines = type_to_harness_source | newline_to_br | split: '<br />' -%}
+  {%- for line in type_to_harness_lines -%}
+    {%- assign line = line | strip -%}
+    {%- if line == '' -%}{% continue %}{% endif %}
+    {%- assign parts = line | split: ':' -%}
+    {%- if parts.size >= 2 -%}
+      {%- assign type_name = parts[0] | strip -%}
+      {%- assign harness_type_name = parts[1] | strip -%}
+      {%- assign type_name_lower = type_name | downcase -%}
+      {%- assign product_type_lower = product_type | downcase -%}
+      {%- if type_name == product_type or type_name_lower == product_type_lower -%}
+        {%- assign auto_selected_harness_type = harness_type_name -%}
+        {%- break -%}
+      {%- endif -%}
+    {%- endif -%}
+  {%- endfor -%}
+{%- endif -%}
+
 {%- comment -%} Parse measurement map {%- endcomment -%}
 {%- comment -%} Use settings directly - defaults are defined in settings_schema.json {%- endcomment -%}
 {%- assign measurement_map_source = settings.custom_measurements_map -%}
@@ -128,7 +150,28 @@
         {%- endfor -%}
       {%- endif -%}
     },
+    productTypeToHarnessType: {
+      {%- if type_to_harness_source != '' -%}
+        {%- assign type_to_harness_lines = type_to_harness_source | newline_to_br | split: '<br />' -%}
+        {%- assign first_harness = true -%}
+        {%- for line in type_to_harness_lines -%}
+          {%- assign line = line | strip -%}
+          {%- if line == '' -%}{% continue %}{% endif %}
+          {%- assign parts = line | split: ':' -%}
+          {%- if parts.size >= 2 -%}
+            {%- assign type_name = parts[0] | strip -%}
+            {%- assign harness_type_name = parts[1] | strip -%}
+            {%- if type_name != '' and harness_type_name != '' -%}
+              {%- unless first_harness -%},{%- endunless -%}
+              {%- assign first_harness = false -%}
+              "{{ type_name | replace: '"', '\"' }}": "{{ harness_type_name | replace: '"', '\"' }}"
+            {%- endif -%}
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endif -%}
+    },
     autoSelectedCategory: {% if auto_selected_category != '' %}"{{ auto_selected_category | escape }}"{% else %}null{% endif %},
+    autoSelectedHarnessType: {% if auto_selected_harness_type != '' %}"{{ auto_selected_harness_type | escape }}"{% else %}null{% endif %},
     categories: [
       {%- for category in categories_order -%}
         {%- assign category_clean = category | strip -%}
@@ -255,9 +298,84 @@
       INCH_TO_CM: 2.54,
       CM_TO_INCH: 0.393700787
     },
-    customOrderProductTitle: {{ settings.custom_order_product_title | default: 'Custom Order' | json }},
-    customTextMaxLengthDefault: 50
+    customTextMaxLengthDefault: 50,
+    {%- comment -%} SKU→URL from pairwise list (SKU: handle or path). No dynamic lookup. {%- endcomment -%}
+    {%- assign custom_order_sku = settings.custom_order_product_sku | default: '' | strip -%}
+    {%- assign sku_to_url_source = settings.custom_measurements_sku_to_product_url | default: '' | strip -%}
+    skuToUrl: {
+      {%- assign first_pair = true -%}
+      {%- if sku_to_url_source != '' -%}
+        {%- assign sku_url_lines = sku_to_url_source | newline_to_br | split: '<br />' -%}
+        {%- for line in sku_url_lines -%}
+          {%- assign line = line | strip -%}
+          {%- if line == '' -%}{% continue %}{% endif %}
+          {%- assign parts = line | split: ':' -%}
+          {%- if parts.size >= 2 -%}
+            {%- assign sku_key = parts[0] | strip -%}
+            {%- capture url_val -%}
+              {%- for part in parts offset: 1 -%}
+                {%- if forloop.first -%}{{ part | strip }}{%- else -%}:{{ part | strip }}{%- endif -%}
+              {%- endfor -%}
+            {%- endcapture -%}
+            {%- assign url_val = url_val | strip -%}
+            {%- if sku_key != '' and url_val != '' -%}
+              {%- if url_val contains '/' -%}
+                {%- assign path = url_val -%}
+              {%- else -%}
+                {%- assign path = '/products/' | append: url_val -%}
+              {%- endif -%}
+              {%- unless first_pair -%},{%- endunless -%}
+              "{{ sku_key | replace: '"', '\"' }}": "{{ path | escape }}"
+              {%- assign first_pair = false -%}
+            {%- endif -%}
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endif -%}
+    },
+    {%- comment -%} typeToSku from settings; productTypeToRedirectUrl and customOrderProductUrl computed in JS from skuToUrl {%- endcomment -%}
+    typeToSku: {
+      {%- assign type_to_sku_source = settings.custom_measurements_charge_upfront_type_to_sku | default: '' -%}
+      {%- assign first_ts = true -%}
+      {%- if type_to_sku_source != '' -%}
+        {%- assign type_to_sku_lines = type_to_sku_source | newline_to_br | split: '<br />' -%}
+        {%- for line in type_to_sku_lines -%}
+          {%- assign line = line | strip -%}
+          {%- if line == '' -%}{% continue %}{% endif %}
+          {%- assign type_sku_parts = line | split: ':' -%}
+          {%- if type_sku_parts.size >= 2 -%}
+            {%- assign type_key = type_sku_parts[0] | strip -%}
+            {%- assign sku_val = type_sku_parts[1] | strip -%}
+            {%- if type_key != '' and sku_val != '' -%}
+              {%- unless first_ts -%},{%- endunless -%}
+              "{{ type_key | replace: '"', '\"' }}": "{{ sku_val | replace: '"', '\"' }}"
+              {%- assign first_ts = false -%}
+            {%- endif -%}
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endif -%}
+    },
+    customOrderProductSku: {% if custom_order_sku != '' %}"{{ custom_order_sku | escape }}"{% else %}null{% endif %},
+    effectiveProductType: {% if product_type != '' %}"{{ product_type | escape }}"{% else %}null{% endif %},
+    chargeUpfrontDebug: {
+      skuToUrlSource: "pairwise list (see typeToSku + skuToUrl)",
+      typeToSkuRef: "see typeToSku above"
+    }
   };
+  (function () {
+    var c = window.customMeasurementsConfig;
+    if (!c || !c.skuToUrl || !c.typeToSku) return;
+    var skuToUrl = c.skuToUrl;
+    var typeToSku = c.typeToSku;
+    c.productTypeToRedirectUrl = {};
+    for (var type in typeToSku) {
+      var url = skuToUrl[typeToSku[type]];
+      if (url) c.productTypeToRedirectUrl[type] = url;
+    }
+    var genericUrl = (c.customOrderProductSku && skuToUrl[c.customOrderProductSku]) ? skuToUrl[c.customOrderProductSku] : null;
+    c.customOrderProductUrl = genericUrl && genericUrl.length > 0 ? genericUrl : '/products/custom-order';
+    c.isChargeUpfrontProductPage = !!(c.effectiveProductType && c.productTypeToRedirectUrl[c.effectiveProductType]);
+    if (c.chargeUpfrontDebug) c.chargeUpfrontDebug.typeToSku = typeToSku;
+  })();
 </script>
 
 {%- comment -%} Helper tool is now rendered separately by parent snippets when needed {%- endcomment -%}

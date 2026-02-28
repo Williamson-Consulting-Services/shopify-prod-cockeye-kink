@@ -6,74 +6,26 @@
 
 class CustomOrderUtils {
   /**
-   * Gets the configured custom order product title from theme settings
-   * Uses dependency injection pattern - depends on window.customOrderSettings abstraction
-   * @returns {string} - Custom order product title (default: "Custom Order")
-   */
-  static getCustomOrderProductTitle() {
-    // Primary: Get from global settings object (set in custom-scripts-loader.liquid)
-    // This ensures settings persist even if theme.liquid is overwritten
-    if (window.customOrderSettings && window.customOrderSettings.productTitle) {
-      const title = String(window.customOrderSettings.productTitle).trim();
-      if (title !== '') {
-        return title;
-      }
-    }
-
-    // Fallback: Get from custom measurements config if available
-    if (window.customMeasurementsConfig && window.customMeasurementsConfig.customOrderProductTitle) {
-      const title = String(window.customMeasurementsConfig.customOrderProductTitle).trim();
-      if (title !== '') {
-        return title;
-      }
-    }
-
-    // Final fallback to default
-    return 'Custom Order';
-  }
-
-  /**
    * Determines if a cart item is a custom order
-   * Checks product title against configured custom order product title
-   * Also checks properties for backward compatibility during migration
+   * Products using the custom-by-type / custom-measure template are custom orders;
+   * they are identified by line item properties (measurement form adds _custom, Order Type, or measurement keys).
    * @param {Object} item - Cart item object
    * @returns {boolean} - True if item is a custom order
    */
   static isCustomOrderItem(item) {
     if (!item) return false;
 
-    const customOrderTitle = this.getCustomOrderProductTitle();
-
-    // Primary method: Check product title
-    // Cart API may have product.title or product_title
-    let productTitle = null;
-    if (item.product && item.product.title) {
-      productTitle = String(item.product.title).trim();
-    } else if (item.product_title) {
-      productTitle = String(item.product_title).trim();
-    }
-
-    if (productTitle && productTitle.toLowerCase() === customOrderTitle.toLowerCase()) {
-      return true;
-    }
-
-    // Backward compatibility: Check properties (for migration period)
-    // Also check for 'custom-by-type' and other custom variations
     if (item.properties) {
       const customFlag = item.properties['_custom'] || item.properties['Order Type'];
       if (typeof customFlag === 'string') {
         const flagLower = customFlag.toLowerCase();
-        // Check for exact 'custom' match or values containing 'custom' (e.g., 'custom-by-type')
         if (flagLower === 'custom' || flagLower.includes('custom')) {
           return true;
         }
       }
 
-      // Heuristic detection: Check for measurement properties (e.g., "Bicep (in)", "Bicep (cm)")
-      // This catches items that are clearly custom orders based on their properties
-      for (const [propertyName, propertyValue] of Object.entries(item.properties)) {
+      for (const [propertyName] of Object.entries(item.properties)) {
         const nameLower = String(propertyName).toLowerCase();
-        // Check if property name contains measurement indicators
         if (
           nameLower.includes('(in)') ||
           nameLower.includes('(cm)') ||
@@ -161,17 +113,51 @@ class CustomOrderUtils {
    * @param {number|string} variantId - Variant ID (optional)
    * @returns {string} - Product page URL with query parameters
    */
+  /**
+   * Derives effective product type from category + harness type for type param in edit URLs
+   * @param {Object} properties - Cart item properties (filtered)
+   * @returns {string|null} - Product type or null
+   */
+  static getEffectiveTypeFromProperties(properties) {
+    if (!properties || !window.customMeasurementsConfig) return null;
+    const config = window.customMeasurementsConfig;
+    const productTypeMap = config.productTypeMap;
+    const productTypeToHarnessType = config.productTypeToHarnessType;
+    if (!productTypeMap || !productTypeToHarnessType) return null;
+
+    const category = properties['Selected Option'];
+    const harnessType = properties['Harness Type'];
+    if (!category || !harnessType) return null;
+
+    for (const type of Object.keys(productTypeMap)) {
+      if (
+        productTypeMap[type] === category &&
+        productTypeToHarnessType[type] &&
+        productTypeToHarnessType[type].trim().toLowerCase() === String(harnessType).trim().toLowerCase()
+      ) {
+        return type;
+      }
+    }
+    return null;
+  }
+
   static buildEditUrl(productHandle, properties, variantId = null) {
     if (!productHandle) return '/';
 
     const baseUrl = `/products/${productHandle}`;
-    const filteredProperties = this.filterCartItemProperties(properties);
+    const filteredProperties = this.filterCartItemProperties(properties || {});
 
     const params = new URLSearchParams();
 
     // Add variant ID first if provided (this ensures variant is selected on product page)
     if (variantId) {
       params.append('variant', String(variantId));
+    }
+
+    // Include type when effective type can be derived (for preselection and Pay now redirect)
+    const effectiveType = this.getEffectiveTypeFromProperties(filteredProperties);
+    if (effectiveType) {
+      params.append('type', effectiveType);
     }
 
     for (const [key, value] of Object.entries(filteredProperties)) {
@@ -348,30 +334,25 @@ class CustomOrderUtils {
 
   /**
    * Determines if a FormData object represents a custom order
-   * Used for form submission detection - checks if product title matches
+   * Custom order forms add properties[_custom] or properties[Order Type] or measurement keys.
    * @param {FormData} formData - Form data object
-   * @param {string} productTitle - Product title from the form's product
+   * @param {string} _productTitle - Unused (kept for API compatibility)
    * @returns {boolean} - True if form data represents a custom order
    */
-  static isCustomOrderFromFormData(formData, productTitle) {
+  static isCustomOrderFromFormData(formData, _productTitle) {
     if (!formData) return false;
 
-    // Primary method: Check product title
-    if (productTitle) {
-      const customOrderTitle = this.getCustomOrderProductTitle();
-      if (String(productTitle).trim().toLowerCase() === customOrderTitle.toLowerCase()) {
-        return true;
-      }
-    }
-
-    // Backward compatibility: Check properties (for migration period)
     const orderType = formData.get('properties[Order Type]');
     const customFlag = formData.get('properties[_custom]');
 
-    return (
-      (typeof orderType === 'string' && orderType.toLowerCase() === 'custom') ||
+    if (
+      (typeof orderType === 'string' && orderType.toLowerCase().includes('custom')) ||
       (typeof customFlag === 'string' && customFlag.toLowerCase() === 'custom')
-    );
+    ) {
+      return true;
+    }
+
+    return false;
   }
 }
 

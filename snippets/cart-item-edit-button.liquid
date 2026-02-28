@@ -20,21 +20,10 @@
 
 {%- liquid
   assign is_custom_order = false
-  assign custom_order_title = settings.custom_order_product_title | default: 'Custom Order'
   assign button_style = style | default: 'button'
 
-  # Check product title first (primary method)
-  if item.product and item.product.title
-    assign product_title_lower = item.product.title | downcase | strip
-    assign custom_title_lower = custom_order_title | downcase | strip
-    if product_title_lower == custom_title_lower
-      assign is_custom_order = true
-    endif
-  endif
-
-  # Backward compatibility: Check properties (for migration period)
-  # Also check for 'custom-by-type' and other custom variations
-  if is_custom_order == false and item.properties
+  # Custom orders are identified by line item properties (template adds _custom, Order Type, or measurement keys)
+  if item.properties
     assign order_type = item.properties['Order Type'] | default: ''
     assign custom_flag = item.properties['_custom'] | default: ''
 

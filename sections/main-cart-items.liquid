@@ -128,15 +128,7 @@
                       <div class="cart-item__title-row">
                         {%- liquid
                           assign is_custom_order = false
-                          assign custom_order_title = settings.custom_order_product_title | default: 'Custom Order'
-                          if item.product and item.product.title
-                            assign product_title_lower = item.product.title | downcase | strip
-                            assign custom_title_lower = custom_order_title | downcase | strip
-                            if product_title_lower == custom_title_lower
-                              assign is_custom_order = true
-                            endif
-                          endif
-                          if is_custom_order == false and item.properties
+                          if item.properties
                             assign order_type = item.properties['Order Type'] | default: ''
                             assign custom_flag = item.properties._custom | default: ''
 
@@ -215,38 +207,23 @@
                       {%- endif -%}
 
                       {%- liquid
-                        # Detect if this is a customer-facing product (custom-by-type)
-                        # For customer-facing products, "Selected Option" is redundant since there's only one product type
+                        # Detect if this is a customer-facing product (custom-by-type): Order Type or product type indicates specific type
                         assign is_customer_facing_cart = false
-                        assign custom_order_title_cart = settings.custom_order_product_title | default: 'Custom Order'
-
                         if item.properties
                           assign order_type_cart = item.properties['Order Type'] | default: ''
                           assign order_type_lower_cart = order_type_cart | downcase
-
-                          # Check if Order Type contains "custom-by-type" or similar customer-facing indicators
                           if order_type_lower_cart contains 'custom-by-type' or order_type_lower_cart contains 'by-type'
                             assign is_customer_facing_cart = true
                           endif
                         endif
-
-                        # Also check if product title is NOT the generic "Custom Order" (indicates customer-facing product)
-                        if is_customer_facing_cart == false and item.product and item.product.title
-                          assign product_title_lower_cart = item.product.title | downcase | strip
-                          assign custom_title_lower_cart = custom_order_title_cart | downcase | strip
-                          if product_title_lower_cart != custom_title_lower_cart
-                            # Product has a specific title (like "Custom Arm Band"), likely customer-facing
-                            # But only if it has measurement properties (to avoid false positives)
-                            if item.properties
-                              for property in item.properties
-                                assign property_name_cart = property.first | downcase
-                                if property_name_cart contains '(in)' or property_name_cart contains '(cm)' or property_name_cart contains 'unit of measure'
-                                  assign is_customer_facing_cart = true
-                                  break
-                                endif
-                              endfor
+                        if is_customer_facing_cart == false and item.product and item.product.type != blank and item.properties
+                          for property in item.properties
+                            assign property_name_cart = property.first | downcase
+                            if property_name_cart contains '(in)' or property_name_cart contains '(cm)' or property_name_cart contains 'unit of measure'
+                              assign is_customer_facing_cart = true
+                              break
                             endif
-                          endif
+                          endfor
                         endif
                       -%}
                       {%- if item.product.has_only_default_variant == false

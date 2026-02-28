@@ -2,10 +2,28 @@
  * Cart Edit Custom Order
  * Handles editing custom order items from cart page
  * Follows class-based architecture pattern
+ *
+ * Note: Pay now vs Invoice later when changing harness/tag type on the product page
+ * is handled in custom-measurements-form.js (updatePaymentToggleState).
  */
 
 (function () {
   'use strict';
+
+  const DEBUG =
+    typeof window !== 'undefined' &&
+    (window.cartEditCustomOrderDebug === true ||
+      (window.location && window.location.search && /[?&]debug=1(?:\D|$)/.test(window.location.search)));
+
+  function debugLog(label, data) {
+    if (!DEBUG) return;
+    const prefix = '[CartEditCustomOrder]';
+    if (data !== undefined) {
+      console.log(prefix, label, data);
+    } else {
+      console.log(prefix, label);
+    }
+  }
 
   class CartEditCustomOrder {
     constructor() {
@@ -41,6 +59,8 @@
       const itemIndex = button.dataset.editCustomOrder;
       if (!itemIndex) return;
 
+      debugLog('handleEditClick', { itemIndex });
+
       try {
         // Get cart data
         const cartResponse = await fetch(`${routes.cart_url}.js`);
@@ -50,6 +70,7 @@
         const item = cart.items[parseInt(itemIndex) - 1];
 
         if (!item) {
+          debugLog('handleEditClick: item not found', { itemIndex, cartItemCount: cart.items?.length });
           console.error('Item not found in cart');
           return;
         }
@@ -62,9 +83,12 @@
 
         // Check if it's a custom order
         if (!window.CustomOrderUtils.isCustomOrderItem(item)) {
+          debugLog('handleEditClick: not a custom order item', {
+            itemTitle: item.product?.title || item.product_title,
+            hasProperties: !!item.properties,
+          });
           console.warn('Item is not a custom order', {
             itemTitle: item.product?.title || item.product_title,
-            customOrderTitle: window.CustomOrderUtils.getCustomOrderProductTitle(),
             properties: item.properties,
             fullItem: item,
           });
@@ -83,6 +107,13 @@
 
         // Build edit URL with properties and variant ID
         const editUrl = window.CustomOrderUtils.buildEditUrl(productHandle, item.properties, variantId);
+
+        debugLog('handleEditClick: built edit URL', {
+          productHandle,
+          variantId,
+          editUrlLength: editUrl ? editUrl.length : 0,
+          hasPayNowInProps: !!(item.properties && (item.properties.pay_now || item.properties['Payment Timing'])),
+        });
 
         // Remove item from cart
         await this.removeItemFromCart(itemIndex);
