@@ -406,9 +406,9 @@
         "header_general": {
           "content": "General settings"
         },
-        "custom_order_product_title": {
-          "label": "Custom Order Product Title",
-          "info": "Product title used to identify custom orders (e.g., 'Custom Order'). Items with this product title will be treated as custom orders."
+        "custom_order_product_sku": {
+          "label": "Custom Order Product SKU",
+          "info": "Variant SKU of the generic custom order product. Must appear in the SKU→URL list below. Used for Invoice later redirect and to detect the generic product page."
         },
         "header_measurements": {
           "content": "Categories and measurements"
@@ -424,6 +424,18 @@
         "product_type_display_overrides": {
           "label": "Measurement display overrides (product type template)",
           "info": "Hide specific measurements per product type on the product-type template. Format: Product Type: Measurement1, Measurement2 (one per line). Only product types listed here get overrides; others show the full form for their category. Example: Dog Tag: Neck"
+        },
+        "product_type_to_harness_type": {
+          "label": "Product type to harness type",
+          "info": "Map product types to harness type for preselection. Format: Product Type: Harness Type (one per line). Example: Deluxe Bulldog Harness: Deluxe Harness"
+        },
+        "charge_upfront_type_to_sku": {
+          "label": "Pay now: product type to SKU",
+          "info": "Map product types to variant SKU for Pay now redirect. Format: Product Type: SKU (one per line). Example: Deluxe Bulldog Harness: ACC-HNS-BLLDG-CUST"
+        },
+        "sku_to_product_url": {
+          "label": "SKU to product URL",
+          "info": "Pairwise list: Variant SKU : product handle (or path). One per line. Used for Pay now redirect and generic custom order URL. Example: ACC-HNS-BLLDG-CUST: custom-deluxe-bulldog-harness. Include the generic custom order product SKU here too."
         },
         "measurement_map": {
           "label": "Measurement assignments",

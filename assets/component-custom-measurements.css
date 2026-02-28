@@ -831,3 +831,23 @@
 .product-type-helper__output-placeholder {
   color: rgba(var(--color-foreground), 0.5);
 }
+
+/* Payment timing toggle (Invoice later | Pay now) — uses .product-form__input--pill from component-product-variant-picker.css */
+.custom-measurements-payment-toggle {
+  margin-bottom: 1.5rem;
+}
+
+/* Disabled Pay now: follow project disabled standard (no strikethrough). Override pill disabled styles. */
+.custom-measurements-payment-toggle .product-form__input--pill input[type='radio']:disabled + label,
+.custom-measurements-payment-toggle .product-form__input--pill input[type='radio'].disabled + label,
+.custom-measurements-payment-toggle .product-form__input--pill input[type='radio'].visually-disabled:not(:checked) + label {
+  text-decoration: none;
+  opacity: 0.5;
+  filter: none;
+  cursor: not-allowed;
+}
+.custom-measurements-payment-toggle .product-form__input--pill input[type='radio'].disabled:checked + label,
+.custom-measurements-payment-toggle .product-form__input--pill input[type='radio']:disabled:checked + label {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

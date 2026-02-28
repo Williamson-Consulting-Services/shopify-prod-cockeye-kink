@@ -1514,10 +1514,10 @@
       },
       {
         "type": "text",
-        "id": "custom_order_product_title",
-        "label": "t:settings_schema.custom_order_measurements_settings.settings.custom_order_product_title.label",
-        "info": "t:settings_schema.custom_order_measurements_settings.settings.custom_order_product_title.info",
-        "default": "Custom Order"
+        "id": "custom_order_product_sku",
+        "label": "t:settings_schema.custom_order_measurements_settings.settings.custom_order_product_sku.label",
+        "info": "t:settings_schema.custom_order_measurements_settings.settings.custom_order_product_sku.info",
+        "default": "ACC-HNS-BLLDG-CUST"
       },
       {
         "type": "header",
@@ -1543,6 +1543,27 @@
         "label": "t:settings_schema.custom_order_measurements_settings.settings.product_type_display_overrides.label",
         "info": "t:settings_schema.custom_order_measurements_settings.settings.product_type_display_overrides.info",
         "default": "Dog Tag: Neck"
+      },
+      {
+        "type": "textarea",
+        "id": "custom_measurements_product_type_to_harness_type",
+        "label": "t:settings_schema.custom_order_measurements_settings.settings.product_type_to_harness_type.label",
+        "info": "t:settings_schema.custom_order_measurements_settings.settings.product_type_to_harness_type.info",
+        "default": "Deluxe Bulldog Harness: Deluxe Harness"
+      },
+      {
+        "type": "textarea",
+        "id": "custom_measurements_charge_upfront_type_to_sku",
+        "label": "t:settings_schema.custom_order_measurements_settings.settings.charge_upfront_type_to_sku.label",
+        "info": "t:settings_schema.custom_order_measurements_settings.settings.charge_upfront_type_to_sku.info",
+        "default": "Deluxe Bulldog Harness: ACC-HNS-BLLDG-CUST"
+      },
+      {
+        "type": "textarea",
+        "id": "custom_measurements_sku_to_product_url",
+        "label": "t:settings_schema.custom_order_measurements_settings.settings.sku_to_product_url.label",
+        "info": "t:settings_schema.custom_order_measurements_settings.settings.sku_to_product_url.info",
+        "default": "ACC-HNS-BLLDG-CUST: custom-deluxe-bulldog-harness"
       },
       {
         "type": "textarea",

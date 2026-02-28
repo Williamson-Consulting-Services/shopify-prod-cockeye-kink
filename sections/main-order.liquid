@@ -74,9 +74,14 @@
                         </span>
                       {%- endunless -%}
                       {%- if property_size != 0 -%}
+                        {%- assign hide_product_type_order = false -%}
+                        {%- if line_item.product and line_item.product.handle != blank and line_item.product.handle != 'custom-order' -%}
+                          {%- assign hide_product_type_order = true -%}
+                        {%- endif -%}
                         {%- render 'cart-item-properties-grouped',
                           properties: line_item.properties,
                           is_customer_facing: false,
+                          hide_product_type: hide_product_type_order,
                           output_format: 'span'
                         -%}
                       {%- endif -%}

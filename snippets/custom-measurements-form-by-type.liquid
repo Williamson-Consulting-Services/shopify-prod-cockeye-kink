@@ -161,7 +161,7 @@
   {%- endif -%}
 
   {%- comment -%} Render category selector with mapped category and categories order {%- endcomment -%}
-  {%- comment -%} Customer product-type template: hide Tag Type and Harness Type selectors (product type is the sub-category); pass product_type for the order {%- endcomment -%}
+  {%- comment -%} Customer product-type template: hide sub-type selectors; do NOT pass Product Type (type is in the product title). {%- endcomment -%}
   {%- render 'custom-measurements-category-selector',
     categories_order: categories_order,
     measurement_map_lines: measurement_map_lines,
@@ -170,9 +170,7 @@
     auto_select_category: mapped_category,
     hide_selector: has_mapped_category,
     hide_tag_type_selector: true,
-    tag_type_value: product_type,
-    hide_harness_type_selector: true,
-    harness_type_value: product_type
+    hide_harness_type_selector: true
   -%}
   {%- comment -%} Ensure categories_order is recognized as used (used in render above) {%- endcomment -%}
 

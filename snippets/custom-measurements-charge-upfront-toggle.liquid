@@ -1,0 +1,36 @@
+{% comment %}
+  Payment timing toggle: Invoice later | Pay now
+  Structure matches unit toggle (IN/CM) so product-form__input--pill styles apply.
+  JS wires redirect via productTypeToRedirectUrl.
+  Parameters:
+    - section_id: Section ID for form association and unique IDs
+{% endcomment %}
+<div class="custom-measurements-payment-toggle" id="custom-measurements-payment-toggle-{{ section_id }}" data-section-id="{{ section_id }}" data-pay-now-disabled-hint="{{ 'custom_order.payment_toggle.pay_now_disabled_hint' | t | escape }}">
+  <fieldset class="product-form__input product-form__input--pill" id="payment-timing-fieldset-{{ section_id }}">
+    <legend class="form__label">{{ 'custom_order.payment_toggle.legend' | t | default: 'Payment' }}</legend>
+    <input
+      type="radio"
+      id="payment-invoice-later-{{ section_id }}"
+      name="payment-timing-{{ section_id }}"
+      value="invoice_later"
+      data-payment-option="invoice_later"
+      checked
+      aria-describedby="payment-timing-hint-{{ section_id }}"
+    >
+    <label for="payment-invoice-later-{{ section_id }}">
+      {{ 'custom_order.payment_toggle.invoice_later' | t }}
+    </label>
+    <input
+      type="radio"
+      id="payment-pay-now-{{ section_id }}"
+      name="payment-timing-{{ section_id }}"
+      value="pay_now"
+      data-payment-option="pay_now"
+      aria-describedby="payment-timing-hint-{{ section_id }}"
+    >
+    <label for="payment-pay-now-{{ section_id }}">
+      {{ 'custom_order.payment_toggle.pay_now' | t }}
+    </label>
+  </fieldset>
+  <p id="payment-timing-hint-{{ section_id }}" class="form__message" aria-live="polite"></p>
+</div>

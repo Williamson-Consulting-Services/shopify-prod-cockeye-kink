@@ -2,29 +2,19 @@
 if (!window._customProductFormExtensionInitialized) {
   window._customProductFormExtensionInitialized = true;
 
-  const isCustomOrder = (formData, productTitle) => {
+  const isCustomOrder = (formData) => {
     if (!formData) return false;
 
-    // Use utility function if available
     if (window.CustomOrderUtils && window.CustomOrderUtils.isCustomOrderFromFormData) {
-      return window.CustomOrderUtils.isCustomOrderFromFormData(formData, productTitle);
+      return window.CustomOrderUtils.isCustomOrderFromFormData(formData, null);
     }
 
-    // Fallback: Check product title
-    if (productTitle && window.CustomOrderUtils) {
-      const customOrderTitle = window.CustomOrderUtils.getCustomOrderProductTitle();
-      if (String(productTitle).trim().toLowerCase() === customOrderTitle.toLowerCase()) {
-        return true;
-      }
-    }
-
-    // Backward compatibility: Check properties (for migration period)
     const customFlag = formData.get('properties[_custom]');
     const orderTypeFlag = formData.get('properties[Order Type]');
 
     return (
       (typeof customFlag === 'string' && customFlag.toLowerCase() === 'custom') ||
-      (typeof orderTypeFlag === 'string' && orderTypeFlag.toLowerCase() === 'custom')
+      (typeof orderTypeFlag === 'string' && orderTypeFlag.toLowerCase().includes('custom'))
     );
   };
 
@@ -170,7 +160,7 @@ if (!window._customProductFormExtensionInitialized) {
 
             // Get product title from page context
             const productTitle = this.getProductTitle();
-            if (isCustomOrder(formData, productTitle)) {
+            if (isCustomOrder(formData)) {
               publish(PUB_SUB_EVENTS.cartUpdate, {
                 source: 'product-form-extension',
                 customOrderItemAdded: true,

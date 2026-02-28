@@ -5,6 +5,7 @@
   Parameters:
   - properties: The item.properties object
   - is_customer_facing: Boolean to skip "Selected Option" for customer-facing products
+  - hide_product_type: Boolean to skip "Product Type" when type is in the product title (pay-now / by-type)
   - output_format: 'dl', 'span', or default (div)
 
   Usage:
@@ -12,6 +13,8 @@
 {%- endcomment -%}
 
 {%- liquid
+  assign hide_product_type = hide_product_type | default: false
+
   # First pass: Collect all measurements and regular properties
   assign measurement_data = ''
   assign regular_properties = ''
@@ -31,6 +34,11 @@
 
     # Skip "Selected Option" for customer-facing products
     if is_customer_facing and property.first == 'Selected Option'
+      continue
+    endif
+
+    # Skip "Product Type" when type is in the product title (pay-now associate, by-type customer)
+    if hide_product_type and property.first == 'Product Type'
       continue
     endif
 

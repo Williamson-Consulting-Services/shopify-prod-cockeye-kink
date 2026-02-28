@@ -6,74 +6,26 @@
 
 class CustomOrderUtils {
   /**
-   * Gets the configured custom order product title from theme settings
-   * Uses dependency injection pattern - depends on window.customOrderSettings abstraction
-   * @returns {string} - Custom order product title (default: "Custom Order")
-   */
-  static getCustomOrderProductTitle() {
-    // Primary: Get from global settings object (set in custom-scripts-loader.liquid)
-    // This ensures settings persist even if theme.liquid is overwritten
-    if (window.customOrderSettings && window.customOrderSettings.productTitle) {
-      const title = String(window.customOrderSettings.productTitle).trim();
-      if (title !== '') {
-        return title;
-      }
-    }
-
-    // Fallback: Get from custom measurements config if available
-    if (window.customMeasurementsConfig && window.customMeasurementsConfig.customOrderProductTitle) {
-      const title = String(window.customMeasurementsConfig.customOrderProductTitle).trim();
-      if (title !== '') {
-        return title;
-      }
-    }
-
-    // Final fallback to default
-    return 'Custom Order';
-  }
-
-  /**
    * Determines if a cart item is a custom order
-   * Checks product title against configured custom order product title
-   * Also checks properties for backward compatibility during migration
+   * Products using the custom-by-type / custom-measure template are custom orders;
+   * they are identified by line item properties (measurement form adds _custom, Order Type, or measurement keys).
    * @param {Object} item - Cart item object
    * @returns {boolean} - True if item is a custom order
    */
   static isCustomOrderItem(item) {
     if (!item) return false;
 
-    const customOrderTitle = this.getCustomOrderProductTitle();
-
-    // Primary method: Check product title
-    // Cart API may have product.title or product_title
-    let productTitle = null;
-    if (item.product && item.product.title) {
-      productTitle = String(item.product.title).trim();
-    } else if (item.product_title) {
-      productTitle = String(item.product_title).trim();
-    }
-
-    if (productTitle && productTitle.toLowerCase() === customOrderTitle.toLowerCase()) {
-      return true;
-    }
-
-    // Backward compatibility: Check properties (for migration period)
-    // Also check for 'custom-by-type' and other custom variations
     if (item.properties) {
       const customFlag = item.properties['_custom'] || item.properties['Order Type'];
       if (typeof customFlag === 'string') {
         const flagLower = customFlag.toLowerCase();
-        // Check for exact 'custom' match or values containing 'custom' (e.g., 'custom-by-type')
         if (flagLower === 'custom' || flagLower.includes('custom')) {
           return true;
         }
       }
 
-      // Heuristic detection: Check for measurement properties (e.g., "Bicep (in)", "Bicep (cm)")
-      // This catches items that are clearly custom orders based on their properties
-      for (const [propertyName, propertyValue] of Object.entries(item.properties)) {
+      for (const [propertyName] of Object.entries(item.properties)) {
         const nameLower = String(propertyName).toLowerCase();
-        // Check if property name contains measurement indicators
         if (
           nameLower.includes('(in)') ||
           nameLower.includes('(cm)') ||
@@ -161,46 +113,142 @@ class CustomOrderUtils {
    * @param {number|string} variantId - Variant ID (optional)
    * @returns {string} - Product page URL with query parameters
    */
-  static buildEditUrl(productHandle, properties, variantId = null) {
-    if (!productHandle) return '/';
+  /**
+   * Derives effective product type from properties for type param in edit URLs.
+   * Uses Product Type (with Harness Type fallback for backward compatibility).
+   * @param {Object} properties - Cart item properties (filtered)
+   * @returns {string|null} - Product type or null
+   */
+  static getEffectiveTypeFromProperties(properties) {
+    if (!properties || !window.customMeasurementsConfig) return null;
+    const config = window.customMeasurementsConfig;
+    const productTypeMap = config.productTypeMap;
+    const productTypeToHarnessType = config.productTypeToHarnessType;
+    if (!productTypeMap) return null;
 
-    const baseUrl = `/products/${productHandle}`;
-    const filteredProperties = this.filterCartItemProperties(properties);
+    const productTypeValue =
+      properties['Product Type'] != null && String(properties['Product Type']).trim() !== ''
+        ? String(properties['Product Type']).trim()
+        : properties['Harness Type'] != null && String(properties['Harness Type']).trim() !== ''
+          ? String(properties['Harness Type']).trim()
+          : null;
+    if (!productTypeValue) return null;
 
-    const params = new URLSearchParams();
-
-    // Add variant ID first if provided (this ensures variant is selected on product page)
-    if (variantId) {
-      params.append('variant', String(variantId));
+    // If Product Type value is itself a key in productTypeMap (e.g. by-type: "hat", "Leather Armband"), return it
+    const productTypeValueLower = productTypeValue.toLowerCase();
+    for (const type of Object.keys(productTypeMap)) {
+      if (type.toLowerCase() === productTypeValueLower) return type;
     }
 
-    for (const [key, value] of Object.entries(filteredProperties)) {
-      // Skip internal properties
-      if (key.charAt(0) === '_') continue;
+    // Otherwise resolve from category + sub-type (associate: Product Type = harness/tag type value)
+    if (!productTypeToHarnessType) return null;
+    const category = properties['Selected Option'];
+    if (!category) return null;
 
-      // URLSearchParams.append() automatically encodes, so don't double-encode
-      params.append(key, String(value));
+    for (const type of Object.keys(productTypeMap)) {
+      if (
+        productTypeMap[type] === category &&
+        productTypeToHarnessType[type] &&
+        productTypeToHarnessType[type].trim().toLowerCase() === productTypeValueLower
+      ) {
+        return type;
+      }
     }
-
-    const queryString = params.toString();
-    return queryString ? `${baseUrl}?${queryString}` : baseUrl;
+    return null;
   }
 
   /**
-   * Parses URL query parameters for form pre-filling
+   * @param {string} productHandle - Product handle
+   * @param {Object} properties - Cart item properties
+   * @param {number|string|null} variantId - Variant ID (optional)
+   * @param {string|null} [productType] - Product type from item.product.type (optional; used when properties don't resolve)
+   * @returns {string} - Product page URL with query parameters
+   */
+  static buildEditUrl(productHandle, properties, variantId = null, productType = null) {
+    if (!productHandle) return '/';
+
+    const baseUrl = `/products/${productHandle}`;
+    const filteredProperties = this.filterCartItemProperties(properties || {});
+
+    // Build a single param object so we can send it via URL or sessionStorage when URL would be too long
+    const paramObj = {};
+
+    if (variantId) {
+      paramObj.variant = String(variantId);
+    }
+
+    const effectiveType =
+      this.getEffectiveTypeFromProperties(filteredProperties) ||
+      (productType != null && String(productType).trim() !== '' ? String(productType).trim() : null);
+    const productTypeValue =
+      filteredProperties['Product Type'] != null && String(filteredProperties['Product Type']).trim() !== ''
+        ? String(filteredProperties['Product Type']).trim()
+        : effectiveType;
+    if (effectiveType) {
+      paramObj.type = effectiveType;
+    }
+    if (productTypeValue) {
+      paramObj['Sub type'] = productTypeValue;
+      if (!(filteredProperties['Product Type'] != null && String(filteredProperties['Product Type']).trim() !== '')) {
+        paramObj['Product Type'] = productTypeValue;
+      }
+    }
+
+    for (const [key, value] of Object.entries(filteredProperties)) {
+      if (key.charAt(0) === '_') continue;
+      paramObj[key] = String(value);
+    }
+
+    const params = new URLSearchParams(paramObj);
+    const queryString = params.toString();
+    const fullUrl = queryString ? `${baseUrl}?${queryString}` : baseUrl;
+
+    // Avoid URL length limits (~2048 in many browsers); store full state in sessionStorage and use short ref
+    const maxUrlLength = 2000;
+    if (fullUrl.length > maxUrlLength) {
+      const editRef = Date.now().toString(36) + Math.random().toString(36).slice(2, 9);
+      const storageKey = 'customOrderEdit_' + editRef;
+      try {
+        sessionStorage.setItem(storageKey, JSON.stringify(paramObj));
+        const shortQuery = new URLSearchParams({ edit_ref: editRef });
+        if (variantId) shortQuery.set('variant', String(variantId));
+        return `${baseUrl}?${shortQuery.toString()}`;
+      } catch (e) {
+        return fullUrl;
+      }
+    }
+
+    return fullUrl;
+  }
+
+  /**
+   * Parses URL query parameters for form pre-filling.
+   * If edit_ref is present, reads full state from sessionStorage (used when edit URL would exceed length limits).
    * @returns {Object} - Parsed property values
    */
   static parseUrlParams() {
     const params = new URLSearchParams(window.location.search);
-    const properties = {};
+    const editRef = params.get('edit_ref');
+    if (editRef) {
+      try {
+        const storageKey = 'customOrderEdit_' + editRef;
+        const stored = sessionStorage.getItem(storageKey);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          sessionStorage.removeItem(storageKey);
+          return parsed;
+        }
+      } catch (e) {
+        // Fall through to URL parsing
+      }
+    }
 
+    const properties = {};
     for (const [key, value] of params.entries()) {
-      // Decode property name and value
       const decodedKey = decodeURIComponent(key);
       const decodedValue = decodeURIComponent(value);
       properties[decodedKey] = decodedValue;
     }
-
     return properties;
   }
 
@@ -348,30 +396,25 @@ class CustomOrderUtils {
 
   /**
    * Determines if a FormData object represents a custom order
-   * Used for form submission detection - checks if product title matches
+   * Custom order forms add properties[_custom] or properties[Order Type] or measurement keys.
    * @param {FormData} formData - Form data object
-   * @param {string} productTitle - Product title from the form's product
+   * @param {string} _productTitle - Unused (kept for API compatibility)
    * @returns {boolean} - True if form data represents a custom order
    */
-  static isCustomOrderFromFormData(formData, productTitle) {
+  static isCustomOrderFromFormData(formData, _productTitle) {
     if (!formData) return false;
 
-    // Primary method: Check product title
-    if (productTitle) {
-      const customOrderTitle = this.getCustomOrderProductTitle();
-      if (String(productTitle).trim().toLowerCase() === customOrderTitle.toLowerCase()) {
-        return true;
-      }
-    }
-
-    // Backward compatibility: Check properties (for migration period)
     const orderType = formData.get('properties[Order Type]');
     const customFlag = formData.get('properties[_custom]');
 
-    return (
-      (typeof orderType === 'string' && orderType.toLowerCase() === 'custom') ||
+    if (
+      (typeof orderType === 'string' && orderType.toLowerCase().includes('custom')) ||
       (typeof customFlag === 'string' && customFlag.toLowerCase() === 'custom')
-    );
+    ) {
+      return true;
+    }
+
+    return false;
   }
 }
 

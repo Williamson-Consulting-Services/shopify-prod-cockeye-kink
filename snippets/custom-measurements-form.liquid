@@ -28,9 +28,6 @@
     endfor
   endif
 
-  # Get product type for category preselection
-  assign product_type = product_obj.type | default: ''
-
   # Load configuration
   render 'custom-measurements-config'
 -%}
@@ -105,7 +102,11 @@
 {%- assign tag_options_source = tag_options_source_raw | replace: '|', ',' -%}
 {%- assign tag_options = tag_options_source | split: ',' -%}
 
+{%- comment -%} Preselection (category, harness type, tag type, etc.) is driven by config: custom-measurements-config outputs autoSelectedCategory, autoSelectedHarnessType (and optional autoSelectedTagType). JS applies them on init — no per-selector params needed. {%- endcomment -%}
+
 {%- render 'custom-measurements-associate', associates: associates, section_id: section_obj.id -%}
+
+{%- render 'custom-measurements-charge-upfront-toggle', section_id: section_obj.id -%}
 
 {%- render 'custom-measurements-category-selector',
   categories_order: categories_order,
@@ -113,8 +114,7 @@
   harness_categories: harness_categories,
   harness_types: harness_types,
   tag_options: tag_options,
-  section_id: section_obj.id,
-  preselected_category: product_type
+  section_id: section_obj.id
 -%}
 
 {%- render 'custom-measurements-hidden-fields', section_id: section_obj.id -%}

@@ -2,6 +2,9 @@
  * Cart Edit Custom Order
  * Handles editing custom order items from cart page
  * Follows class-based architecture pattern
+ *
+ * Note: Pay now vs Invoice later when changing harness/tag type on the product page
+ * is handled in custom-measurements-form.js (updatePaymentToggleState).
  */
 
 (function () {
@@ -64,7 +67,6 @@
         if (!window.CustomOrderUtils.isCustomOrderItem(item)) {
           console.warn('Item is not a custom order', {
             itemTitle: item.product?.title || item.product_title,
-            customOrderTitle: window.CustomOrderUtils.getCustomOrderProductTitle(),
             properties: item.properties,
             fullItem: item,
           });
@@ -81,8 +83,14 @@
         // Get variant ID from cart item (for products with variants like color)
         const variantId = item.variant_id || item.variant?.id || null;
 
-        // Build edit URL with properties and variant ID
-        const editUrl = window.CustomOrderUtils.buildEditUrl(productHandle, item.properties, variantId);
+        // Build edit URL with properties, variant ID, and product type (for by-type when properties don't resolve)
+        const productType = item.product?.type ?? null;
+        const editUrl = window.CustomOrderUtils.buildEditUrl(
+          productHandle,
+          item.properties,
+          variantId,
+          productType
+        );
 
         // Remove item from cart
         await this.removeItemFromCart(itemIndex);

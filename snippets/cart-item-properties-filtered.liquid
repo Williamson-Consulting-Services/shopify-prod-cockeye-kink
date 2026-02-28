@@ -16,40 +16,32 @@
   # Detect if this is a customer-facing product (custom-by-type)
   # For customer-facing products, "Selected Option" is redundant since there's only one product type
   assign is_customer_facing = false
-  assign custom_order_title = settings.custom_order_product_title | default: 'Custom Order'
-
   if item.properties
     assign order_type = item.properties['Order Type'] | default: ''
     assign order_type_lower = order_type | downcase
-
-    # Check if Order Type contains "custom-by-type" or similar customer-facing indicators
     if order_type_lower contains 'custom-by-type' or order_type_lower contains 'by-type'
       assign is_customer_facing = true
     endif
   endif
-
-  # Also check if product title is NOT the generic "Custom Order" (indicates customer-facing product)
-  if is_customer_facing == false and item.product and item.product.title
-    assign product_title_lower = item.product.title | downcase | strip
-    assign custom_title_lower = custom_order_title | downcase | strip
-    if product_title_lower != custom_title_lower
-      # Product has a specific title (like "Custom Arm Band"), likely customer-facing
-      # But only if it has measurement properties (to avoid false positives)
-      if item.properties
-        for property in item.properties
-          assign property_name = property.first | downcase
-          if property_name contains '(in)' or property_name contains '(cm)' or property_name contains 'unit of measure'
-            assign is_customer_facing = true
-            break
-          endif
-        endfor
+  if is_customer_facing == false and item.product and item.product.type != blank and item.properties
+    for property in item.properties
+      assign property_name = property.first | downcase
+      if property_name contains '(in)' or property_name contains '(cm)' or property_name contains 'unit of measure'
+        assign is_customer_facing = true
+        break
       endif
-    endif
+    endfor
+  endif
+
+  # Hide "Product Type" when it's in the product title (pay-now product, by-type product). Show only for generic custom order (handle custom-order).
+  assign hide_product_type = false
+  if item.product and item.product.handle != blank and item.product.handle != 'custom-order'
+    assign hide_product_type = true
   endif
 -%}
 
 {%- if item.properties.size > 0 -%}
   <div class="cart-item-properties">
-    {%- render 'cart-item-properties-grouped', properties: item.properties, is_customer_facing: is_customer_facing -%}
+    {%- render 'cart-item-properties-grouped', properties: item.properties, is_customer_facing: is_customer_facing, hide_product_type: hide_product_type -%}
   </div>
 {%- endif -%}
