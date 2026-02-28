@@ -1537,22 +1537,23 @@
         }
       }
 
-      // Pre-fill harness type
-      if (urlParams['Harness Type'] && this.harnessTypeSelector) {
-        const harnessTypeValue = urlParams['Harness Type'];
-        const harnessTypeInput = Array.from(this.harnessTypeInputs).find((input) => input.value === harnessTypeValue);
-        if (harnessTypeInput) {
-          harnessTypeInput.checked = true;
+      // Pre-fill sub-type (Product Type); support Product Type, Sub type, Harness Type, and Tag Type URL params for edit links
+      const productTypeParam =
+        urlParams['Product Type'] ||
+        urlParams['Sub type'] ||
+        urlParams['Harness Type'] ||
+        urlParams['Tag Type'];
+      if (productTypeParam) {
+        if (this.harnessTypeSelector) {
+          const harnessTypeInput = Array.from(this.harnessTypeInputs).find(
+            (input) => input.value === productTypeParam
+          );
+          if (harnessTypeInput) harnessTypeInput.checked = true;
         }
-      }
-
-      // Pre-fill tag type
-      if (urlParams['Tag Type'] && this.tagTypeSelector) {
-        const tagTypeValue = urlParams['Tag Type'];
-        const tagTypeInputs = this.tagTypeSelector.querySelectorAll('.tag-type-input');
-        const tagTypeInput = Array.from(tagTypeInputs).find((input) => input.value === tagTypeValue);
-        if (tagTypeInput) {
-          tagTypeInput.checked = true;
+        if (this.tagTypeSelector) {
+          const tagTypeInputs = this.tagTypeSelector.querySelectorAll('.tag-type-input');
+          const tagTypeInput = Array.from(tagTypeInputs).find((input) => input.value === productTypeParam);
+          if (tagTypeInput) tagTypeInput.checked = true;
         }
       }
 
@@ -1615,6 +1616,11 @@
 
       // Update button state after pre-filling
       this.updateAddToCartButton();
+
+      // Sync URL to include Product Type and Sub type so the address bar has the full set of params (not just type)
+      if (this.syncUrlToCurrentSelection) {
+        this.syncUrlToCurrentSelection();
+      }
     }
 
     updateMeasurementOnUnitChange() {
@@ -1802,6 +1808,11 @@
       const effectiveType = this.getEffectiveProductType();
       if (effectiveType) {
         params.set('type', effectiveType);
+        params.set('Product Type', effectiveType);
+        params.set('Sub type', effectiveType);
+      }
+      if (this.selectedCategory) {
+        params.set('Selected Option', this.selectedCategory);
       }
 
       // Always include Associate (and Associate - Text when "Other") from known refs so redirect preserves selection
@@ -2025,18 +2036,45 @@
     }
 
     /**
+     * True when the current page is the generic custom order product (invoice later).
+     * Used to decide whether to submit or inject Product Type (show) vs strip it (pay-now / by-type).
+     */
+    isOnGenericCustomOrderPage() {
+      if (typeof window === 'undefined' || !window.location || !this.config) return false;
+      const genericUrl = (this.config.customOrderProductUrl || '').trim();
+      const genericPath = genericUrl
+        ? genericUrl.replace(/^https?:\/\/[^/]+/, '').split('?')[0].replace(/\/+$/, '').toLowerCase()
+        : '';
+      const currentPath = (window.location.pathname || '').replace(/\/+$/, '').toLowerCase();
+      return (
+        (genericPath.length > 0 && currentPath === genericPath) ||
+        currentPath === '/products/custom-order'
+      );
+    }
+
+    /**
      * Updates the browser URL (type and pay_now params) to match current form selection without reload.
      * Call after category or harness/tag type change so the URL reflects the new type (e.g. type=Standard+Harness instead of stale type=Deluxe+Bulldog+Harness).
      * Always sets type when the user has a selection so the URL carries the current type.
      */
     syncUrlToCurrentSelection() {
       if (typeof window === 'undefined' || !window.location) return;
+      this.syncSelectionFromDOM();
       const typeParam = this.getTypeParamForCurrentSelection();
       const params = new URLSearchParams(window.location.search);
       if (typeParam) {
         params.set('type', typeParam);
+        params.set('Product Type', typeParam);
+        params.set('Sub type', typeParam);
       } else {
         params.delete('type');
+        params.delete('Product Type');
+        params.delete('Sub type');
+      }
+      if (this.selectedCategory) {
+        params.set('Selected Option', this.selectedCategory);
+      } else {
+        params.delete('Selected Option');
       }
       const effectiveType = this.getEffectiveProductType({ fromSelectionOnly: true });
       const redirectUrl = this.getRedirectUrlForType(effectiveType);
@@ -2484,9 +2522,11 @@
         })
         .filter((counter) => counter !== null);
 
-      // Form submission
+      // Form submission: use capture phase so we run BEFORE product-form.js builds FormData (inject Product Type for Gloves/Hat etc. in time)
       if (this.productForm) {
-        this.productForm.addEventListener('submit', (event) => {
+        this.productForm.addEventListener(
+          'submit',
+          (event) => {
           if (!this.validationService.validateRequiredFields(this.selectedCategory, false)) {
             event.preventDefault();
             alert('Please select a category and fill all required measurements.');
@@ -2516,9 +2556,9 @@
           });
 
           // Check if we're in product-type mode (customer-facing form)
-          // In this mode, "Selected Option" is redundant since there's only one product type
           const isProductTypeMode =
             this.config?.autoSelectedCategory !== undefined && this.config?.autoSelectedCategory !== null;
+          const isOnGenericCustomOrderPage = this.isOnGenericCustomOrderPage();
 
           // Filter all property inputs (measurements and other properties)
           // Remove name attribute to prevent them from being included in FormData
@@ -2538,6 +2578,24 @@
 
             // Remove "Selected Option" for customer-facing products (redundant UX)
             if (isProductTypeMode && propertyName === 'Selected Option') {
+              input.removeAttribute('name');
+              input.setAttribute('data-removed', 'true');
+              return;
+            }
+
+            // Never submit Harness Type or Tag Type (replaced by Product Type)
+            if (propertyName === 'Harness Type' || propertyName === 'Tag Type') {
+              input.removeAttribute('name');
+              input.setAttribute('data-removed', 'true');
+              return;
+            }
+
+            // On pay-now product pages (not generic), type is in the product title — don't submit Product Type
+            if (
+              propertyName === 'Product Type' &&
+              this.config?.isChargeUpfrontProductPage &&
+              !isOnGenericCustomOrderPage
+            ) {
               input.removeAttribute('name');
               input.setAttribute('data-removed', 'true');
               return;
@@ -2584,10 +2642,35 @@
             }
           });
 
+          // On generic custom order only: inject Product Type when category has no sub-type selector (e.g. Gloves, Hat)
+          const needsProductTypeInject =
+            !isProductTypeMode &&
+            isOnGenericCustomOrderPage &&
+            this.selectedCategory &&
+            this.selectedCategory !== 'Harness' &&
+            this.selectedCategory !== 'Tag';
+          if (needsProductTypeInject) {
+            const hasChecked = this.productForm.querySelector(
+              'input[name="properties[Product Type]"]:checked'
+            );
+            const hasHidden = Array.from(
+              this.productForm.querySelectorAll('input[name="properties[Product Type]"]')
+            ).some((el) => el.type === 'hidden' && el.value && String(el.value).trim() !== '');
+            if (!hasChecked && !hasHidden) {
+              const hidden = document.createElement('input');
+              hidden.type = 'hidden';
+              hidden.name = 'properties[Product Type]';
+              hidden.value = this.selectedCategory;
+              this.productForm.appendChild(hidden);
+            }
+          }
+
           this.resetAfterAddToCartPending = true;
           this.hasInteractedWithForm = false;
           this.updateBannerEditingState(false);
-        });
+        },
+          true
+        );
       }
     }
 

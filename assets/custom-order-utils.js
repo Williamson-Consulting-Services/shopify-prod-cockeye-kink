@@ -114,7 +114,8 @@ class CustomOrderUtils {
    * @returns {string} - Product page URL with query parameters
    */
   /**
-   * Derives effective product type from category + harness type for type param in edit URLs
+   * Derives effective product type from properties for type param in edit URLs.
+   * Uses Product Type (with Harness Type fallback for backward compatibility).
    * @param {Object} properties - Cart item properties (filtered)
    * @returns {string|null} - Product type or null
    */
@@ -123,17 +124,32 @@ class CustomOrderUtils {
     const config = window.customMeasurementsConfig;
     const productTypeMap = config.productTypeMap;
     const productTypeToHarnessType = config.productTypeToHarnessType;
-    if (!productTypeMap || !productTypeToHarnessType) return null;
+    if (!productTypeMap) return null;
 
+    const productTypeValue =
+      properties['Product Type'] != null && String(properties['Product Type']).trim() !== ''
+        ? String(properties['Product Type']).trim()
+        : properties['Harness Type'] != null && String(properties['Harness Type']).trim() !== ''
+          ? String(properties['Harness Type']).trim()
+          : null;
+    if (!productTypeValue) return null;
+
+    // If Product Type value is itself a key in productTypeMap (e.g. by-type: "hat", "Leather Armband"), return it
+    const productTypeValueLower = productTypeValue.toLowerCase();
+    for (const type of Object.keys(productTypeMap)) {
+      if (type.toLowerCase() === productTypeValueLower) return type;
+    }
+
+    // Otherwise resolve from category + sub-type (associate: Product Type = harness/tag type value)
+    if (!productTypeToHarnessType) return null;
     const category = properties['Selected Option'];
-    const harnessType = properties['Harness Type'];
-    if (!category || !harnessType) return null;
+    if (!category) return null;
 
     for (const type of Object.keys(productTypeMap)) {
       if (
         productTypeMap[type] === category &&
         productTypeToHarnessType[type] &&
-        productTypeToHarnessType[type].trim().toLowerCase() === String(harnessType).trim().toLowerCase()
+        productTypeToHarnessType[type].trim().toLowerCase() === productTypeValueLower
       ) {
         return type;
       }
@@ -141,7 +157,14 @@ class CustomOrderUtils {
     return null;
   }
 
-  static buildEditUrl(productHandle, properties, variantId = null) {
+  /**
+   * @param {string} productHandle - Product handle
+   * @param {Object} properties - Cart item properties
+   * @param {number|string|null} variantId - Variant ID (optional)
+   * @param {string|null} [productType] - Product type from item.product.type (optional; used when properties don't resolve)
+   * @returns {string} - Product page URL with query parameters
+   */
+  static buildEditUrl(productHandle, properties, variantId = null, productType = null) {
     if (!productHandle) return '/';
 
     const baseUrl = `/products/${productHandle}`;
@@ -154,10 +177,22 @@ class CustomOrderUtils {
       params.append('variant', String(variantId));
     }
 
-    // Include type when effective type can be derived (for preselection and Pay now redirect)
-    const effectiveType = this.getEffectiveTypeFromProperties(filteredProperties);
+    // Include type, Product Type, and Sub type when effective type can be derived, or from item.product.type for by-type orders
+    const effectiveType =
+      this.getEffectiveTypeFromProperties(filteredProperties) ||
+      (productType != null && String(productType).trim() !== '' ? String(productType).trim() : null);
+    const productTypeValue =
+      filteredProperties['Product Type'] != null && String(filteredProperties['Product Type']).trim() !== ''
+        ? String(filteredProperties['Product Type']).trim()
+        : effectiveType;
     if (effectiveType) {
       params.append('type', effectiveType);
+    }
+    if (productTypeValue) {
+      params.append('Sub type', productTypeValue);
+      if (!(filteredProperties['Product Type'] != null && String(filteredProperties['Product Type']).trim() !== '')) {
+        params.append('Product Type', productTypeValue);
+      }
     }
 
     for (const [key, value] of Object.entries(filteredProperties)) {
