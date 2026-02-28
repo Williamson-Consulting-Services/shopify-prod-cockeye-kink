@@ -958,67 +958,11 @@
     }
   }
 
-  const PAYNOW_DEBUG =
-    typeof window !== 'undefined' &&
-    (window.customMeasurementsPayNowDebug === true ||
-      (window.location && window.location.search && /[?&]debug=1(?:\D|$)/.test(window.location.search)));
-
-  function payNowLog(form, label, data) {
-    if (!PAYNOW_DEBUG) return;
-    const prefix = '[CustomMeasurements PayNow]';
-    if (data !== undefined) {
-      console.log(prefix, label, data);
-    } else {
-      console.log(prefix, label);
-    }
-  }
-
-  let payNowUrlsLoggedOnce = false;
-  function logAvailablePayNowUrlsOnce(config) {
-    if (!PAYNOW_DEBUG || payNowUrlsLoggedOnce || !config) return;
-    payNowUrlsLoggedOnce = true;
-    const prefix = '[CustomMeasurements PayNow]';
-    const map = config.productTypeToRedirectUrl;
-    if (!map || typeof map !== 'object') {
-      console.log(prefix, 'onLoad: available URLs from SKUs', { productTypeToRedirectUrl: null });
-      return;
-    }
-    const entries = Object.entries(map).map(([type, url]) => ({
-      type,
-      url: url == null || url === '' ? null : (url.length > 80 ? url.substring(0, 80) + '...' : url),
-      hasUrl: typeof url === 'string' && url.trim().length > 0,
-    }));
-    console.log(prefix, 'onLoad: available URLs from SKUs (once per page)', {
-      count: entries.length,
-      entries,
-      chargeUpfrontDebug: config.chargeUpfrontDebug || null,
-    });
-  }
-
   // Main form controller
   class CustomMeasurementsForm {
     constructor(sectionId) {
       this.sectionId = sectionId;
       this.config = window.customMeasurementsConfig || this.buildConfigFromDOM();
-      payNowLog(this, 'constructor', {
-        sectionId,
-        hasConfig: !!this.config,
-        productTypeToRedirectUrlKeys: this.config && this.config.productTypeToRedirectUrl
-          ? Object.keys(this.config.productTypeToRedirectUrl)
-          : [],
-        productTypeToRedirectUrlSample:
-          this.config && this.config.productTypeToRedirectUrl
-            ? Object.fromEntries(
-                Object.entries(this.config.productTypeToRedirectUrl).slice(0, 3),
-              )
-            : null,
-        isChargeUpfrontProductPage: !!(this.config && this.config.isChargeUpfrontProductPage),
-        customOrderProductUrl: this.config && this.config.customOrderProductUrl ? '(set)' : null,
-      });
-      if (PAYNOW_DEBUG) {
-        payNowLog(this, 'Debug enabled. Enable with: window.customMeasurementsPayNowDebug = true or ?debug=1 in URL.');
-        logAvailablePayNowUrlsOnce(this.config);
-      }
       this.utils = new MeasurementUtils(this.config);
       this.validationService = new ValidationService(this.config, this.utils);
       this.buttonManager = new ButtonStateManager(`ProductSubmitButton-${sectionId}`, sectionId);
@@ -1069,14 +1013,7 @@
         this.paymentPayNowRadio = this.paymentToggleContainer.querySelector('input[value="pay_now"]');
         this.paymentInvoiceLaterRadio = this.paymentToggleContainer.querySelector('input[value="invoice_later"]');
         this.paymentToggleHint = this.paymentToggleContainer.querySelector('.custom-measurements-payment-toggle__hint, [id^="payment-timing-hint-"]');
-        payNowLog(this, 'payment toggle: used fallback (sectionId mismatch?)');
       }
-      payNowLog(this, 'payment toggle elements', {
-        container: !!this.paymentToggleContainer,
-        payNowRadio: !!this.paymentPayNowRadio,
-        invoiceLaterRadio: !!this.paymentInvoiceLaterRadio,
-        hint: !!this.paymentToggleHint,
-      });
 
       this.setupEventListeners();
       this.initialize();
@@ -1400,12 +1337,6 @@
         this.selectedCategory = checkedCategory.dataset.label;
         this.currentCategoryStore = this.measurementManager.getCategoryStore(this.selectedCategory);
       }
-      payNowLog(this, 'syncSelectionFromDOM', {
-        previousCategory,
-        selectedCategory: this.selectedCategory,
-        checkedCategoryLabel: checkedCategory ? checkedCategory.dataset.label : null,
-        categoryInputsCount: this.categoryInputs.length,
-      });
     }
 
     /**
@@ -1740,7 +1671,6 @@
         if (urlParams && urlParams.type) {
           const t = decodeURIComponent(String(urlParams.type)).trim();
           if (t && t.toLowerCase() !== 'custom order') {
-            payNowLog(this, 'getEffectiveProductType', { source: 'urlParam', type: t });
             return t;
           }
         }
@@ -1764,13 +1694,6 @@
             this.config.productTypeMap[type] === category &&
             this.config.productTypeToHarnessType[type] === subType
           ) {
-            payNowLog(this, 'getEffectiveProductType', {
-              source: fromSelectionOnly ? 'selectionOnly' : 'category+subType',
-              category,
-              subType,
-              type,
-              fromSelectionOnly,
-            });
             return type;
           }
         }
@@ -1781,24 +1704,10 @@
       if (!needsSubType && category && this.config && this.config.productTypeMap) {
         for (const type of Object.keys(this.config.productTypeMap)) {
           if (this.config.productTypeMap[type] === category) {
-            payNowLog(this, 'getEffectiveProductType', {
-              source: 'categoryOnly',
-              category,
-              needsSubType,
-              type,
-            });
             return type;
           }
         }
       }
-      payNowLog(this, 'getEffectiveProductType', {
-        source: 'none',
-        category,
-        subType,
-        needsSubType: category === 'Harness' || category === 'Tag',
-        result: null,
-        fromSelectionOnly,
-      });
       return null;
     }
 
@@ -1858,12 +1767,6 @@
     getRedirectUrlForType(effectiveType) {
       const map = this.config && this.config.productTypeToRedirectUrl;
       if (!map || !effectiveType) {
-        payNowLog(this, 'getRedirectUrlForType', {
-          effectiveType,
-          hasMap: !!map,
-          result: null,
-          reason: !map ? 'no productTypeToRedirectUrl in config' : 'no effectiveType',
-        });
         return null;
       }
       let url = map[effectiveType] || null;
@@ -1879,15 +1782,6 @@
         }
       }
       if (!url) {
-        payNowLog(this, 'getRedirectUrlForType', {
-          effectiveType,
-          mapKeys: Object.keys(map),
-          rawValue: map[effectiveType],
-          result: null,
-          reason:
-            'Key exists but value is null — Liquid SKU lookup failed. Check theme setting "Pay now: product source" and ensure the product with variant SKU from "Pay now: type to SKU" is in that source. See config.chargeUpfrontDebug for expected SKU and product source.',
-          chargeUpfrontDebug: this.config && this.config.chargeUpfrontDebug,
-        });
         return null;
       }
       // Ensure absolute URL so navigation works from any context
@@ -1895,11 +1789,6 @@
         const origin = typeof window !== 'undefined' && window.location && window.location.origin;
         url = origin ? origin + url : url;
       }
-      payNowLog(this, 'getRedirectUrlForType', {
-        effectiveType,
-        matchedBy: matchedBy || 'exact',
-        url: url.substring(0, 60) + (url.length > 60 ? '...' : ''),
-      });
       return url;
     }
 
@@ -1999,36 +1888,26 @@
      */
     maybeRedirectToPayNowProduct() {
       if (this.config && this.config.isChargeUpfrontProductPage) {
-        payNowLog(this, 'maybeRedirectToPayNowProduct: skip (already on charge-upfront product page)');
         return;
       }
       if (this.selectedCategory === 'Harness' && !this.getSelectedHarnessType()) {
-        payNowLog(this, 'maybeRedirectToPayNowProduct: skip (Harness selected but no harness type yet)');
         return;
       }
       if (this.selectedCategory === 'Tag' && this.tagTypeSelector) {
         const tagChecked = this.tagTypeSelector.querySelector('.tag-type-input:checked');
         if (!tagChecked) {
-          payNowLog(this, 'maybeRedirectToPayNowProduct: skip (Tag selected but no tag type yet)');
           return;
         }
       }
       const effectiveType = this.getEffectiveProductType();
       const redirectUrl = this.getRedirectUrlForType(effectiveType);
       if (!redirectUrl) {
-        payNowLog(this, 'maybeRedirectToPayNowProduct: skip (no redirect URL for effective type)', {
-          effectiveType,
-        });
         return;
       }
       const queryString = this.getFormStateAsQueryString();
       const params = queryString ? new URLSearchParams(queryString) : new URLSearchParams();
       params.set('pay_now', '1');
       const target = `${redirectUrl}?${params.toString()}`;
-      payNowLog(this, 'maybeRedirectToPayNowProduct: redirecting', {
-        effectiveType,
-        targetLength: target.length,
-      });
       window.location.href = target;
     }
 
@@ -2096,7 +1975,6 @@
               if (tagRadio) tagRadio.checked = true;
             }
           }
-          payNowLog(this, 'applyTypeParamToSelection', { source: 'config', effectiveType, category });
           return;
         }
       }
@@ -2108,7 +1986,6 @@
       );
       if (categoryByLabel && categoryByLabel.dataset.label) {
         setCategoryAndVisibility(categoryByLabel.dataset.label);
-        payNowLog(this, 'applyTypeParamToSelection', { source: 'categoryLabel', effectiveType });
         return;
       }
 
@@ -2118,7 +1995,6 @@
       if (harnessRadio) {
         setCategoryAndVisibility('Harness');
         harnessRadio.checked = true;
-        payNowLog(this, 'applyTypeParamToSelection', { source: 'harnessType', effectiveType });
         return;
       }
 
@@ -2130,7 +2006,6 @@
         if (tagRadio) {
           setCategoryAndVisibility('Tag');
           tagRadio.checked = true;
-          payNowLog(this, 'applyTypeParamToSelection', { source: 'tagType', effectiveType });
         }
       }
     }
@@ -2176,19 +2051,10 @@
       if (typeParam) {
         this.applyTypeParamToSelection(typeParam);
       }
-      payNowLog(this, 'syncUrlToCurrentSelection', {
-        typeParam,
-        effectiveType,
-        newSearchLength: newSearch.length,
-      });
     }
 
     updatePaymentToggleState() {
       if (!this.paymentPayNowRadio || !this.paymentToggleHint) {
-        payNowLog(this, 'updatePaymentToggleState skipped', {
-          hasPayNowRadio: !!this.paymentPayNowRadio,
-          hasHint: !!this.paymentToggleHint,
-        });
         return;
       }
       this.syncSelectionFromDOM();
@@ -2202,26 +2068,12 @@
       this.paymentToggleHint.textContent = '';
       const wasPayNowChecked = this.paymentPayNowRadio.checked;
       if (wasPayNowChecked && !hasRedirect && this.paymentInvoiceLaterRadio) {
-        payNowLog(this, 'updatePaymentToggleState: switching to Invoice later (no pay-now product for new type)', {
-          effectiveType,
-          selectedCategory: this.selectedCategory,
-          hadRedirect: false,
-        });
         this.paymentInvoiceLaterRadio.checked = true;
         // We're on a pay-now product page but the new selection has no pay-now product — go to generic page
         if (this.redirectToGenericCustomOrderPageIfNeeded()) {
-          payNowLog(this, 'updatePaymentToggleState: redirecting to generic Custom Order page');
           return;
         }
       }
-      payNowLog(this, 'updatePaymentToggleState', {
-        effectiveType,
-        redirectUrlLength: redirectUrl ? String(redirectUrl).length : 0,
-        hasRedirect,
-        payNowDisabled: this.paymentPayNowRadio.disabled,
-        wasPayNowChecked,
-        switchedToInvoiceLater: wasPayNowChecked && !hasRedirect,
-      });
     }
 
     /**
@@ -2276,7 +2128,6 @@
       if (this.paymentPayNowRadio.disabled) return;
       this.paymentPayNowRadio.checked = true;
       this.paymentInvoiceLaterRadio.checked = false;
-      payNowLog(this, 'applyPayNowFromUrlIfPresent', { applied: true });
     }
 
     /**
@@ -2287,7 +2138,6 @@
      * @param {HTMLInputElement} radio - The radio that was selected
      */
     handlePaymentTimingChange(radio) {
-      payNowLog(this, 'handlePaymentTimingChange', { value: radio.value, checked: radio.checked });
       if (radio.value === 'pay_now' && radio.checked) {
         this.syncSelectionFromDOM();
         const effectiveType = this.getEffectiveProductType();
@@ -2298,25 +2148,11 @@
           const params = queryString ? new URLSearchParams(queryString) : new URLSearchParams();
           params.set('pay_now', '1');
           const target = `${redirectUrl}?${params.toString()}`;
-          payNowLog(this, 'handlePaymentTimingChange: redirecting', {
-            effectiveType,
-            targetLength: target.length,
-            queryStringLength: queryString ? queryString.length : 0,
-          });
           window.location.href = target;
-        } else {
-          payNowLog(this, 'handlePaymentTimingChange: Pay now selected but no redirect URL', {
-            effectiveType,
-            redirectUrl: redirectUrl,
-          });
         }
         // If no URL, Pay now radio is disabled by updatePaymentToggleState so this path should not run
       } else if (radio.value === 'invoice_later' && radio.checked) {
         const currentPath = (window.location && window.location.pathname || '').replace(/\/+$/, '');
-        console.log('[CustomMeasurements InvoiceLater] clicked', {
-          currentPath,
-          currentUrl: window.location ? window.location.href : '',
-        });
         this.redirectToGenericCustomOrderPageIfNeeded();
       }
     }
