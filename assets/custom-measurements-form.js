@@ -2115,19 +2115,29 @@
     }
 
     /**
-     * If URL has pay_now=1 (or pay_now=true), selects Pay now so the toggle matches the page we landed on.
+     * Selects Pay now when it should match the page we landed on:
+     * 1) URL has pay_now=1 (or pay_now=true) — e.g. coming from custom order page with Pay now chosen.
+     * 2) We're on a pay-now product page with no URL param — e.g. direct load of /products/custom-deluxe-bulldog-harness.
      * Only applies when Pay now is enabled for the current selection (not disabled).
      */
     applyPayNowFromUrlIfPresent() {
       if (!this.paymentPayNowRadio || !this.paymentInvoiceLaterRadio) return;
-      if (!window.CustomOrderUtils || !window.CustomOrderUtils.parseUrlParams) return;
-      const urlParams = window.CustomOrderUtils.parseUrlParams();
-      if (!urlParams || !urlParams.pay_now) return;
-      const payNowVal = String(urlParams.pay_now).trim().toLowerCase();
-      if (payNowVal !== '1' && payNowVal !== 'true') return;
       if (this.paymentPayNowRadio.disabled) return;
-      this.paymentPayNowRadio.checked = true;
-      this.paymentInvoiceLaterRadio.checked = false;
+
+      const fromUrl =
+        window.CustomOrderUtils &&
+        window.CustomOrderUtils.parseUrlParams &&
+        (() => {
+          const urlParams = window.CustomOrderUtils.parseUrlParams();
+          if (!urlParams || !urlParams.pay_now) return false;
+          const payNowVal = String(urlParams.pay_now).trim().toLowerCase();
+          return payNowVal === '1' || payNowVal === 'true';
+        })();
+
+      if (fromUrl || this.isOnPayNowProductPage()) {
+        this.paymentPayNowRadio.checked = true;
+        this.paymentInvoiceLaterRadio.checked = false;
+      }
     }
 
     /**
