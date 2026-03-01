@@ -1961,6 +1961,10 @@
      * navigates to its page).
      */
     maybeRedirectToPayNowProduct() {
+      // Only redirect to pay-now product when user has Pay now selected; leave Invoice later users on generic flow
+      if (this.paymentInvoiceLaterRadio && this.paymentInvoiceLaterRadio.checked) {
+        return;
+      }
       if (this.selectedCategory === 'Harness' && !this.getSelectedHarnessType()) {
         return;
       }
@@ -2195,14 +2199,22 @@
         }
         return norm(p.startsWith('/') ? p : '/products/' + p);
       };
+      const canonicalGeneric = '/products/custom-order';
       let genericUrl =
         (this.config && this.config.customOrderProductUrl) ||
         (window.customMeasurementsConfig && window.customMeasurementsConfig.customOrderProductUrl) ||
-        '/products/custom-order';
+        canonicalGeneric;
+      // Never use a pay-now product URL as the generic (e.g. if custom_order_product_sku points at a pay-now SKU)
+      const payNowPaths = this.config && this.config.productTypeToRedirectUrl
+        ? Object.values(this.config.productTypeToRedirectUrl).map((u) => pathToNorm(u))
+        : [];
+      if (payNowPaths.indexOf(pathToNorm(genericUrl)) !== -1) {
+        genericUrl = canonicalGeneric;
+      }
       let genericPathNorm = pathToNorm(genericUrl);
       const currentPathNorm = norm(currentPath);
       if (genericPathNorm === currentPathNorm) {
-        genericUrl = '/products/custom-order';
+        genericUrl = canonicalGeneric;
         genericPathNorm = pathToNorm(genericUrl);
       }
       const alreadyOnGeneric = currentPathNorm === genericPathNorm;
