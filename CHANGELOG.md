@@ -37,6 +37,33 @@ See [Version Tracking Workflow](../.cursor/version-tracking-workflow.mdc) for de
 
 - (Items will be listed here)
 
+## [15.4.1.7] - 2026-03-01
+
+### Added
+
+- Theme settings for pay-now product mapping: `custom_measurements_product_type_to_harness_type`, `custom_measurements_charge_upfront_type_to_sku`, and `custom_measurements_sku_to_product_url` (in `settings_data.json`) so custom product types can redirect to the correct pay-now product page when "Pay now" is selected.
+- Extended `custom_measurements_product_type_map` and `custom_measurements_categories_order` (Vest, Jockstraps; all pay-now types) in default settings.
+- `.gitignore` entries for product/pricing CSVs: `products_export*.csv`, `International*.csv`, `product weight and packages.csv`.
+
+### Changed
+
+- Tag option label "Other" → "Other Tag" in settings for consistency with product types.
+- When resolving product type for a category that has multiple types (e.g. Hats), the form now prefers a type that has a pay-now product URL so the URL uses e.g. `type=Hats` and redirects correctly.
+- Category change, harness type change, and tag type change all trigger `maybeRedirectToPayNowProduct()` so changing type with "Pay now" selected navigates to the correct pay-now product page when configured.
+- When already on a pay-now product page, redirect on type change only if the new selection is a different product (avoids no-op redirects).
+- "Invoice later" redirect: the generic custom order URL is never a pay-now product; if theme config points the generic at a pay-now product, the theme falls back to `/products/custom-order`.
+- On direct load of a pay-now product page (e.g. `/products/custom-hat`), "Pay now" is set selected and enabled first so page state matches the product.
+
+### Fixed
+
+- **Invoice later preserved on type change:** When the customer had "Invoice later" selected and changed product type (category, harness type, or tag type), the flow incorrectly redirected to the pay-now product and switched to "Pay now". The flow now stays on "Invoice later" and only updates the form/URL with the new type on the generic custom order page.
+- Choosing "Invoice later" from a pay-now product page now always redirects to the generic custom order page (e.g. `/products/custom-order`), never to another pay-now product URL, even when theme settings mispoint the generic at a pay-now product.
+
+### Notes
+
+- Base: Dawn 15.4.1
+- No breaking changes; new settings are additive. See `docs/PR-invoice-later-type-change.md` for full PR overview and testing steps.
+
 ## [15.4.1.6] - 2026-01-29
 
 ### Added
