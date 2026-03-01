@@ -150,14 +150,14 @@
         "product": {
           "type": "product",
           "settings": {
-            "product": "cockeye-kink-pig-tag",
+            "product": "bear-paw-dog-tag",
             "second_image": true
           }
         },
         "collection-1": {
           "type": "collection",
           "settings": {
-            "collection": "suspenders"
+            "collection": "special-collections"
           }
         }
       },
