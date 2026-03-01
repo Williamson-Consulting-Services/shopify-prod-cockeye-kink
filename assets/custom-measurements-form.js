@@ -1766,11 +1766,16 @@
       // (Harness and Tag need harness type / tag type to determine which pay-now product)
       const needsSubType = category === 'Harness' || category === 'Tag';
       if (!needsSubType && category && this.config && this.config.productTypeMap) {
+        const hasPayNowUrl = (type) =>
+          this.config.productTypeToRedirectUrl && this.config.productTypeToRedirectUrl[type];
+        let firstMatch = null;
         for (const type of Object.keys(this.config.productTypeMap)) {
-          if (this.config.productTypeMap[type] === category) {
-            return type;
-          }
+          if (this.config.productTypeMap[type] !== category) continue;
+          if (!firstMatch) firstMatch = type;
+          // Prefer a type that has a pay-now product so URL uses e.g. type=Hats not type=Muir+Cap
+          if (hasPayNowUrl(type)) return type;
         }
+        if (firstMatch) return firstMatch;
       }
       return null;
     }
@@ -1950,15 +1955,12 @@
     }
 
     /**
-     * If current selection has a pay-now product URL and we're on the generic custom order page,
-     * redirect to that product page with form state in the URL so Add to cart uses the pay-now SKU.
-     * Only redirect when the selection fully determines the SKU (e.g. Harness + harness type, Tag + tag type).
-     * Called after category or harness/tag type change (user-initiated).
+     * When selection has a pay-now product URL, redirect to that product page with form state.
+     * Called after category or harness/tag type change. When already on a pay-now product page,
+     * redirects only if the new selection is a different product (so clicking another product
+     * navigates to its page).
      */
     maybeRedirectToPayNowProduct() {
-      if (this.config && this.config.isChargeUpfrontProductPage) {
-        return;
-      }
       if (this.selectedCategory === 'Harness' && !this.getSelectedHarnessType()) {
         return;
       }
@@ -1968,10 +1970,16 @@
           return;
         }
       }
-      const effectiveType = this.getEffectiveProductType();
+      const effectiveType = this.getEffectiveProductType({ fromSelectionOnly: true });
       const redirectUrl = this.getRedirectUrlForType(effectiveType);
       if (!redirectUrl) {
         return;
+      }
+      // When already on a pay-now product page, only redirect if the new selection is a different product
+      if (this.config && this.config.isChargeUpfrontProductPage) {
+        if (effectiveType === this.config.effectiveProductType) {
+          return;
+        }
       }
       const queryString = this.getFormStateAsQueryString();
       const params = queryString ? new URLSearchParams(queryString) : new URLSearchParams();
@@ -2218,6 +2226,17 @@
      */
     applyPayNowFromUrlIfPresent() {
       if (!this.paymentPayNowRadio || !this.paymentInvoiceLaterRadio) return;
+
+      // On a pay-now product page (e.g. direct load of /products/custom-hat), always show Pay now
+      // selected and enabled so the page state matches the product. Skip the disabled check so we
+      // don't depend on category/toggle state having been set first.
+      if (this.isOnPayNowProductPage()) {
+        this.paymentPayNowRadio.checked = true;
+        this.paymentInvoiceLaterRadio.checked = false;
+        this.paymentPayNowRadio.disabled = false;
+        return;
+      }
+
       if (this.paymentPayNowRadio.disabled) return;
 
       const fromUrl =
@@ -2230,7 +2249,7 @@
           return payNowVal === '1' || payNowVal === 'true';
         })();
 
-      if (fromUrl || this.isOnPayNowProductPage()) {
+      if (fromUrl) {
         this.paymentPayNowRadio.checked = true;
         this.paymentInvoiceLaterRadio.checked = false;
       }
@@ -2295,24 +2314,27 @@
           this.selectFirstSubTypeIfNone();
           this.syncUrlToCurrentSelection();
           this.updatePaymentToggleState();
+          this.maybeRedirectToPayNowProduct();
           this.updateAddToCartButton();
         });
       });
 
-      // Harness type selection: sync URL to new type, then update Pay now state (redirect may follow)
+      // Harness type selection: sync URL, update Pay now state, redirect to new product page if different pay-now product
       this.harnessTypeInputs.forEach((input) => {
         input.addEventListener('change', () => {
           this.syncUrlToCurrentSelection();
           this.updatePaymentToggleState();
+          this.maybeRedirectToPayNowProduct();
         });
       });
 
-      // Tag type selection: sync URL to new type, then update Pay now state (redirect may follow)
+      // Tag type selection: sync URL, update Pay now state, redirect to new product page if different pay-now product
       if (this.tagTypeSelector) {
         this.tagTypeSelector.querySelectorAll('.tag-type-input').forEach((input) => {
           input.addEventListener('change', () => {
             this.syncUrlToCurrentSelection();
             this.updatePaymentToggleState();
+            this.maybeRedirectToPayNowProduct();
           });
         });
       }
