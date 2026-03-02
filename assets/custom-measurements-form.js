@@ -660,21 +660,20 @@
     }
   }
 
-  // Measurement manager
+  // Measurement manager — single shared store so measurements persist across category/type switches (e.g. Chest when moving Harness → Shirt)
   class MeasurementManager {
     constructor(config, utils) {
       this.config = config;
       this.utils = utils;
-      this.measurementValuesByCategory = new Map();
+      /** Shared across all categories and sub-types: measName -> { in, cm } */
+      this.sharedMeasurements = new Map();
       this.isSyncingValues = false;
     }
 
+    /** Returns the shared store (same for all categories) so values persist when switching type. */
     getCategoryStore(category) {
       if (!category) return null;
-      if (!this.measurementValuesByCategory.has(category)) {
-        this.measurementValuesByCategory.set(category, new Map());
-      }
-      return this.measurementValuesByCategory.get(category);
+      return this.sharedMeasurements;
     }
 
     syncValues(measName, sourceUnit, numericValue, currentCategoryStore) {
@@ -710,10 +709,10 @@
       this.isSyncingValues = false;
     }
 
+    /** Saves active measurement fields into the shared store (merge only; does not clear other measurements). */
     saveCategoryMeasurements(category, measurementFields) {
       if (!category) return;
-      const store = this.getCategoryStore(category);
-      store.clear();
+      const store = this.sharedMeasurements;
 
       measurementFields.forEach((field) => {
         if (!field.classList.contains('active')) return;
@@ -738,8 +737,9 @@
       });
     }
 
+    /** Restores measurement field values from the shared store (so e.g. Chest is filled when switching to Shirt). */
     restoreMeasurementsForCategory(category, measurementFields) {
-      const store = this.getCategoryStore(category);
+      const store = this.sharedMeasurements;
       measurementFields.forEach((field) => {
         const measName = field.dataset.measurement;
         const stored = store ? store.get(measName) : null;
@@ -761,7 +761,7 @@
     }
 
     clearAll() {
-      this.measurementValuesByCategory.clear();
+      this.sharedMeasurements.clear();
     }
   }
 
