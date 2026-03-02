@@ -14,6 +14,7 @@
       "settings": {
         "columns_desktop": 4,
         "columns_mobile": "2",
+        "color_scheme": "scheme-3",
         "image_ratio": "adapt",
         "image_shape": "default",
         "show_secondary_image": false,
