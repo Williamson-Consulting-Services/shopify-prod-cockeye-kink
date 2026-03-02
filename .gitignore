@@ -9,3 +9,8 @@ ehthumbs.db
 Thumbs.db
 .shopify
 .upgrade-analysis/
+
+# Product/pricing CSVs (local use and Shopify import only; do not commit)
+products_export*.csv
+International*.csv
+product weight and packages.csv

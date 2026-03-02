@@ -12,6 +12,25 @@
 {%- comment -%} Parse product type mapping {%- endcomment -%}
 {%- assign type_map_source = settings.custom_measurements_product_type_map | default: '' -%}
 {%- assign product_type = product.type | default: '' -%}
+{%- comment -%} When product.type is blank (e.g. catalog entry), derive type from product.handle (e.g. custom-asymmetric-harness → Asymmetric Harness) {%- endcomment -%}
+{%- if product_type == '' and product.handle != blank and type_map_source != '' -%}
+  {%- assign handle_lower = product.handle | downcase -%}
+  {%- assign type_map_lines_handle = type_map_source | newline_to_br | split: '<br />' -%}
+  {%- for line in type_map_lines_handle -%}
+    {%- assign line = line | strip -%}
+    {%- if line == '' -%}{% continue %}{% endif %}
+    {%- assign parts = line | split: ':' -%}
+    {%- if parts.size >= 2 -%}
+      {%- assign type_name = parts[0] | strip -%}
+      {%- assign type_slug = type_name | downcase | replace: ' ', '-' -%}
+      {%- assign handle_with_prefix = 'custom-' | append: type_slug -%}
+      {%- if handle_lower == type_slug or handle_lower == handle_with_prefix -%}
+        {%- assign product_type = type_name -%}
+        {%- break -%}
+      {%- endif -%}
+    {%- endif -%}
+  {%- endfor -%}
+{%- endif -%}
 {%- assign auto_selected_category = '' -%}
 {%- if type_map_source != '' and product_type != '' -%}
   {%- assign type_map_lines = type_map_source | newline_to_br | split: '<br />' -%}
@@ -30,8 +49,28 @@
     {%- endif -%}
   {%- endfor -%}
 {%- endif -%}
+{%- comment -%} If product.type didn't match type map (e.g. "Asymmetrical" vs "Asymmetric"), try deriving type from handle and re-resolve category/harness {%- endcomment -%}
+{%- if auto_selected_category == '' and product.handle != blank and type_map_source != '' -%}
+  {%- assign handle_lower = product.handle | downcase -%}
+  {%- assign type_map_lines_handle2 = type_map_source | newline_to_br | split: '<br />' -%}
+  {%- for line in type_map_lines_handle2 -%}
+    {%- assign line = line | strip -%}
+    {%- if line == '' -%}{% continue %}{% endif %}
+    {%- assign parts = line | split: ':' -%}
+    {%- if parts.size >= 2 -%}
+      {%- assign type_name = parts[0] | strip -%}
+      {%- assign type_slug = type_name | downcase | replace: ' ', '-' -%}
+      {%- assign handle_with_prefix = 'custom-' | append: type_slug -%}
+      {%- if handle_lower == type_slug or handle_lower == handle_with_prefix -%}
+        {%- assign product_type = type_name -%}
+        {%- assign auto_selected_category = parts[1] | strip -%}
+        {%- break -%}
+      {%- endif -%}
+    {%- endif -%}
+  {%- endfor -%}
+{%- endif -%}
 
-{%- comment -%} Parse product type → harness type (for preselection) {%- endcomment -%}
+{%- comment -%} Parse product type → harness type (for preselection). Re-run when we just set product_type from handle so harness type is set. {%- endcomment -%}
 {%- assign type_to_harness_source = settings.custom_measurements_product_type_to_harness_type | default: '' -%}
 {%- assign auto_selected_harness_type = '' -%}
 {%- if type_to_harness_source != '' and product_type != '' -%}
@@ -51,6 +90,49 @@
       {%- endif -%}
     {%- endif -%}
   {%- endfor -%}
+{%- endif -%}
+
+{%- comment -%} When harness/tag type lookup failed (e.g. product.type "Asymmetrical Harness" vs map "Asymmetric Harness", or "Bear Tags" vs "Bear Tag"), derive canonical type from handle and re-lookup. Applies to both Harness and Tag categories. {%- endcomment -%}
+{%- assign needs_subtype = false -%}
+{%- if auto_selected_category == 'Harness' or auto_selected_category == 'Tag' -%}
+  {%- assign needs_subtype = true -%}
+{%- endif -%}
+{%- if auto_selected_harness_type == '' and needs_subtype and product.handle != blank and type_map_source != '' and type_to_harness_source != '' -%}
+  {%- assign handle_lower = product.handle | downcase -%}
+  {%- assign harness_type_map_lines = type_map_source | newline_to_br | split: '<br />' -%}
+  {%- assign canonical_type_for_harness = '' -%}
+  {%- for line in harness_type_map_lines -%}
+    {%- assign line = line | strip -%}
+    {%- if line == '' -%}{% continue %}{% endif %}
+    {%- assign parts = line | split: ':' -%}
+    {%- if parts.size >= 2 -%}
+      {%- assign type_name = parts[0] | strip -%}
+      {%- assign type_slug = type_name | downcase | replace: ' ', '-' -%}
+      {%- assign handle_with_prefix = 'custom-' | append: type_slug -%}
+      {%- if handle_lower == type_slug or handle_lower == handle_with_prefix -%}
+        {%- assign canonical_type_for_harness = type_name -%}
+        {%- break -%}
+      {%- endif -%}
+    {%- endif -%}
+  {%- endfor -%}
+  {%- if canonical_type_for_harness != '' -%}
+    {%- assign type_to_harness_lines2 = type_to_harness_source | newline_to_br | split: '<br />' -%}
+    {%- for line in type_to_harness_lines2 -%}
+      {%- assign line = line | strip -%}
+      {%- if line == '' -%}{% continue %}{% endif %}
+      {%- assign parts = line | split: ':' -%}
+      {%- if parts.size >= 2 -%}
+        {%- assign type_name = parts[0] | strip -%}
+        {%- assign harness_type_name = parts[1] | strip -%}
+        {%- assign type_name_lower = type_name | downcase -%}
+        {%- assign canonical_lower = canonical_type_for_harness | downcase -%}
+        {%- if type_name == canonical_type_for_harness or type_name_lower == canonical_lower -%}
+          {%- assign auto_selected_harness_type = harness_type_name -%}
+          {%- break -%}
+        {%- endif -%}
+      {%- endif -%}
+    {%- endfor -%}
+  {%- endif -%}
 {%- endif -%}
 
 {%- comment -%} Parse measurement map {%- endcomment -%}
@@ -172,6 +254,7 @@
     },
     autoSelectedCategory: {% if auto_selected_category != '' %}"{{ auto_selected_category | escape }}"{% else %}null{% endif %},
     autoSelectedHarnessType: {% if auto_selected_harness_type != '' %}"{{ auto_selected_harness_type | escape }}"{% else %}null{% endif %},
+    autoSelectedTagType: {% if auto_selected_category == 'Tag' and auto_selected_harness_type != '' %}"{{ auto_selected_harness_type | escape }}"{% else %}null{% endif %},
     categories: [
       {%- for category in categories_order -%}
         {%- assign category_clean = category | strip -%}
@@ -355,7 +438,8 @@
       {%- endif -%}
     },
     customOrderProductSku: {% if custom_order_sku != '' %}"{{ custom_order_sku | escape }}"{% else %}null{% endif %},
-    effectiveProductType: {% if product_type != '' %}"{{ product_type | escape }}"{% else %}null{% endif %}
+    effectiveProductType: {% if product_type != '' %}"{{ product_type | escape }}"{% else %}null{% endif %},
+    effectiveProductHandle: {% if product.handle != blank %}"{{ product.handle | escape }}"{% else %}null{% endif %}
   };
   (function () {
     var c = window.customMeasurementsConfig;

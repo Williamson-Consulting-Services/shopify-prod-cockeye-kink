@@ -660,21 +660,20 @@
     }
   }
 
-  // Measurement manager
+  // Measurement manager — single shared store so measurements persist across category/type switches (e.g. Chest when moving Harness → Shirt)
   class MeasurementManager {
     constructor(config, utils) {
       this.config = config;
       this.utils = utils;
-      this.measurementValuesByCategory = new Map();
+      /** Shared across all categories and sub-types: measName -> { in, cm } */
+      this.sharedMeasurements = new Map();
       this.isSyncingValues = false;
     }
 
+    /** Returns the shared store (same for all categories) so values persist when switching type. */
     getCategoryStore(category) {
       if (!category) return null;
-      if (!this.measurementValuesByCategory.has(category)) {
-        this.measurementValuesByCategory.set(category, new Map());
-      }
-      return this.measurementValuesByCategory.get(category);
+      return this.sharedMeasurements;
     }
 
     syncValues(measName, sourceUnit, numericValue, currentCategoryStore) {
@@ -710,10 +709,10 @@
       this.isSyncingValues = false;
     }
 
+    /** Saves active measurement fields into the shared store (merge only; does not clear other measurements). */
     saveCategoryMeasurements(category, measurementFields) {
       if (!category) return;
-      const store = this.getCategoryStore(category);
-      store.clear();
+      const store = this.sharedMeasurements;
 
       measurementFields.forEach((field) => {
         if (!field.classList.contains('active')) return;
@@ -738,8 +737,9 @@
       });
     }
 
+    /** Restores measurement field values from the shared store (so e.g. Chest is filled when switching to Shirt). */
     restoreMeasurementsForCategory(category, measurementFields) {
-      const store = this.getCategoryStore(category);
+      const store = this.sharedMeasurements;
       measurementFields.forEach((field) => {
         const measName = field.dataset.measurement;
         const stored = store ? store.get(measName) : null;
@@ -760,8 +760,52 @@
       });
     }
 
+    /**
+     * Merges measurement params from URL (or edit_ref state) into the shared store.
+     * Ensures measurements from other categories (e.g. Shirt's Chest when we're on Tag page) are
+     * preserved so that Shirt → Tag → Shirt keeps Shirt data.
+     * @param {Object} urlParams - Parsed URL/state object with keys like "Chest (in)", "Chest (cm)".
+     */
+    mergeMeasurementsFromUrlParams(urlParams) {
+      if (!urlParams || typeof urlParams !== 'object') return;
+      const store = this.sharedMeasurements;
+      const byName = new Map();
+      for (const [key, value] of Object.entries(urlParams)) {
+        const str = value != null ? String(value).trim() : '';
+        if (str === '') continue;
+        const num = this.utils.parseValue(str);
+        if (!Number.isFinite(num)) continue;
+        let measName;
+        let unit;
+        if (key.endsWith(' (in)')) {
+          measName = key.slice(0, -5).trim();
+          unit = 'in';
+        } else if (key.endsWith(' (cm)')) {
+          measName = key.slice(0, -5).trim();
+          unit = 'cm';
+        } else continue;
+        if (!measName) continue;
+        let entry = byName.get(measName);
+        if (!entry) {
+          entry = { in: null, cm: null };
+          byName.set(measName, entry);
+        }
+        if (unit === 'in') entry.in = num;
+        else entry.cm = num;
+      }
+      byName.forEach((entry, measName) => {
+        if (!Number.isFinite(entry.in) && !Number.isFinite(entry.cm)) return;
+        const existing = store.get(measName) || { in: null, cm: null };
+        let inVal = Number.isFinite(entry.in) ? entry.in : (Number.isFinite(existing.in) ? existing.in : null);
+        let cmVal = Number.isFinite(entry.cm) ? entry.cm : (Number.isFinite(existing.cm) ? existing.cm : null);
+        if (Number.isFinite(inVal) && !Number.isFinite(cmVal)) cmVal = inVal * this.utils.INCH_TO_CM;
+        if (Number.isFinite(cmVal) && !Number.isFinite(inVal)) inVal = cmVal * this.utils.CM_TO_INCH;
+        store.set(measName, { in: inVal, cm: cmVal });
+      });
+    }
+
     clearAll() {
-      this.measurementValuesByCategory.clear();
+      this.sharedMeasurements.clear();
     }
   }
 
@@ -963,6 +1007,19 @@
     constructor(sectionId) {
       this.sectionId = sectionId;
       this.config = window.customMeasurementsConfig || this.buildConfigFromDOM();
+
+      // Debug logging (enabled via ?cm_debug=1 or localStorage cm_debug=1)
+      this.debugEnabled = false;
+      this.debugPrefix = `[CustomMeasurementsForm:${this.sectionId}]`;
+      try {
+        const params = new URLSearchParams(window.location.search || '');
+        const flag = params.get('cm_debug');
+        this.debugEnabled =
+          flag === '1' || flag === 'true' || (window.localStorage && window.localStorage.getItem('cm_debug') === '1');
+      } catch (e) {
+        this.debugEnabled = false;
+      }
+
       this.utils = new MeasurementUtils(this.config);
       this.validationService = new ValidationService(this.config, this.utils);
       this.buttonManager = new ButtonStateManager(`ProductSubmitButton-${sectionId}`, sectionId);
@@ -1016,7 +1073,23 @@
       }
 
       this.setupEventListeners();
+      this.setupCustomProductLinkInterceptor();
       this.initialize();
+    }
+
+    debug(label, ...args) {
+      if (!this.debugEnabled) return;
+      try {
+        const strArgs = args.map((a) =>
+          a !== null && typeof a === 'object' && !(a instanceof Error)
+            ? JSON.stringify(a, null, 2)
+            : String(a)
+        );
+        const out = [this.debugPrefix, label, ...strArgs].join(' ');
+        console.debug(out);
+      } catch (e) {
+        console.debug(this.debugPrefix, label, String(e));
+      }
     }
 
     buildConfigFromDOM() {
@@ -1137,10 +1210,85 @@
       this.validationService.validateRequiredFields(this.selectedCategory);
     }
 
+    /**
+     * Intercepts clicks on links to other custom product pages so we navigate with form state (measurements, options).
+     * Use when switching types via links (e.g. on by-type pages or "Other options" blocks) instead of harness/tag radios.
+     */
+    setupCustomProductLinkInterceptor() {
+      if (this._customProductLinkHandlerAttached) return;
+      this._customProductLinkHandlerAttached = true;
+      const pathToNorm = (path) => {
+        const p = (path || '').trim();
+        if (p.startsWith('http')) {
+          try {
+            return new URL(p).pathname.replace(/\/+$/, '') || '/';
+          } catch (e) {
+            return p.startsWith('/') ? p : '/products/' + p;
+          }
+        }
+        return (p.startsWith('/') ? p : '/products/' + p).replace(/\/+$/, '') || '/';
+      };
+      const getPayNowPaths = () => {
+        const urls = this.config?.productTypeToRedirectUrl;
+        if (!urls) return [];
+        return Object.values(urls)
+          .filter(Boolean)
+          .map(pathToNorm);
+      };
+      document.addEventListener(
+        'click',
+        (e) => {
+          const anchor = e.target && (e.target.closest ? e.target.closest('a[href]') : null);
+          if (!anchor || anchor.target === '_blank' || anchor.hasAttribute('download')) return;
+          const href = (anchor.getAttribute('href') || '').trim();
+          if (!href || href.startsWith('#') || href.startsWith('javascript:')) return;
+          const targetPath = pathToNorm(href);
+          const payNowPaths = getPayNowPaths();
+          const isCustomProductLink =
+            targetPath.startsWith('/products/custom-') &&
+            payNowPaths.some((p) => pathToNorm(p) === targetPath);
+          if (!isCustomProductLink) return;
+          const currentPath = pathToNorm(window.location.pathname);
+          if (targetPath === currentPath) return;
+          e.preventDefault();
+          if (this.selectedCategory) {
+            this.measurementManager.saveCategoryMeasurements(this.selectedCategory, this.measurementFields);
+          }
+          let typeOverride;
+          const urlToType = this.config?.productTypeToRedirectUrl;
+          if (urlToType) {
+            for (const [type, url] of Object.entries(urlToType)) {
+              if (url && pathToNorm(url) === targetPath) {
+                typeOverride = type;
+                break;
+              }
+            }
+          }
+          const fullBase = href.startsWith('http') || href.startsWith('//')
+            ? (href.split('?')[0] || href)
+            : (window.location.origin || '') + (targetPath.startsWith('/') ? targetPath : '/products/' + targetPath);
+          const target = this.getUrlWithFormStateForNextPage(fullBase, { payNow: true, type: typeOverride });
+          window.location.href = target;
+        },
+        true
+      );
+    }
+
     initialize() {
       this.hasInteractedWithForm = false;
       this.updateBannerEditingState(false);
       this.resetAfterAddToCartPending = false;
+
+      this.debug('initialize:start', {
+        pathname: window.location && window.location.pathname,
+        search: window.location && window.location.search,
+      });
+      this.debug('initialize:config', {
+        autoSelectedCategory: this.config && this.config.autoSelectedCategory,
+        autoSelectedHarnessType: this.config && this.config.autoSelectedHarnessType,
+        effectiveProductType: this.config && this.config.effectiveProductType,
+        effectiveProductHandle: this.config && this.config.effectiveProductHandle,
+      });
 
       if (this.unitOfMeasureInput) {
         this.unitOfMeasureInput.value = 'Inches';
@@ -1241,75 +1389,213 @@
       // Leather color section visibility is managed by updateSectionVisibility
       // Don't set it as always active here - let updateSectionVisibility handle it based on category
 
-      // Check if product type mode (auto-selected category)
-      if (this.config && this.config.autoSelectedCategory) {
-        this.selectedCategory = this.config.autoSelectedCategory;
-        this.currentCategoryStore = this.measurementManager.getCategoryStore(this.selectedCategory);
+      // When URL has type/category params (edit link), apply them first so we don't default to first category/harness
+      const urlParams =
+        window.CustomOrderUtils && window.CustomOrderUtils.parseUrlParams
+          ? window.CustomOrderUtils.parseUrlParams()
+          : {};
+      const appliedFromUrl = this.applyTypeAndCategoryFromUrlParams(urlParams);
+      this.debug('initialize:urlParams', urlParams);
+      this.debug('initialize:appliedFromUrl', appliedFromUrl, {
+        selectedCategory: this.selectedCategory,
+      });
 
-        // Find and check the category input if it exists (may be hidden)
-        const categoryInput = Array.from(this.categoryInputs).find(
-          (input) => input.dataset.label === this.selectedCategory,
-        );
-        if (categoryInput) {
-          categoryInput.checked = true;
-        }
+      // If no type from URL: apply config (product-type page) or first category
+      if (!appliedFromUrl) {
+        if (this.config && this.config.autoSelectedCategory) {
+          this.debug('initialize:branch', 'config:autoSelectedCategory');
+          this.selectedCategory = this.config.autoSelectedCategory;
+          this.currentCategoryStore = this.measurementManager.getCategoryStore(this.selectedCategory);
 
-        this.categoryManager.updateSectionVisibility(
-          this.selectedCategory,
-          this.harnessSection,
-          this.harnessTypeSelector,
-          this.tagTypeSelector,
-          this.leatherColorSection,
-          this.notesSection,
-          this.associateSection,
-          this.otherCategoryNotice,
-        );
-        this.categoryManager.updateMeasurementsForCategory(this.selectedCategory, this.measurementFields);
-        this.measurementManager.restoreMeasurementsForCategory(this.selectedCategory, this.measurementFields);
-        this.updateMeasurementOnUnitChange();
-        this.categoryManager.updateMeasurementGroupVisibility();
-        if (this.config.autoSelectedHarnessType && this.harnessTypeInputs.length) {
-          const harnessType = this.config.autoSelectedHarnessType;
-          const radio = Array.from(this.harnessTypeInputs).find(
-            (input) => input.value.trim().toLowerCase() === harnessType.trim().toLowerCase(),
+          // Find and check the category input if it exists (may be hidden)
+          const categoryInput = Array.from(this.categoryInputs).find(
+            (input) => input.dataset.label === this.selectedCategory,
           );
-          if (radio) {
-            radio.checked = true;
+          if (categoryInput) {
+            categoryInput.checked = true;
+          }
+
+          this.categoryManager.updateSectionVisibility(
+            this.selectedCategory,
+            this.harnessSection,
+            this.harnessTypeSelector,
+            this.tagTypeSelector,
+            this.leatherColorSection,
+            this.notesSection,
+            this.associateSection,
+            this.otherCategoryNotice,
+          );
+          this.categoryManager.updateMeasurementsForCategory(this.selectedCategory, this.measurementFields);
+          this.measurementManager.restoreMeasurementsForCategory(this.selectedCategory, this.measurementFields);
+          this.updateMeasurementOnUnitChange();
+          this.categoryManager.updateMeasurementGroupVisibility();
+          if (this.config.autoSelectedHarnessType && this.harnessTypeInputs.length) {
+            const harnessType = this.config.autoSelectedHarnessType;
+            const radio = Array.from(this.harnessTypeInputs).find(
+              (input) => (input.value || '').trim().toLowerCase() === harnessType.trim().toLowerCase(),
+            );
+            if (radio) {
+              radio.checked = true;
+            }
+          }
+          // Apply tag type preselection from config when present (no new snippet params needed for new sub-types)
+          if (this.config.autoSelectedTagType && this.tagTypeSelector) {
+            const tagTypeInputs = this.tagTypeSelector.querySelectorAll('.tag-type-input');
+            const tagType = this.config.autoSelectedTagType;
+            const radio = Array.from(tagTypeInputs).find(
+              (input) => (input.value || '').trim().toLowerCase() === tagType.trim().toLowerCase(),
+            );
+            if (radio) {
+              radio.checked = true;
+            }
+          }
+        } else if (
+          this.config?.effectiveProductType &&
+          this.config.productTypeMap?.[this.config.effectiveProductType] &&
+          this.categoryInputs.length > 0
+        ) {
+          this.debug('initialize:branch', 'config:effectiveProductType');
+          // Fallback: derive category/harness from effectiveProductType when Liquid did not set autoSelectedCategory (e.g. type map key mismatch)
+          const effectiveType = String(this.config.effectiveProductType).trim();
+          const category = this.config.productTypeMap[effectiveType];
+          const harnessType = this.config.productTypeToHarnessType?.[effectiveType];
+          this.debug('initialize:effectiveProductType->category', { effectiveType, category, harnessType });
+          const categoryInput = Array.from(this.categoryInputs).find(
+            (input) => input.dataset.label === category,
+          );
+          if (categoryInput) {
+            categoryInput.checked = true;
+            this.selectedCategory = category;
+            this.currentCategoryStore = this.measurementManager.getCategoryStore(this.selectedCategory);
+            this.categoryManager.updateSectionVisibility(
+              this.selectedCategory,
+              this.harnessSection,
+              this.harnessTypeSelector,
+              this.tagTypeSelector,
+              this.leatherColorSection,
+              this.notesSection,
+              this.associateSection,
+              this.otherCategoryNotice,
+            );
+            this.categoryManager.updateMeasurementsForCategory(this.selectedCategory, this.measurementFields);
+            this.measurementManager.restoreMeasurementsForCategory(this.selectedCategory, this.measurementFields);
+            this.updateMeasurementOnUnitChange();
+            this.categoryManager.updateMeasurementGroupVisibility();
+            if (harnessType) {
+              if (category === 'Harness' && this.harnessTypeInputs?.length) {
+                const radio = Array.from(this.harnessTypeInputs).find(
+                  (input) => (input.value || '').trim().toLowerCase() === harnessType.trim().toLowerCase(),
+                );
+                if (radio) radio.checked = true;
+              } else if (category === 'Tag' && this.tagTypeSelector) {
+                const tagTypeInputs = this.tagTypeSelector.querySelectorAll('.tag-type-input');
+                const tagRadio = Array.from(tagTypeInputs).find(
+                  (input) => (input.value || '').trim().toLowerCase() === harnessType.trim().toLowerCase(),
+                );
+                if (tagRadio) tagRadio.checked = true;
+              }
+            }
+          }
+        } else if (
+          !this.config?.autoSelectedCategory &&
+          this.config?.productTypeMap &&
+          this.categoryInputs?.length > 0
+        ) {
+          this.debug('initialize:branch', 'handleFallback');
+          // Fallback: derive type from product handle (e.g. custom-asymmetric-harness → Asymmetric Harness) when Liquid didn't set category
+          const handle =
+            (this.config.effectiveProductHandle && String(this.config.effectiveProductHandle).trim()) ||
+            (typeof window !== 'undefined' &&
+              window.location?.pathname &&
+              (window.location.pathname.match(/\/products\/([^/]+)/) || [])[1]);
+          const handleLower = handle ? String(handle).toLowerCase().trim() : '';
+          this.debug('initialize:handleFallback:handle', { handle, handleLower });
+          if (handleLower) {
+            let effectiveType = null;
+            let category = null;
+            for (const [typeKey, catVal] of Object.entries(this.config.productTypeMap)) {
+              const slug = String(typeKey).toLowerCase().replace(/\s+/g, '-');
+              if (handleLower === slug || handleLower === 'custom-' + slug) {
+                effectiveType = typeKey;
+                category = catVal;
+                break;
+              }
+            }
+            this.debug('initialize:handleFallback:match', { effectiveType, category });
+            if (effectiveType && category) {
+              const harnessType = this.config.productTypeToHarnessType?.[effectiveType];
+              this.debug('initialize:handleFallback:resolved', { effectiveType, category, harnessType });
+              const categoryInput = Array.from(this.categoryInputs).find(
+                (input) => input.dataset.label === category,
+              );
+              if (categoryInput) {
+                categoryInput.checked = true;
+                this.selectedCategory = category;
+                this.currentCategoryStore = this.measurementManager.getCategoryStore(this.selectedCategory);
+                this.categoryManager.updateSectionVisibility(
+                  this.selectedCategory,
+                  this.harnessSection,
+                  this.harnessTypeSelector,
+                  this.tagTypeSelector,
+                  this.leatherColorSection,
+                  this.notesSection,
+                  this.associateSection,
+                  this.otherCategoryNotice,
+                );
+                this.categoryManager.updateMeasurementsForCategory(this.selectedCategory, this.measurementFields);
+                this.measurementManager.restoreMeasurementsForCategory(this.selectedCategory, this.measurementFields);
+                this.categoryManager.updateMeasurementGroupVisibility();
+                if (harnessType) {
+                  if (category === 'Harness' && this.harnessTypeInputs?.length) {
+                    const radio = Array.from(this.harnessTypeInputs).find(
+                      (input) =>
+                        (input.value || '').trim().toLowerCase() === String(harnessType).trim().toLowerCase(),
+                    );
+                    if (radio) radio.checked = true;
+                  } else if (category === 'Tag' && this.tagTypeSelector) {
+                    const tagTypeInputs = this.tagTypeSelector.querySelectorAll('.tag-type-input');
+                    const tagRadio = Array.from(tagTypeInputs).find(
+                      (input) =>
+                        (input.value || '').trim().toLowerCase() === String(harnessType).trim().toLowerCase(),
+                    );
+                    if (tagRadio) tagRadio.checked = true;
+                  }
+                }
+              }
+            }
           }
         }
-        // Apply tag type preselection from config when present (no new snippet params needed for new sub-types)
-        if (this.config.autoSelectedTagType && this.tagTypeSelector) {
-          const tagTypeInputs = this.tagTypeSelector.querySelectorAll('.tag-type-input');
-          const tagType = this.config.autoSelectedTagType;
-          const radio = Array.from(tagTypeInputs).find(
-            (input) => input.value.trim().toLowerCase() === tagType.trim().toLowerCase(),
+        if (!this.selectedCategory && this.categoryInputs.length > 0) {
+          this.debug('initialize:branch', 'default:firstCategory');
+          const firstInput = this.categoryInputs[0];
+          firstInput.checked = true;
+          this.selectedCategory = firstInput.dataset.label;
+          this.currentCategoryStore = this.measurementManager.getCategoryStore(this.selectedCategory);
+          this.categoryManager.updateSectionVisibility(
+            this.selectedCategory,
+            this.harnessSection,
+            this.harnessTypeSelector,
+            this.tagTypeSelector,
+            this.leatherColorSection,
+            this.notesSection,
+            this.associateSection,
+            this.otherCategoryNotice,
           );
-          if (radio) {
-            radio.checked = true;
-          }
+          this.categoryManager.updateMeasurementsForCategory(this.selectedCategory, this.measurementFields);
+          this.measurementManager.restoreMeasurementsForCategory(this.selectedCategory, this.measurementFields);
+          this.updateMeasurementOnUnitChange();
+          this.categoryManager.updateMeasurementGroupVisibility();
         }
-      } else if (this.categoryInputs.length > 0) {
-        const firstInput = this.categoryInputs[0];
-        firstInput.checked = true;
-        this.selectedCategory = firstInput.dataset.label;
-        this.currentCategoryStore = this.measurementManager.getCategoryStore(this.selectedCategory);
-        this.categoryManager.updateSectionVisibility(
-          this.selectedCategory,
-          this.harnessSection,
-          this.harnessTypeSelector,
-          this.tagTypeSelector,
-          this.leatherColorSection,
-          this.notesSection,
-          this.associateSection,
-          this.otherCategoryNotice,
-        );
-        this.categoryManager.updateMeasurementsForCategory(this.selectedCategory, this.measurementFields);
-        this.measurementManager.restoreMeasurementsForCategory(this.selectedCategory, this.measurementFields);
-        this.updateMeasurementOnUnitChange();
-        this.categoryManager.updateMeasurementGroupVisibility();
       }
 
       this.selectFirstSubTypeIfNone();
+      this.debug('initialize:afterSelectFirstSubTypeIfNone', {
+        selectedCategory: this.selectedCategory,
+        harnessTypeSelected: Array.from(this.harnessTypeInputs || []).find((i) => i.checked)?.value || null,
+        tagTypeSelected: this.tagTypeSelector
+          ? Array.from(this.tagTypeSelector.querySelectorAll('.tag-type-input')).find((i) => i.checked)?.value || null
+          : null,
+      });
 
       // Trigger validation which will publish events and update button state via pub/sub
       this.updateAddToCartButton();
@@ -1362,6 +1648,187 @@
           }
         }
       }
+    }
+
+    /**
+     * Applies only type, category, and harness/tag sub-type from URL params.
+     * Used at init so URL (edit link) wins over config/first-category when params are present.
+     * @param {Object} urlParams - Parsed URL params from CustomOrderUtils.parseUrlParams()
+     * @returns {boolean} - True if category/type was applied from URL
+     */
+    applyTypeAndCategoryFromUrlParams(urlParams) {
+      if (!urlParams || !this.categoryInputs?.length) return false;
+      this.debug('applyTypeAndCategoryFromUrlParams:start', {
+        keys: Object.keys(urlParams || {}),
+        type: urlParams && urlParams.type,
+        selectedOption: urlParams && urlParams['Selected Option'],
+        productType: urlParams && urlParams['Product Type'],
+        subType: urlParams && urlParams['Sub type'],
+      });
+      const hasType =
+        (urlParams.type && String(urlParams.type).trim()) ||
+        (urlParams['Selected Option'] && String(urlParams['Selected Option']).trim()) ||
+        (urlParams['Product Type'] && String(urlParams['Product Type']).trim()) ||
+        (urlParams['Sub type'] && String(urlParams['Sub type']).trim());
+      if (!hasType) return false;
+
+      // Apply type param (category + harness from config)
+      const typeParam = urlParams.type;
+      if (typeParam) {
+        const effectiveType = decodeURIComponent(String(typeParam)).trim();
+        if (effectiveType && effectiveType.toLowerCase() !== 'custom order') {
+          let category =
+            this.config?.productTypeMap?.[effectiveType];
+          const harnessType =
+            this.config?.productTypeToHarnessType?.[effectiveType];
+          this.debug('applyTypeAndCategoryFromUrlParams:type', { effectiveType, category, harnessType });
+          if (!category && this.categoryInputs.length) {
+            const categoryByLabel = Array.from(this.categoryInputs).find(
+              (input) =>
+                input.dataset.label &&
+                input.dataset.label.trim().toLowerCase() === effectiveType.trim().toLowerCase(),
+            );
+            if (categoryByLabel?.dataset.label) category = categoryByLabel.dataset.label;
+          }
+          if (category) {
+            const categoryInput = Array.from(this.categoryInputs).find(
+              (input) => input.dataset.label === category,
+            );
+            if (categoryInput) {
+              categoryInput.checked = true;
+              this.selectedCategory = category;
+              this.currentCategoryStore = this.measurementManager.getCategoryStore(this.selectedCategory);
+              this.categoryManager.updateSectionVisibility(
+                this.selectedCategory,
+                this.harnessSection,
+                this.harnessTypeSelector,
+                this.tagTypeSelector,
+                this.leatherColorSection,
+                this.notesSection,
+                this.associateSection,
+                this.otherCategoryNotice,
+              );
+              this.categoryManager.updateMeasurementsForCategory(this.selectedCategory, this.measurementFields);
+              this.measurementManager.restoreMeasurementsForCategory(this.selectedCategory, this.measurementFields);
+              this.categoryManager.updateMeasurementGroupVisibility();
+              this.debug('applyTypeAndCategoryFromUrlParams:type:appliedCategory', { category });
+            }
+          }
+          if (harnessType && this.harnessTypeInputs?.length) {
+            const radio = Array.from(this.harnessTypeInputs).find(
+              (input) => (input.value || '').trim().toLowerCase() === harnessType.trim().toLowerCase(),
+            );
+            if (radio) radio.checked = true;
+            this.debug('applyTypeAndCategoryFromUrlParams:type:appliedHarness', { harnessType, found: !!radio });
+          }
+        }
+      }
+
+      // Pre-fill category from Selected Option
+      if (urlParams['Selected Option']) {
+        const categoryValue = String(urlParams['Selected Option']).trim();
+        const categoryInput = Array.from(this.categoryInputs).find(
+          (input) => input.dataset.label === categoryValue,
+        );
+        if (categoryInput) {
+          categoryInput.checked = true;
+          this.selectedCategory = categoryValue;
+          this.currentCategoryStore = this.measurementManager.getCategoryStore(this.selectedCategory);
+          this.categoryManager.updateSectionVisibility(
+            this.selectedCategory,
+            this.harnessSection,
+            this.harnessTypeSelector,
+            this.tagTypeSelector,
+            this.leatherColorSection,
+            this.notesSection,
+            this.associateSection,
+            this.otherCategoryNotice,
+          );
+          this.categoryManager.updateMeasurementsForCategory(this.selectedCategory, this.measurementFields);
+          this.debug('applyTypeAndCategoryFromUrlParams:selectedOption:appliedCategory', { categoryValue });
+        }
+      }
+
+      // Pre-fill harness/tag sub-type from Product Type or Sub type (trim + case-insensitive)
+      const productTypeParamRaw =
+        urlParams['Product Type'] ||
+        urlParams['Sub type'] ||
+        urlParams['Harness Type'] ||
+        urlParams['Tag Type'];
+      const productTypeParam = productTypeParamRaw ? String(productTypeParamRaw).trim() : '';
+      if (productTypeParam) {
+        // When URL has only Sub type / Product Type (no Selected Option or type), set category from sub-type so we don't fall back to first category
+        if (!this.selectedCategory && this.categoryInputs?.length) {
+          const isHarnessType =
+            this.harnessTypeInputs?.length &&
+            Array.from(this.harnessTypeInputs).some(
+              (input) => (input.value || '').trim().toLowerCase() === productTypeParam.toLowerCase(),
+            );
+          const isTagType =
+            this.tagTypeSelector &&
+            Array.from(this.tagTypeSelector.querySelectorAll('.tag-type-input')).some(
+              (input) => (input.value || '').trim().toLowerCase() === productTypeParam.toLowerCase(),
+            );
+          const categoryFromSubType = isHarnessType ? 'Harness' : isTagType ? 'Tag' : null;
+          this.debug('applyTypeAndCategoryFromUrlParams:subType:inferCategory', {
+            productTypeParam,
+            isHarnessType,
+            isTagType,
+            categoryFromSubType,
+          });
+          if (categoryFromSubType) {
+            const categoryInput = Array.from(this.categoryInputs).find(
+              (input) => input.dataset.label === categoryFromSubType,
+            );
+            if (categoryInput) {
+              categoryInput.checked = true;
+              this.selectedCategory = categoryFromSubType;
+              this.currentCategoryStore = this.measurementManager.getCategoryStore(this.selectedCategory);
+              this.categoryManager.updateSectionVisibility(
+                this.selectedCategory,
+                this.harnessSection,
+                this.harnessTypeSelector,
+                this.tagTypeSelector,
+                this.leatherColorSection,
+                this.notesSection,
+                this.associateSection,
+                this.otherCategoryNotice,
+              );
+              this.categoryManager.updateMeasurementsForCategory(this.selectedCategory, this.measurementFields);
+              this.measurementManager.restoreMeasurementsForCategory(this.selectedCategory, this.measurementFields);
+              this.categoryManager.updateMeasurementGroupVisibility();
+              this.debug('applyTypeAndCategoryFromUrlParams:subType:appliedCategory', { categoryFromSubType });
+            }
+          }
+        }
+        if (this.harnessTypeSelector && this.harnessTypeInputs?.length) {
+          const radio = Array.from(this.harnessTypeInputs).find(
+            (input) => (input.value || '').trim().toLowerCase() === productTypeParam.toLowerCase(),
+          );
+          if (radio) radio.checked = true;
+          this.debug('applyTypeAndCategoryFromUrlParams:subType:applyHarness', {
+            productTypeParam,
+            found: !!radio,
+          });
+        }
+        if (this.tagTypeSelector) {
+          const tagTypeInputs = this.tagTypeSelector.querySelectorAll('.tag-type-input');
+          const tagRadio = Array.from(tagTypeInputs).find(
+            (input) => (input.value || '').trim().toLowerCase() === productTypeParam.toLowerCase(),
+          );
+          if (tagRadio) tagRadio.checked = true;
+          this.debug('applyTypeAndCategoryFromUrlParams:subType:applyTag', { productTypeParam, found: !!tagRadio });
+        }
+      }
+
+      this.debug('applyTypeAndCategoryFromUrlParams:done', {
+        selectedCategory: this.selectedCategory,
+        harnessTypeSelected: Array.from(this.harnessTypeInputs || []).find((i) => i.checked)?.value || null,
+        tagTypeSelected: this.tagTypeSelector
+          ? Array.from(this.tagTypeSelector.querySelectorAll('.tag-type-input')).find((i) => i.checked)?.value || null
+          : null,
+      });
+      return !!(this.selectedCategory && hasType);
     }
 
     prefillFromUrlParams() {
@@ -1550,11 +2017,13 @@
 
       runPropertyPrefill();
       runMeasurementSync();
+      this.measurementManager.mergeMeasurementsFromUrlParams(urlParams);
       this.updateAddToCartButton();
       if (hasMeasurementParams) {
         requestAnimationFrame(() => {
           runPropertyPrefill();
           runMeasurementSync();
+          this.measurementManager.mergeMeasurementsFromUrlParams(urlParams);
           this.updateAddToCartButton();
         });
       }
@@ -1595,22 +2064,25 @@
         }
       }
 
-      // Pre-fill sub-type (Product Type); support Product Type, Sub type, Harness Type, and Tag Type URL params for edit links
-      const productTypeParam =
+      // Pre-fill sub-type (Product Type); support Product Type, Sub type, Harness Type, and Tag Type URL params for edit links (trim + case-insensitive match)
+      const productTypeParamRaw =
         urlParams['Product Type'] ||
         urlParams['Sub type'] ||
         urlParams['Harness Type'] ||
         urlParams['Tag Type'];
+      const productTypeParam = productTypeParamRaw ? String(productTypeParamRaw).trim() : '';
       if (productTypeParam) {
-        if (this.harnessTypeSelector) {
+        if (this.harnessTypeSelector && this.harnessTypeInputs.length) {
           const harnessTypeInput = Array.from(this.harnessTypeInputs).find(
-            (input) => input.value === productTypeParam
+            (input) => (input.value || '').trim().toLowerCase() === productTypeParam.toLowerCase()
           );
           if (harnessTypeInput) harnessTypeInput.checked = true;
         }
         if (this.tagTypeSelector) {
           const tagTypeInputs = this.tagTypeSelector.querySelectorAll('.tag-type-input');
-          const tagTypeInput = Array.from(tagTypeInputs).find((input) => input.value === productTypeParam);
+          const tagTypeInput = Array.from(tagTypeInputs).find(
+            (input) => (input.value || '').trim().toLowerCase() === productTypeParam.toLowerCase()
+          );
           if (tagTypeInput) tagTypeInput.checked = true;
         }
       }
@@ -1766,11 +2238,16 @@
       // (Harness and Tag need harness type / tag type to determine which pay-now product)
       const needsSubType = category === 'Harness' || category === 'Tag';
       if (!needsSubType && category && this.config && this.config.productTypeMap) {
+        const hasPayNowUrl = (type) =>
+          this.config.productTypeToRedirectUrl && this.config.productTypeToRedirectUrl[type];
+        let firstMatch = null;
         for (const type of Object.keys(this.config.productTypeMap)) {
-          if (this.config.productTypeMap[type] === category) {
-            return type;
-          }
+          if (this.config.productTypeMap[type] !== category) continue;
+          if (!firstMatch) firstMatch = type;
+          // Prefer a type that has a pay-now product so URL uses e.g. type=Hats not type=Muir+Cap
+          if (hasPayNowUrl(type)) return type;
         }
+        if (firstMatch) return firstMatch;
       }
       return null;
     }
@@ -1950,13 +2427,51 @@
     }
 
     /**
-     * If current selection has a pay-now product URL and we're on the generic custom order page,
-     * redirect to that product page with form state in the URL so Add to cart uses the pay-now SKU.
-     * Only redirect when the selection fully determines the SKU (e.g. Harness + harness type, Tag + tag type).
-     * Called after category or harness/tag type change (user-initiated).
+     * Builds the URL to use for the next page load so form state (measurements, options) is preserved.
+     * Call this when redirecting; the next page reads state via parseUrlParams() (URL or edit_ref).
+     * Abstracts storage: uses query string when short enough, otherwise sessionStorage + edit_ref (same as edit links).
+     * @param {string} baseUrl - Full URL or path for the destination (e.g. redirectUrl or generic custom order URL).
+     * @param {{ payNow?: boolean, type?: string }} [options] - payNow: add pay_now=1; type: override type / Product Type / Sub type (e.g. for link interceptor target).
+     * @returns {string} Full URL to assign to window.location.href.
+     */
+    getUrlWithFormStateForNextPage(baseUrl, options = {}) {
+      const qs = this.getFormStateAsQueryString();
+      const params = qs ? new URLSearchParams(qs) : new URLSearchParams();
+      if (options.payNow) params.set('pay_now', '1');
+      if (options.type != null && String(options.type).trim() !== '') {
+        const t = String(options.type).trim();
+        params.set('type', t);
+        params.set('Product Type', t);
+        params.set('Sub type', t);
+      }
+      const base = (baseUrl || '').replace(/\?.*$/, '').trim();
+      const origin = typeof window !== 'undefined' && window.location && window.location.origin ? window.location.origin : '';
+      const fullBase = base.startsWith('http') ? base : base.startsWith('/') ? origin + base : origin + (base ? '/products/' + base : '');
+      const queryString = params.toString();
+      const fullUrl = queryString ? `${fullBase}?${queryString}` : fullBase;
+      const maxUrlLength = 2000;
+      if (fullUrl.length <= maxUrlLength) return fullUrl;
+      const paramObj = Object.fromEntries(params.entries());
+      try {
+        const editRef = Date.now().toString(36) + Math.random().toString(36).slice(2, 9);
+        sessionStorage.setItem('customOrderEdit_' + editRef, JSON.stringify(paramObj));
+        const shortParams = new URLSearchParams({ edit_ref: editRef });
+        if (options.payNow) shortParams.set('pay_now', '1');
+        return fullBase + '?' + shortParams.toString();
+      } catch (e) {
+        return fullUrl;
+      }
+    }
+
+    /**
+     * When selection has a pay-now product URL, redirect to that product page with form state.
+     * Called after category or harness/tag type change. When already on a pay-now product page,
+     * redirects only if the new selection is a different product (so clicking another product
+     * navigates to its page).
      */
     maybeRedirectToPayNowProduct() {
-      if (this.config && this.config.isChargeUpfrontProductPage) {
+      // Only redirect to pay-now product when user has Pay now selected; leave Invoice later users on generic flow
+      if (this.paymentInvoiceLaterRadio && this.paymentInvoiceLaterRadio.checked) {
         return;
       }
       if (this.selectedCategory === 'Harness' && !this.getSelectedHarnessType()) {
@@ -1968,15 +2483,18 @@
           return;
         }
       }
-      const effectiveType = this.getEffectiveProductType();
+      const effectiveType = this.getEffectiveProductType({ fromSelectionOnly: true });
       const redirectUrl = this.getRedirectUrlForType(effectiveType);
       if (!redirectUrl) {
         return;
       }
-      const queryString = this.getFormStateAsQueryString();
-      const params = queryString ? new URLSearchParams(queryString) : new URLSearchParams();
-      params.set('pay_now', '1');
-      const target = `${redirectUrl}?${params.toString()}`;
+      // When already on a pay-now product page, only redirect if the new selection is a different product
+      if (this.config && this.config.isChargeUpfrontProductPage) {
+        if (effectiveType === this.config.effectiveProductType) {
+          return;
+        }
+      }
+      const target = this.getUrlWithFormStateForNextPage(redirectUrl, { payNow: true });
       window.location.href = target;
     }
 
@@ -2187,14 +2705,22 @@
         }
         return norm(p.startsWith('/') ? p : '/products/' + p);
       };
+      const canonicalGeneric = '/products/custom-order';
       let genericUrl =
         (this.config && this.config.customOrderProductUrl) ||
         (window.customMeasurementsConfig && window.customMeasurementsConfig.customOrderProductUrl) ||
-        '/products/custom-order';
+        canonicalGeneric;
+      // Never use a pay-now product URL as the generic (e.g. if custom_order_product_sku points at a pay-now SKU)
+      const payNowPaths = this.config && this.config.productTypeToRedirectUrl
+        ? Object.values(this.config.productTypeToRedirectUrl).map((u) => pathToNorm(u))
+        : [];
+      if (payNowPaths.indexOf(pathToNorm(genericUrl)) !== -1) {
+        genericUrl = canonicalGeneric;
+      }
       let genericPathNorm = pathToNorm(genericUrl);
       const currentPathNorm = norm(currentPath);
       if (genericPathNorm === currentPathNorm) {
-        genericUrl = '/products/custom-order';
+        genericUrl = canonicalGeneric;
         genericPathNorm = pathToNorm(genericUrl);
       }
       const alreadyOnGeneric = currentPathNorm === genericPathNorm;
@@ -2202,11 +2728,8 @@
       const path = (genericUrl || '').trim();
       const origin = window.location && window.location.origin || '';
       const base = path.startsWith('http') ? path : path.startsWith('/') ? origin + path : origin + '/products/' + path;
-      const formState = this.getFormStateAsQueryString();
-      const params = formState ? new URLSearchParams(formState) : new URLSearchParams();
-      params.delete('pay_now');
-      const qs = params.toString();
-      window.location.href = qs ? `${base}?${qs}` : base;
+      const target = this.getUrlWithFormStateForNextPage(base);
+      window.location.href = target;
       return true;
     }
 
@@ -2218,6 +2741,17 @@
      */
     applyPayNowFromUrlIfPresent() {
       if (!this.paymentPayNowRadio || !this.paymentInvoiceLaterRadio) return;
+
+      // On a pay-now product page (e.g. direct load of /products/custom-hat), always show Pay now
+      // selected and enabled so the page state matches the product. Skip the disabled check so we
+      // don't depend on category/toggle state having been set first.
+      if (this.isOnPayNowProductPage()) {
+        this.paymentPayNowRadio.checked = true;
+        this.paymentInvoiceLaterRadio.checked = false;
+        this.paymentPayNowRadio.disabled = false;
+        return;
+      }
+
       if (this.paymentPayNowRadio.disabled) return;
 
       const fromUrl =
@@ -2230,7 +2764,7 @@
           return payNowVal === '1' || payNowVal === 'true';
         })();
 
-      if (fromUrl || this.isOnPayNowProductPage()) {
+      if (fromUrl) {
         this.paymentPayNowRadio.checked = true;
         this.paymentInvoiceLaterRadio.checked = false;
       }
@@ -2250,10 +2784,7 @@
         const redirectUrl = this.getRedirectUrlForType(effectiveType);
         const hasRedirect = typeof redirectUrl === 'string' && redirectUrl.trim().length > 0;
         if (hasRedirect) {
-          const queryString = this.getFormStateAsQueryString();
-          const params = queryString ? new URLSearchParams(queryString) : new URLSearchParams();
-          params.set('pay_now', '1');
-          const target = `${redirectUrl}?${params.toString()}`;
+          const target = this.getUrlWithFormStateForNextPage(redirectUrl, { payNow: true });
           window.location.href = target;
         }
         // If no URL, Pay now radio is disabled by updatePaymentToggleState so this path should not run
@@ -2295,24 +2826,33 @@
           this.selectFirstSubTypeIfNone();
           this.syncUrlToCurrentSelection();
           this.updatePaymentToggleState();
+          this.maybeRedirectToPayNowProduct();
           this.updateAddToCartButton();
         });
       });
 
-      // Harness type selection: sync URL to new type, then update Pay now state (redirect may follow)
+      // Harness type selection: save measurements to store first so redirect carries them; then sync URL, update Pay now state, redirect
       this.harnessTypeInputs.forEach((input) => {
         input.addEventListener('change', () => {
+          if (this.selectedCategory) {
+            this.measurementManager.saveCategoryMeasurements(this.selectedCategory, this.measurementFields);
+          }
           this.syncUrlToCurrentSelection();
           this.updatePaymentToggleState();
+          this.maybeRedirectToPayNowProduct();
         });
       });
 
-      // Tag type selection: sync URL to new type, then update Pay now state (redirect may follow)
+      // Tag type selection: save measurements to store first so redirect carries them; then sync URL, update Pay now state, redirect
       if (this.tagTypeSelector) {
         this.tagTypeSelector.querySelectorAll('.tag-type-input').forEach((input) => {
           input.addEventListener('change', () => {
+            if (this.selectedCategory) {
+              this.measurementManager.saveCategoryMeasurements(this.selectedCategory, this.measurementFields);
+            }
             this.syncUrlToCurrentSelection();
             this.updatePaymentToggleState();
+            this.maybeRedirectToPayNowProduct();
           });
         });
       }

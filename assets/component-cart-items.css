@@ -486,49 +486,54 @@ cart-edit-button .button:not([disabled]):hover {
   box-sizing: border-box;
 }
 
-/* Set explicit column widths only on thead (first row) for table-layout: fixed */
+/* Set explicit column widths: give IN/CM enough room for 3-decimal values (e.g. 307.340) plus padding. */
 .measurements-table thead th:first-child {
-  width: 60%;
-}
-
-.measurements-table thead th:not(:first-child):not(:last-child) {
-  width: 20%;
-}
-
-.measurements-table thead th:last-child {
-  width: 20%;
-}
-
-/* Adjust column widths for tablet - give more space to measurement values */
-@media screen and (min-width: 750px) and (max-width: 989px) {
-  .measurements-table thead th:first-child {
-    width: 40%;
-  }
-
-  .measurements-table thead th:not(:first-child):not(:last-child) {
-    width: 30%;
-  }
-
-  .measurements-table thead th:last-child {
-    width: 30%;
-  }
-}
-
-/* Cart drawer: Give more space to measurement values to prevent wrapping */
-.cart-drawer .measurements-table thead th:first-child {
   width: 45%;
 }
 
-.cart-drawer .measurements-table thead th:not(:first-child):not(:last-child) {
+.measurements-table thead th:not(:first-child):not(:last-child) {
   width: 27.5%;
+  min-width: 11ch; /* fit XXX.XXX plus padding */
+}
+
+.measurements-table thead th:last-child {
+  width: 27.5%;
+  min-width: 11ch;
+}
+
+/* Adjust column widths for tablet - more space for numeric columns */
+@media screen and (min-width: 750px) and (max-width: 989px) {
+  .measurements-table thead th:first-child {
+    width: 38%;
+  }
+
+  .measurements-table thead th:not(:first-child):not(:last-child) {
+    width: 31%;
+    min-width: 11ch;
+  }
+
+  .measurements-table thead th:last-child {
+    width: 31%;
+    min-width: 11ch;
+  }
+}
+
+/* Cart drawer: give numeric columns enough room */
+.cart-drawer .measurements-table thead th:first-child {
+  width: 40%;
+}
+
+.cart-drawer .measurements-table thead th:not(:first-child):not(:last-child) {
+  width: 30%;
+  min-width: 11ch;
 }
 
 .cart-drawer .measurements-table thead th:last-child {
-  width: 27.5%;
+  width: 30%;
+  min-width: 11ch;
 }
 
 .measurements-table th {
-  text-align: left;
   padding: 0.8rem 0;
   font-weight: 500;
   font-size: 0.9em;
@@ -541,14 +546,17 @@ cart-edit-button .button:not([disabled]):hover {
   padding-right: 1.2rem;
 }
 
+/* IN and CM columns: right-align so numbers line up; extra padding so values aren't cramped */
+.measurements-table th:nth-child(2),
+.measurements-table th:nth-child(3),
 .measurements-table th:not(:first-child) {
   text-align: right;
   padding-left: 0.8rem;
-  padding-right: 0.8rem;
+  padding-right: 1.2rem;
 }
 
 .measurements-table th:last-child {
-  padding-right: 0;
+  padding-right: 1.2rem;
   padding-left: 0.8rem;
 }
 
@@ -559,19 +567,24 @@ cart-edit-button .button:not([disabled]):hover {
 }
 
 .measurements-table td:first-child {
+  text-align: left;
   padding-left: 0;
   padding-right: 1.2rem;
 }
 
+/* IN and CM value cells: right-align so numbers line up; extra padding so values aren't cramped */
+.measurements-table td:nth-child(2),
+.measurements-table td:nth-child(3),
 .measurements-table td:not(:first-child) {
   text-align: right;
   padding-left: 0.8rem;
-  padding-right: 0.8rem;
+  padding-right: 1.2rem;
   font-variant-numeric: tabular-nums;
+  white-space: nowrap; /* keep 3-decimal values on one line */
 }
 
 .measurements-table td:last-child {
-  padding-right: 0;
+  padding-right: 1.2rem;
   padding-left: 0.8rem;
 }
 
