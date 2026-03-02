@@ -486,17 +486,20 @@ cart-edit-button .button:not([disabled]):hover {
   box-sizing: border-box;
 }
 
-/* Set explicit column widths only on thead (first row) for table-layout: fixed */
+/* Set explicit column widths only on thead (first row) for table-layout: fixed.
+   IN/CM columns need room for 3-decimal values (e.g. 307.340) on one line. */
 .measurements-table thead th:first-child {
   width: 60%;
 }
 
 .measurements-table thead th:not(:first-child):not(:last-child) {
   width: 20%;
+  min-width: 8ch; /* fit XXX.XXX */
 }
 
 .measurements-table thead th:last-child {
   width: 20%;
+  min-width: 8ch; /* fit XXX.XXX */
 }
 
 /* Adjust column widths for tablet - give more space to measurement values */
@@ -507,10 +510,12 @@ cart-edit-button .button:not([disabled]):hover {
 
   .measurements-table thead th:not(:first-child):not(:last-child) {
     width: 30%;
+    min-width: 8ch;
   }
 
   .measurements-table thead th:last-child {
     width: 30%;
+    min-width: 8ch;
   }
 }
 
@@ -521,14 +526,15 @@ cart-edit-button .button:not([disabled]):hover {
 
 .cart-drawer .measurements-table thead th:not(:first-child):not(:last-child) {
   width: 27.5%;
+  min-width: 8ch;
 }
 
 .cart-drawer .measurements-table thead th:last-child {
   width: 27.5%;
+  min-width: 8ch;
 }
 
 .measurements-table th {
-  text-align: left;
   padding: 0.8rem 0;
   font-weight: 500;
   font-size: 0.9em;
@@ -541,6 +547,9 @@ cart-edit-button .button:not([disabled]):hover {
   padding-right: 1.2rem;
 }
 
+/* IN and CM columns: right-align so numbers line up */
+.measurements-table th:nth-child(2),
+.measurements-table th:nth-child(3),
 .measurements-table th:not(:first-child) {
   text-align: right;
   padding-left: 0.8rem;
@@ -559,15 +568,20 @@ cart-edit-button .button:not([disabled]):hover {
 }
 
 .measurements-table td:first-child {
+  text-align: left;
   padding-left: 0;
   padding-right: 1.2rem;
 }
 
+/* IN and CM value cells: right-align so numbers line up */
+.measurements-table td:nth-child(2),
+.measurements-table td:nth-child(3),
 .measurements-table td:not(:first-child) {
   text-align: right;
   padding-left: 0.8rem;
   padding-right: 0.8rem;
   font-variant-numeric: tabular-nums;
+  white-space: nowrap; /* keep 3-decimal values on one line */
 }
 
 .measurements-table td:last-child {
