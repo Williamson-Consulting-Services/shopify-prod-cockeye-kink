@@ -760,6 +760,50 @@
       });
     }
 
+    /**
+     * Merges measurement params from URL (or edit_ref state) into the shared store.
+     * Ensures measurements from other categories (e.g. Shirt's Chest when we're on Tag page) are
+     * preserved so that Shirt → Tag → Shirt keeps Shirt data.
+     * @param {Object} urlParams - Parsed URL/state object with keys like "Chest (in)", "Chest (cm)".
+     */
+    mergeMeasurementsFromUrlParams(urlParams) {
+      if (!urlParams || typeof urlParams !== 'object') return;
+      const store = this.sharedMeasurements;
+      const byName = new Map();
+      for (const [key, value] of Object.entries(urlParams)) {
+        const str = value != null ? String(value).trim() : '';
+        if (str === '') continue;
+        const num = this.utils.parseValue(str);
+        if (!Number.isFinite(num)) continue;
+        let measName;
+        let unit;
+        if (key.endsWith(' (in)')) {
+          measName = key.slice(0, -5).trim();
+          unit = 'in';
+        } else if (key.endsWith(' (cm)')) {
+          measName = key.slice(0, -5).trim();
+          unit = 'cm';
+        } else continue;
+        if (!measName) continue;
+        let entry = byName.get(measName);
+        if (!entry) {
+          entry = { in: null, cm: null };
+          byName.set(measName, entry);
+        }
+        if (unit === 'in') entry.in = num;
+        else entry.cm = num;
+      }
+      byName.forEach((entry, measName) => {
+        if (!Number.isFinite(entry.in) && !Number.isFinite(entry.cm)) return;
+        const existing = store.get(measName) || { in: null, cm: null };
+        let inVal = Number.isFinite(entry.in) ? entry.in : (Number.isFinite(existing.in) ? existing.in : null);
+        let cmVal = Number.isFinite(entry.cm) ? entry.cm : (Number.isFinite(existing.cm) ? existing.cm : null);
+        if (Number.isFinite(inVal) && !Number.isFinite(cmVal)) cmVal = inVal * this.utils.INCH_TO_CM;
+        if (Number.isFinite(cmVal) && !Number.isFinite(inVal)) inVal = cmVal * this.utils.CM_TO_INCH;
+        store.set(measName, { in: inVal, cm: cmVal });
+      });
+    }
+
     clearAll() {
       this.sharedMeasurements.clear();
     }
@@ -1210,26 +1254,20 @@
           if (this.selectedCategory) {
             this.measurementManager.saveCategoryMeasurements(this.selectedCategory, this.measurementFields);
           }
-          const qs = this.getFormStateAsQueryString();
-          const params = qs ? new URLSearchParams(qs) : new URLSearchParams();
-          // Override type params for the target product (link goes to Deluxe but form still shows Standard)
+          let typeOverride;
           const urlToType = this.config?.productTypeToRedirectUrl;
           if (urlToType) {
             for (const [type, url] of Object.entries(urlToType)) {
               if (url && pathToNorm(url) === targetPath) {
-                params.set('type', type);
-                params.set('Product Type', type);
-                params.set('Sub type', type);
+                typeOverride = type;
                 break;
               }
             }
           }
-          params.set('pay_now', '1');
-          const origin = window.location.origin || '';
-          const target =
-            href.startsWith('http') || href.startsWith('//')
-              ? (href.split('?')[0] || href) + '?' + params.toString()
-              : origin + (targetPath.startsWith('/') ? targetPath : '/products/' + targetPath) + '?' + params.toString();
+          const fullBase = href.startsWith('http') || href.startsWith('//')
+            ? (href.split('?')[0] || href)
+            : (window.location.origin || '') + (targetPath.startsWith('/') ? targetPath : '/products/' + targetPath);
+          const target = this.getUrlWithFormStateForNextPage(fullBase, { payNow: true, type: typeOverride });
           window.location.href = target;
         },
         true
@@ -1979,11 +2017,13 @@
 
       runPropertyPrefill();
       runMeasurementSync();
+      this.measurementManager.mergeMeasurementsFromUrlParams(urlParams);
       this.updateAddToCartButton();
       if (hasMeasurementParams) {
         requestAnimationFrame(() => {
           runPropertyPrefill();
           runMeasurementSync();
+          this.measurementManager.mergeMeasurementsFromUrlParams(urlParams);
           this.updateAddToCartButton();
         });
       }
@@ -2387,6 +2427,43 @@
     }
 
     /**
+     * Builds the URL to use for the next page load so form state (measurements, options) is preserved.
+     * Call this when redirecting; the next page reads state via parseUrlParams() (URL or edit_ref).
+     * Abstracts storage: uses query string when short enough, otherwise sessionStorage + edit_ref (same as edit links).
+     * @param {string} baseUrl - Full URL or path for the destination (e.g. redirectUrl or generic custom order URL).
+     * @param {{ payNow?: boolean, type?: string }} [options] - payNow: add pay_now=1; type: override type / Product Type / Sub type (e.g. for link interceptor target).
+     * @returns {string} Full URL to assign to window.location.href.
+     */
+    getUrlWithFormStateForNextPage(baseUrl, options = {}) {
+      const qs = this.getFormStateAsQueryString();
+      const params = qs ? new URLSearchParams(qs) : new URLSearchParams();
+      if (options.payNow) params.set('pay_now', '1');
+      if (options.type != null && String(options.type).trim() !== '') {
+        const t = String(options.type).trim();
+        params.set('type', t);
+        params.set('Product Type', t);
+        params.set('Sub type', t);
+      }
+      const base = (baseUrl || '').replace(/\?.*$/, '').trim();
+      const origin = typeof window !== 'undefined' && window.location && window.location.origin ? window.location.origin : '';
+      const fullBase = base.startsWith('http') ? base : base.startsWith('/') ? origin + base : origin + (base ? '/products/' + base : '');
+      const queryString = params.toString();
+      const fullUrl = queryString ? `${fullBase}?${queryString}` : fullBase;
+      const maxUrlLength = 2000;
+      if (fullUrl.length <= maxUrlLength) return fullUrl;
+      const paramObj = Object.fromEntries(params.entries());
+      try {
+        const editRef = Date.now().toString(36) + Math.random().toString(36).slice(2, 9);
+        sessionStorage.setItem('customOrderEdit_' + editRef, JSON.stringify(paramObj));
+        const shortParams = new URLSearchParams({ edit_ref: editRef });
+        if (options.payNow) shortParams.set('pay_now', '1');
+        return fullBase + '?' + shortParams.toString();
+      } catch (e) {
+        return fullUrl;
+      }
+    }
+
+    /**
      * When selection has a pay-now product URL, redirect to that product page with form state.
      * Called after category or harness/tag type change. When already on a pay-now product page,
      * redirects only if the new selection is a different product (so clicking another product
@@ -2417,10 +2494,7 @@
           return;
         }
       }
-      const queryString = this.getFormStateAsQueryString();
-      const params = queryString ? new URLSearchParams(queryString) : new URLSearchParams();
-      params.set('pay_now', '1');
-      const target = `${redirectUrl}?${params.toString()}`;
+      const target = this.getUrlWithFormStateForNextPage(redirectUrl, { payNow: true });
       window.location.href = target;
     }
 
@@ -2654,11 +2728,8 @@
       const path = (genericUrl || '').trim();
       const origin = window.location && window.location.origin || '';
       const base = path.startsWith('http') ? path : path.startsWith('/') ? origin + path : origin + '/products/' + path;
-      const formState = this.getFormStateAsQueryString();
-      const params = formState ? new URLSearchParams(formState) : new URLSearchParams();
-      params.delete('pay_now');
-      const qs = params.toString();
-      window.location.href = qs ? `${base}?${qs}` : base;
+      const target = this.getUrlWithFormStateForNextPage(base);
+      window.location.href = target;
       return true;
     }
 
@@ -2713,10 +2784,7 @@
         const redirectUrl = this.getRedirectUrlForType(effectiveType);
         const hasRedirect = typeof redirectUrl === 'string' && redirectUrl.trim().length > 0;
         if (hasRedirect) {
-          const queryString = this.getFormStateAsQueryString();
-          const params = queryString ? new URLSearchParams(queryString) : new URLSearchParams();
-          params.set('pay_now', '1');
-          const target = `${redirectUrl}?${params.toString()}`;
+          const target = this.getUrlWithFormStateForNextPage(redirectUrl, { payNow: true });
           window.location.href = target;
         }
         // If no URL, Pay now radio is disabled by updatePaymentToggleState so this path should not run
