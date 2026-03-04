@@ -96,7 +96,7 @@
         "collapsible-row-1": {
           "type": "collapsible_tab",
           "settings": {
-            "heading": "{{ block.settings.page.title }}",
+            "heading": "",
             "icon": "truck",
             "content": "",
             "page": "shipping-policy"
@@ -105,7 +105,7 @@
         "collapsible_tab_RQ8Knh": {
           "type": "collapsible_tab",
           "settings": {
-            "heading": "{{ block.settings.page.title }}",
+            "heading": "",
             "icon": "return",
             "content": "",
             "page": "return-and-refund-policy"

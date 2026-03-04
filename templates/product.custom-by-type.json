@@ -93,10 +93,19 @@
         "collapsible-row-1": {
           "type": "collapsible_tab",
           "settings": {
-            "heading": "Shipping & Returns",
+            "heading": "",
             "icon": "truck",
-            "content": "<p>7-14 Business Days depending on demand</p>",
-            "page": ""
+            "content": "",
+            "page": "shipping-policy"
+          }
+        },
+        "collapsible_tab_M3kjAH": {
+          "type": "collapsible_tab",
+          "settings": {
+            "heading": "",
+            "icon": "return",
+            "content": "",
+            "page": "return-and-refund-policy"
           }
         },
         "share": {
@@ -121,6 +130,7 @@
         "collapsible_tab_CdzfPc",
         "collapsible-row-0",
         "collapsible-row-1",
+        "collapsible_tab_M3kjAH",
         "share"
       ],
       "settings": {
