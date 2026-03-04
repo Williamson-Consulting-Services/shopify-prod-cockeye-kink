@@ -96,10 +96,10 @@
         "collapsible-row-1": {
           "type": "collapsible_tab",
           "settings": {
-            "heading": "Shipping & Returns",
+            "heading": "{{ block.settings.page.title }}",
             "icon": "truck",
-            "content": "<p>7-14 Business Days depending on demand</p>",
-            "page": ""
+            "content": "{{ block.settings.page.content }}",
+            "page": "shipping-policy"
           }
         },
         "share": {
