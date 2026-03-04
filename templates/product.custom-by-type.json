@@ -81,15 +81,6 @@
             "page": ""
           }
         },
-        "collapsible-row-0": {
-          "type": "collapsible_tab",
-          "settings": {
-            "heading": "Materials",
-            "icon": "leather",
-            "content": "<p>Leather</p>",
-            "page": ""
-          }
-        },
         "collapsible-row-1": {
           "type": "collapsible_tab",
           "settings": {
@@ -128,7 +119,6 @@
         "description_i9TxWY",
         "text_93jaBm",
         "collapsible_tab_CdzfPc",
-        "collapsible-row-0",
         "collapsible-row-1",
         "collapsible_tab_M3kjAH",
         "share"
