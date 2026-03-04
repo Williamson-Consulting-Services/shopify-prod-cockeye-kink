@@ -102,6 +102,15 @@
             "page": "shipping-policy"
           }
         },
+        "collapsible_tab_RQ8Knh": {
+          "type": "collapsible_tab",
+          "settings": {
+            "heading": "{{ block.settings.page.title }}",
+            "icon": "return",
+            "content": "{{ block.settings.page.content }}",
+            "page": "return-and-refund-policy"
+          }
+        },
         "share": {
           "type": "share",
           "settings": {
@@ -124,6 +133,7 @@
         "collapsible_tab_CdzfPc",
         "collapsible-row-0",
         "collapsible-row-1",
+        "collapsible_tab_RQ8Knh",
         "share"
       ],
       "custom_css": [],
