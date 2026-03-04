@@ -98,7 +98,7 @@
           "settings": {
             "heading": "{{ block.settings.page.title }}",
             "icon": "truck",
-            "content": "{{ block.settings.page.content }}",
+            "content": "",
             "page": "shipping-policy"
           }
         },
@@ -107,7 +107,7 @@
           "settings": {
             "heading": "{{ block.settings.page.title }}",
             "icon": "return",
-            "content": "{{ block.settings.page.content }}",
+            "content": "",
             "page": "return-and-refund-policy"
           }
         },
